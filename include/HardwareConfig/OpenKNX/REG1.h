@@ -11,7 +11,7 @@
  *
  * ATTENTION:
  *    Do not include this file directly.
- *    It will be included by the OpenKNXHardware.h file.
+ *    It will be included by the HardwareConfig.h file.
  */
 
 #pragma region "REG1 Geräte"
