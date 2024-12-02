@@ -2,9 +2,9 @@
 /**
  * OpenKNX Hardware definition header file
  * 
- * File: OpenKNX-UP1-Hardware.h
- * Hardware: OpenKNX UP1-Controller2040
- * Responsible: OpenKNX
+ * File: UP1.h
+ * Hardware: OpenKNX-UP1
+ * Responsible: Ing-Dom
  *
  *
  * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNX/wiki/OpenKNX-UP1

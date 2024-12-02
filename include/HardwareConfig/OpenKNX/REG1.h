@@ -4,11 +4,15 @@
  * 
  * File: REG1.h
  * Hardware: OpenKNX REG1
- * Responsible: OpenKNX / Ing-Dom
+ * Responsible: Ing-Dom
  *
- * Defines hardware IO pins and functionalities for the OpenKNX REG1 Hardware.
- * Includes pin assignments for LEDs, buttons, serial communication, and other peripherals.
- **/
+ * 
+ * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNX/wiki/OpenKNX-REG1
+ *
+ * ATTENTION:
+ *    Do not include this file directly.
+ *    It will be included by the OpenKNXHardware.h file.
+ */
 
 #pragma region "REG1 Geräte"
 
