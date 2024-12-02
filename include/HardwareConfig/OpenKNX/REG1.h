@@ -16,7 +16,7 @@
 // https://github.com/OpenKNX/OpenKNX/wiki/REG1-Eth
     #ifdef DEVICE_REG1_ETH_V0
         #define DEVICE_ID "REG1-Eth-V0"
-        #define DEVICE_NAME "" // ToDo
+        #define DEVICE_NAME "OpenKNX REG1 LAN Gateway V0"
 
         #define OKNXHW_REG1_CONTROLLER2040
 
@@ -27,7 +27,7 @@
 
     #ifdef DEVICE_REG1_ETH
         #define DEVICE_ID "REG1-Eth"
-        #define DEVICE_NAME "" // ToDo
+        #define DEVICE_NAME "OpenKNX REG1 LAN Gateway" 
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -217,6 +217,48 @@
         #define REG1_APP_PIN2 (15)
         #define REG1_APP_PIN3 (13)
         #define REG1_APP_PIN4 (5)
+        #define REG1_APP_PIN5 (8)
+        #define REG1_APP_PIN6 (7)
+        #define REG1_APP_PIN7 (20)
+
+        #define REG1_FRONT_PIN3  (38)
+        #define REG1_FRONT_PIN4  (34)
+        #define REG1_FRONT_PIN7  (35)
+        #define REG1_FRONT_PIN8  (4)
+        #define REG1_FRONT_PIN10 (39)
+
+        // informative pin usage - Do not use for other purposes
+        // RMII: 
+        // ETH_PHY_CLK_INPUT_PIN 0
+        // ETH_PHY_RXD0_PIN 25
+        // ETH_PHY_RXD1_PIN 26
+        // ETH_PHY_RX_DV_CRS_PIN 27
+        // ETH_PHY_TX_EN_PIN 21
+        // ETH_PHY_TXD0_PIN 19
+        // ETH_PHY_TXD1_PIN 22
+        //
+        // USB:
+        // USB_UART_TX_PIN 1
+        // USB_UART_RX_PIN 3
+    #endif
+
+    #ifdef OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define SAVE_INTERRUPT_PIN (36)
+        #define KNX_UART_RX_PIN (37)
+        #define KNX_UART_TX_PIN (5)
+
+        #define ETH_PHY_TYPE  ETH_PHY_LAN8720   // type of PHY used, needed for IDF
+        #define ETH_PHY_ADDR  (0)                 // PHYs I2C address
+        #define ETH_PHY_MDC   (33)                
+        #define ETH_PHY_MDIO  (32)
+        #define ETH_PHY_POWER (2)                 // enable / disable the PHYs clock
+        #define ETH_CLK_MODE  ETH_CLOCK_GPIO0_IN
+
+        #define REG1_APP_PIN1 (12)
+        #define REG1_APP_PIN2 (15)
+        #define REG1_APP_PIN3 (13)
+        #define REG1_APP_PIN4 (14)
         #define REG1_APP_PIN5 (8)
         #define REG1_APP_PIN6 (7)
         #define REG1_APP_PIN7 (20)
