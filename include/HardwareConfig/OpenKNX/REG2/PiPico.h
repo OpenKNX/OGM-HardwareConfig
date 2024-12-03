@@ -7,33 +7,10 @@
  * Responsible: OpenKNX - Erkan Çolak
  *
  * Defines hardware IO pins and functionalities for OpenKNX REG2-Pi-Pico platform.
- * Includes pin assignments for LEDs, buttons, serial communication, I2C interfaces,
- * and other peripherals. Ensures compatibility with various application boards and
- * firmware features.
- *
- * Configurations are categorized by hardware versions and features:
- * - REG2-Pi-Pico ( Current Versions: V1 )
- * - Wi-Fi
- * - Ethernet
- * - Device Display, Meter support, RTC, WS2812, etc.
- *
- * Each configuration is guarded by preprocessor directives to enable/disable features.
- * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNX-Pi-Pico-REG2
- *
- * Section: Product configurations / use cases
- *          Describes the available configurations for the OpenKNX REG2-Pi-Pico hardware.
- * Section: Firmware Features (FwF) based IO and Pin Definitions
- *          Defines the pin assignments for the firmware features.
- * Section: Hardware specific Pin Definitions
- *          Defines the pin assignments for the seperate hardware specific configurations.
- * Section: Common Hardware (CHW) Pin Definitions
- *          Defines the pin assignments for the common hardware features.
- * Section: FwF and CHW based Pin Definitions
- *          Defines the pin assignments for the firmware features and common hardware features.
  *
  * ATTENTION:
  *    Do not include this file directly.
- *    It will be included by the HardwareConfig.h file.
+ *    It will be included by the REG2.h file.
  *
  */
 
@@ -48,7 +25,6 @@
  *          Defines the pin assignments for the common hardware features.
  * Section: Device Module based IO and Pin Definitions
  *          Defines the pin assignments for the firmware features.
- 
  * 
  * 
  */
@@ -59,14 +35,17 @@
  * OpenKNX REG2-Pi-Pico
  */
 
+#if EITHER( OKNXHW_REG2_PIPICO_V1, OKNXHW_REG2_PIPICO_V1_DD_METER, OKNXHW_REG2_PIPICO_ETH_V1, \
+            OKNXHW_REG2_PIPICO_ETH_V1_DD_METER, OKNXHW_REG2_PIPICO_W_V1, OKNXHW_REG2_PIPICO_W_V1_DD_METER, \
+            OKNXHW_REG2_PIPICO_W_ETH_V1, OKNXHW_REG2_PIPICO_W_ETH_V1_DD_METER)
+    #define PREFIX_ID "REG2-PP-V1" // 12 characters
+    #define PREFIX_NAME "OpenKNX REG2 PiPico V1" // 24 characters
+#endif
+
 // REG2-Pi-Pico V1
 #ifdef OKNXHW_REG2_PIPICO_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico V1"
-    #endif
+    #define DEVICE_ID   PREFIX_ID
+    #define DEVICE_NAME PREFIX_NAME
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_LED1   // LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2
@@ -75,12 +54,8 @@
 
 // REG2-Pi-Pico V1 (Device Display + Meter) 
 #ifdef OKNXHW_REG2_PIPICO_V1_DD_METER
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico V1 - Device Display + Meter"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-DD-Meter" // 12 + 8 = 20 characters
+    #define DEVICE_NAME PREFIX_NAME " DeviceDisplay Meter" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_LED1   // LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2
@@ -92,12 +67,8 @@
 
 // REG2-Pi-Pico V1 ETH App
 #ifdef OKNXHW_REG2_PIPICO_ETH_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-Eth-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico V1 - Ethernet"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-ETH" // 12 + 4 = 16 characters
+    #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
     #define OKNXHW_REG2_PIPICO_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_LED1
@@ -108,12 +79,8 @@
 
 // REG2-Pi-Pico V1 ETH App (Device Display + Meter)
 #ifdef OKNXHW_REG2_PIPICO_ETH_V1_DD_METER
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-Eth-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico V1 - Ethernet + Device Display + Meter"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-ETH-DD" // 12 + 12 = 24 characters
+    #define DEVICE_NAME PREFIX_NAME " Ethernet Display Meter" // 24 + 20 = 44 characters
     #define OKNXHW_REG2_PIPICO_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_LED1
@@ -131,13 +98,8 @@
 
 // REG2-Pi-Pico Wi-Fi V1
 #ifdef OKNXHW_REG2_PIPICO_W_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-W-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico WiFi V1"
-    #endif
-
+    #define DEVICE_ID   PREFIX_ID "-W" // 12 + 2 = 14 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_W_V1_LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2
@@ -146,12 +108,8 @@
 
 // REG2-Pi-Pico Wi-Fi V1 (Device Display + Meter)
 #ifdef OKNXHW_REG2_PIPICO_W_V1_DD_METER
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-W-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico WiFi V1 - Device Display + Meter"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-W-DD-Meter" // 12 + 8 = 20 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_W_V1_LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2
@@ -162,12 +120,8 @@
 
 // REG2-Pi-Pico WiFi V1 ETH App
 #ifdef OKNXHW_REG2_PIPICO_W_ETH_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-W-Eth-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico WiFi V1 - Ethernet"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-W-ETH" // 12 + 6 = 18 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
     #define OKNXHW_REG2_PIPICO_W_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_W_V1_LED1
@@ -178,12 +132,8 @@
 
 // REG2-Pi-Pico WiFi V1 ETH App (Device Display + Meter)
 #ifdef OKNXHW_REG2_PIPICO_W_ETH_V1_DD_METER
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-REG2-Pi-Pico-W-Eth-V1"
-    #endif
-    #ifndef PRODUCTION_NAME
-        #define PRODUCTION_NAME "OpenKNX REG2 PiPico WiFi V1 - Ethernet + Device Display + Meter"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-W-ETH-DD-Meter" // 12 + 12 = 24 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Eth Disp. Meter" // 24 + 20 = 44 characters --> + 24 = 68 characters
     #define OKNXHW_REG2_PIPICO_W_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_W_V1_LED1
