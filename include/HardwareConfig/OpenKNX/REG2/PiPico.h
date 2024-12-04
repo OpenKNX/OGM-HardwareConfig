@@ -174,7 +174,8 @@
 #ifdef OKNXHW_REG2_DEVICE_RTC
     // Default pins for the I2C bus to connect the hardware RTC
     #define OKNXHW_REG2_HWRTC_I2C_ADDRESS 0x68 // Set here the i2c address of the RTC. I.e. 0x68 for DS3231. 0x57 for PCF8523. 0x51 for DS3232
-    #define OKNXHW_REG2_HWRTC_I2C_0_1 1        // 0: I2C0, 1: I2C1
+    //#define OKNXHW_REG2_HWRTC_I2C_0_1 1        // 0: I2C0, 1: I2C1
+    #define OKNXHW_REG2_HWRTC_I2C_INST i2c1     // i2c1
     #define OKNXHW_REG2_HWRTC_I2C_SDA 26       // GPIO26 | SPI1 SCK | UART0 CTS | I2C1 SDA | PWM5 A | ADC0
     #define OKNXHW_REG2_HWRTC_I2C_SCL 27       // GPIO27 | SPI1 TX  | UART0 RX  | I2C0 SCL | PWM6 B | ADC1
     
@@ -182,7 +183,10 @@
     #define OKNXHW_DEVICE_RTC_I2C_ADDRESS OKNXHW_REG2_HWRTC_I2C_ADDRESS
     #define OKNXHW_DEVICE_RTC_I2C_SDA OKNXHW_REG2_HWRTC_I2C_SDA
     #define OKNXHW_DEVICE_RTC_I2C_SCL OKNXHW_REG2_HWRTC_I2C_SCL
-    #define OKNXHW_DEVICE_RTC_I2C_0_1 OKNXHW_REG2_HWRTC_I2C_0_1
+    //#define OKNXHW_DEVICE_RTC_I2C_0_1 OKNXHW_REG2_HWRTC_I2C_0_1
+    #define OKNXHW_DEVICE_RTC_I2C_INST OKNXHW_REG2_HWRTC_I2C_INST
+
+
 #endif // REG2-Pi-Pico FwF: Device RTC Support
 
 // REG2-Pi-Pico FwF: Meter Support
