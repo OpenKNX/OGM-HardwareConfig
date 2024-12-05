@@ -90,6 +90,9 @@
     #define SMARTMF_BE2_PIN 27
     #define SMARTMF_BE3_PIN 29
 
+    #define SMARTMF_SML_PWR_PIN 25
+    #define SMARTMF_SML_PWR_FAULT_PIN 24
+
     #define SMARTMF_SML1_RX_PIN 5
     #define SMARTMF_SML1_TX_PIN 4
 

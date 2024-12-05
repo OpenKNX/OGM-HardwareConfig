@@ -42,6 +42,15 @@
     #define OKNXHW_SENSOR_H2_SDA_PIN (14)
 #endif
 
+#ifdef DEVICE_UP1_GW_RS485
+    #define DEVICE_ID "UP1-GW-RS485"
+    #define DEVICE_NAME "OpenKNX UP1 RS485 Gateway"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define OKNXHW_UP1_APP_RS485
+#endif
+
 #pragma endregion
 
 #pragma region "UP1 Controllers"
@@ -56,6 +65,17 @@
     #define KNX_SERIAL Serial1
     #define KNX_UART_RX_PIN (1)
     #define KNX_UART_TX_PIN (0)
+#endif
+
+#pragma endregion
+
+#pragma region "UP1 Apps"
+
+#ifdef OKNXHW_UP1_APP_RS485
+    #define RS485_SERIAL Serial2
+    #define RS485_UART_RX_PIN (21)
+    #define RS485_UART_TX_PIN (20)
+    #define RS485_UART_DIR_PIN (22)
 #endif
 
 #pragma endregion
