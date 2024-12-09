@@ -35,22 +35,23 @@
  */
 
 /* Needs the new macro in common! 
-#if EITHER( OKNXHW_REG2_PIPICO_V1, OKNXHW_REG2_PIPICO_V1_DD_METER, OKNXHW_REG2_PIPICO_ETH_V1, \
-            OKNXHW_REG2_PIPICO_ETH_V1_DD_METER, OKNXHW_REG2_PIPICO_W_V1, OKNXHW_REG2_PIPICO_W_V1_DD_METER, \
-            OKNXHW_REG2_PIPICO_W_ETH_V1, OKNXHW_REG2_PIPICO_W_ETH_V1_DD_METER)
+#if EITHER( DEVICE_REG2_PIPICO_V1, DEVICE_REG2_PIPICO_V1_DD_METER, DEVICE_REG2_PIPICO_ETH_V1, \
+            DEVICE_REG2_PIPICO_ETH_V1_DD_METER, DEVICE_REG2_PIPICO_W_V1, DEVICE_REG2_PIPICO_W_V1_DD_METER, \
+            DEVICE_REG2_PIPICO_W_ETH_V1, DEVICE_REG2_PIPICO_W_ETH_V1_DD_METER)
     #define PREFIX_ID "REG2-PP-V1" // 12 characters
     #define PREFIX_NAME "OpenKNX REG2 PiPico V1" // 24 characters
 #endif
 */
-#if defined(OKNXHW_REG2_PIPICO_V1) || defined(OKNXHW_REG2_PIPICO_V1_DD_METER) || defined(OKNXHW_REG2_PIPICO_ETH_V1) || \
-  defined(OKNXHW_REG2_PIPICO_ETH_V1_DD_METER) || defined(OKNXHW_REG2_PIPICO_W_V1) || defined(OKNXHW_REG2_PIPICO_W_V1_DD_METER) || \
-  defined(OKNXHW_REG2_PIPICO_W_ETH_V1) || defined(OKNXHW_REG2_PIPICO_W_ETH_V1_DD_METER)
+#if defined(DEVICE_REG2_PIPICO_V1) || defined(DEVICE_REG2_PIPICO_V1_DD_METER) || defined(DEVICE_REG2_PIPICO_ETH_V1) || \
+  defined(DEVICE_REG2_PIPICO_ETH_V1_DD_METER) || defined(DEVICE_REG2_PIPICO_W_V1) || defined(DEVICE_REG2_PIPICO_W_V1_DD_METER) || \
+  defined(DEVICE_REG2_PIPICO_W_ETH_V1) || defined(DEVICE_REG2_PIPICO_W_ETH_V1_DD_METER) || defined(DEVICE_REG2_PIPICO_V1_DD_RTC) || \
+  defined(DEVICE_REG2_PIPICO_W_V1_DD_RTC)
   #define PREFIX_ID "REG2-PP-V1" // 12 characters
   #define PREFIX_NAME "OpenKNX REG2 PiPico V1" // 24 characters
 #endif
 
 // REG2-Pi-Pico V1
-#ifdef OKNXHW_REG2_PIPICO_V1
+#ifdef DEVICE_REG2_PIPICO_V1
     #define DEVICE_ID   PREFIX_ID
     #define DEVICE_NAME PREFIX_NAME
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
@@ -61,7 +62,7 @@
 
 
 // REG2-Pi-Pico V1 (Device Display + RTC) 
-#ifdef OKNXHW_REG2_PIPICO_V1_DD_RTC
+#ifdef DEVICE_REG2_PIPICO_V1_DD_RTC
     #define DEVICE_ID   PREFIX_ID "-DD-RTC" // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay RTC" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
@@ -73,7 +74,7 @@
 #endif
 
 // REG2-Pi-Pico V1 (Device Display + Meter) 
-#ifdef OKNXHW_REG2_PIPICO_V1_DD_METER
+#ifdef DEVICE_REG2_PIPICO_V1_DD_METER
     #define DEVICE_ID   PREFIX_ID "-DD-Meter" // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay Meter" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
@@ -86,10 +87,10 @@
 #endif
 
 // REG2-Pi-Pico V1 ETH App
-#ifdef OKNXHW_REG2_PIPICO_ETH_V1
+#ifdef DEVICE_REG2_PIPICO_ETH_V1
     #define DEVICE_ID   PREFIX_ID "-ETH" // 12 + 4 = 16 characters
     #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
-    #define OKNXHW_REG2_PIPICO_V1
+    #define DEVICE_REG2_PIPICO_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2
@@ -98,10 +99,10 @@
 #endif
 
 // REG2-Pi-Pico V1 ETH App (Device Display + Meter)
-#ifdef OKNXHW_REG2_PIPICO_ETH_V1_DD_METER
+#ifdef DEVICE_REG2_PIPICO_ETH_V1_DD_METER
     #define DEVICE_ID   PREFIX_ID "-ETH-DD" // 12 + 12 = 24 characters
     #define DEVICE_NAME PREFIX_NAME " Eth DD Meter" // 24 + 14 = 38 characters
-    #define OKNXHW_REG2_PIPICO_V1
+    #define DEVICE_REG2_PIPICO_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2
@@ -117,7 +118,7 @@
  */
 
 // REG2-Pi-Pico Wi-Fi V1
-#ifdef OKNXHW_REG2_PIPICO_W_V1
+#ifdef DEVICE_REG2_PIPICO_W_V1
     #define DEVICE_ID   PREFIX_ID "-W" // 12 + 2 = 14 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
@@ -127,7 +128,7 @@
 #endif
 
 // REG2-Pi-Pico Wi-Fi V1 (Device Display + RTC)
-#ifdef OKNXHW_REG2_PIPICO_W_V1_DD_RTC
+#ifdef DEVICE_REG2_PIPICO_W_V1_DD_RTC
     #define DEVICE_ID   PREFIX_ID "-W-DD-RTC" // 12 + 10 = 22 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display RTC" // 24 + 14 = 38 characters --> + 22 = 60 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
@@ -140,7 +141,7 @@
 
 
 // REG2-Pi-Pico Wi-Fi V1 (Device Display + Meter)
-#ifdef OKNXHW_REG2_PIPICO_W_V1_DD_METER
+#ifdef DEVICE_REG2_PIPICO_W_V1_DD_METER
     #define DEVICE_ID   PREFIX_ID "-W-DD-Meter" // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
@@ -152,10 +153,10 @@
 #endif
 
 // REG2-Pi-Pico WiFi V1 ETH App
-#ifdef OKNXHW_REG2_PIPICO_W_ETH_V1
+#ifdef DEVICE_REG2_PIPICO_W_ETH_V1
     #define DEVICE_ID   PREFIX_ID "-W-ETH" // 12 + 6 = 18 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
-    #define OKNXHW_REG2_PIPICO_W_V1
+    #define DEVICE_REG2_PIPICO_W_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_W_V1_LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2
@@ -164,10 +165,10 @@
 #endif
 
 // REG2-Pi-Pico WiFi V1 ETH App (Device Display + Meter)
-#ifdef OKNXHW_REG2_PIPICO_W_ETH_V1_DD_METER
+#ifdef DEVICE_REG2_PIPICO_W_ETH_V1_DD_METER
     #define DEVICE_ID   PREFIX_ID "-W-ETH-DD-Meter" // 12 + 12 = 24 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Eth Disp. Meter" // 24 + 20 = 44 characters --> + 24 = 68 characters
-    #define OKNXHW_REG2_PIPICO_W_V1
+    #define DEVICE_REG2_PIPICO_W_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_W_V1_LED1
     #define OKNXHW_REG2_PIPICO_V1_LED2
