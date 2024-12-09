@@ -5,50 +5,58 @@
  * File: OpenKNXiao-Hardware.h
  * Hardware: OpenKNXiao RP2040 / SAMD / ESP Based Boards
  * Responsible: OpenKNX - Erkan Çolak
- *
+ * 
  * Defines hardware IO pins and functionalities for OpenKNXiao RP2040 / SAMD platform.
  * Includes pin assignments for LEDs, buttons, serial communication, I2C interfaces,
  * and other peripherals. Ensures compatibility with various application boards and
  * firmware features.
- *
+ * 
  * Configurations are categorized by hardware versions and features:
  * - OpenKNXiao RP2040 ( Current Versions: V1 )
  * - OpenKNXiao SAMD ( Current Versions: V1 )
  * - OpenKNXiao ESP32 ( Current Versions: V1 )
- * - Wi-Fi
+ * - Wi-Fi 
  * - Meter support, WS2812/NeoPixel, etc.
- *
+ * 
  * Each configuration is guarded by preprocessor directives to enable/disable features.
- * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNXiao
- *
- * Section: Product configurations / use cases
- *          Describes the available configurations for the OpenKNXiao RP2040 / SAMD  / ESP hardware.
- * Section: Firmware Features (FwF) based IO and Pin Definitions
- *          Defines the pin assignments for the firmware features.
- * Section: Hardware specific Pin Definitions
- *          Defines the pin assignments for the separate hardware specific configurations.
- * Section: Common Hardware (CHW) Pin Definitions
- *          Defines the pin assignments for the common hardware features.
- * Section: FwF and CHW based Pin Definitions
- *          Defines the pin assignments for the firmware features and common hardware features.
- *
+ * 
+ * More info about the Hardware visit: www.openknx.de
+ * 
  * ATTENTION:
- *    Do not include this file directly.
- *    It will be included by the HardwareConfig.h file.
- *
+ *   Do not include this file directly.
+ *   It will be included by the HardwareConfig.h file.
+ * 
  */
 
+
 /**
- * Section: Product configurations / use cases
- * OpenKNXiao RP2040 / SAMD / ESP
+ * Section: Device configurations / use cases ( Device is a full defined hardware has documentation in openknx wiki)
+ * OpenKNXiao RP2040 / SAMD / ESP / ESP32-S2
  */
+
+/* Needs the new macro in common! 
+#if EITHER( OKNXHW_OPENKNXIAO_RP2040_V1, OKNXHW_OPENKNXIAO_RP2040_MINI_V1, \
+            OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1, OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1_METER, \
+            OKNXHW_OPENKNXIAO_RP2040_MINI_V1_METER, OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1, \
+            OKNXHW_OPENKNXIAO_SAMD21_MINI_V1)
+    #define PREFIX_ID "OKNXIAO-V1" // 10 characters
+    #define PREFIX_NAME "OpenKNXiao V1" // 13 characters
+#endif
+*/
+
+#if defined(OKNXHW_OPENKNXIAO_RP2040_V1) || defined(OKNXHW_OPENKNXIAO_RP2040_MINI_V1) || \
+    defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1) || defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1_METER) || \
+    defined(OKNXHW_OPENKNXIAO_RP2040_MINI_V1_METER) || defined(OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1) || \
+    defined(OKNXHW_OPENKNXIAO_SAMD21_MINI_V1)
+    #define PREFIX_ID "OKNXIAO-V1" // 10 characters
+    #define PREFIX_NAME "OpenKNXiao V1" // 13 characters
+#endif
 
 // OpenKNXiao KNeoPix RP2040 V1
 // https://github.com/OpenKNX/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-OpenKNXiao-KNeoPix-RP2040-V1"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-KNeoPix"
+    #define DEVICE_NAME PREFIX_NAME " KNeoPix"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_NEOPIX
@@ -60,9 +68,8 @@
 // OpenKNXiao Mini RP2040 V1
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_RP2040_MINI_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-OpenKNXiao-Mini-RP2040-V1"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-Mini"
+    #define DEVICE_NAME PREFIX_NAME " Mini"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_MINI
@@ -74,9 +81,8 @@
 // OpenKNXiao KNeoPix RP2040 V1 (Meter)
 // https://github.com/OpenKNX/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1_METER
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-OpenKNXiao-KNeoPix-RP2040-V1"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-KNeoPix-Meter"
+    #define DEVICE_NAME PREFIX_NAME " KNeoPix Meter"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_NEOPIX
@@ -89,9 +95,8 @@
 // OpenKNXiao Mini RP2040 V1 (Meter)
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_RP2040_MINI_V1_METER
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-OpenKNXiao-Mini-RP2040-V1"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-Mini-Meter"
+    #define DEVICE_NAME PREFIX_NAME " Mini Meter"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_MINI
@@ -104,9 +109,8 @@
 // OpenKNXiao KNeoPix SAMD21 V1
 // https://github.com/OpenKNX/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-OpenKNXiao-KNeoPix-SAMD21-V1"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-KNeoPix-SAMD21"
+    #define DEVICE_NAME PREFIX_NAME " KNeoPix SAMD21"
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_COMMON
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL_NEOPIX
@@ -117,9 +121,8 @@
 // OpenKNXiao Mini SAMD21 V1
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_SAMD21_MINI_V1
-    #ifndef HARDWARE_NAME
-        #define HARDWARE_NAME "OpenKNX-OpenKNXiao-Mini-SAMD21-V1"
-    #endif
+    #define DEVICE_ID   PREFIX_ID "-Mini-SAMD21"
+    #define DEVICE_NAME PREFIX_NAME " Mini SAMD21"
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_COMMON
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL_MINI

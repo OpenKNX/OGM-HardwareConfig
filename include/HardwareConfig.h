@@ -22,7 +22,7 @@
 
 // OpenKNX Hardware Configurations
 #include "HardwareConfig/OpenKNX/REG1.h"
-#include "HardwareConfig/OpenKNX/REG2-PiPico.h"
+#include "HardwareConfig/OpenKNX/REG2.h"
 #include "HardwareConfig/OpenKNX/UP1.h"
 #include "HardwareConfig/OpenKNX/Xiao.h"
 #include "HardwareConfig/OpenKNX/misc.h"
