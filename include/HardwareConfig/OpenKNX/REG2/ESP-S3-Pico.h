@@ -16,8 +16,15 @@
 
 
 // Example: REG2-ESP-S3-Pico V1
+/* New Macro in common needed!
 #if EITHER(OKNXHW_REG2_ESP_S3_PICO_V1, OKNXHW_REG2_ESP_S3_PICO_V1_DD_METER, OKNXHW_REG2_ESP_S3_PICO_W_V1, \
            OKNXHW_REG2_ESP_S3_PICO_W_V1_DD_METER, OKNXHW_REG2_ESP_S3_PICO_W_ETH_V1, OKNXHW_REG2_ESP_S3_PICO_W_ETH_V1_DD_METER)
+    #define PREFIX_ID "REG2-ESP-V1" // 12 characters
+    #define PREFIX_NAME "OpenKNX REG2 ESP-Pico V1" // 24 characters
+#endif
+*/
+#if defined(OKNXHW_REG2_ESP_S3_PICO_V1) || defined(OKNXHW_REG2_ESP_S3_PICO_V1_DD_METER) || defined(OKNXHW_REG2_ESP_S3_PICO_W_V1) || \
+    defined(OKNXHW_REG2_ESP_S3_PICO_W_V1_DD_METER) || defined(OKNXHW_REG2_ESP_S3_PICO_W_ETH_V1) || defined(OKNXHW_REG2_ESP_S3_PICO_W_ETH_V1_DD_METER)
     #define PREFIX_ID "REG2-ESP-V1" // 12 characters
     #define PREFIX_NAME "OpenKNX REG2 ESP-Pico V1" // 24 characters
 #endif

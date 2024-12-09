@@ -12,8 +12,8 @@
  */
  
  // OpenKNX Hardware Configurations for REG2-Pi-Pico
-#include "REG2/PiPico-W.h"
+#include "HardwareConfig/OpenKNX/REG2/PiPico.h"
 
 // OpenKNX Hardware Configurations for REG2-ESP-S3-Pico
-#include "REG2/ESP-S3-Pico.h"
+#include "HardwareConfig/OpenKNX/REG2/ESP-S3-Pico.h"
 
