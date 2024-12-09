@@ -17,6 +17,11 @@
  *    It will be included by the HardwareConfig.h file.
  */
 
+
+/************************************************** */
+//  REG 1TE
+/************************************************** */
+
 // Smart-MF 1TE 3x Binary Inputs
 #ifdef DEVICE_SMARTMF_1TE_BE_3CH
     #define DEVICE_ID "SMARTMF-1TE-BE-3CH"
@@ -41,6 +46,28 @@
 
     #define SMARTMF_BE_VCC_PIN 5
 #endif
+
+// Smart-MF Logikmopdul
+#ifdef DEVICE_SMARTMF_LOGIKMODUL_REG
+    #define DEVICE_ID "SMARTMF-LOGIK-REG"
+    #define DEVICE_NAME "Smart-MF Logikmodul"
+
+
+#endif
+
+// Smart-MF 1-Wire Gateway 1TE
+#ifdef DEVICE_SMARTMF_1WIRE_1CH
+    #define DEVICE_ID "SMARTMF-1Wire-1CH"
+    #define DEVICE_NAME "Smart-MF 1-Wire Gateway 1CH"
+
+
+#endif
+
+
+
+/************************************************** */
+//  REG 2TE
+/************************************************** */
 
 // Smart-MF 1-Wire Gateway 3CH
 #ifdef DEVICE_SMARTMF_1WIRE_3CH
@@ -124,4 +151,67 @@
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 24
+#endif
+
+
+// Smart-MF Sensormodul
+#ifdef DEVICE_SMARTMF_SENSORMODUL
+    #define DEVICE_ID "SMARTMF-SEN-V4"
+    #define DEVICE_NAME "Smart-MF Sensormodul V4"
+
+    #define SMARTMF_HARDWARE_REVISION_ID1_PIN 10
+    #define SMARTMF_HARDWARE_REVISION_ID2_PIN 11
+    #define SMARTMF_HARDWARE_REVISION_ID3_PIN 12
+    #define SMARTMF_HARDWARE_REVISION_ID4_PIN 23
+
+    #define SMARTMF_HARDWARE_REVISION_ADC_PIN 26
+
+    #define PROG_LED_PIN 1
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 0
+    #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
+    #define SAVE_INTERRUPT_PIN 29
+    #define KNX_UART_RX_PIN 16
+    #define KNX_UART_TX_PIN 17
+
+    #define SMARTMF_BE1_PIN 2
+    #define SMARTMF_BE2_PIN 4
+    #define SMARTMF_BE3_PIN 6
+    #define SMARTMF_BE3_PIN 7
+
+    #define SMARTMF_I2C0_SDA_PIN 20
+    #define SMARTMF_I2C0_SCL_PIN 21
+
+    #define SMARTMF_I2C1_SDA_PIN 14
+    #define SMARTMF_I2C1_SCL_PIN 15
+
+    #define SMARTMF_BUZZER_PIN 9
+   
+#endif
+
+
+// Smart-MF GardenControl
+#ifdef DEVICE_SMARTMF_GARDENCONTROL
+    #define DEVICE_ID "SMARTMF-GC"
+    #define DEVICE_NAME "Smart-MF GardenControl"
+
+
+#endif
+
+
+// Smart-MF Enocean Gateway
+#ifdef DEVICE_SMARTMF_ENOCEANGATEWAY
+    #define DEVICE_ID "SMARTMF-ENO"
+    #define DEVICE_NAME "Smart-MF Enocean Gateway"
+
+
+#endif
+
+
+// Smart-MF Tasterinterface
+#ifdef DEVICE_SMARTMF_TASTERINTERFACE
+    #define DEVICE_ID "SMARTMF-Taster"
+    #define DEVICE_NAME "Smart-MF Tasterinterface"
+
+
 #endif
