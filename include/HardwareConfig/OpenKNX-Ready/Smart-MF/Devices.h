@@ -17,7 +17,6 @@
  *    It will be included by the HardwareConfig.h file.
  */
 
-
 /************************************************** */
 //  REG 1TE
 /************************************************** */
@@ -52,7 +51,6 @@
     #define DEVICE_ID "SMARTMF-LOGIK-REG"
     #define DEVICE_NAME "Smart-MF Logikmodul"
 
-
 #endif
 
 // Smart-MF 1-Wire Gateway 1TE
@@ -60,10 +58,7 @@
     #define DEVICE_ID "SMARTMF-1Wire-1CH"
     #define DEVICE_NAME "Smart-MF 1-Wire Gateway 1CH"
 
-
 #endif
-
-
 
 /************************************************** */
 //  REG 2TE
@@ -123,8 +118,8 @@
     #define SMARTMF_SML1_RX_PIN 5
     #define SMARTMF_SML1_TX_PIN 4
 
-    #define SMARTMF_SML2_RX_PIN 22
-    #define SMARTMF_SML2_TX_PIN 23
+    #define SMARTMF_SML2_RX_PIN 23
+    #define SMARTMF_SML2_TX_PIN 22
 #endif
 
 // Smart-MF Modbus Gateway + 3x BIN
@@ -153,6 +148,9 @@
     #define SMARTMF_MODBUS_DIR_PIN 24
 #endif
 
+/************************************************** */
+//   Sensormodul
+/************************************************** */
 
 // Smart-MF Sensormodul
 #ifdef DEVICE_SMARTMF_SENSORMODUL
@@ -186,32 +184,55 @@
     #define SMARTMF_I2C1_SCL_PIN 15
 
     #define SMARTMF_BUZZER_PIN 9
-   
-#endif
 
+#endif
 
 // Smart-MF GardenControl
 #ifdef DEVICE_SMARTMF_GARDENCONTROL
     #define DEVICE_ID "SMARTMF-GC"
     #define DEVICE_NAME "Smart-MF GardenControl"
 
-
 #endif
-
 
 // Smart-MF Enocean Gateway
 #ifdef DEVICE_SMARTMF_ENOCEANGATEWAY
     #define DEVICE_ID "SMARTMF-ENO"
     #define DEVICE_NAME "Smart-MF Enocean Gateway"
 
-
 #endif
-
 
 // Smart-MF Tasterinterface
 #ifdef DEVICE_SMARTMF_TASTERINTERFACE
     #define DEVICE_ID "SMARTMF-Taster"
     #define DEVICE_NAME "Smart-MF Tasterinterface"
 
+#endif
+
+// Smart-MF RealPresence 2.0 (HLK)
+#ifdef DEVICE_SMARTMF_REALPRESENCE_V2
+    #define DEVICE_ID "SMARTMF-RP-V2"
+    #define DEVICE_NAME "Smart-MF RealPresence 2.0"
+
+    #define PROG_LED_PIN 18
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 17
+    #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
+    #define INFO_LED_PIN 16
+    #define INFO_LED_PIN_ACTIVE_ON HIGH
+    #define PRESENCE_LED_PIN 1
+    #define PRESENCE_LED_PIN_ACTIVE_ON HIGH
+    #define MOVE_LED_PIN 0
+    #define MOVE_LED_PIN_ACTIVE_ON HIGH
+    #define KNX_UART_TX_PIN 12
+    #define KNX_UART_RX_PIN 13
+    #define SAVE_INTERRUPT_PIN 11
+    #define I2C_WIRE Wire1
+    #define I2C_SDA_PIN 26
+    #define I2C_SCL_PIN 27
+    #define HF_SERIAL Serial2
+    #define HF_SERIAL_SPEED 115200
+    #define HF_POWER_PIN 28
+    #define HF_UART_TX_PIN 4
+    #define HF_UART_RX_PIN 5
 
 #endif
