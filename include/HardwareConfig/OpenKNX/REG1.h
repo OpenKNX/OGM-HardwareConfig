@@ -132,6 +132,27 @@
 
 #pragma endregion
 
+#pragma region "REG1 Prototypen / Devboards"
+
+    #ifdef DEVICE_DEV_REG1_LAN_TP_Base_V00_02
+        #define DEVICE_ID "REG1-DEV-LAN-TP-Base-V00-02"
+        #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP Devboard V00.02"
+
+        #define OKNXHW_REG1_CONTROLLERESP_V00_02
+
+        #define OKNXHW_REG1_FRONT_RGB
+    #endif
+
+    #ifdef DEVICE_DEV_REG1_LAN_TP_Base_V00_11
+        #define DEVICE_ID "REG1-DEV-LAN-TP-Base-V00-11"
+        #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP Devboard V00.11"
+
+        #define OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define OKNXHW_REG1_FRONT_RGB
+    #endif
+#pragma endregion
+
 #pragma region "REG1 Controllers"
 // REG1-Controller2040
 // https://github.com/OpenKNX/OpenKNX/wiki/REG1-Controller2040
