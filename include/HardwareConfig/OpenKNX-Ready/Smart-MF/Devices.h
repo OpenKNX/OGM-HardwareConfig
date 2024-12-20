@@ -169,9 +169,11 @@
     #define SMARTMF_BE2_PIN 27
     #define SMARTMF_BE3_PIN 26
 
-    #define SMARTMF_RX_PIN 5
-    #define SMARTMF_TX_PIN 4
-    #define SMARTMF_DIR_PIN 24
+    #define RS485_SERIAL Serial2
+    #define RS485_UART_RX_PIN (5)
+    #define RS485_UART_TX_PIN (4)
+    #define RS485_UART_DIR_PIN (24)
+
 #endif
 
 /************************************************** */
