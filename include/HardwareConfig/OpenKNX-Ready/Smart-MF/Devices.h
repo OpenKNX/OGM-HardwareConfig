@@ -148,6 +148,32 @@
     #define SMARTMF_MODBUS_DIR_PIN 24
 #endif
 
+// Smart-MF Wetterstation Gateway
+#ifdef DEVICE_SMARTMF_ECOWITT_WN90LP
+    #define DEVICE_ID "SMARTMF-WN90LP"
+    #define DEVICE_NAME "Smart-MF Ecowitt WN90LP"
+
+    #define SMARTMF_HARDWARE_REVISION_ID1_PIN 2
+    #define SMARTMF_HARDWARE_REVISION_ID2_PIN 3
+    #define SMARTMF_HARDWARE_REVISION_ID3_PIN 15
+
+    #define PROG_LED_PIN 11
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 14
+    #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
+    #define SAVE_INTERRUPT_PIN 8
+    #define KNX_UART_RX_PIN 1
+    #define KNX_UART_TX_PIN 0
+
+    #define SMARTMF_BE1_PIN 25
+    #define SMARTMF_BE2_PIN 27
+    #define SMARTMF_BE3_PIN 26
+
+    #define SMARTMF_RX_PIN 5
+    #define SMARTMF_TX_PIN 4
+    #define SMARTMF_DIR_PIN 24
+#endif
+
 /************************************************** */
 //   Sensormodul
 /************************************************** */
