@@ -129,6 +129,17 @@
 
     #endif
 
+// REG1-LAN-TP-Base
+// https://github.com/OpenKNX/OpenKNX/wiki/REG1-LAN-TP-Base
+    #ifdef DEVICE_REG1_LAN_TP_BASE
+        #define DEVICE_ID "REG1-LAN-TP-Base"
+        #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP "
+
+        #define OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define OKNXHW_REG1_FRONT_RGB
+    #endif
+
 
 #pragma endregion
 
