@@ -42,6 +42,44 @@
     #define OKNXHW_SENSOR_H2_SDA_PIN (14)
 #endif
 
+// UP1-PM-HF
+// https://github.com/OpenKNX/OpenKNX/wiki/UP1-PM-HF
+#ifdef DEVICE_UP1_PM_HF
+    #define DEVICE_ID "UP1-PM-HF"
+    #define DEVICE_NAME "OpenKNX UP1 Präsenzmelder+"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+	#define OKNXHW_SENSOR_HF_SERIAL Serial2
+    #define OKNXHW_SENSOR_HF_RX_PIN
+    #define OKNXHW_SENSOR_HF_TX_PIN
+    #define OKNXHW_SENSOR_HF_PWR_PIN
+
+    #define OKNXHW_SENSOR_J40_WIRE Wire1
+    #define OKNXHW_SENSOR_J40_SDA 10
+    #define OKNXHW_SENSOR_J40_SCL 11
+
+    #define PRESENCE_LED_PIN 27 // red channel of central RGB LED
+    #define PRESENCE_LED_PIN_ACTIVE_ON HIGH
+    #define MOVE_LED_PIN 26 // green channel of central RGB LED
+    #define MOVE_LED_PIN_ACTIVE_ON HIGH
+    #define MOVE_LED_PIN 25 // blue channel of central RGB LED
+    #define MOVE_LED_PIN_ACTIVE_ON HIGH
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 28
+    #define I2C_SCL_PIN 29
+    #define HF_SERIAL Serial2
+    #define HF_SERIAL_SPEED 115200
+    #define HF_POWER_PIN 18
+    #define HF_UART_TX_PIN 20
+    #define HF_UART_RX_PIN 21
+    #define OPENKNX_BI_GPIO_PINS 19,22,23,24
+    #define OPENKNX_BI_GPIO_COUNT 4
+    #define OPENKNX_BI_ONLEVEL LOW
+
+#endif
+
 #ifdef DEVICE_UP1_GW_RS485
     #define DEVICE_ID "UP1-GW-RS485"
     #define DEVICE_NAME "OpenKNX UP1 RS485 Gateway"
