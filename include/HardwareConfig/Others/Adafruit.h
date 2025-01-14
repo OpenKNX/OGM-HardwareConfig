@@ -7,14 +7,14 @@
  * Responsible: mgeramb
  *
  *
- * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNX/wiki/OpenKNX-REG1
+ * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNX/wiki/Adafruit-ESP32-Feather-V2
  *
  * ATTENTION:
  *    Do not include this file directly.
  *    It will be included by the HardwareConfig.h file.
  */
 #pragma region "Adafruit Dev Boards"
-// https://www.adafruit.com/product/5400
+// https://github.com/OpenKNX/OpenKNX/wiki/Adafruit-ESP32-Feather-V2
 #ifdef DEVICE_ADAFRUIT_ESP32_FEATHER_V2
     #define DEVICE_ID "ADF-ESP32-FEATHER-V2"
     #define DEVICE_NAME "Adafruit ESP32 Feather V2"
@@ -40,7 +40,6 @@
         #define PROG_BUTTON_PIN 38
     #endif
     #define KNX_IP_WIFI
-    #define KNX_NETIF WiFi
      
 #endif
 #pragma endregion
