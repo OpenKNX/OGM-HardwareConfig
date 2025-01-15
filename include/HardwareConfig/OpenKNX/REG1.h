@@ -162,6 +162,17 @@
 
         #define OKNXHW_REG1_FRONT_RGB
     #endif
+
+        #ifdef DEVICE_DEV_REG1_LAN_SEN_MULTI_V00_11
+        #define DEVICE_ID "REG1-DEV-LAN-SEN-Multi-V00-11"
+        #define DEVICE_NAME "OpenKNX REG1 Multisensor LAN Devboard V00.11"
+
+        #define OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_APP_SEN_MULTI
+    #endif
 #pragma endregion
 
 #pragma region "REG1 Controllers"
