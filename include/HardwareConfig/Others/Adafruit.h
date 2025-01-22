@@ -27,7 +27,7 @@
         #define KNX_UART_RX_PIN 34
         #endif
         #ifndef KNX_UART_TX_PIN
-        #define KNX_UART_TX_PIN 5
+        #define KNX_UART_TX_PIN 25
         #endif
     #endif
     #ifndef PROG_LED_PIN
