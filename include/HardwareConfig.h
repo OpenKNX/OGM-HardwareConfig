@@ -1,5 +1,4 @@
 #pragma once
-#include "macros.h" // Include the macros file from the OGM-Common library
 /**
  * OpenKNX Hardware Configuration Header File
  *
