@@ -306,7 +306,7 @@
 
 // REG2-Pi-Pico Wifi V1: Info1 LED
 #ifdef OKNXHW_REG2_PIPICO_W_V1_LED1
-    #define INFO1_LED_PIN 32 // PiPicoW Onboard LED
+    #define INFO1_LED_PIN LED_BUILTIN // PiPicoW1 GPIO 32 / PiPicoW2 GPIO 64 (Onboard LED WiFi)
     #define INFO1_LED_PIN_ACTIVE_ON HIGH
 #endif
 
