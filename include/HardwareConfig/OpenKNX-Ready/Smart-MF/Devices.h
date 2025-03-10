@@ -48,8 +48,16 @@
 
 // Smart-MF Logikmopdul
 #ifdef DEVICE_SMARTMF_LOGIKMODUL_REG
-    #define DEVICE_ID "SMARTMF-LOGIK-REG"
-    #define DEVICE_NAME "Smart-MF Logikmodul"
+    #define DEVICE_ID "SMARTMF-1TE-REG"
+    #define DEVICE_NAME "Smart-MF 1TE REG"
+
+    #define PROG_LED_PIN 1
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 0
+    #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
+    #define SAVE_INTERRUPT_PIN 29
+    #define KNX_UART_RX_PIN 17
+    #define KNX_UART_TX_PIN 16
 
 #endif
 
@@ -57,6 +65,7 @@
 #ifdef DEVICE_SMARTMF_1WIRE_1CH
     #define DEVICE_ID "SMARTMF-1Wire-1CH"
     #define DEVICE_NAME "Smart-MF 1-Wire Gateway 1CH"
+
 
 #endif
 
