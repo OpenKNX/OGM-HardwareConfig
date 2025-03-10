@@ -47,7 +47,7 @@
 #endif
 
 // Smart-MF Logikmopdul
-#ifdef DEVICE_SMARTMF_LOGIKMODUL_REG
+#ifdef DEVICE_SMARTMF_1TE_REG
     #define DEVICE_ID "SMARTMF-1TE-REG"
     #define DEVICE_NAME "Smart-MF 1TE REG"
 
