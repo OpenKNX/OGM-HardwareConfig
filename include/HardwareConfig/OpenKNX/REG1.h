@@ -401,6 +401,15 @@
         #define OKNXHW_REG1_APP_DALI_TX REG1_APP_PIN6
     #endif
 
+// REG1-App-2xDALI
+// https://github.com/OpenKNX/OpenKNX/wiki/REG1-App-2xDALI
+    #ifdef OKNXHW_REG1_APP_2xDALI
+        #define OKNXHW_REG1_APP_DALI_RX REG1_APP_PIN7
+        #define OKNXHW_REG1_APP_DALI_TX REG1_APP_PIN6
+        #define OKNXHW_REG1_APP_DALI2_RX REG1_APP_PIN5
+        #define OKNXHW_REG1_APP_DALI2_TX REG1_APP_PIN4
+    #endif
+
 #pragma endregion
 
 #pragma region "REG1 Front"
