@@ -138,6 +138,11 @@
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
         #define OKNXHW_REG1_FRONT_RGB
+
+        #define DEVICE_INIT() \
+            pinMode(ETH_PHY_POWER, OUTPUT); \
+            digitalWrite(ETH_PHY_POWER, LOW)
+
     #endif
 
 
