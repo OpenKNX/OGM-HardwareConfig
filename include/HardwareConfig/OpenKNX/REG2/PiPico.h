@@ -20,20 +20,31 @@
  */
 
 #if defined(DEVICE_REG2_PIPICO_V1) \
- || defined(DEVICE_REG2_PIPICO_V1_DD) \
- || defined(DEVICE_REG2_PIPICO_V1_DD_RTC) \
- || defined(DEVICE_REG2_PIPICO_V1_DD_METER) \
- || defined(DEVICE_REG2_PIPICO_V1_ETH) \
- || defined(DEVICE_REG2_PIPICO_V1_ETH_DD) \
- || defined(DEVICE_REG2_PIPICO_W_V1) \
- || defined(DEVICE_REG2_PIPICO_W_V1_DD) \
- || defined(DEVICE_REG2_PIPICO_W_V1_DD_METER) \
- || defined(DEVICE_REG2_PIPICO_W_V1_ETH) \
- || defined(DEVICE_REG2_PIPICO_W_V1_ETH_DD) \
- || defined(DEVICE_REG2_PIPICO_W_V1_DD_RTC)
+  || defined(DEVICE_REG2_PIPICO_V1_DD) \
+  || defined(DEVICE_REG2_PIPICO_V1_DD_RTC) \
+  || defined(DEVICE_REG2_PIPICO_V1_DD_METER) \
+  || defined(DEVICE_REG2_PIPICO_V1_ETH) \
+  || defined(DEVICE_REG2_PIPICO_V1_ETH_DD) \
+  || defined(DEVICE_REG2_PIPICO_W_V1) \
+  || defined(DEVICE_REG2_PIPICO_W_V1_DD) \
+  || defined(DEVICE_REG2_PIPICO_W_V1_DD_METER) \
+  || defined(DEVICE_REG2_PIPICO_W_V1_ETH) \
+  || defined(DEVICE_REG2_PIPICO_W_V1_ETH_DD) \
+  || defined(DEVICE_REG2_PIPICO_W_V1_DD_RTC)
     #define PREFIX_ID "REG2-PP-V1"               // 12 characters
     #define PREFIX_NAME "OpenKNX REG2 PiPico V1" // 24 characters
-#elif defined(DEVICE_REG2_PIPICO2_V1) || defined(DEVICE_REG2_PIPICO2_V1_DD) || defined(DEVICE_REG2_PIPICO2_V1_DD_RTC) || defined(DEVICE_REG2_PIPICO2_V1_DD_METER) || defined(DEVICE_REG2_PIPICO2_V1_ET) || defined(DEVICE_REG2_PIPICO2_V1_ETH_DD) || defined(DEVICE_REG2_PIPICO2_W_V1) || defined(DEVICE_REG2_PIPICO2_W_V1_DD) || defined(DEVICE_REG2_PIPICO2_W_V1_DD_METER) || defined(DEVICE_REG2_PIPICO2_W_V1_ETH) || defined(DEVICE_REG2_PIPICO2_W_V1_ETH_DD) || defined(DEVICE_REG2_PIPICO2_W_V1_DD_RTC)
+#elif defined(DEVICE_REG2_PIPICO2_V1) \
+  || defined(DEVICE_REG2_PIPICO2_V1_DD) \
+  || defined(DEVICE_REG2_PIPICO2_V1_DD_RTC) \
+  || defined(DEVICE_REG2_PIPICO2_V1_DD_METER) \
+  || defined(DEVICE_REG2_PIPICO2_V1_ET) \
+  || defined(DEVICE_REG2_PIPICO2_V1_ETH_DD) \
+  || defined(DEVICE_REG2_PIPICO2_W_V1) \
+  || defined(DEVICE_REG2_PIPICO2_W_V1_DD) \
+  || defined(DEVICE_REG2_PIPICO2_W_V1_DD_METER) \
+  || defined(DEVICE_REG2_PIPICO2_W_V1_ETH) \
+  || defined(DEVICE_REG2_PIPICO2_W_V1_ETH_DD) \
+  || defined(DEVICE_REG2_PIPICO2_W_V1_DD_RTC)
     #define PREFIX_ID "REG2-PP2-V1"               // 13 characters
     #define PREFIX_NAME "OpenKNX REG2 PiPico2 V1" // 25 characters
 #endif
@@ -335,8 +346,10 @@
     #define PROG_LED_PIN 2
     #define PROG_LED_PIN_ACTIVE_ON HIGH
     #define PROG_BUTTON_PIN 20
-    #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
-    #define KNX_SERIAL Serial1
+    #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // Using internal pullup of the ESP32 (aprox. 45kOhm)
+    #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
+    #define KNX_SERIAL Serial1 // Uart0
+    #define KNX_UART_NUM 0     // Uart0 
     #define KNX_UART_RX_PIN 1
     #define KNX_UART_TX_PIN 0
 

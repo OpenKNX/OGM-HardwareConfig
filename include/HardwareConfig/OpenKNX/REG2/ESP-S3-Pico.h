@@ -67,9 +67,11 @@
         #define PROG_LED_PIN 13              // ESP32 GPIO13 | PI PICO GPIO2
         #define PROG_LED_PIN_ACTIVE_ON HIGH
     #endif
+    
     #define PROG_BUTTON_PIN 4                   // ESP32 GPIO4  | PI PICO GPIO20
     #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // Using internal pullup of the ESP32 (aprox. 45kOhm)
-    #define OPENKNX_BUTTON_DEBOUNCE 0           // Disables software debounce. Since we use the hardware debounce.
+    #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
+    
     #define KNX_SERIAL Serial1                  // Uart0
     #define KNX_UART_NUM 0                      // Uart0 (Possible UART Ports: 0, 1, 2, 3, 4
     #define KNX_UART_RX_PIN 12  // ESP32 GPIO12 | PI PICO GPIO1
