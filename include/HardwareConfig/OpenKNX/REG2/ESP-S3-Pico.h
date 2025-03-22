@@ -36,7 +36,7 @@
     // #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
     // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
     // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
-    #define OKNXHW_REG2_USING_APP_BOARD
+    #define OKNXHW_REG2_ESP_USING_APP_BOARD
     #define OKNXHW_REG2_ESPS3PICO_APP_ETH
 #endif
 
@@ -51,8 +51,8 @@
     // #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
     // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
     // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
-    #define OKNXHW_REG2_DEVICE_DISPLAY      // Device Display Support
-    #define OKNXHW_REG2_USING_APP_BOARD
+    #define OKNXHW_REG2_ESP_DEVICE_DISPLAY      // Device Display Support
+    #define OKNXHW_REG2_ESP_USING_APP_BOARD
     #define OKNXHW_REG2_ESPS3PICO_APP_ETH
 #endif
 
@@ -67,10 +67,11 @@
         #define PROG_LED_PIN 13              // ESP32 GPIO13 | PI PICO GPIO2
         #define PROG_LED_PIN_ACTIVE_ON HIGH
     #endif
-    #define PROG_BUTTON_PIN 4               // ESP32 GPIO4  | PI PICO GPIO20
-    #define PROG_BUTTON_PIN_MODE INPUT_PULLUP
-    #define PROG_BUTTON_PIN_INTERRUPT_ON CHANGE
-    #define KNX_SERIAL Serial1
+    #define PROG_BUTTON_PIN 4                   // ESP32 GPIO4  | PI PICO GPIO20
+    #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // Using internal pullup of the ESP32 (aprox. 45kOhm)
+    #define OPENKNX_BUTTON_DEBOUNCE 0           // Disables software debounce. Since we use the hardware debounce.
+    #define KNX_SERIAL Serial1                  // Uart0
+    #define KNX_UART_NUM 0                      // Uart0 (Possible UART Ports: 0, 1, 2, 3, 4
     #define KNX_UART_RX_PIN 12  // ESP32 GPIO12 | PI PICO GPIO1
     #define KNX_UART_TX_PIN 11  // ESP32 GPIO11 | PI PICO GPIO0
 
@@ -174,7 +175,7 @@
 #endif
 
 // REG2-ESP-S3-Pico FwF: Device Display Support
-#if defined(OKNXHW_REG2_DEVICE_DISPLAY) || defined(OKNXHW_REG2_USING_APP_BOARD)
+#if defined(OKNXHW_REG2_ESP_DEVICE_DISPLAY) || defined(OKNXHW_REG2_ESP_USING_APP_BOARD)
     // Default pins for the I2C bus to connect the hardware display
     #ifdef ARDUINO_ARCH_ESP32
         #define OKNXHW_REG2_HWDISPLAY_I2C_INST &Wire1
@@ -229,6 +230,52 @@
 
 #endif // REG2-ESP-S3-Pico FwF: Device Display Support
 
+
+// pio board definition for the Waveshare ESP-S3-Pico
+/*
+[custom_board_ws_esp32s2_pico] // Waveshare ESP32-S2 Pico
+platform = espressif32
+framework = arduino
+board_build.memory_type = qio_opi
+board_build.f_cpu = 240000000L
+board_build.f_flash = 80000000L
+board_build.flash_mode = dio ;qio
+board_build.flash_freq = 80m
+board_build.flash_size = 16MB
+board_build.hwids = [["0x303A", "0x1001"]]
+board_build.mcu = esp32s3
+board_build.variant = ESP32S3
+board_build.extra_flags =
+    -D ARDUINO_WAVESHARE_ESP32S3
+    -D BOARD_HAS_PSRAM
+    -D ARDUINO_USB_CDC_ON_BOOT=0 ; 0 (disabled) so the OPenKNX console is disturbed by the USB-CDC
+                                 ; 0 (disabled) → USB-CDC is not activated as a serial port during boot
+                                 ; 1 (enabled) → ESP32-S3 pico's virtual COM port (no external USB-UART adapter needed)
+    -D ARDUINO_RUNNING_CORE=1
+    -D ARDUINO_EVENT_RUNNING_CORE=1
+    -D ARDUINO_USB_MODE=1
+;   -U BOARD_HAS_PSRAM                    ; Disable PSRAM
+;   -D CONFIG_SPIRAM_SUPPORT=0            ; Disable SPIRAM
+;   -D CONFIG_SPI_MASTER_IN_IRAM=0        ; Disable SPI Master in IRAM
+;   -D CONFIG_SPI_SLAVE_IN_IRAM=0         ; Disable SPI Slave in IRAM
+;   -D CONFIG_SPI_FLASH_SHARE_SPI1_BUS=0  ; Disable SPI Flash share SPI1 bus
+;   -D CONFIG_SPI_MASTER_IN_IRAM=0        ; Disable SPI Master in IRAM
+;   -D CONFIG_SPI_SLAVE_IN_IRAM=0         ; Disable SPI Slave in IRAM
+;   -D CONFIG_SPI_FLASH_SHARE_SPI1_BUS=0  ; Disable SPI Flash share SPI1 bus
+;   -D CONFIG_ESP_CONSOLE_USB_SERIAL=0    ; Disable USB Serial Console
+;   -D CONFIG_ESP_CONSOLE_UART_NONE=1     ; Disable UART Console
+;   -D CONFIG_JTAG_ENABLE_ESP32S3=0       ; Disable JTAG
+;   -D CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240=1 ; Set CPU frequency to 240MHz
+;   -D CONFIG_ESP32S3_DEFAULT_CPU_FREQ_160=0 ; Set CPU frequency to 160MHz
+;   -D CONFIG_ESP32S3_DEFAULT_CPU_FREQ_80=0  ; Set CPU frequency to 80MHz
+;   -D CONFIG_ESP32S3_DEFAULT_CPU_FREQ_40=0  ; Set CPU frequency to 40MHz
+;debug_port = /dev/cu.usbmodem84201
+;upload_port = /dev/cu.usbmodem84201
+;monitor_port = /dev/cu.usbmodem57640270261
+;debug_tool = esp32s3-builtin
+upload_speed = 921600
+monitor_speed = 115200
+*/
 
 /*
 Mapping PiPico to ESP-S3-Pico
