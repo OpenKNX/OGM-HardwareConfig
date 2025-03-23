@@ -27,6 +27,7 @@
         #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
         #define SAVE_INTERRUPT_PIN 20
         #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
         #define KNX_UART_RX_PIN 1
         #define KNX_UART_TX_PIN 0
     #endif
