@@ -38,6 +38,7 @@
     #define SAVE_INTERRUPT_PIN 29
     #define KNX_UART_RX_PIN 17
     #define KNX_UART_TX_PIN 16
+    #define KNX_UART_NUM 0
 
     #define SMARTMF_BE1_PIN 14
     #define SMARTMF_BE2_PIN 15
@@ -58,6 +59,7 @@
     #define SAVE_INTERRUPT_PIN 29
     #define KNX_UART_RX_PIN 17
     #define KNX_UART_TX_PIN 16
+    #define KNX_UART_NUM 0
 
 #endif
 
@@ -87,6 +89,7 @@
     #define PROG_BUTTON_PIN 14
     #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
     #define SAVE_INTERRUPT_PIN 8
+    #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
     #define KNX_UART_TX_PIN 0
 
@@ -114,6 +117,7 @@
     #define PROG_BUTTON_PIN 14
     #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
     #define SAVE_INTERRUPT_PIN 8
+    #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
     #define KNX_UART_TX_PIN 0
 
@@ -145,6 +149,7 @@
     #define PROG_BUTTON_PIN 14
     #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
     #define SAVE_INTERRUPT_PIN 8
+    #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
     #define KNX_UART_TX_PIN 0
 
@@ -171,6 +176,7 @@
     #define PROG_BUTTON_PIN 14
     #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
     #define SAVE_INTERRUPT_PIN 8
+    #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
     #define KNX_UART_TX_PIN 0
 
@@ -206,6 +212,7 @@
     #define PROG_BUTTON_PIN 0
     #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
     #define SAVE_INTERRUPT_PIN 29
+    #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 16
     #define KNX_UART_TX_PIN 17
 
@@ -260,6 +267,7 @@
     #define PRESENCE_LED_PIN_ACTIVE_ON HIGH
     #define MOVE_LED_PIN 0
     #define MOVE_LED_PIN_ACTIVE_ON HIGH
+    #define KNX_UART_NUM 0
     #define KNX_UART_TX_PIN 12
     #define KNX_UART_RX_PIN 13
     #define SAVE_INTERRUPT_PIN 11

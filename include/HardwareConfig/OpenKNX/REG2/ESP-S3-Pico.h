@@ -73,7 +73,7 @@
     #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
     
     #define KNX_SERIAL Serial1                  // Uart0
-    #define KNX_UART_NUM 0                      // Uart0 (Possible UART Ports: 0, 1, 2, 3, 4
+    #define KNX_UART_NUM 0                      // Uart0
     #define KNX_UART_RX_PIN 12  // ESP32 GPIO12 | PI PICO GPIO1
     #define KNX_UART_TX_PIN 11  // ESP32 GPIO11 | PI PICO GPIO0
 

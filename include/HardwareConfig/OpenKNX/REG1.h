@@ -193,6 +193,7 @@
         #define INFO_LED_PIN (3)
         #define INFO_LED_PIN_ACTIVE_ON HIGH
         #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
         #define KNX_UART_RX_PIN (1)
         #define KNX_UART_TX_PIN (0)
 
@@ -208,6 +209,7 @@
     #ifdef OKNXHW_REG1_CONTROLLER2040_V1 // V00.90 - V01.89
         #define SAVE_INTERRUPT_PIN (3)
         #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
         #define KNX_UART_RX_PIN (1)
         #define KNX_UART_TX_PIN (0)
 
@@ -255,6 +257,7 @@
      #ifdef OKNXHW_REG1_CONTROLLERESP_V00_02
 
         #define SAVE_INTERRUPT_PIN (36)
+        #define KNX_UART_NUM 0
         #define KNX_UART_RX_PIN (37)
         #define KNX_UART_TX_PIN (14)
 
@@ -297,6 +300,7 @@
     #ifdef OKNXHW_REG1_CONTROLLERESP_V00_11
 
         #define SAVE_INTERRUPT_PIN (36)
+        #define KNX_UART_NUM 0
         #define KNX_UART_RX_PIN (37)
         #define KNX_UART_TX_PIN (5)
 

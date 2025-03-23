@@ -23,6 +23,7 @@
     #endif
     #ifndef KNX_SERIAL
         #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
         #ifndef KNX_UART_TX_PIN
         #define KNX_UART_RX_PIN 34
         #endif
