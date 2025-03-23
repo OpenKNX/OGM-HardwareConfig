@@ -188,11 +188,11 @@
         #define PROG_LED_PIN (2)
         #define PROG_LED_PIN_ACTIVE_ON HIGH
         #define PROG_BUTTON_PIN (7)
-        #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
         #define SAVE_INTERRUPT_PIN (6)
         #define INFO_LED_PIN (3)
         #define INFO_LED_PIN_ACTIVE_ON HIGH
         #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
         #define KNX_UART_RX_PIN (1)
         #define KNX_UART_TX_PIN (0)
 
@@ -208,6 +208,7 @@
     #ifdef OKNXHW_REG1_CONTROLLER2040_V1 // V00.90 - V01.89
         #define SAVE_INTERRUPT_PIN (3)
         #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
         #define KNX_UART_RX_PIN (1)
         #define KNX_UART_TX_PIN (0)
 
@@ -255,6 +256,7 @@
      #ifdef OKNXHW_REG1_CONTROLLERESP_V00_02
 
         #define SAVE_INTERRUPT_PIN (36)
+        #define KNX_UART_NUM 1
         #define KNX_UART_RX_PIN (37)
         #define KNX_UART_TX_PIN (14)
 
@@ -297,6 +299,7 @@
     #ifdef OKNXHW_REG1_CONTROLLERESP_V00_11
 
         #define SAVE_INTERRUPT_PIN (36)
+        #define KNX_UART_NUM 1
         #define KNX_UART_RX_PIN (37)
         #define KNX_UART_TX_PIN (5)
 
@@ -433,7 +436,6 @@
 
 
         #define PROG_BUTTON_PIN REG1_FRONT_PIN10
-        #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
 
         #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
 
@@ -463,7 +465,6 @@
 
 
         #define PROG_BUTTON_PIN REG1_FRONT_PIN10
-        #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
 
         #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
         #define FUNC2_BUTTON_PIN REG1_FRONT_PIN4

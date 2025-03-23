@@ -196,9 +196,10 @@
     #define PROG_LED_PIN 17                      // Build-In LED RED (RED:GPIO17 | GREEN:GPIO16 | BLUE:GPIO25)
     #define PROG_LED_PIN_ACTIVE_ON LOW           // Active on HIGH
     #define PROG_BUTTON_PIN 26                   // GPIO26 | SPI1 SCK | UART0 CTS | I2C1 SDA | PWM5 A | ADC0
-    #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
+    #define OPENKNX_BUTTON_DEBOUNCE 0            // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
     
-    #define KNX_SERIAL Serial1                   // Serial1 for UART1
+    #define KNX_SERIAL Serial1                   // Serial1 for UART0
+    #define KNX_UART_NUM 0                       // Serial1 for UART0
     #define KNX_UART_RX_PIN 1                    // GPIO1 | SPI0 CSn | UART0 RX  | I2C0 SCL | PWM0 B
     #define KNX_UART_TX_PIN 0                    // GPIO0 | SPI0 RX  | UART0 TX  | I2C0 SDA | PWM0 A
 
@@ -250,6 +251,7 @@
     #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
     
     #define KNX_SERIAL Serial1                   // Serial1 for UART1
+    #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 44                    // GPIO44 | SPI1 RX  | UART1 RX  | I2C0 SCL | PWM0 B
     #define KNX_UART_TX_PIN 43                    // GPIO43 | SPI1 TX  | UART1 TX  | I2C0 SDA | PWM0 A
 
@@ -339,6 +341,7 @@
     #define OPENKNX_BUTTON_DEBOUNCE 0            // Software Debouncer delay in ms. 0 will Disables software debounce. Since we use the hardware debounce.
     
     #define KNX_SERIAL Serial1                   // Serial1 for UART1
+    #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 6                    // GPIO6 | SPI1 TX  | UART1 RX  | I2C0 SCL | PWM4 B
     #define KNX_UART_TX_PIN 7                    // GPIO7 | SPI1 RX  | UART1 TX  | I2C0 SDA | PWM4 A
 
