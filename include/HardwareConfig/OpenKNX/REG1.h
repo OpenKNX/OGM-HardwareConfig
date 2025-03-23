@@ -188,7 +188,6 @@
         #define PROG_LED_PIN (2)
         #define PROG_LED_PIN_ACTIVE_ON HIGH
         #define PROG_BUTTON_PIN (7)
-        #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
         #define SAVE_INTERRUPT_PIN (6)
         #define INFO_LED_PIN (3)
         #define INFO_LED_PIN_ACTIVE_ON HIGH
@@ -437,7 +436,6 @@
 
 
         #define PROG_BUTTON_PIN REG1_FRONT_PIN10
-        #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
 
         #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
 
@@ -467,7 +465,6 @@
 
 
         #define PROG_BUTTON_PIN REG1_FRONT_PIN10
-        #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
 
         #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
         #define FUNC2_BUTTON_PIN REG1_FRONT_PIN4

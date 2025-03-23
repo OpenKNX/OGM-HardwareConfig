@@ -98,7 +98,6 @@
     #define PROG_LED_PIN (6)
     #define PROG_LED_PIN_ACTIVE_ON HIGH
     #define PROG_BUTTON_PIN (7)
-    #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
     #define SAVE_INTERRUPT_PIN (5)
     #define KNX_SERIAL Serial1
     #define KNX_UART_NUM 0
