@@ -129,6 +129,20 @@
 
     #endif
 
+// REG1-LAN-TP-2xDali
+// https://github.com/OpenKNX/OpenKNX/wiki/REG1_Dali
+    #ifdef DEVICE_REG1_LAN_TP_2XDALI
+        #define DEVICE_ID "REG1-LAN-TP-2xDali"
+        #define DEVICE_NAME "OpenKNX REG1 Dual Dali Gateway LAN"
+
+        #define OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_APP_2XDALI
+
+    #endif
+
 // REG1-LAN-TP-Base
 // https://github.com/OpenKNX/OpenKNX/wiki/REG1-LAN-TP-Base
     #ifdef DEVICE_REG1_LAN_TP_BASE
@@ -404,9 +418,9 @@
         #define OKNXHW_REG1_APP_DALI_TX REG1_APP_PIN6
     #endif
 
-// REG1-App-2xDALI
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-App-2xDALI
-    #ifdef OKNXHW_REG1_APP_2xDALI
+// REG1-App-2xDali
+// https://github.com/OpenKNX/OpenKNX/wiki/REG1-App-2xDali
+    #ifdef OKNXHW_REG1_APP_2XDALI
         #define OKNXHW_REG1_APP_DALI_RX REG1_APP_PIN7
         #define OKNXHW_REG1_APP_DALI_TX REG1_APP_PIN6
         #define OKNXHW_REG1_APP_DALI2_RX REG1_APP_PIN5
