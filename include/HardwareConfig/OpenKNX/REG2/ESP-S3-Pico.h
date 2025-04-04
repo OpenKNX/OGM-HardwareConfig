@@ -167,8 +167,8 @@
     #define DEVICE_INIT() \
       pinMode(ETH_PHY_RST, OUTPUT), \
       digitalWrite(ETH_PHY_RST, LOW);
-    
-    #define SDCARD_SPI_INTERFACE SPI3_HOST      // SPI2_HOST | SPI3_HOST
+    //#define OPENKNX_SD_CARD_MODULE_ENABLE       // Enable the SD Card Module Support 
+    #define SDCARD_SPI_INTERFACE HSPI           // HSPI or VSPI, depends on the pins (HSPI is SPI2 on ESP32-S3)
     #define PIN_SDCARD_CD (REG2_APP_PIN12)      // Card Detect - GPIO14 SPI1 SCK UART0 CTS I2C1 SDA PWM7_A SIO PIO0 PIO1
     #define PIN_SDCARD_CS (REG2_APP_PIN13)      // Chip Select - GPIO13 SPI1 RX UART0 TX I2C0 SDA PWM6_B SIO PIO0 PIO1
     #define PIN_SDCARD_SCK (REG2_APP_PIN16)     // Clock - GPIO10 SPI1 SCK UART1 CTS I2C1 SDA PWM5_A SIO PIO0 PIO1
@@ -180,12 +180,12 @@
 #if defined(OKNXHW_REG2_ESP_DEVICE_DISPLAY) || defined(OKNXHW_REG2_ESP_USING_APP_BOARD)
     // Default pins for the I2C bus to connect the hardware display
     #ifdef ARDUINO_ARCH_ESP32
-        #define OKNXHW_REG2_HWDISPLAY_I2C_INST &Wire1
+        #define OKNXHW_REG2_HWDISPLAY_I2C_INST Wire1
     #else
         #define OKNXHW_REG2_HWDISPLAY_I2C_INST i2c1 // i2c1 | i2c0
     #endif
 
-    #ifdef OKNXHW_REG2_USING_APP_BOARD
+    #ifdef OKNXHW_REG2_ESP_USING_APP_BOARD
         #define OKNXHW_REG2_HWDISPLAY_I2C_SDA REG2_TERM_PIN10  // ESP32 GPIO6  | PI PICO GPIO22
         #define OKNXHW_REG2_HWDISPLAY_I2C_SCL REG2_APP_PIN11 // ESP32 GPIO40 | PI PICO GPIO15
     #else
@@ -220,7 +220,7 @@
     #define OPENKNX_GPIO_TYPES  OPENKNX_GPIO_T_PCA9557
     #define OPENKNX_GPIO_ADDRS  0x18      // PCA9557 I2C address 0x18 (A0-A2 = 0) A0-A2 are connected to GND if A1 is connected to VCC the address is 0x19
     #define OPENKNX_GPIO_INTS   0xFF
-    #define OPENKNX_GPIO_WIRE   Wire1     // OKNXHW_REG2_HWDISPLAY_I2C_INST
+    #define OPENKNX_GPIO_WIRE   OKNXHW_REG2_HWDISPLAY_I2C_INST  // Must be the same as OKNXHW_REG2_HWDISPLAY_I2C_INST
     #define OPENKNX_GPIO_CLOCK  400000    // I2C Taktfrequenz in Hz (400kHz für schnelle I2C-Kommunikation)
 
     #define OKNXHW_DEVICE_DISPLAY_I2C_INST    OKNXHW_REG2_HWDISPLAY_I2C_INST
