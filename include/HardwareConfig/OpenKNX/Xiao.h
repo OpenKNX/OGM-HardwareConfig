@@ -2,7 +2,7 @@
 /**
  * OpenKNX Hardware Definition Header File
  *
- * File: OpenKNXiao-Hardware.h
+ * File: Xiao.h
  * Hardware: OpenKNXiao RP2040 / SAMD / ESP Based Boards
  * Responsible: OpenKNX - Erkan Çolak
  *
