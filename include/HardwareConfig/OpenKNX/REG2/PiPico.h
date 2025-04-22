@@ -196,10 +196,10 @@
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
 
-// REG2-Pi-Pico WiFi V1 ETH App (Device Display + Meter)
+// REG2-Pi-Pico WiFi V1 ETH App (Device Display)
 #if defined(DEVICE_REG2_PIPICO_W_V1_ETH_DD) || defined(DEVICE_REG2_PIPICO2_W_V1_ETH_DD)
-    #define DEVICE_ID PREFIX_ID "-W-DD-Meter"           // 12 + 12 = 24 characters
-    #define DEVICE_NAME PREFIX_NAME " WiFi Disp. Meter" // 24 + 20 = 44 characters --> + 24 = 68 characters
+    #define DEVICE_ID PREFIX_ID "-W-ETH-DD"           // 12 + 12 = 24 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
     #define DEVICE_REG2_PIPICO_W_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
