@@ -89,6 +89,15 @@
     #define OKNXHW_UP1_APP_RS485
 #endif
 
+#ifdef DEVICE_UP1_GW_IR
+    #define DEVICE_ID "UP1-GW-IR"
+    #define DEVICE_NAME "OpenKNX UP1 Infrared Gateway"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define OKNXHW_UP1_APP_IR
+#endif
+
 #pragma endregion
 
 #pragma region "UP1 Controllers"
@@ -114,6 +123,11 @@
     #define RS485_UART_RX_PIN (21)
     #define RS485_UART_TX_PIN (20)
     #define RS485_UART_DIR_PIN (22)
+#endif
+
+#ifdef OKNXHW_UP1_APP_IR
+    #define IR_PIN_REC (13)
+    #define IR_PIN_SEND (2)
 #endif
 
 #pragma endregion
