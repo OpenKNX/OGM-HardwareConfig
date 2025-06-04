@@ -41,6 +41,10 @@
 
         #define ETH_SPI_INTERFACE SPI1 // SPI or SPI1, depends on the pins
 
+        #define DEVICE_INIT() \
+            pinMode(PIN_ETH_RES, OUTPUT); \
+            digitalWrite(PIN_ETH_RES, LOW);
+
     #endif
 
 // REG1-Base
