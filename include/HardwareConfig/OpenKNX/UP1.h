@@ -44,6 +44,7 @@
 
 // UP1-PM-HF
 // https://github.com/OpenKNX/OpenKNX/wiki/UP1-PM-HF
+// note: valid for UP1-PM-HF >= V00.10
 #ifdef DEVICE_UP1_PM_HF
     #define DEVICE_ID "UP1-PM-HF"
     #define DEVICE_NAME "OpenKNX UP1 Präsenzmelder+"
@@ -59,12 +60,17 @@
     #define OKNXHW_SENSOR_J40_SDA 10
     #define OKNXHW_SENSOR_J40_SCL 11
 
-    #define PRESENCE_LED_PIN 27 // red channel of central RGB LED
-    #define PRESENCE_LED_PIN_ACTIVE_ON HIGH
-    #define MOVE_LED_PIN 26 // green channel of central RGB LED
-    #define MOVE_LED_PIN_ACTIVE_ON HIGH
-    #define MOVE_LED_PIN 25 // blue channel of central RGB LED
-    #define MOVE_LED_PIN_ACTIVE_ON HIGH
+    #define RED_LED_PIN 25 // red channel of central RGB LED
+    #define RED_LED_PIN_ACTIVE_ON LOW
+    #define GREEN_LED_PIN 26 // green channel of central RGB LED
+    #define GREEN_LED_PIN_ACTIVE_ON LOW
+    #define BLUE_LED_PIN 27 // blue channel of central RGB LED
+    #define BLUE_LED_PIN_ACTIVE_ON LOW
+
+    #define PRESENCE_LED_PIN RED_LED_PIN
+    #define PRESENCE_LED_PIN_ACTIVE_ON RED_LED_PIN_ACTIVE_ON
+    #define MOVE_LED_PIN BLUE_LED_PIN
+    #define MOVE_LED_PIN_ACTIVE_ON BLUE_LED_PIN_ACTIVE_ON
 
     #define I2C_WIRE Wire
     #define I2C_SDA_PIN 28
@@ -74,9 +80,15 @@
     #define HF_POWER_PIN 18
     #define HF_UART_TX_PIN 20
     #define HF_UART_RX_PIN 21
-    #define OPENKNX_BI_GPIO_PINS 19,22,23,24
-    #define OPENKNX_BI_GPIO_COUNT 4
+    #define OPENKNX_BI_GPIO_PINS 19,22,23,24,11,10
+    #define OPENKNX_BI_GPIO_COUNT 6
     #define OPENKNX_BI_ONLEVEL LOW
+
+    // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deativated by setting to PULLUP
+    #define DEVICE_INIT() \
+        pinMode(RED_LED_PIN, INPUT_PULLUP); \
+        pinMode(GREEN_LED_PIN, INPUT_PULLUP); \
+        pinMode(BLUE_LED_PIN, INPUT_PULLUP); \
 
 #endif
 
