@@ -206,13 +206,13 @@
     #define PROG_BUTTON_PIN 0
     #define SAVE_INTERRUPT_PIN 29
     #define KNX_UART_NUM 0
-    #define KNX_UART_RX_PIN 16
-    #define KNX_UART_TX_PIN 17
+    #define KNX_UART_RX_PIN 17
+    #define KNX_UART_TX_PIN 16
 
     #define SMARTMF_BE1_PIN 2
     #define SMARTMF_BE2_PIN 4
     #define SMARTMF_BE3_PIN 6
-    #define SMARTMF_BE3_PIN 7
+    #define SMARTMF_BE4_PIN 7
 
     #define SMARTMF_I2C0_SDA_PIN 20
     #define SMARTMF_I2C0_SCL_PIN 21
