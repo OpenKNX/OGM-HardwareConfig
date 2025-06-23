@@ -48,8 +48,35 @@
 
 // Smart-MF Logikmopdul
 #ifdef DEVICE_SMARTMF_1TE_REG
+    #define DEVICE_SMARTMF_1TE_REG_BASE
+
     #define DEVICE_ID "SMARTMF-1TE-REG"
     #define DEVICE_NAME "Smart-MF 1TE REG"
+#endif
+
+// Smart-MF 1-Wire Gateway 1TE
+#ifdef DEVICE_SMARTMF_1WIRE_1CH
+    #define DEVICE_SMARTMF_1TE_REG_BASE
+
+    #define DEVICE_ID "SMARTMF-1Wire-1CH"
+    #define DEVICE_NAME "Smart-MF 1-Wire Gateway 1CH"
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 20
+    #define I2C_SCL_PIN 21
+    #define I2C_SDA_1WIRE_PIN 14
+    #define I2C_SCL_1WIRE_PIN 15
+    #define COUNT_1WIRE_BUSMASTER 1
+    #define COUNT_1WIRE_CHANNEL 30
+    #define I2C_1WIRE_DEVICE_ADDRESSS 0x18 // Address of DS2484 1-Wire-Busmaster chip
+    #define I2C_BUS_1WIRE Wire1
+    #define ONEWIRE_5V_ENABLE 5
+    #define ONEWIRE_5V_SHORT 4
+
+#endif
+
+// Smart-MF Logikmopdul
+#ifdef DEVICE_SMARTMF_1TE_REG_BASE
 
     #define PROG_LED_PIN 1
     #define PROG_LED_PIN_ACTIVE_ON HIGH
@@ -61,13 +88,7 @@
 
 #endif
 
-// Smart-MF 1-Wire Gateway 1TE
-#ifdef DEVICE_SMARTMF_1WIRE_1CH
-    #define DEVICE_ID "SMARTMF-1Wire-1CH"
-    #define DEVICE_NAME "Smart-MF 1-Wire Gateway 1CH"
 
-
-#endif
 
 /************************************************** */
 //  REG 2TE
@@ -220,7 +241,32 @@
     #define SMARTMF_I2C1_SDA_PIN 14
     #define SMARTMF_I2C1_SCL_PIN 15
 
-    #define SMARTMF_BUZZER_PIN 9
+    #define SMARTMF_BUZZER_PIN 27
+
+    // definitions for legacy support
+    #define I2C_RGBLED_DEVICE_ADDRESS 0x60 // Address of PCA9632 RGBW-LED-Driver
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN SMARTMF_I2C0_SDA_PIN
+    #define I2C_SCL_PIN SMARTMF_I2C0_SCL_PIN
+    #define COUNT_1WIRE_BUSMASTER 1
+    #define COUNT_1WIRE_CHANNEL 30
+    #define I2C_1WIRE_DEVICE_ADDRESSS 0x18 // Address of DS2484 1-Wire-Busmaster chip
+    #define I2C_BUS_1WIRE Wire1
+    #define I2C_SDA_1WIRE_PIN SMARTMF_I2C1_SDA_PIN 
+    #define I2C_SCL_1WIRE_PIN SMARTMF_I2C1_SCL_PIN 
+    #define ONEWIRE_5V_ENABLE 5
+    #define ONEWIRE_5V_SHORT 4
+    #define HW_ANALOG_ID SMARTMF_HARDWARE_REVISION_ADC_PIN
+    #define HW_REVISION_ID1 SMARTMF_HARDWARE_REVISION_ID1_PIN
+    #define HW_REVISION_ID2 SMARTMF_HARDWARE_REVISION_ID2_PIN
+    #define HW_REVISION_ID3 SMARTMF_HARDWARE_REVISION_ID3_PIN
+    #define OPENKNX_BI_GPIO_PINS SMARTMF_BE1_PIN, SMARTMF_BE2_PIN, SMARTMF_BE3_PIN, SMARTMF_BE4_PIN
+    #define OPENKNX_BI_GPIO_COUNT 4
+    #define OPENKNX_ADC_ADS_ADDR 0x49
+    #define OPENKNX_ADC_ADS_GAIN 2
+    #define OPENKNX_ADC_ADS_WIRE I2C_BUS_1WIRE
+    #define OPENKNX_ADC_ADS_SDA I2C_SDA_1WIRE_PIN
+    #define OPENKNX_ADC_ADS_SCL I2C_SCL_1WIRE_PIN
 
 #endif
 
