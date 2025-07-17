@@ -151,7 +151,7 @@
 // https://github.com/OpenKNX/OpenKNX/wiki/REG1-LAN-TP-Base
     #ifdef DEVICE_REG1_LAN_TP_BASE
         #define DEVICE_ID "REG1-LAN-TP-Base"
-        #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP "
+        #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP"
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
@@ -160,6 +160,25 @@
         #define DEVICE_INIT() \
             pinMode(ETH_PHY_POWER, OUTPUT); \
             digitalWrite(ETH_PHY_POWER, LOW)
+
+    #endif
+
+// REG1-LAN-Base
+// https://device.openknx.com/REG1-LAN-Base
+    #ifdef DEVICE_REG1_LAN_BASE
+        #define DEVICE_ID "REG1-LAN-Base"
+        #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN"
+
+        #define OKNXHW_REG1_CONTROLLERESP_DCU
+        #define OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define DEVICE_INIT() \
+            pinMode(ETH_PHY_POWER, OUTPUT); \
+            digitalWrite(ETH_PHY_POWER, LOW); \
+            pinMode(SAVE_POWER_PIN, OUTPUT); \
+            digitalWrite(SAVE_POWER_PIN, HIGH);
 
     #endif
 
@@ -317,9 +336,16 @@
     #ifdef OKNXHW_REG1_CONTROLLERESP_V00_11
 
         #define SAVE_INTERRUPT_PIN (36)
-        #define KNX_UART_NUM 1
-        #define KNX_UART_RX_PIN (37)
-        #define KNX_UART_TX_PIN (5)
+
+        #ifdef OKNXHW_REG1_CONTROLLERESP_DCU
+            #define SAVE_POWER_PIN (5)
+            #define SAVE_POWER_PIN_POWER_OFF (LOW)
+            #define SAVE_POWER_PIN_POWER_ON (HIGH)
+        #else
+            #define KNX_UART_NUM 1
+            #define KNX_UART_RX_PIN (37)
+            #define KNX_UART_TX_PIN (5)
+        #endif
 
         #define ETH_PHY_TYPE  ETH_PHY_LAN8720   // type of PHY used, needed for IDF
         #define ETH_PHY_ADDR  (0)                 // PHYs I2C address
