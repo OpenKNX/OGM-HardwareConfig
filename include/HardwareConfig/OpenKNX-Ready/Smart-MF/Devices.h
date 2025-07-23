@@ -18,9 +18,34 @@
  */
 
 /************************************************** */
-//  UP
+//  SOM
 /************************************************** */
 #ifdef DEVICE_SMARTMF_SOM_UP
+    #define DEVICE_ID "SOM-UP"
+    #define DEVICE_NAME "Smart-MF Soundmodul UP"
+    
+    #define SOM_BASE
+
+    #define OPENKNX_BI_GPIO_PINS 4, 5, 19, 18
+    #define OPENKNX_BI_GPIO_COUNT 4
+    #define OPENKNX_BI_PULSE 14
+#endif
+
+#ifdef DEVICE_SMARTMF_SOM_UP_EXT_PWR
+    #define DEVICE_ID "SOM-UP-EXT-PWR"
+    #define DEVICE_NAME "Smart-MF Soundmodul UP (Ext-Power)"
+    
+    #define SOM_BASE
+#endif
+
+#ifdef DEVICE_SMARTMF_SOM_REG
+    #define DEVICE_ID "SOM-UP-EXT-PWR"
+    #define DEVICE_NAME "Smart-MF Soundmodul REG"
+
+    #define SOM_BASE
+#endif
+
+#ifdef SOM_BASE
     #define PROG_LED_PIN 2
     #define PROG_LED_PIN_ACTIVE_ON HIGH
     #define INFO1_LED_PIN 29
@@ -33,21 +58,15 @@
     #define KNX_UART_TX_PIN 16
     #define PLAYER_UART_RX_PIN 9
     #define PLAYER_UART_TX_PIN 8
+    #define PLAYER_I2S_MCLK_PIN -1
     #define PLAYER_I2S_BCLK_PIN 8
     #define PLAYER_I2S_DATA_PIN 20
     #define PLAYER_POWER_PIN 3
-    #define DEVICE_ID "SOM-UP"
-    #define DEVICE_NAME "Smart-MF Soundmodul"
 
     #define SmartMF_HardwareRevision_PIN1 10
     #define SmartMF_HardwareRevision_PIN2 11
     #define SmartMF_HardwareRevision_PIN3 12
-
-    #define OPENKNX_BI_GPIO_PINS 4, 5, 19, 18
-    #define OPENKNX_BI_GPIO_COUNT 4
-    #define OPENKNX_BI_PULSE 14
 #endif
-
 
 /************************************************** */
 //  REG 1TE
