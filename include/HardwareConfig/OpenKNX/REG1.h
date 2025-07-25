@@ -176,9 +176,7 @@
 
         #define DEVICE_INIT() \
             pinMode(ETH_PHY_POWER, OUTPUT); \
-            digitalWrite(ETH_PHY_POWER, LOW); \
-            pinMode(SAVE_POWER_PIN, OUTPUT); \
-            digitalWrite(SAVE_POWER_PIN, HIGH);
+            digitalWrite(ETH_PHY_POWER, LOW);
 
     #endif
 
