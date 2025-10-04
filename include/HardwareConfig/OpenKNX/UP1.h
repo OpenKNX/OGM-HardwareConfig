@@ -42,6 +42,31 @@
     #define OKNXHW_SENSOR_H2_SDA_PIN (14)
 #endif
 
+// UP1-SEN-8x
+#ifdef DEVICE_UP1_SEN_8X
+    #define DEVICE_ID "UP1-SEN-8x"
+    #define DEVICE_NAME "OpenKNX UP1 8xSensor"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+	#define OKNXHW_SENSOR_A1_SCL_PIN (29)
+    #define OKNXHW_SENSOR_A2_SDA_PIN (28)
+	#define OKNXHW_SENSOR_B1_SCL_PIN (27)
+    #define OKNXHW_SENSOR_B2_SDA_PIN (26)
+	#define OKNXHW_SENSOR_C1_SCL_PIN (25)
+    #define OKNXHW_SENSOR_C2_SDA_PIN (24)
+	#define OKNXHW_SENSOR_D1_SCL_PIN (23)
+    #define OKNXHW_SENSOR_D2_SDA_PIN (22)
+	#define OKNXHW_SENSOR_E1_SCL_PIN (21)
+    #define OKNXHW_SENSOR_E2_SDA_PIN (20)
+	#define OKNXHW_SENSOR_F1_SCL_PIN (19)
+    #define OKNXHW_SENSOR_F2_SDA_PIN (18)
+	#define OKNXHW_SENSOR_G1_SCL_PIN (17)
+    #define OKNXHW_SENSOR_G2_SDA_PIN (16)
+	#define OKNXHW_SENSOR_H1_SCL_PIN (15)
+    #define OKNXHW_SENSOR_H2_SDA_PIN (14)
+#endif
+
 // UP1-PM-HF
 // https://github.com/OpenKNX/OpenKNX/wiki/UP1-PM-HF
 // note: valid for UP1-PM-HF >= V00.10

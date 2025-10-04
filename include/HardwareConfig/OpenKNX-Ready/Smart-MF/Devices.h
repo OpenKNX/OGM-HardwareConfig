@@ -18,6 +18,57 @@
  */
 
 /************************************************** */
+//  SOM
+/************************************************** */
+#ifdef DEVICE_SMARTMF_SOM_UP
+    #define DEVICE_ID "SOM-UP"
+    #define DEVICE_NAME "Smart-MF Soundmodul UP"
+    
+    #define SOM_BASE
+
+    #define OPENKNX_BI_GPIO_PINS 4, 5, 19, 18
+    #define OPENKNX_BI_GPIO_COUNT 4
+    #define OPENKNX_BI_PULSE 14
+#endif
+
+#ifdef DEVICE_SMARTMF_SOM_UP_EXT_PWR
+    #define DEVICE_ID "SOM-UP-EXT-PWR"
+    #define DEVICE_NAME "Smart-MF Soundmodul UP (Ext-Power)"
+    
+    #define SOM_BASE
+#endif
+
+#ifdef DEVICE_SMARTMF_SOM_REG
+    #define DEVICE_ID "SOM-UP-EXT-PWR"
+    #define DEVICE_NAME "Smart-MF Soundmodul REG"
+
+    #define SOM_BASE
+#endif
+
+#ifdef SOM_BASE
+    #define PROG_LED_PIN 2
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define INFO1_LED_PIN 29
+    #define INFO1_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 0
+    #define FUNC1_BUTTON_PIN 1
+    #define SAVE_INTERRUPT_PIN 13
+    #define KNX_UART_NUM 0
+    #define KNX_UART_RX_PIN 17
+    #define KNX_UART_TX_PIN 16
+    #define PLAYER_UART_RX_PIN 9
+    #define PLAYER_UART_TX_PIN 8
+    #define PLAYER_I2S_MCLK_PIN -1
+    #define PLAYER_I2S_BCLK_PIN 8
+    #define PLAYER_I2S_DATA_PIN 20
+    #define PLAYER_POWER_PIN 3
+
+    #define SmartMF_HardwareRevision_PIN1 10
+    #define SmartMF_HardwareRevision_PIN2 11
+    #define SmartMF_HardwareRevision_PIN3 12
+#endif
+
+/************************************************** */
 //  REG 1TE
 /************************************************** */
 
@@ -254,8 +305,9 @@
     #define I2C_BUS_1WIRE Wire1
     #define I2C_SDA_1WIRE_PIN SMARTMF_I2C1_SDA_PIN 
     #define I2C_SCL_1WIRE_PIN SMARTMF_I2C1_SCL_PIN 
-    #define ONEWIRE_5V_ENABLE 5
-    #define ONEWIRE_5V_SHORT 4
+    #define ONEWIRE_5V_ENABLE 8
+    #define ONEWIRE_5V_SHORT 9
+    #define BUZZER_PIN SMARTMF_BUZZER_PIN
     #define HW_ANALOG_ID SMARTMF_HARDWARE_REVISION_ADC_PIN
     #define HW_REVISION_ID1 SMARTMF_HARDWARE_REVISION_ID1_PIN
     #define HW_REVISION_ID2 SMARTMF_HARDWARE_REVISION_ID2_PIN
