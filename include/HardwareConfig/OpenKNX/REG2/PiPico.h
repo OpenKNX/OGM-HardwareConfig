@@ -237,45 +237,51 @@
     #define OPENKNX_GPIO_SCL OKNXHW_REG2_HWDISPLAY_I2C_SCL
 
     // Define the 8 GPIO Pins of the PCA9557 I2C GPIO Expander
-    #define FRONT_CTRL_LEFT 0x100   // PIN 0 (LEFT)
-    #define FRONT_CTRL_LED1_R 0x101 // PIN 1 (RED LED)
-    #define FRONT_CTRL_LED2_G 0x102 // PIN 2 (GREEN LED)
-    #define FRONT_CTRL_LEFT2 0x103  // PIN 3 (LEFT2)
-    #define FRONT_CTRL_DOWN 0x104   // PIN 4 (DOWN)
-    #define FRONT_CTRL_RIGHT 0x105  // PIN 5 (RIGHT)
-    #define FRONT_CTRL_OK 0x106     // PIN 6 (OK / SELECT)
-    #define FRONT_CTRL_UP 0x107     // PIN 7 (UP)
+    #define FRONT_CTRL_LEFT   0x100   // PIN 0 (LEFT)
+    #define FRONT_CTRL_LED1_R 0x101   // PIN 1 (RED LED)
+    #define FRONT_CTRL_LED2_G 0x102   // PIN 2 (GREEN LED)
+    #define FRONT_CTRL_LEFT2  0x103   // PIN 3 (LEFT2)
+    #define FRONT_CTRL_DOWN   0x104   // PIN 4 (DOWN)
+    #define FRONT_CTRL_RIGHT  0x105   // PIN 5 (RIGHT)
+    #define FRONT_CTRL_OK     0x106   // PIN 6 (OK / SELECT)
+    #define FRONT_CTRL_UP     0x107   // PIN 7 (UP)
 
     #define OPENKNX_PCA9557_PINS_COUNT 8
-    #define OPENKNX_PCA9557_PINS                                                 \
-        FRONT_CTRL_LEFT, FRONT_CTRL_LED1_R, FRONT_CTRL_LED2_G, FRONT_CTRL_LEFT2, \
-            FRONT_CTRL_DOWN, FRONT_CTRL_RIGHT, FRONT_CTRL_OK, FRONT_CTRL_UP
+    #define OPENKNX_PCA9557_PINS \
+                FRONT_CTRL_LEFT, \
+                FRONT_CTRL_LED1_R, \
+                FRONT_CTRL_LED2_G, \
+                FRONT_CTRL_LEFT2, \
+                FRONT_CTRL_DOWN, \
+                FRONT_CTRL_RIGHT, \
+                FRONT_CTRL_OK, \
+                FRONT_CTRL_UP
 
-    #define OPENKNX_GPIO_NUM OPENKNX_PCA9557_PINS_COUNT
-    #define OPENKNX_GPIO_TYPES OPENKNX_GPIO_T_PCA9557
-    #define OPENKNX_GPIO_ADDRS 0x18 // PCA9557 I2C address 0x18 (A0-A2 = 0) A0-A2 are connected to GND if A1 is connected to VCC the address is 0x19
-    #define OPENKNX_GPIO_INTS 0xFF
-    #define OPENKNX_GPIO_WIRE Wire1   // OKNXHW_REG2_HWDISPLAY_I2C_INST
-    #define OPENKNX_GPIO_CLOCK 400000 // I2C Taktfrequenz in Hz (400kHz für schnelle I2C-Kommunikation)
+    #define OPENKNX_GPIO_NUM    1         // Total number of GPIO expanders used
+    #define OPENKNX_GPIO_TYPES  OPENKNX_GPIO_T_PCA9557
+    #define OPENKNX_GPIO_ADDRS  0x18      // PCA9557 I2C address 0x18 (A0-A2 = 0) A0-A2 are connected to GND if A1 is connected to VCC the address is 0x19
+    #define OPENKNX_GPIO_INTS   0xFF
+    #define OPENKNX_GPIO_WIRE   Wire1     // OKNXHW_REG2_HWDISPLAY_I2C_INST
+    #define OPENKNX_GPIO_CLOCK  400000    // I2C Taktfrequenz in Hz (400kHz für schnelle I2C-Kommunikation)
 
-    #define OKNXHW_DEVICE_DISPLAY_I2C_INST OKNXHW_REG2_HWDISPLAY_I2C_INST
-    #define OKNXHW_DEVICE_DISPLAY_I2C_SDA OKNXHW_REG2_HWDISPLAY_I2C_SDA
-    #define OKNXHW_DEVICE_DISPLAY_I2C_SCL OKNXHW_REG2_HWDISPLAY_I2C_SCL
+    #define OKNXHW_DEVICE_DISPLAY_I2C_INST    OKNXHW_REG2_HWDISPLAY_I2C_INST
+    #define OKNXHW_DEVICE_DISPLAY_I2C_SDA     OKNXHW_REG2_HWDISPLAY_I2C_SDA
+    #define OKNXHW_DEVICE_DISPLAY_I2C_SCL     OKNXHW_REG2_HWDISPLAY_I2C_SCL
     #define OKNXHW_DEVICE_DISPLAY_I2C_ADDRESS OKNXHW_REG2_HWDISPLAY_I2C_ADDRESS
-    #define OKNXHW_DEVICE_DISPLAY_WIDTH OKNXHW_REG2_DEVICE_DISPLAY_WIDTH
-    #define OKNXHW_DEVICE_DISPLAY_HEIGHT OKNXHW_REG2_DEVICE_DISPLAY_HEIGHT
+    #define OKNXHW_DEVICE_DISPLAY_WIDTH       OKNXHW_REG2_DEVICE_DISPLAY_WIDTH
+    #define OKNXHW_DEVICE_DISPLAY_HEIGHT      OKNXHW_REG2_DEVICE_DISPLAY_HEIGHT
 
 #endif // REG2-Pi-Pico FwF: Device Display Support
 
 // REG2-Pi-Pico FwF: Device RTC Support
 #ifdef OKNXHW_REG2_DEVICE_RTC
     // Default pins for the I2C bus to connect the hardware RTC - This is the default setting for the DS3231!!
-    #define OKNXHW_REG2_HWRTC_I2C_ADDRESS 0x68         // i2c address of the RTC. I.e. 0x68 for DS3231.
-    #define OKNXHW_REG2_HWRTC_I2C_EEPROM_ADDRESS 0x57  // Set here the i2c address of the RTC EEPROM. I.e. 0x57 for DS3231.
-    #define OKNXHW_REG2_HWRTC_I2C_EEPROM_SIZE 0x1000   // Set here the size of the RTC EEPROM. I.e. 0x1000 for DS3231.
-    #define OKNXHW_REG2_HWRTC_SRAM_RTC_USER_START 0x13 // User address start in the DS3231 SRAM. 0x13
-    #define OKNXHW_REG2_HWRTC_SRAM_RTC_USER_END 0x3F   // User address end in the DS3231 SRAM. 0x3F
-    #define OKNXHW_REG2_HWRTC_SRAM_RTC_USER 45         // (SRAM_RTC_USER_END - SRAM_RTC_USER_START + 1) // User address count in the DS3231 SRAM.
+    #define OKNXHW_REG2_HWRTC_I2C_ADDRESS         0x68    // i2c address of the RTC. I.e. 0x68 for DS3231.
+    #define OKNXHW_REG2_HWRTC_I2C_EEPROM_ADDRESS  0x57    // Set here the i2c address of the RTC EEPROM. I.e. 0x57 for DS3231.
+    #define OKNXHW_REG2_HWRTC_I2C_EEPROM_SIZE     0x1000  // Set here the size of the RTC EEPROM. I.e. 0x1000 for DS3231.
+    #define OKNXHW_REG2_HWRTC_SRAM_RTC_USER_START 0x13    // User address start in the DS3231 SRAM. 0x13
+    #define OKNXHW_REG2_HWRTC_SRAM_RTC_USER_END   0x3F    // User address end in the DS3231 SRAM. 0x3F
+    #define OKNXHW_REG2_HWRTC_SRAM_RTC_USER       45      // (SRAM_RTC_USER_END - SRAM_RTC_USER_START + 1) // User address count in the DS3231 SRAM.
 
     #define OKNXHW_REG2_HWRTC_I2C_INST i2c1 // i2c1 | i2c0
 
@@ -289,10 +295,10 @@
 
     // Set there now the generall setting definition for the OFM-DeviceRTC
     #define OKNXHW_DEVICE_RTC_EEPROM_I2C_ADDRESS OKNXHW_REG2_HWRTC_I2C_EEPROM_ADDRESS
-    #define OKNXHW_DEVICE_RTC_I2C_ADDRESS OKNXHW_REG2_HWRTC_I2C_ADDRESS
-    #define OKNXHW_DEVICE_RTC_I2C_SDA OKNXHW_REG2_HWRTC_I2C_SDA
-    #define OKNXHW_DEVICE_RTC_I2C_SCL OKNXHW_REG2_HWRTC_I2C_SCL
-    #define OKNXHW_DEVICE_RTC_I2C_INST OKNXHW_REG2_HWRTC_I2C_INST
+    #define OKNXHW_DEVICE_RTC_I2C_ADDRESS        OKNXHW_REG2_HWRTC_I2C_ADDRESS
+    #define OKNXHW_DEVICE_RTC_I2C_SDA            OKNXHW_REG2_HWRTC_I2C_SDA
+    #define OKNXHW_DEVICE_RTC_I2C_SCL            OKNXHW_REG2_HWRTC_I2C_SCL
+    #define OKNXHW_DEVICE_RTC_I2C_INST           OKNXHW_REG2_HWRTC_I2C_INST
 #endif // REG2-Pi-Pico FwF: Device RTC Support
 
 // REG2-Pi-Pico FwF: Meter Support
