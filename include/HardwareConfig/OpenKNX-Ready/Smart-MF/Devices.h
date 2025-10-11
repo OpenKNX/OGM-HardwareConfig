@@ -23,7 +23,7 @@
 #ifdef DEVICE_SMARTMF_SOM_UP
     #define DEVICE_ID "SOM-UP"
     #define DEVICE_NAME "Smart-MF Soundmodul UP"
-    
+
     #define SOM_BASE
 
     #define OPENKNX_BI_GPIO_PINS 4, 5, 19, 18
@@ -34,7 +34,7 @@
 #ifdef DEVICE_SMARTMF_SOM_UP_EXT_PWR
     #define DEVICE_ID "SOM-UP-EXT-PWR"
     #define DEVICE_NAME "Smart-MF Soundmodul UP (Ext-Power)"
-    
+
     #define SOM_BASE
 #endif
 
@@ -126,6 +126,21 @@
 
 #endif
 
+// Smart-MF Modbus 1TE
+#ifdef DEVICE_SMARTMF_1TE_MODBUS
+    #define DEVICE_SMARTMF_1TE_REG_BASE
+
+    #define DEVICE_ID "SMARTMF-1TE-MODBUS"
+    #define DEVICE_NAME "Smart-MF 1TE Modbus RTU"
+
+    #define SMARTMF_LED 15
+
+    #define SMARTMF_MODBUS_RX_PIN 5
+    #define SMARTMF_MODBUS_TX_PIN 4
+    #define SMARTMF_MODBUS_DIR_PIN 14
+
+#endif
+
 // Smart-MF Logikmopdul
 #ifdef DEVICE_SMARTMF_1TE_REG_BASE
 
@@ -138,8 +153,6 @@
     #define KNX_UART_NUM 0
 
 #endif
-
-
 
 /************************************************** */
 //  REG 2TE
@@ -303,8 +316,8 @@
     #define COUNT_1WIRE_CHANNEL 30
     #define I2C_1WIRE_DEVICE_ADDRESSS 0x18 // Address of DS2484 1-Wire-Busmaster chip
     #define I2C_BUS_1WIRE Wire1
-    #define I2C_SDA_1WIRE_PIN SMARTMF_I2C1_SDA_PIN 
-    #define I2C_SCL_1WIRE_PIN SMARTMF_I2C1_SCL_PIN 
+    #define I2C_SDA_1WIRE_PIN SMARTMF_I2C1_SDA_PIN
+    #define I2C_SCL_1WIRE_PIN SMARTMF_I2C1_SCL_PIN
     #define ONEWIRE_5V_ENABLE 8
     #define ONEWIRE_5V_SHORT 9
     #define BUZZER_PIN SMARTMF_BUZZER_PIN
@@ -329,11 +342,26 @@
 
 #endif
 
-// Smart-MF Enocean Gateway
-#ifdef DEVICE_SMARTMF_ENOCEANGATEWAY
+/************************************************** */
+//   Smart-MF Enocean Gateway V2 RP2040
+/************************************************** */
+#ifdef DEVICE_SMARTMF_ENOCEANGATEWAY_V2
     #define DEVICE_ID "SMARTMF-ENO"
-    #define DEVICE_NAME "Smart-MF Enocean Gateway"
+    #define DEVICE_NAME "Smart-MF Enocean Gateway V2"
+    #define PROG_LED_PIN 1
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define INFO_LED_PIN 7
+    #define INFO_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 0
+    #define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
+    #define SAVE_INTERRUPT_PIN 29
+    #define KNX_UART_RX_PIN 17
+    #define KNX_UART_TX_PIN 16
+    #define KNX_UART_NUM 0
 
+    #define OPENKNX_ENO_SERIAL Serial2
+    #define OPENKNX_ENO_UART_RX_PIN 5
+    #define OPENKNX_ENO_UART_TX_PIN 4
 #endif
 
 // Smart-MF Tasterinterface
