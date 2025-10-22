@@ -60,6 +60,7 @@
     #define PLAYER_UART_TX_PIN 8
     #define PLAYER_I2S_MCLK_PIN -1
     #define PLAYER_I2S_BCLK_PIN 8
+    #define PLAYER_I2S_WCLK_PIN (PLAYER_I2S_BCLK_PIN + 1)
     #define PLAYER_I2S_DATA_PIN 20
     #define PLAYER_POWER_PIN 3
 
