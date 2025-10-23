@@ -123,7 +123,18 @@
 
     #define OKNXHW_UP1_CONTROLLER2040
 
-    #define OKNXHW_UP1_APP_RS485
+    #define RS485_SERIAL Serial2
+    #define RS485_UART_RX_PIN (21)
+    #define RS485_UART_TX_PIN (20)
+    #define RS485_UART_DIR_PIN (22)
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 16
+    #define I2C_SCL_PIN 17
+
+    #define OPENKNX_BI_GPIO_PINS 18
+    #define OPENKNX_BI_GPIO_COUNT 1
+    #define OPENKNX_BI_ONLEVEL LOW
 #endif
 
 #ifdef DEVICE_UP1_GW_IR
@@ -154,13 +165,6 @@
 #pragma endregion
 
 #pragma region "UP1 Apps"
-
-#ifdef OKNXHW_UP1_APP_RS485
-    #define RS485_SERIAL Serial2
-    #define RS485_UART_RX_PIN (21)
-    #define RS485_UART_TX_PIN (20)
-    #define RS485_UART_DIR_PIN (22)
-#endif
 
 #ifdef OKNXHW_UP1_APP_IR
     #define IR_PIN_REC (13)
