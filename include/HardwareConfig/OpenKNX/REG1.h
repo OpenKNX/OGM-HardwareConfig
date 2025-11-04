@@ -35,7 +35,7 @@
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
-        #define OKNXHW_REG1_FRONT_UNIVERSAL
+        #define OKNXHW_REG1_FRONT_AUTO
 
         #define OKNXHW_REG1_APP_ETH
 
@@ -64,7 +64,7 @@
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
-        #define OKNXHW_REG1_FRONT_UNIVERSAL
+        #define OKNXHW_REG1_FRONT_AUTO
 
         #define OKNXHW_REG1_SENSOR_SDA_TX_PIN (8) // RP2040 GPIO 8 / SPI1 RX / UART1 TX / I2C0 SDA / PWM4 A
         #define OKNXHW_REG1_SENSOR_SCL_RX_PIN (9) // RP2040 GPIO 9 / SPI1 CSn / UART1 RX / I2C0 SCL / PWM4 B
@@ -93,7 +93,7 @@
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
-        #define OKNXHW_REG1_FRONT_UNIVERSAL
+        #define OKNXHW_REG1_FRONT_AUTO
 
         #define OKNXHW_REG1_SENSOR_SDA_TX_PIN (8) // RP2040 GPIO 8 / SPI1 RX / UART1 TX / I2C0 SDA / PWM4 A
         #define OKNXHW_REG1_SENSOR_SCL_RX_PIN (9) // RP2040 GPIO 9 / SPI1 CSn / UART1 RX / I2C0 SCL / PWM4 B
@@ -511,6 +511,49 @@
         #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
         #define FUNC2_BUTTON_PIN REG1_FRONT_PIN4
         #define FUNC3_BUTTON_PIN REG1_FRONT_PIN7
+
+    #endif
+
+// REG1-Front-Auto
+// With this Macro REG1-Front-RGB or REG1-Front-Universal can be used on a REG1-Controller2040
+    #ifdef OKNXHW_REG1_FRONT_AUTO
+
+        #define OPENKNX_SERIALLED_ENABLE
+        #define OPENKNX_LEDCOLOR_CALIBRATION {50, 35, 63}
+        
+        #define PROG_LED_PIN REG1_FRONT_PIN8
+        #define PROG_LED_PIN_ACTIVE_ON HIGH
+
+        #define INFO1_LED_PIN REG1_FRONT_PIN1
+        #define INFO1_LED_PIN_ACTIVE_ON HIGH
+
+        #define INFO2_LED_PIN REG1_FRONT_PIN4
+        #define INFO2_LED_PIN_ACTIVE_ON HIGH
+
+        #define INFO3_LED_PIN REG1_FRONT_PIN7
+        #define INFO3_LED_PIN_ACTIVE_ON HIGH
+
+
+        #define PROG_BUTTON_PIN REG1_FRONT_PIN10
+
+        #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
+
+        #define LED_INIT() \
+            pinMode(REG1_FRONT_PIN7, INPUT); \
+            if (digitalRead(REG1_FRONT_PIN7)) \
+            { \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(0, PROG_LED_PIN, OpenKNX::Led::Color::Red), OpenKNX::Led::LED_TYPE_PROG); \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(1, PROG_LED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO1); \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(2, PROG_LED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO2); \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(3, PROG_LED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO3); \
+            } \
+            else \
+            { \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO1_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1); \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO2_LED_PIN, INFO2_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO2); \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO3_LED_PIN, INFO3_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO3); \
+            }
 
     #endif
 
