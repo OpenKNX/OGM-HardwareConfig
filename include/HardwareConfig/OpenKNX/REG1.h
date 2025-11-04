@@ -487,22 +487,19 @@
 // https://github.com/OpenKNX/OpenKNX/wiki/REG1-Front-RGB
     #ifdef OKNXHW_REG1_FRONT_RGB
         
-        #define OPENKNX_SERIALLED_COLOR_RED 50, 0, 0
-        #define OPENKNX_SERIALLED_COLOR_GREEN 0, 35, 0
-        #define OPENKNX_SERIALLED_COLOR_BLUE 0, 0, 63
-        #define OPENKNX_SERIALLED_COLOR_YELLOW 40, 30, 0
-
         #define OPENKNX_SERIALLED_ENABLE
+        #define OPENKNX_LEDCOLOR_CALIBRATION {50, 35, 63}
+
         #define OPENKNX_SERIALLED_PIN REG1_FRONT_PIN8
         #define OPENKNX_SERIALLED_NUM 4
         #define PROG_LED_PIN 0
-        #define PROG_LED_COLOR OPENKNX_SERIALLED_COLOR_RED
+        #define PROG_LED_COLOR OpenKNX::Led::Color::Red
         #define INFO1_LED_PIN 1
-        #define INFO1_LED_COLOR OPENKNX_SERIALLED_COLOR_GREEN
+        #define INFO1_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO2_LED_PIN 2
-        #define INFO2_LED_COLOR OPENKNX_SERIALLED_COLOR_GREEN
+        #define INFO2_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO3_LED_PIN 3
-        #define INFO3_LED_COLOR OPENKNX_SERIALLED_COLOR_GREEN
+        #define INFO3_LED_COLOR OpenKNX::Led::Color::Green
         #define OPENKNX_LEDEFFECT_PULSE_MIN 50
 
 
