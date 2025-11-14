@@ -117,6 +117,7 @@
 
 #endif
 
+// device.openknx.de/UP1-GW-RS485
 #ifdef DEVICE_UP1_GW_RS485
     #define DEVICE_ID "UP1-GW-RS485"
     #define DEVICE_NAME "OpenKNX UP1 RS485 Gateway"
@@ -127,6 +128,27 @@
     #define RS485_UART_RX_PIN (21)
     #define RS485_UART_TX_PIN (20)
     #define RS485_UART_DIR_PIN (22)
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 16
+    #define I2C_SCL_PIN 17
+
+    #define OPENKNX_BI_GPIO_PINS 18
+    #define OPENKNX_BI_GPIO_COUNT 1
+    #define OPENKNX_BI_ONLEVEL LOW
+#endif
+
+// device.openknx.de/UP1-GW-2xUART
+#ifdef DEVICE_UP1_GW_2XUART
+    #define DEVICE_ID "UP1-GW-2xUART"
+    #define DEVICE_NAME "OpenKNX UP1 UART Gateway"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define UART1_RX_PIN (21)
+    #define UART1_TX_PIN (20)
+    #define UART2_RX_PIN (29)
+    #define UART2_TX_PIN (28)
 
     #define I2C_WIRE Wire
     #define I2C_SDA_PIN 16
