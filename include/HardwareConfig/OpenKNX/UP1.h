@@ -1,7 +1,7 @@
 #pragma once
 /**
  * OpenKNX Hardware definition header file
- * 
+ *
  * File: UP1.h
  * Hardware: OpenKNX-UP1
  * Responsible: Ing-Dom
@@ -24,21 +24,21 @@
 
     #define OKNXHW_UP1_CONTROLLER2040
 
-	#define OKNXHW_SENSOR_A1_SCL_PIN (29)
+    #define OKNXHW_SENSOR_A1_SCL_PIN (29)
     #define OKNXHW_SENSOR_A2_SDA_PIN (28)
-	#define OKNXHW_SENSOR_B1_SCL_PIN (27)
+    #define OKNXHW_SENSOR_B1_SCL_PIN (27)
     #define OKNXHW_SENSOR_B2_SDA_PIN (26)
-	#define OKNXHW_SENSOR_C1_SCL_PIN (25)
+    #define OKNXHW_SENSOR_C1_SCL_PIN (25)
     #define OKNXHW_SENSOR_C2_SDA_PIN (24)
-	#define OKNXHW_SENSOR_D1_SCL_PIN (23)
+    #define OKNXHW_SENSOR_D1_SCL_PIN (23)
     #define OKNXHW_SENSOR_D2_SDA_PIN (22)
-	#define OKNXHW_SENSOR_E1_SCL_PIN (21)
+    #define OKNXHW_SENSOR_E1_SCL_PIN (21)
     #define OKNXHW_SENSOR_E2_SDA_PIN (20)
-	#define OKNXHW_SENSOR_F1_SCL_PIN (19)
+    #define OKNXHW_SENSOR_F1_SCL_PIN (19)
     #define OKNXHW_SENSOR_F2_SDA_PIN (18)
-	#define OKNXHW_SENSOR_G1_SCL_PIN (17)
+    #define OKNXHW_SENSOR_G1_SCL_PIN (17)
     #define OKNXHW_SENSOR_G2_SDA_PIN (16)
-	#define OKNXHW_SENSOR_H1_SCL_PIN (15)
+    #define OKNXHW_SENSOR_H1_SCL_PIN (15)
     #define OKNXHW_SENSOR_H2_SDA_PIN (14)
 #endif
 
@@ -76,7 +76,7 @@
 
     #define OKNXHW_UP1_CONTROLLER2040
 
-	#define OKNXHW_SENSOR_HF_SERIAL Serial2
+    #define OKNXHW_SENSOR_HF_SERIAL Serial2
     #define OKNXHW_SENSOR_HF_RX_PIN
     #define OKNXHW_SENSOR_HF_TX_PIN
     #define OKNXHW_SENSOR_HF_PWR_PIN
@@ -105,16 +105,92 @@
     #define HF_POWER_PIN 18
     #define HF_UART_TX_PIN 20
     #define HF_UART_RX_PIN 21
-    #define OPENKNX_BI_GPIO_PINS 19,22,23,24,11,10
+    #define OPENKNX_BI_GPIO_PINS 19, 22, 23, 24, 11, 10
     #define OPENKNX_BI_GPIO_COUNT 6
     #define OPENKNX_BI_ONLEVEL LOW
 
     // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deativated by setting to PULLUP
-    #define DEVICE_INIT() \
-        pinMode(RED_LED_PIN, INPUT_PULLUP); \
+    #define DEVICE_INIT()                     \
+        pinMode(RED_LED_PIN, INPUT_PULLUP);   \
         pinMode(GREEN_LED_PIN, INPUT_PULLUP); \
-        pinMode(BLUE_LED_PIN, INPUT_PULLUP); \
+        pinMode(BLUE_LED_PIN, INPUT_PULLUP);
 
+#endif
+
+#ifdef DEVICE_UP1_TAS_4X
+    #define DEVICE_ID "UP1-TAS-4x"
+    #define DEVICE_NAME "OpenKNX UP1 Taster"
+
+    #define PROG_LED_PIN (5)
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN (4)
+    #define SAVE_INTERRUPT_PIN (2)
+    #define KNX_SERIAL Serial1
+    #define KNX_UART_NUM 0
+    #define KNX_UART_RX_PIN (1)
+    #define KNX_UART_TX_PIN (0)
+
+    #define TASTE1_PIN 26
+    #define TASTE2_PIN 27
+    #define TASTE3_PIN 29
+    #define TASTE4_PIN 28
+
+    #define LED1_R_PIN 18
+    #define LED1_G_PIN 17
+    #define LED1_B_PIN 19
+    #define LED1_ACTIVE_ON LOW
+
+    #define LED2_R_PIN 10
+    #define LED2_G_PIN 11
+    #define LED2_B_PIN 7
+    #define LED2_ACTIVE_ON LOW
+
+    #define TASTE1_EXT_PIN 21
+    #define TASTE2_EXT_PIN 23
+    #define TASTE3_EXT_PIN 16
+    #define TASTE4_EXT_PIN 6
+
+    #define LED1_EXT_R_PIN 25
+    #define LED1_EXT_G_PIN 24
+    #define LED1_EXT_B_PIN 22
+    #define LED1_EXT_ACTIVE_ON LOW
+
+    #define LED2_EXT_R_PIN 20
+    #define LED2_EXT_G_PIN 14
+    #define LED2_EXT_B_PIN 15
+    #define LED2_EXT_ACTIVE_ON LOW
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 12
+    #define I2C_SCL_PIN 13
+
+    #define OPENKNX_BI_GPIO_PINS 9, 8
+    #define OPENKNX_BI_GPIO_COUNT 2
+    #define OPENKNX_BI_ONLEVEL LOW
+
+    #define OPENKNX_SLED_IDs 10, 11, 12, 13
+
+    // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deativated by setting to PULLUP
+    #define DEVICE_INIT()                      \
+        pinMode(LED1_R_PIN, INPUT_PULLUP);     \
+        pinMode(LED1_G_PIN, INPUT_PULLUP);     \
+        pinMode(LED1_B_PIN, INPUT_PULLUP);     \
+        pinMode(LED2_R_PIN, INPUT_PULLUP);     \
+        pinMode(LED2_G_PIN, INPUT_PULLUP);     \
+        pinMode(LED2_B_PIN, INPUT_PULLUP);     \
+        pinMode(LED1_EXT_R_PIN, INPUT_PULLUP); \
+        pinMode(LED1_EXT_G_PIN, INPUT_PULLUP); \
+        pinMode(LED1_EXT_B_PIN, INPUT_PULLUP); \
+        pinMode(LED2_EXT_R_PIN, INPUT_PULLUP); \
+        pinMode(LED2_EXT_G_PIN, INPUT_PULLUP); \
+        pinMode(LED2_EXT_B_PIN, INPUT_PULLUP);
+
+    #define LED_INIT()                                                                                                                                                               \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG);                                                              \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(LED1_R_PIN, LED1_G_PIN, LED1_B_PIN, LED1_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER);                 \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(LED2_R_PIN, LED2_G_PIN, LED2_B_PIN, LED1_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER + 1);             \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(LED1_EXT_R_PIN, LED1_EXT_G_PIN, LED1_EXT_B_PIN, LED1_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER + 2); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(LED2_EXT_R_PIN, LED2_EXT_G_PIN, LED2_EXT_B_PIN, LED1_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER + 3);
 #endif
 
 #ifdef DEVICE_UP1_GW_RS485
