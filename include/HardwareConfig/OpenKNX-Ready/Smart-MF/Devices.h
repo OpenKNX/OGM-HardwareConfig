@@ -60,7 +60,6 @@
     #define PLAYER_UART_TX_PIN 8
     #define PLAYER_I2S_MCLK_PIN -1
     #define PLAYER_I2S_BCLK_PIN 8
-    #define PLAYER_I2S_WCLK_PIN (PLAYER_I2S_BCLK_PIN + 1)
     #define PLAYER_I2S_DATA_PIN 20
     #define PLAYER_POWER_PIN 3
 
@@ -139,6 +138,11 @@
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 14
+
+    #define SMARTMF_HARDWARE_VARIANT_PIN 26
+    #define SMARTMF_HARDWARE_REVISION_ID1_PIN 10
+    #define SMARTMF_HARDWARE_REVISION_ID2_PIN 11
+    #define SMARTMF_HARDWARE_REVISION_ID3_PIN 12
 
 #endif
 
@@ -341,6 +345,32 @@
     #define DEVICE_ID "SMARTMF-GC"
     #define DEVICE_NAME "Smart-MF GardenControl"
 
+#endif
+
+/************************************************** */
+//   Smart-MF Modbus Gehäuse Außen
+/************************************************** */
+#ifdef DEVICE_SMARTMF_MODBUS_AUSSEN
+    #define DEVICE_ID "SMARTMF-Modbus-Aussen"
+    #define DEVICE_NAME "Smart-MF Modbus RTU Aussen"
+
+    #define PROG_LED_PIN 1
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 0
+    #define SAVE_INTERRUPT_PIN 29
+    #define KNX_UART_RX_PIN 17
+    #define KNX_UART_TX_PIN 16
+    #define KNX_UART_NUM 0
+
+    #define SMARTMF_LED 15
+    #define SMARTMF_MODBUS_RX_PIN 5
+    #define SMARTMF_MODBUS_TX_PIN 4
+    #define SMARTMF_MODBUS_DIR_PIN 14
+
+    #define SMARTMF_HARDWARE_VARIANT_PIN 26
+    #define SMARTMF_HARDWARE_REVISION_ID1_PIN 10
+    #define SMARTMF_HARDWARE_REVISION_ID2_PIN 11
+    #define SMARTMF_HARDWARE_REVISION_ID3_PIN 12
 #endif
 
 /************************************************** */
