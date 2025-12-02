@@ -153,10 +153,37 @@
     #define I2C_WIRE Wire
     #define I2C_SDA_PIN 16
     #define I2C_SCL_PIN 17
+#endif
 
-    #define OPENKNX_BI_GPIO_PINS 18
-    #define OPENKNX_BI_GPIO_COUNT 1
-    #define OPENKNX_BI_ONLEVEL LOW
+// device.openknx.de/UP1-WLAN-2xUART
+// XIAO ESP32-S3 or ESP32-C3 board
+#ifdef DEVICE_UP1_WLAN_2XUART
+    #define DEVICE_ID "UP1-WLAN-2xUART"
+    #define DEVICE_NAME "OpenKNX UP1 WLAN UART Gateway"
+
+    #define PROG_LED_PIN (8)    // D8 - GPIO8
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN (20)  // D7 - GPIO20
+
+    #define SAVE_INTERRUPT_PIN (21) // D6 - GPIO21
+
+    #define SAVE_POWER_PIN (9) // D9 - GPIO9
+    #define SAVE_POWER_PIN_POWER_OFF (LOW)
+    #define SAVE_POWER_PIN_POWER_ON (HIGH)
+
+    //#define KNX_SERIAL
+    //#define KNX_UART_NUM
+    //#define KNX_UART_RX_PIN (10) // D10 - GPIO10
+    //#define KNX_UART_TX_PIN (9) // D9 - GPIO9
+
+    #define UART1_RX_PIN (4) // D2 - GPIO4
+    #define UART1_TX_PIN (6) // D4 - GPIO6
+    #define UART2_RX_PIN (5) // D3 - GPIO5
+    #define UART2_TX_PIN (7) // D5 - GPIO7
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 2 // D0 - GPIO2
+    #define I2C_SCL_PIN 3 // D1 - GPIO3
 #endif
 
 #ifdef DEVICE_UP1_GW_IR
