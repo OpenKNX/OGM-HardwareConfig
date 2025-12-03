@@ -182,6 +182,9 @@
         #define SAVE_POWER_PIN (D9) // D9 - GPIO8
         #define SAVE_POWER_PIN_POWER_OFF (LOW)
         #define SAVE_POWER_PIN_POWER_ON (HIGH)
+        #define DEVICE_INIT() \
+            pinMode(SAVE_POWER_PIN, OUTPUT); \
+            digitalWrite(SAVE_POWER_PIN, SAVE_POWER_PIN_POWER_ON)
     #endif
 
     #define UART1_RX_PIN (D2) // D2 - GPIO3
