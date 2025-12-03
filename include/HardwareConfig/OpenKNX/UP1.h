@@ -156,34 +156,42 @@
 #endif
 
 // device.openknx.de/UP1-WLAN-2xUART
-// XIAO ESP32-S3 or ESP32-C3 board
+// XIAO ESP32-S3
 #ifdef DEVICE_UP1_WLAN_2XUART
     #define DEVICE_ID "UP1-WLAN-2xUART"
     #define DEVICE_NAME "OpenKNX UP1 WLAN UART Gateway"
 
-    #define PROG_LED_PIN (8)    // D8 - GPIO8
-    #define PROG_LED_PIN_ACTIVE_ON HIGH
-    #define PROG_BUTTON_PIN (20)  // D7 - GPIO20
+    #ifdef DEVICE_UP1_WLAN_2XUART_ONBOARD
+        #define PROG_LED_PIN LED_BUILTIN
+        #define PROG_LED_PIN_ACTIVE_ON LOW
+        #define PROG_BUTTON_PIN 0 // BOOT button
+    #else
+        #define PROG_LED_PIN (D8)    // D8 - GPIO7
+        #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #define PROG_BUTTON_PIN (D7)  // D7 - GPIO44
+    #endif
 
-    #define SAVE_INTERRUPT_PIN (21) // D6 - GPIO21
+    #define SAVE_INTERRUPT_PIN (D6) // D6 - GPIO43
 
-    #define SAVE_POWER_PIN (9) // D9 - GPIO9
-    #define SAVE_POWER_PIN_POWER_OFF (LOW)
-    #define SAVE_POWER_PIN_POWER_ON (HIGH)
+    #ifdef DEVICE_UP1_WLAN_2XUART_BCU
+        #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
+        #define KNX_UART_RX_PIN (D10) // D10 - GPIO9
+        #define KNX_UART_TX_PIN (D9) // D9 - GPIO8
+    #else
+        #define SAVE_POWER_PIN (D9) // D9 - GPIO8
+        #define SAVE_POWER_PIN_POWER_OFF (LOW)
+        #define SAVE_POWER_PIN_POWER_ON (HIGH)
+    #endif
 
-    //#define KNX_SERIAL
-    //#define KNX_UART_NUM
-    //#define KNX_UART_RX_PIN (10) // D10 - GPIO10
-    //#define KNX_UART_TX_PIN (9) // D9 - GPIO9
-
-    #define UART1_RX_PIN (4) // D2 - GPIO4
-    #define UART1_TX_PIN (6) // D4 - GPIO6
-    #define UART2_RX_PIN (5) // D3 - GPIO5
-    #define UART2_TX_PIN (7) // D5 - GPIO7
+    #define UART1_RX_PIN (D2) // D2 - GPIO3
+    #define UART1_TX_PIN (D4) // D4 - GPIO5
+    #define UART2_RX_PIN (D3) // D3 - GPIO4
+    #define UART2_TX_PIN (D5) // D5 - GPIO6
 
     #define I2C_WIRE Wire
-    #define I2C_SDA_PIN 2 // D0 - GPIO2
-    #define I2C_SCL_PIN 3 // D1 - GPIO3
+    #define I2C_SDA_PIN (D0) // D0 - GPIO1
+    #define I2C_SCL_PIN (D1) // D1 - GPIO2
 #endif
 
 #ifdef DEVICE_UP1_GW_IR
