@@ -193,6 +193,7 @@
         openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(LED2_EXT_R_PIN, LED2_EXT_G_PIN, LED2_EXT_B_PIN, LED1_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER + 3);
 #endif
 
+// device.openknx.de/UP1-GW-RS485
 #ifdef DEVICE_UP1_GW_RS485
     #define DEVICE_ID "UP1-GW-RS485"
     #define DEVICE_NAME "OpenKNX UP1 RS485 Gateway"
@@ -211,6 +212,65 @@
     #define OPENKNX_BI_GPIO_PINS 18
     #define OPENKNX_BI_GPIO_COUNT 1
     #define OPENKNX_BI_ONLEVEL LOW
+#endif
+
+// device.openknx.de/UP1-GW-2xUART
+#ifdef DEVICE_UP1_GW_2XUART
+    #define DEVICE_ID "UP1-GW-2xUART"
+    #define DEVICE_NAME "OpenKNX UP1 UART Gateway"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define UART1_RX_PIN (21)
+    #define UART1_TX_PIN (20)
+    #define UART2_RX_PIN (29)
+    #define UART2_TX_PIN (28)
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 16
+    #define I2C_SCL_PIN 17
+#endif
+
+// device.openknx.de/UP1-WLAN-2xUART
+// XIAO ESP32-S3
+#ifdef DEVICE_UP1_WLAN_2XUART
+    #define DEVICE_ID "UP1-WLAN-2xUART"
+    #define DEVICE_NAME "OpenKNX UP1 WLAN UART Gateway"
+
+    #ifdef DEVICE_UP1_WLAN_2XUART_ONBOARD
+        #define PROG_LED_PIN LED_BUILTIN
+        #define PROG_LED_PIN_ACTIVE_ON LOW
+        #define PROG_BUTTON_PIN 0 // BOOT button
+    #else
+        #define PROG_LED_PIN (D8)    // D8 - GPIO7
+        #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #define PROG_BUTTON_PIN (D7)  // D7 - GPIO44
+    #endif
+
+    #define SAVE_INTERRUPT_PIN (D6) // D6 - GPIO43
+
+    #ifdef DEVICE_UP1_WLAN_2XUART_BCU
+        #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
+        #define KNX_UART_RX_PIN (D10) // D10 - GPIO9
+        #define KNX_UART_TX_PIN (D9) // D9 - GPIO8
+    #else
+        #define SAVE_POWER_PIN (D9) // D9 - GPIO8
+        #define SAVE_POWER_PIN_POWER_OFF (LOW)
+        #define SAVE_POWER_PIN_POWER_ON (HIGH)
+        #define DEVICE_INIT() \
+            pinMode(SAVE_POWER_PIN, OUTPUT); \
+            digitalWrite(SAVE_POWER_PIN, SAVE_POWER_PIN_POWER_ON)
+    #endif
+
+    #define UART1_RX_PIN (D2) // D2 - GPIO3
+    #define UART1_TX_PIN (D4) // D4 - GPIO5
+    #define UART2_RX_PIN (D3) // D3 - GPIO4
+    #define UART2_TX_PIN (D5) // D5 - GPIO6
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN (D0) // D0 - GPIO1
+    #define I2C_SCL_PIN (D1) // D1 - GPIO2
 #endif
 
 #ifdef DEVICE_UP1_GW_IR
