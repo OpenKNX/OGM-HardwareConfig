@@ -39,7 +39,7 @@
 #endif
 
 #ifdef DEVICE_SMARTMF_SOM_REG
-    #define DEVICE_ID "SOM-UP-EXT-PWR"
+    #define DEVICE_ID "SOM-UP-REG"
     #define DEVICE_NAME "Smart-MF Soundmodul REG"
 
     #define SOM_BASE
