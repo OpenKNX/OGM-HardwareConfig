@@ -13,8 +13,9 @@ def find_header_files(directory):
     for root, _, files in os.walk(directory):
         for file in files:
             if file.endswith(".h"):
-                header_files.append(os.path.join(root, file))
-                print(f"  > found '{os.path.join(root, file)}'")
+                headerpath = os.path.join(root, file)
+                header_files.append(headerpath)
+                print(f"  > found '{headerpath}'")
     return header_files
 
 def extract_devices_from_header(file_path):
