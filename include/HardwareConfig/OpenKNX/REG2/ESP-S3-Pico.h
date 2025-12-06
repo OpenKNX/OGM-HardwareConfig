@@ -3,7 +3,7 @@
  * OpenKNX Hardware Definition Header File
  *
  * File: REG2-ESP-S3-Pico.h
- * Hardware: REG2-ESP-S3-Pico Based Boards (V1) (NOT TESTED !!!)
+ * Hardware: OpenKNX REG2-ESP-S3-Pico Based Boards (V1) (NOT TESTED !!!)
  * Responsible: Erkan Çolak
  *
  * Hardware Info visit: https://github.com/OpenKNX/OpenKNX-Pi-Pico-REG2

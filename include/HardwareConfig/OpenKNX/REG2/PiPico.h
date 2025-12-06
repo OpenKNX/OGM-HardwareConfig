@@ -3,7 +3,7 @@
  * OpenKNX Hardware Definition Header File
  *
  * File: OpenKNX-REG2-PiPico-Hardware.h
- * Hardware: REG2-Pi-Pico Based Boards (V1)
+ * Hardware: OpenKNX REG2-Pi-Pico Based Boards (V1)
  * Responsible: OpenKNX - Erkan Çolak
  *
  * Defines hardware IO pins and functionalities for OpenKNX REG2-Pi-Pico platform.

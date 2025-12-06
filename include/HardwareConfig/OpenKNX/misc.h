@@ -3,7 +3,7 @@
  * OpenKNX Hardware definition header file
  * 
  * File: misc.h
- * Hardware: OpenKNX Miscellanous Hardware
+ * Hardware: OpenKNX Miscellaneous Hardware
  * Responsible: OpenKNX
  *
  *

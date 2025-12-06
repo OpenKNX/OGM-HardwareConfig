@@ -3,7 +3,7 @@
  * Smart-MF OpenKNX ready Hardware definition header file
  *
  * File: Devices.h
- * Hardware: OpenKNX Miscellanous Hardware
+ * Hardware: Ready Hardware
  * Responsible: Smart-MF
  *
  * Defines hardware IO pins and functionalities for the Smart-MF Hardware.
