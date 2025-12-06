@@ -140,10 +140,18 @@ def main():
     # save the structured device data
     output_file = "devices.json"
     with open(output_file, 'w', encoding='utf-8') as json_file:
-        json.dump(all_devices_map, json_file, indent=4, ensure_ascii=False)
+        json.dump({
+            "OpenKnxContentType": "OpenKNX/Devices/Flat",
+            "OpenKnxFormatVersion": "v0.1.0",
+            "data": all_devices_map
+        }, json_file, indent=4, ensure_ascii=False)
     output_file = "devices_by_family.json"
     with open(output_file, 'w', encoding='utf-8') as json_file:
-        json.dump(devices_by_family, json_file, indent=4, ensure_ascii=False)
+        json.dump({
+            "OpenKnxContentType": "OpenKNX/Devices/ByFamily",
+            "OpenKnxFormatVersion": "v0.1.0",
+            "data": devices_by_family
+        }, json_file, indent=4, ensure_ascii=False)
 
     print("[COMPLETED]")
 
