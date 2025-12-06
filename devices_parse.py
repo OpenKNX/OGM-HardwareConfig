@@ -25,8 +25,8 @@ def extract_devices_from_header(file_path):
     devices = []
     # Regex for DEVICE_ definitions AND special cases: PREFIX_
     device_pattern = re.compile(
-        r"\W*?#define PREFIX_ID ([A-Z0-9_]+ )?\"(?P<prefix_id>[^\"]+)\"\W*(//.*)?\n"
-        r"\W*?#define PREFIX_NAME ([A-Z0-9_]+ )?\"(?P<prefix_name>[^\"]+)\""
+        r"\W*?#define PREFIX_ID \"(?P<prefix_id>[^\"]+)\"\W*(//.*)?\n"
+        r"\W*?#define PREFIX_NAME \"(?P<prefix_name>[^\"]+)\""
         r"|"
         r"\W*(?P<line1>//\W*(?P<line1c>.*))?\n"
         r"\W*(?P<line2>//\W*(?P<line2c>.*))?\n"
