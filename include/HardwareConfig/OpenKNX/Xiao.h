@@ -33,26 +33,13 @@
  * OpenKNXiao RP2040 / SAMD / ESP / ESP32-S2
  */
 
-// Needs the new macro in common!
-#if defined(OKNXHW_OPENKNXIAO_RP2040_MINI_V1) \
-  || defined(OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1) \
-  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1) \
-  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1) \
-  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1_METER) \
-  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1_METER) \
-  || defined(OKNXHW_OPENKNXIAO_RP2040_MINI_V1_METER) \
-  || defined(OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1_METER) \
-  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1) \
-  || defined(OKNXHW_OPENKNXIAO_SAMD21_MINI_V1)
-    #define PREFIX_ID "OKNXIAO-V1"      // 10 characters
-    #define PREFIX_NAME "OpenKNXiao V1" // 13 characters
-#endif
+// Note: All devices use the same prefixes for DEVICE_ID ("OKNXIAO-V1") and DEVICE_NAME ("OpenKNXiao V1")
 
 // OpenKNXiao KNeoPix RP2040 V1
 // https://github.com/OpenKNX/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1
-    #define DEVICE_ID PREFIX_ID "-KNeoPix"
-    #define DEVICE_NAME PREFIX_NAME " KNeoPix"
+    #define DEVICE_ID "OKNXIAO-V1-KNeoPix"
+    #define DEVICE_NAME "OpenKNXiao V1 KNeoPix"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_NEOPIX
@@ -64,8 +51,8 @@
 // OpenKNXiao KNeoPix ESP32-S3 V1
 // http://www.openknx.de/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1
-    #define DEVICE_ID PREFIX_ID "-KNeoPix"
-    #define DEVICE_NAME PREFIX_NAME " KNeoPix"
+    #define DEVICE_ID "OKNXIAO-V1-KNeoPix"
+    #define DEVICE_NAME "OpenKNXiao V1 KNeoPix"
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_COMMON
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_TERMINAL_NEOPIX
@@ -75,8 +62,8 @@
 // OpenKNXiao Mini RP2040 V1
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_RP2040_MINI_V1
-    #define DEVICE_ID PREFIX_ID "-Mini"
-    #define DEVICE_NAME PREFIX_NAME " Mini"
+    #define DEVICE_ID "OKNXIAO-V1-Mini"
+    #define DEVICE_NAME "OpenKNXiao V1 Mini"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_MINI
@@ -88,8 +75,8 @@
 // OpenKNXiao Mini ESP32-S3 V1
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1
-    #define DEVICE_ID PREFIX_ID "-Mini"
-    #define DEVICE_NAME PREFIX_NAME " Mini"
+    #define DEVICE_ID "OKNXIAO-V1-Mini"
+    #define DEVICE_NAME "OpenKNXiao V1 Mini"
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_COMMON
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_TERMINAL_MINI
@@ -98,8 +85,8 @@
 // OpenKNXiao KNeoPix RP2040 V1 (Meter)
 // https://github.com/OpenKNX/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1_METER
-    #define DEVICE_ID PREFIX_ID "-KNeoPix-Meter"
-    #define DEVICE_NAME PREFIX_NAME " KNeoPix Meter"
+    #define DEVICE_ID "OKNXIAO-V1-KNeoPix-Meter"
+    #define DEVICE_NAME "OpenKNXiao V1 KNeoPix Meter"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_NEOPIX
@@ -112,8 +99,8 @@
 // OpenKNXiao Mini RP2040 V1 (Meter)
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_RP2040_MINI_V1_METER
-    #define DEVICE_ID PREFIX_ID "-Mini-Meter"
-    #define DEVICE_NAME PREFIX_NAME " Mini Meter"
+    #define DEVICE_ID "OKNXIAO-V1-Mini-Meter"
+    #define DEVICE_NAME "OpenKNXiao V1 Mini Meter"
     #define OKNXHW_OPENKNXIAO_RP2040_V1_COMMON
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_RP2040_V1_TERMINAL_MINI
@@ -126,8 +113,8 @@
 // OpenKNXiao Mini RP2040 V1 (Meter)
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1_METER
-    #define DEVICE_ID PREFIX_ID "-Mini-Meter"
-    #define DEVICE_NAME PREFIX_NAME " Mini Meter"
+    #define DEVICE_ID "OKNXIAO-V1-Mini-Meter"
+    #define DEVICE_NAME "OpenKNXiao V1 Mini Meter"
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_COMMON
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_ESP32S3_V1_TERMINAL_MINI
@@ -137,8 +124,8 @@
 // OpenKNXiao KNeoPix SAMD21 V1
 // https://github.com/OpenKNX/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1
-    #define DEVICE_ID PREFIX_ID "-KNeoPix-SAMD21"
-    #define DEVICE_NAME PREFIX_NAME " KNeoPix SAMD21"
+    #define DEVICE_ID "OKNXIAO-V1-KNeoPix-SAMD21"
+    #define DEVICE_NAME "OpenKNXiao V1 KNeoPix SAMD21"
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_COMMON
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL_NEOPIX
@@ -149,8 +136,8 @@
 // OpenKNXiao Mini SAMD21 V1
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_SAMD21_MINI_V1
-    #define DEVICE_ID PREFIX_ID "-Mini-SAMD21"
-    #define DEVICE_NAME PREFIX_NAME " Mini SAMD21"
+    #define DEVICE_ID "OKNXIAO-V1-Mini-SAMD21"
+    #define DEVICE_NAME "OpenKNXiao V1 Mini SAMD21"
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_COMMON
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL_MINI
