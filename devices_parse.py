@@ -26,6 +26,10 @@ def extract_devices_from_header(file_path):
     devices = []
     # Regex for DEVICE_ definitions AND special cases: PREFIX_
     device_pattern = re.compile(
+        r"(\W*?\* File: (?P<family_file>[^\n]+)\n)?"
+        r"\W*?\* Hardware: (?P<family_hardware>[^\n]+)\n"
+        r"\W*?\* Responsible: (?P<family_responsible>[^\n]+)\n"
+        r"|"
         r"\W*?#define PREFIX_ID \"(?P<prefix_id>[^\"]+)\"\W*(//.*)?\n"
         r"\W*?#define PREFIX_NAME \"(?P<prefix_name>[^\"]+)\""
         r"|"
@@ -50,7 +54,12 @@ def extract_devices_from_header(file_path):
                 line_number_end = line_number + match.group(0).count('\n')
                 line_range = f"{line_number}-{line_number_end}"
 
-                if match.group("prefix_id"):
+                if match.group("family_hardware"):
+                    family_file = match.group("family_file")
+                    family_hardware = match.group("family_hardware")
+                    family_responsible = match.group("family_responsible")
+                    print(f"  i found family '{family_hardware}' by '{family_responsible}' at lines {line_range}")
+                elif match.group("prefix_id"):
                     prefix_id = match.group("prefix_id")
                     prefix_name = match.group("prefix_name")
                     print(f"  i found prefix '{prefix_id}' and '{prefix_name}' at lines {line_range}")
@@ -80,8 +89,10 @@ def extract_devices_from_header(file_path):
                             "Condition": dev_condition,
                             "DeviceID": prefix_id + (dev_device_id if dev_device_id else ""),
                             "DeviceName": prefix_name + (dev_device_name if dev_device_name else ""),
-                            "SourceFile": f"{file_path.replace("\\", "/")}:{",".join(([prefix_range[prefix_id]] if prefix_id != "" else [])  + [line_range])}",
+                            "SourceFile": f"{file_path.replace("\\", "/")}:{",".join(([prefix_range[prefix_id]] if prefix_id != "" else []) + [line_range])}",
                             "Teaser": dev_teaser,
+                            "DeviceFamily": family_hardware if family_hardware else None,
+                            "Responsible": family_responsible if family_responsible else None,
                         })
                         devices_found += 1
                         print(f'  > found {devices[-1]["DeviceID"]} ("{devices[-1]["DeviceName"]}") at line {line_range}')
@@ -118,8 +129,10 @@ def main():
                 print(f"  > {dev_id}:")
                 for dev in dev_list:
                     print(f"    - {dev['DeviceName']} ({dev['SourceFile']})")
-
-
+    devices_by_family = {}
+    for dev in all_devices_list:
+        devices_by_family.setdefault(dev["DeviceFamily"], {"responsible": dev["Responsible"], "devices": {}})
+        devices_by_family[dev["DeviceFamily"]]["devices"][dev["DeviceID"]] = dev
 
         # exit(1)
     print(f"[DONE] Mapped Definitions by DeviceID")
@@ -128,6 +141,9 @@ def main():
     output_file = "devices.json"
     with open(output_file, 'w', encoding='utf-8') as json_file:
         json.dump(all_devices_map, json_file, indent=4, ensure_ascii=False)
+    output_file = "devices_by_family.json"
+    with open(output_file, 'w', encoding='utf-8') as json_file:
+        json.dump(devices_by_family, json_file, indent=4, ensure_ascii=False)
 
     print("[COMPLETED]")
 
