@@ -7,7 +7,7 @@
  * Responsible: Ing-Dom
  *
  * 
- * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNX/wiki/OpenKNX-REG1
+ * More info about the Hardware visit: http://device.openknx.de/REG1
  *
  * ATTENTION:
  *    Do not include this file directly.
@@ -17,7 +17,7 @@
 #pragma region "REG1 Geräte"
 
 // REG1-Eth
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-Eth
+// http://device.openknx.de/REG1-Eth
     #ifdef DEVICE_REG1_ETH_V0
         #define DEVICE_ID "REG1-Eth-V0"
         #define DEVICE_NAME "OpenKNX REG1 LAN Gateway V0"
@@ -48,7 +48,7 @@
     #endif
 
 // REG1-Base
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-Base
+// http://device.openknx.de/REG1-Base
     #ifdef DEVICE_REG1_BASE_V0
         #define DEVICE_ID "REG1-Base-V0"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul V0"
@@ -74,7 +74,7 @@
 
 
 // REG1-Base-IP
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-Base-IP
+// http://device.openknx.de/REG1-Base-IP
     #ifdef DEVICE_REG1_BASE_IP
         #define DEVICE_ID "REG1-Base-IP"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul IP"
@@ -86,7 +86,7 @@
     #endif
 
 // REG1-SEN-Multi
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-SEN-Multi
+// http://device.openknx.de/REG1-SEN-Multi
     #ifdef DEVICE_REG1_SEN_MULTI
         #define DEVICE_ID "REG1-SEN-Multi"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor"
@@ -103,7 +103,7 @@
     #endif
 
 // REG1_SA-4xSELV
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1_SA-4xSELV
+// http://device.openknx.de/REG1_SA-4xSELV
     #ifdef DEVICE_REG1_SA_4XSELV
         #define DEVICE_ID "REG1-SA-4xSELV"
         #define DEVICE_NAME "OpenKNX REG1 Schaltaktor 4xSELV"
@@ -120,7 +120,7 @@
     #endif
 
 // REG1_DALI
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1_Dali
+// http://device.openknx.de/REG1-Dali
     #ifdef DEVICE_REG1_DALI
         #define DEVICE_ID "REG1-Dali"
         #define DEVICE_NAME "OpenKNX REG1 Dali Gateway"
@@ -134,7 +134,7 @@
     #endif
 
 // REG1-LAN-TP-2xDali
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1_Dali
+// http://device.openknx.de/REG1-LAN-TP-2xDali
     #ifdef DEVICE_REG1_LAN_TP_2XDALI
         #define DEVICE_ID "REG1-LAN-TP-2xDali"
         #define DEVICE_NAME "OpenKNX REG1 Dual Dali Gateway LAN"
@@ -148,7 +148,7 @@
     #endif
 
 // REG1-LAN-TP-Base
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-LAN-TP-Base
+// http://device.openknx.de/REG1-LAN-TP-Base
     #ifdef DEVICE_REG1_LAN_TP_BASE
         #define DEVICE_ID "REG1-LAN-TP-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP"
@@ -164,7 +164,7 @@
     #endif
 
 // REG1-LAN-Base
-// https://device.openknx.com/REG1-LAN-Base
+// http://device.openknx.de/REG1-LAN-Base
     #ifdef DEVICE_REG1_LAN_BASE
         #define DEVICE_ID "REG1-LAN-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN"
@@ -345,7 +345,6 @@
             #define KNX_UART_TX_PIN (5)
         #endif
 
-        #define ETH_PHY_TYPE  ETH_PHY_LAN8720   // type of PHY used, needed for IDF
         #define ETH_PHY_ADDR  (0)                 // PHYs I2C address
         #define ETH_PHY_MDC   (33)                
         #define ETH_PHY_MDIO  (32)
