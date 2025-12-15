@@ -2,6 +2,275 @@
     "OpenKnxContentType": "OpenKNX/Devices/Flat",
     "OpenKnxFormatVersion": "v0.1.0",
     "data": {
+        "SOM-UP": {
+            "Condition": "#ifdef DEVICE_SMARTMF_SOM_UP",
+            "DeviceID": "SOM-UP",
+            "DeviceName": "Smart-MF Soundmodul UP",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:17-25",
+            "Teaser": [
+                "SOM"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SOM-UP-EXT-PWR": {
+            "Condition": "#ifdef DEVICE_SMARTMF_SOM_REG",
+            "DeviceID": "SOM-UP-EXT-PWR",
+            "DeviceName": "Smart-MF Soundmodul REG",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:39-43",
+            "Teaser": [],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-1TE-BE-3CH": {
+            "Condition": "#ifdef DEVICE_SMARTMF_1TE_BE_3CH",
+            "DeviceID": "SMARTMF-1TE-BE-3CH",
+            "DeviceName": "Smart-MF S0-Zählermodul",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:69-78",
+            "Teaser": [
+                "REG 1TE",
+                "Smart-MF 1TE 3x Binary Inputs"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-1Wire-3CH": {
+            "Condition": "#ifdef DEVICE_SMARTMF_1WIRE_3CH",
+            "DeviceID": "SMARTMF-1Wire-3CH",
+            "DeviceName": "Smart-MF 1-Wire Gateway 3CH",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:155-164",
+            "Teaser": [
+                "REG 2TE",
+                "Smart-MF 1-Wire Gateway 3CH"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-2SML-3BE": {
+            "Condition": "#ifdef DEVICE_SMARTMF_2SML_3BE",
+            "DeviceID": "SMARTMF-2SML-3BE",
+            "DeviceName": "Smart-MF eHZ Schnittstelle",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:186-191",
+            "Teaser": [
+                "Smart-MF SML Reader (2x SML + 3x BIN)"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-Modbus-RTU-3BE": {
+            "Condition": "#ifdef DEVICE_SMARTMF_MODBUS_RTU_3BE",
+            "DeviceID": "SMARTMF-Modbus-RTU-3BE",
+            "DeviceName": "Smart-MF Modbus-RTU Gateway",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:217-222",
+            "Teaser": [
+                "Smart-MF Modbus Gateway + 3x BIN"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-WN90LP": {
+            "Condition": "#ifdef DEVICE_SMARTMF_ECOWITT_WN90LP",
+            "DeviceID": "SMARTMF-WN90LP",
+            "DeviceName": "Smart-MF Ecowitt WN90LP",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:243-248",
+            "Teaser": [
+                "Smart-MF Wetterstation Gateway"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-SEN-V4": {
+            "Condition": "#ifdef DEVICE_SMARTMF_SENSORMODUL",
+            "DeviceID": "SMARTMF-SEN-V4",
+            "DeviceName": "Smart-MF Sensormodul V4",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:271-280",
+            "Teaser": [
+                "Sensormodul",
+                "Smart-MF Sensormodul"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-GC": {
+            "Condition": "#ifdef DEVICE_SMARTMF_GARDENCONTROL",
+            "DeviceID": "SMARTMF-GC",
+            "DeviceName": "Smart-MF GardenControl",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:336-341",
+            "Teaser": [
+                "Smart-MF GardenControl"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-ENO": {
+            "Condition": "#ifdef DEVICE_SMARTMF_ENOCEANGATEWAY_V2",
+            "DeviceID": "SMARTMF-ENO",
+            "DeviceName": "Smart-MF Enocean Gateway V2",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:343-350",
+            "Teaser": [
+                "Smart-MF Enocean Gateway V2 RP2040"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-Taster": {
+            "Condition": "#ifdef DEVICE_SMARTMF_TASTERINTERFACE",
+            "DeviceID": "SMARTMF-Taster",
+            "DeviceName": "Smart-MF Tasterinterface",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:365-370",
+            "Teaser": [
+                "Smart-MF Tasterinterface"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "SMARTMF-RP-V2": {
+            "Condition": "#ifdef DEVICE_SMARTMF_REALPRESENCE_V2",
+            "DeviceID": "SMARTMF-RP-V2",
+            "DeviceName": "Smart-MF RealPresence 2.0",
+            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:372-377",
+            "Teaser": [
+                "Smart-MF RealPresence 2.0 (HLK)"
+            ],
+            "DeviceFamily": "Ready Hardware",
+            "Responsible": "Smart-MF"
+        },
+        "ADF-ESP32-FEATHER-V2": {
+            "Condition": "#ifdef DEVICE_ADAFRUIT_ESP32_FEATHER_V2",
+            "DeviceID": "ADF-ESP32-FEATHER-V2",
+            "DeviceName": "Adafruit ESP32 Feather V2",
+            "SourceFile": "./include/HardwareConfig/Others/Adafruit.h:16-20",
+            "Teaser": [
+                "https://github.com/OpenKNX/OpenKNX/wiki/Adafruit-ESP32-Feather-V2"
+            ],
+            "DeviceFamily": "Adafruit",
+            "Responsible": "mgeramb"
+        },
+        "SEN-UP1-8xTH": {
+            "Condition": "#ifdef DEVICE_SEN_UP1_8XTH",
+            "DeviceID": "SEN-UP1-8xTH",
+            "DeviceName": "OpenKNX UP1 8xSensor",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:17-23",
+            "Teaser": [
+                "SEN-UP1-8xTH",
+                "https://github.com/OpenKNX/OpenKNX/wiki/UP1-SEN-8xTH"
+            ],
+            "DeviceFamily": "OpenKNX-UP1",
+            "Responsible": "Ing-Dom"
+        },
+        "UP1-SEN-8x": {
+            "Condition": "#ifdef DEVICE_UP1_SEN_8X",
+            "DeviceID": "UP1-SEN-8x",
+            "DeviceName": "OpenKNX UP1 8xSensor",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:43-48",
+            "Teaser": [
+                "UP1-SEN-8x"
+            ],
+            "DeviceFamily": "OpenKNX-UP1",
+            "Responsible": "Ing-Dom"
+        },
+        "UP1-PM-HF": {
+            "Condition": "#ifdef DEVICE_UP1_PM_HF",
+            "DeviceID": "UP1-PM-HF",
+            "DeviceName": "OpenKNX UP1 Präsenzmelder+",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:70-75",
+            "Teaser": [
+                "https://github.com/OpenKNX/OpenKNX/wiki/UP1-PM-HF",
+                "note: valid for UP1-PM-HF >= V00.10"
+            ],
+            "DeviceFamily": "OpenKNX-UP1",
+            "Responsible": "Ing-Dom"
+        },
+        "UP1-GW-RS485": {
+            "Condition": "#ifdef DEVICE_UP1_GW_RS485",
+            "DeviceID": "UP1-GW-RS485",
+            "DeviceName": "OpenKNX UP1 RS485 Gateway",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:118-122",
+            "Teaser": [],
+            "DeviceFamily": "OpenKNX-UP1",
+            "Responsible": "Ing-Dom"
+        },
+        "UP1-GW-IR": {
+            "Condition": "#ifdef DEVICE_UP1_GW_IR",
+            "DeviceID": "UP1-GW-IR",
+            "DeviceName": "OpenKNX UP1 Infrared Gateway",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:127-131",
+            "Teaser": [],
+            "DeviceFamily": "OpenKNX-UP1",
+            "Responsible": "Ing-Dom"
+        },
+        "OKNXIAO-V1-KNeoPix": {
+            "Condition": "#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1",
+            "DeviceID": "OKNXIAO-V1-KNeoPix",
+            "DeviceName": "OpenKNXiao V1 KNeoPix",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,62-68",
+            "Teaser": [
+                "OpenKNXiao KNeoPix ESP32-S3 V1",
+                "http://www.openknx.de/OpenKNX-KNeoPiX"
+            ],
+            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
+            "Responsible": "OpenKNX - Erkan Çolak"
+        },
+        "OKNXIAO-V1-Mini": {
+            "Condition": "#ifdef OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1",
+            "DeviceID": "OKNXIAO-V1-Mini",
+            "DeviceName": "OpenKNXiao V1 Mini",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,86-92",
+            "Teaser": [
+                "OpenKNXiao Mini ESP32-S3 V1",
+                "https://github.com/OpenKNX/OpenKNXiao-Mini"
+            ],
+            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
+            "Responsible": "OpenKNX - Erkan Çolak"
+        },
+        "OKNXIAO-V1-KNeoPix-Meter": {
+            "Condition": "#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1_METER",
+            "DeviceID": "OKNXIAO-V1-KNeoPix-Meter",
+            "DeviceName": "OpenKNXiao V1 KNeoPix Meter",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,96-102",
+            "Teaser": [
+                "OpenKNXiao KNeoPix RP2040 V1 (Meter)",
+                "https://github.com/OpenKNX/OpenKNX-KNeoPiX"
+            ],
+            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
+            "Responsible": "OpenKNX - Erkan Çolak"
+        },
+        "OKNXIAO-V1-Mini-Meter": {
+            "Condition": "#ifdef OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1_METER",
+            "DeviceID": "OKNXIAO-V1-Mini-Meter",
+            "DeviceName": "OpenKNXiao V1 Mini Meter",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,124-130",
+            "Teaser": [
+                "OpenKNXiao Mini RP2040 V1 (Meter)",
+                "https://github.com/OpenKNX/OpenKNXiao-Mini"
+            ],
+            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
+            "Responsible": "OpenKNX - Erkan Çolak"
+        },
+        "OKNXIAO-V1-KNeoPix-SAMD21": {
+            "Condition": "#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1",
+            "DeviceID": "OKNXIAO-V1-KNeoPix-SAMD21",
+            "DeviceName": "OpenKNXiao V1 KNeoPix SAMD21",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,135-141",
+            "Teaser": [
+                "OpenKNXiao KNeoPix SAMD21 V1",
+                "https://github.com/OpenKNX/OpenKNX-KNeoPiX"
+            ],
+            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
+            "Responsible": "OpenKNX - Erkan Çolak"
+        },
+        "OKNXIAO-V1-Mini-SAMD21": {
+            "Condition": "#ifdef OKNXHW_OPENKNXIAO_SAMD21_MINI_V1",
+            "DeviceID": "OKNXIAO-V1-Mini-SAMD21",
+            "DeviceName": "OpenKNXiao V1 Mini SAMD21",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,147-153",
+            "Teaser": [
+                "OpenKNXiao Mini SAMD21 V1",
+                "https://github.com/OpenKNX/OpenKNXiao-Mini"
+            ],
+            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
+            "Responsible": "OpenKNX - Erkan Çolak"
+        },
         "PiPico-BCU-Connector": {
             "Condition": "#ifdef DEVICE_PIPICO_BCU_CONNECTOR",
             "DeviceID": "PiPico-BCU-Connector",
@@ -166,153 +435,6 @@
             "Teaser": [],
             "DeviceFamily": "OpenKNX REG1",
             "Responsible": "Ing-Dom"
-        },
-        "SEN-UP1-8xTH": {
-            "Condition": "#ifdef DEVICE_SEN_UP1_8XTH",
-            "DeviceID": "SEN-UP1-8xTH",
-            "DeviceName": "OpenKNX UP1 8xSensor",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:17-23",
-            "Teaser": [
-                "SEN-UP1-8xTH",
-                "https://github.com/OpenKNX/OpenKNX/wiki/UP1-SEN-8xTH"
-            ],
-            "DeviceFamily": "OpenKNX-UP1",
-            "Responsible": "Ing-Dom"
-        },
-        "UP1-SEN-8x": {
-            "Condition": "#ifdef DEVICE_UP1_SEN_8X",
-            "DeviceID": "UP1-SEN-8x",
-            "DeviceName": "OpenKNX UP1 8xSensor",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:43-48",
-            "Teaser": [
-                "UP1-SEN-8x"
-            ],
-            "DeviceFamily": "OpenKNX-UP1",
-            "Responsible": "Ing-Dom"
-        },
-        "UP1-PM-HF": {
-            "Condition": "#ifdef DEVICE_UP1_PM_HF",
-            "DeviceID": "UP1-PM-HF",
-            "DeviceName": "OpenKNX UP1 Präsenzmelder+",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:70-75",
-            "Teaser": [
-                "https://github.com/OpenKNX/OpenKNX/wiki/UP1-PM-HF",
-                "note: valid for UP1-PM-HF >= V00.10"
-            ],
-            "DeviceFamily": "OpenKNX-UP1",
-            "Responsible": "Ing-Dom"
-        },
-        "UP1-GW-RS485": {
-            "Condition": "#ifdef DEVICE_UP1_GW_RS485",
-            "DeviceID": "UP1-GW-RS485",
-            "DeviceName": "OpenKNX UP1 RS485 Gateway",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:118-122",
-            "Teaser": [],
-            "DeviceFamily": "OpenKNX-UP1",
-            "Responsible": "Ing-Dom"
-        },
-        "UP1-GW-IR": {
-            "Condition": "#ifdef DEVICE_UP1_GW_IR",
-            "DeviceID": "UP1-GW-IR",
-            "DeviceName": "OpenKNX UP1 Infrared Gateway",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/UP1.h:127-131",
-            "Teaser": [],
-            "DeviceFamily": "OpenKNX-UP1",
-            "Responsible": "Ing-Dom"
-        },
-        "OKNXIAO-V1-KNeoPix": {
-            "Condition": "#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1",
-            "DeviceID": "OKNXIAO-V1-KNeoPix",
-            "DeviceName": "OpenKNXiao V1 KNeoPix",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,62-68",
-            "Teaser": [
-                "OpenKNXiao KNeoPix ESP32-S3 V1",
-                "http://www.openknx.de/OpenKNX-KNeoPiX"
-            ],
-            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
-            "Responsible": "OpenKNX - Erkan Çolak"
-        },
-        "OKNXIAO-V1-Mini": {
-            "Condition": "#ifdef OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1",
-            "DeviceID": "OKNXIAO-V1-Mini",
-            "DeviceName": "OpenKNXiao V1 Mini",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,86-92",
-            "Teaser": [
-                "OpenKNXiao Mini ESP32-S3 V1",
-                "https://github.com/OpenKNX/OpenKNXiao-Mini"
-            ],
-            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
-            "Responsible": "OpenKNX - Erkan Çolak"
-        },
-        "OKNXIAO-V1-KNeoPix-Meter": {
-            "Condition": "#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1_METER",
-            "DeviceID": "OKNXIAO-V1-KNeoPix-Meter",
-            "DeviceName": "OpenKNXiao V1 KNeoPix Meter",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,96-102",
-            "Teaser": [
-                "OpenKNXiao KNeoPix RP2040 V1 (Meter)",
-                "https://github.com/OpenKNX/OpenKNX-KNeoPiX"
-            ],
-            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
-            "Responsible": "OpenKNX - Erkan Çolak"
-        },
-        "OKNXIAO-V1-Mini-Meter": {
-            "Condition": "#ifdef OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1_METER",
-            "DeviceID": "OKNXIAO-V1-Mini-Meter",
-            "DeviceName": "OpenKNXiao V1 Mini Meter",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,124-130",
-            "Teaser": [
-                "OpenKNXiao Mini RP2040 V1 (Meter)",
-                "https://github.com/OpenKNX/OpenKNXiao-Mini"
-            ],
-            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
-            "Responsible": "OpenKNX - Erkan Çolak"
-        },
-        "OKNXIAO-V1-KNeoPix-SAMD21": {
-            "Condition": "#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1",
-            "DeviceID": "OKNXIAO-V1-KNeoPix-SAMD21",
-            "DeviceName": "OpenKNXiao V1 KNeoPix SAMD21",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,135-141",
-            "Teaser": [
-                "OpenKNXiao KNeoPix SAMD21 V1",
-                "https://github.com/OpenKNX/OpenKNX-KNeoPiX"
-            ],
-            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
-            "Responsible": "OpenKNX - Erkan Çolak"
-        },
-        "OKNXIAO-V1-Mini-SAMD21": {
-            "Condition": "#ifdef OKNXHW_OPENKNXIAO_SAMD21_MINI_V1",
-            "DeviceID": "OKNXIAO-V1-Mini-SAMD21",
-            "DeviceName": "OpenKNXiao V1 Mini SAMD21",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/Xiao.h:46-48,147-153",
-            "Teaser": [
-                "OpenKNXiao Mini SAMD21 V1",
-                "https://github.com/OpenKNX/OpenKNXiao-Mini"
-            ],
-            "DeviceFamily": "OpenKNXiao RP2040 / SAMD / ESP Based Boards",
-            "Responsible": "OpenKNX - Erkan Çolak"
-        },
-        "REG2-ESP-V1": {
-            "Condition": "#if defined(OKNXHW_REG2_ESP_S3_PICO_V1)",
-            "DeviceID": "REG2-ESP-V1",
-            "DeviceName": "OpenKNX REG2 ESP-Pico V1",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/REG2/ESP-S3-Pico.h:23-26,27-32",
-            "Teaser": [
-                "REG2-ESP-S3-Pico V1 (Base)"
-            ],
-            "DeviceFamily": "OpenKNX REG2-ESP-S3-Pico Based Boards (V1) (NOT TESTED !!!)",
-            "Responsible": "Erkan Çolak"
-        },
-        "REG2-ESP-V1-DD": {
-            "Condition": "#if defined(OKNXHW_REG2_ESP_S3_PICO_V1_DD)",
-            "DeviceID": "REG2-ESP-V1-DD",
-            "DeviceName": "OpenKNX REG2 ESP-Pico V1 DeviceDisplay",
-            "SourceFile": "./include/HardwareConfig/OpenKNX/REG2/ESP-S3-Pico.h:23-26,41-47",
-            "Teaser": [
-                "REG2-ESP-S3-Pico V1 (Device Display)"
-            ],
-            "DeviceFamily": "OpenKNX REG2-ESP-S3-Pico Based Boards (V1) (NOT TESTED !!!)",
-            "Responsible": "Erkan Çolak"
         },
         "REG2-PP-V1": {
             "Condition": "#if defined(DEVICE_REG2_PIPICO_V1) || defined(DEVICE_REG2_PIPICO2_V1)",
@@ -534,149 +656,27 @@
             "DeviceFamily": "OpenKNX REG2-Pi-Pico Based Boards (V1)",
             "Responsible": "OpenKNX - Erkan Çolak"
         },
-        "SOM-UP": {
-            "Condition": "#ifdef DEVICE_SMARTMF_SOM_UP",
-            "DeviceID": "SOM-UP",
-            "DeviceName": "Smart-MF Soundmodul UP",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:17-25",
+        "REG2-ESP-V1": {
+            "Condition": "#if defined(OKNXHW_REG2_ESP_S3_PICO_V1)",
+            "DeviceID": "REG2-ESP-V1",
+            "DeviceName": "OpenKNX REG2 ESP-Pico V1",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/REG2/ESP-S3-Pico.h:23-26,27-32",
             "Teaser": [
-                "SOM"
+                "REG2-ESP-S3-Pico V1 (Base)"
             ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
+            "DeviceFamily": "OpenKNX REG2-ESP-S3-Pico Based Boards (V1) (NOT TESTED !!!)",
+            "Responsible": "Erkan Çolak"
         },
-        "SOM-UP-EXT-PWR": {
-            "Condition": "#ifdef DEVICE_SMARTMF_SOM_REG",
-            "DeviceID": "SOM-UP-EXT-PWR",
-            "DeviceName": "Smart-MF Soundmodul REG",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:39-43",
-            "Teaser": [],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-1TE-BE-3CH": {
-            "Condition": "#ifdef DEVICE_SMARTMF_1TE_BE_3CH",
-            "DeviceID": "SMARTMF-1TE-BE-3CH",
-            "DeviceName": "Smart-MF S0-Zählermodul",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:69-78",
+        "REG2-ESP-V1-DD": {
+            "Condition": "#if defined(OKNXHW_REG2_ESP_S3_PICO_V1_DD)",
+            "DeviceID": "REG2-ESP-V1-DD",
+            "DeviceName": "OpenKNX REG2 ESP-Pico V1 DeviceDisplay",
+            "SourceFile": "./include/HardwareConfig/OpenKNX/REG2/ESP-S3-Pico.h:23-26,41-47",
             "Teaser": [
-                "REG 1TE",
-                "Smart-MF 1TE 3x Binary Inputs"
+                "REG2-ESP-S3-Pico V1 (Device Display)"
             ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-1Wire-3CH": {
-            "Condition": "#ifdef DEVICE_SMARTMF_1WIRE_3CH",
-            "DeviceID": "SMARTMF-1Wire-3CH",
-            "DeviceName": "Smart-MF 1-Wire Gateway 3CH",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:155-164",
-            "Teaser": [
-                "REG 2TE",
-                "Smart-MF 1-Wire Gateway 3CH"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-2SML-3BE": {
-            "Condition": "#ifdef DEVICE_SMARTMF_2SML_3BE",
-            "DeviceID": "SMARTMF-2SML-3BE",
-            "DeviceName": "Smart-MF eHZ Schnittstelle",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:186-191",
-            "Teaser": [
-                "Smart-MF SML Reader (2x SML + 3x BIN)"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-Modbus-RTU-3BE": {
-            "Condition": "#ifdef DEVICE_SMARTMF_MODBUS_RTU_3BE",
-            "DeviceID": "SMARTMF-Modbus-RTU-3BE",
-            "DeviceName": "Smart-MF Modbus-RTU Gateway",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:217-222",
-            "Teaser": [
-                "Smart-MF Modbus Gateway + 3x BIN"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-WN90LP": {
-            "Condition": "#ifdef DEVICE_SMARTMF_ECOWITT_WN90LP",
-            "DeviceID": "SMARTMF-WN90LP",
-            "DeviceName": "Smart-MF Ecowitt WN90LP",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:243-248",
-            "Teaser": [
-                "Smart-MF Wetterstation Gateway"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-SEN-V4": {
-            "Condition": "#ifdef DEVICE_SMARTMF_SENSORMODUL",
-            "DeviceID": "SMARTMF-SEN-V4",
-            "DeviceName": "Smart-MF Sensormodul V4",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:271-280",
-            "Teaser": [
-                "Sensormodul",
-                "Smart-MF Sensormodul"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-GC": {
-            "Condition": "#ifdef DEVICE_SMARTMF_GARDENCONTROL",
-            "DeviceID": "SMARTMF-GC",
-            "DeviceName": "Smart-MF GardenControl",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:336-341",
-            "Teaser": [
-                "Smart-MF GardenControl"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-ENO": {
-            "Condition": "#ifdef DEVICE_SMARTMF_ENOCEANGATEWAY_V2",
-            "DeviceID": "SMARTMF-ENO",
-            "DeviceName": "Smart-MF Enocean Gateway V2",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:343-350",
-            "Teaser": [
-                "Smart-MF Enocean Gateway V2 RP2040"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-Taster": {
-            "Condition": "#ifdef DEVICE_SMARTMF_TASTERINTERFACE",
-            "DeviceID": "SMARTMF-Taster",
-            "DeviceName": "Smart-MF Tasterinterface",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:365-370",
-            "Teaser": [
-                "Smart-MF Tasterinterface"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "SMARTMF-RP-V2": {
-            "Condition": "#ifdef DEVICE_SMARTMF_REALPRESENCE_V2",
-            "DeviceID": "SMARTMF-RP-V2",
-            "DeviceName": "Smart-MF RealPresence 2.0",
-            "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:372-377",
-            "Teaser": [
-                "Smart-MF RealPresence 2.0 (HLK)"
-            ],
-            "DeviceFamily": "Ready Hardware",
-            "Responsible": "Smart-MF"
-        },
-        "ADF-ESP32-FEATHER-V2": {
-            "Condition": "#ifdef DEVICE_ADAFRUIT_ESP32_FEATHER_V2",
-            "DeviceID": "ADF-ESP32-FEATHER-V2",
-            "DeviceName": "Adafruit ESP32 Feather V2",
-            "SourceFile": "./include/HardwareConfig/Others/Adafruit.h:16-20",
-            "Teaser": [
-                "https://github.com/OpenKNX/OpenKNX/wiki/Adafruit-ESP32-Feather-V2"
-            ],
-            "DeviceFamily": "OpenKNX Adafruit",
-            "Responsible": "mgeramb"
+            "DeviceFamily": "OpenKNX REG2-ESP-S3-Pico Based Boards (V1) (NOT TESTED !!!)",
+            "Responsible": "Erkan Çolak"
         }
     }
 }
