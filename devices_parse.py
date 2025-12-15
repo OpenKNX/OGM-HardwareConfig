@@ -85,11 +85,12 @@ def extract_devices_from_header(file_path):
                             devices_found = 0
                             print(f"  -> clear prefix list")
                     for prefix_id, prefix_name in (prefix if prefix else {"": ""}).items():
+                        source_file_name = file_path.replace('\\', '/')
                         devices.append({
                             "Condition": dev_condition,
                             "DeviceID": prefix_id + (dev_device_id if dev_device_id else ""),
                             "DeviceName": prefix_name + (dev_device_name if dev_device_name else ""),
-                            "SourceFile": f"{file_path.replace("\\", "/")}:{",".join(([prefix_range[prefix_id]] if prefix_id != "" else []) + [line_range])}",
+                            "SourceFile": f"{source_file_name}:{','.join(([prefix_range[prefix_id]] if prefix_id != '' else []) + [line_range])}",
                             "Teaser": dev_teaser,
                             "DeviceFamily": family_hardware if family_hardware else None,
                             "Responsible": family_responsible if family_responsible else None,
