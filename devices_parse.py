@@ -118,7 +118,7 @@ def main():
     # map the devices by DeviceID
     all_devices_map = {dev["DeviceID"]: dev for dev in all_devices_list}
     if len(all_devices_map) != len(all_devices_list):
-        print(f"[ERROR]: {len(all_devices_list) - len(all_devices_map)} duplicates found in DeviceID:")
+        print(f"::error::{len(all_devices_list) - len(all_devices_map)} duplicates found in DeviceID:")
         duplicates = {}
         for dev in all_devices_list:
             if dev["DeviceID"] in duplicates:
@@ -127,9 +127,15 @@ def main():
                 duplicates[dev["DeviceID"]] = [dev]
         for dev_id, dev_list in duplicates.items():
             if len(dev_list) > 1:
-                print(f"  > {dev_id}:")
+                source_ref = re.sub(r'^\.\/', '', dev_list[0]['SourceFile'])
+                source_ref_last = re.sub(r'^\.\/', '', dev_list[-1]['SourceFile'])
+                source_file = source_ref.split(':')[0]
+                source_line_first = source_ref.split(':')[1].split(',')[0].split('-')[0]
+                source_line_last = source_ref_last.split(':')[1].split(',')[-1].split('-')[-1]
+                print(f"::error file={source_file},line={source_line_first},endLine={source_line_last},title={dev_id}::Found duplicate DEVICE_ID definition in {source_ref} and {source_ref_last}")
                 for dev in dev_list:
                     print(f"    - {dev['DeviceName']} ({dev['SourceFile']})")
+        exit(1)
     devices_by_family = {}
     for dev in all_devices_list:
         devices_by_family.setdefault(dev["DeviceFamily"], {"responsible": dev["Responsible"], "devices": {}})
