@@ -30,7 +30,7 @@
     #ifndef KNX_UART_NUM
         #define KNX_UART_NUM 1
     #endif
-    #ifndef KNX_UART_TX_PIN
+    #ifndef KNX_UART_RX_PIN
         #define KNX_UART_RX_PIN 34
     #endif
     #ifndef KNX_UART_TX_PIN

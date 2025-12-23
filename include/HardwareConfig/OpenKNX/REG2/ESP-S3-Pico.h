@@ -202,21 +202,27 @@
     #define OPENKNX_GPIO_SCL OKNXHW_REG2_HWDISPLAY_I2C_SCL
 
     // Define the 8 GPIO Pins of the PCA9557 I2C GPIO Expander
-    #define FRONT_CTRL_LEFT 0x100   // PIN 0 (LEFT)
-    #define FRONT_CTRL_LED1_R 0x101 // PIN 1 (RED LED)
-    #define FRONT_CTRL_LED2_G 0x102 // PIN 2 (GREEN LED)
-    #define FRONT_CTRL_LEFT2 0x103  // PIN 3 (LEFT2) !!
-    #define FRONT_CTRL_DOWN 0x104   // PIN 4 (DOWN)
-    #define FRONT_CTRL_RIGHT 0x105  // PIN 5 (RIGHT)
-    #define FRONT_CTRL_OK 0x106     // PIN 6 (OK / SELECT)
-    #define FRONT_CTRL_UP 0x107     // PIN 7 (UP)
+    #define FRONT_CTRL_LEFT   0x100   // PIN 0 (LEFT)
+    #define FRONT_CTRL_LED1_R 0x101   // PIN 1 (RED LED)
+    #define FRONT_CTRL_LED2_G 0x102   // PIN 2 (GREEN LED)
+    #define FRONT_CTRL_LEFT2  0x103   // PIN 3 (LEFT2) !!
+    #define FRONT_CTRL_DOWN   0x104   // PIN 4 (DOWN)
+    #define FRONT_CTRL_RIGHT  0x105   // PIN 5 (RIGHT)
+    #define FRONT_CTRL_OK     0x106   // PIN 6 (OK / SELECT)
+    #define FRONT_CTRL_UP     0x107   // PIN 7 (UP)
 
     #define OPENKNX_PCA9557_PINS_COUNT 8
-    #define OPENKNX_PCA9557_PINS                                                 \
-            FRONT_CTRL_LEFT, FRONT_CTRL_LED1_R, FRONT_CTRL_LED2_G, FRONT_CTRL_LEFT2, \
-            FRONT_CTRL_DOWN, FRONT_CTRL_RIGHT, FRONT_CTRL_OK, FRONT_CTRL_UP
+    #define OPENKNX_PCA9557_PINS \
+                FRONT_CTRL_LEFT, \
+                FRONT_CTRL_LED1_R, \
+                FRONT_CTRL_LED2_G, \
+                FRONT_CTRL_LEFT2, \
+                FRONT_CTRL_DOWN, \
+                FRONT_CTRL_RIGHT, \
+                FRONT_CTRL_OK, \
+                FRONT_CTRL_UP
 
-    #define OPENKNX_GPIO_NUM    OPENKNX_PCA9557_PINS_COUNT
+    #define OPENKNX_GPIO_NUM    1
     #define OPENKNX_GPIO_TYPES  OPENKNX_GPIO_T_PCA9557
     #define OPENKNX_GPIO_ADDRS  0x18      // PCA9557 I2C address 0x18 (A0-A2 = 0) A0-A2 are connected to GND if A1 is connected to VCC the address is 0x19
     #define OPENKNX_GPIO_INTS   0xFF

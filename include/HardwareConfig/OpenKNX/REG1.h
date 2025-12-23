@@ -7,7 +7,7 @@
  * Responsible: Ing-Dom
  *
  * 
- * More info about the Hardware visit: https://github.com/OpenKNX/OpenKNX/wiki/OpenKNX-REG1
+ * More info about the Hardware visit: http://device.openknx.de/REG1
  *
  * ATTENTION:
  *    Do not include this file directly.
@@ -17,7 +17,7 @@
 #pragma region "REG1 Geräte"
 
 // REG1-Eth
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-Eth
+// http://device.openknx.de/REG1-Eth
     #ifdef DEVICE_REG1_ETH_V0
         #define DEVICE_ID "REG1-Eth-V0"
         #define DEVICE_NAME "OpenKNX REG1 LAN Gateway V0"
@@ -35,7 +35,7 @@
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
-        #define OKNXHW_REG1_FRONT_UNIVERSAL
+        #define OKNXHW_REG1_FRONT_AUTO
 
         #define OKNXHW_REG1_APP_ETH
 
@@ -48,7 +48,7 @@
     #endif
 
 // REG1-Base
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-Base
+// http://device.openknx.de/REG1-Base
     #ifdef DEVICE_REG1_BASE_V0
         #define DEVICE_ID "REG1-Base-V0"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul V0"
@@ -64,7 +64,7 @@
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
-        #define OKNXHW_REG1_FRONT_UNIVERSAL
+        #define OKNXHW_REG1_FRONT_AUTO
 
         #define OKNXHW_REG1_SENSOR_SDA_TX_PIN (8) // RP2040 GPIO 8 / SPI1 RX / UART1 TX / I2C0 SDA / PWM4 A
         #define OKNXHW_REG1_SENSOR_SCL_RX_PIN (9) // RP2040 GPIO 9 / SPI1 CSn / UART1 RX / I2C0 SCL / PWM4 B
@@ -74,7 +74,7 @@
 
 
 // REG1-Base-IP
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-Base-IP
+// http://device.openknx.de/REG1-Base-IP
     #ifdef DEVICE_REG1_BASE_IP
         #define DEVICE_ID "REG1-Base-IP"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul IP"
@@ -86,14 +86,14 @@
     #endif
 
 // REG1-SEN-Multi
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-SEN-Multi
+// http://device.openknx.de/REG1-SEN-Multi
     #ifdef DEVICE_REG1_SEN_MULTI
         #define DEVICE_ID "REG1-SEN-Multi"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor"
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
-        #define OKNXHW_REG1_FRONT_UNIVERSAL
+        #define OKNXHW_REG1_FRONT_AUTO
 
         #define OKNXHW_REG1_SENSOR_SDA_TX_PIN (8) // RP2040 GPIO 8 / SPI1 RX / UART1 TX / I2C0 SDA / PWM4 A
         #define OKNXHW_REG1_SENSOR_SCL_RX_PIN (9) // RP2040 GPIO 9 / SPI1 CSn / UART1 RX / I2C0 SCL / PWM4 B
@@ -103,7 +103,7 @@
     #endif
 
 // REG1_SA-4xSELV
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1_SA-4xSELV
+// http://device.openknx.de/REG1_SA-4xSELV
     #ifdef DEVICE_REG1_SA_4XSELV
         #define DEVICE_ID "REG1-SA-4xSELV"
         #define DEVICE_NAME "OpenKNX REG1 Schaltaktor 4xSELV"
@@ -120,7 +120,7 @@
     #endif
 
 // REG1_DALI
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1_Dali
+// http://device.openknx.de/REG1-Dali
     #ifdef DEVICE_REG1_DALI
         #define DEVICE_ID "REG1-Dali"
         #define DEVICE_NAME "OpenKNX REG1 Dali Gateway"
@@ -134,7 +134,7 @@
     #endif
 
 // REG1-LAN-TP-2xDali
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1_Dali
+// http://device.openknx.de/REG1-LAN-TP-2xDali
     #ifdef DEVICE_REG1_LAN_TP_2XDALI
         #define DEVICE_ID "REG1-LAN-TP-2xDali"
         #define DEVICE_NAME "OpenKNX REG1 Dual Dali Gateway LAN"
@@ -148,7 +148,7 @@
     #endif
 
 // REG1-LAN-TP-Base
-// https://github.com/OpenKNX/OpenKNX/wiki/REG1-LAN-TP-Base
+// http://device.openknx.de/REG1-LAN-TP-Base
     #ifdef DEVICE_REG1_LAN_TP_BASE
         #define DEVICE_ID "REG1-LAN-TP-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP"
@@ -164,7 +164,7 @@
     #endif
 
 // REG1-LAN-Base
-// https://device.openknx.com/REG1-LAN-Base
+// http://device.openknx.de/REG1-LAN-Base
     #ifdef DEVICE_REG1_LAN_BASE
         #define DEVICE_ID "REG1-LAN-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN"
@@ -345,7 +345,6 @@
             #define KNX_UART_TX_PIN (5)
         #endif
 
-        #define ETH_PHY_TYPE  ETH_PHY_LAN8720   // type of PHY used, needed for IDF
         #define ETH_PHY_ADDR  (0)                 // PHYs I2C address
         #define ETH_PHY_MDC   (33)                
         #define ETH_PHY_MDIO  (32)
@@ -487,22 +486,19 @@
 // https://github.com/OpenKNX/OpenKNX/wiki/REG1-Front-RGB
     #ifdef OKNXHW_REG1_FRONT_RGB
         
-        #define OPENKNX_SERIALLED_COLOR_RED 50, 0, 0
-        #define OPENKNX_SERIALLED_COLOR_GREEN 0, 35, 0
-        #define OPENKNX_SERIALLED_COLOR_BLUE 0, 0, 63
-        #define OPENKNX_SERIALLED_COLOR_YELLOW 40, 30, 0
-
         #define OPENKNX_SERIALLED_ENABLE
+        #define OPENKNX_LEDCOLOR_CALIBRATION {50, 35, 63}
+
         #define OPENKNX_SERIALLED_PIN REG1_FRONT_PIN8
         #define OPENKNX_SERIALLED_NUM 4
         #define PROG_LED_PIN 0
-        #define PROG_LED_COLOR OPENKNX_SERIALLED_COLOR_RED
+        #define PROG_LED_COLOR OpenKNX::Led::Color::Red
         #define INFO1_LED_PIN 1
-        #define INFO1_LED_COLOR OPENKNX_SERIALLED_COLOR_GREEN
+        #define INFO1_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO2_LED_PIN 2
-        #define INFO2_LED_COLOR OPENKNX_SERIALLED_COLOR_GREEN
+        #define INFO2_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO3_LED_PIN 3
-        #define INFO3_LED_COLOR OPENKNX_SERIALLED_COLOR_GREEN
+        #define INFO3_LED_COLOR OpenKNX::Led::Color::Green
         #define OPENKNX_LEDEFFECT_PULSE_MIN 50
 
 
@@ -511,6 +507,49 @@
         #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
         #define FUNC2_BUTTON_PIN REG1_FRONT_PIN4
         #define FUNC3_BUTTON_PIN REG1_FRONT_PIN7
+
+    #endif
+
+// REG1-Front-Auto
+// With this Macro REG1-Front-RGB or REG1-Front-Universal can be used on a REG1-Controller2040
+    #ifdef OKNXHW_REG1_FRONT_AUTO
+
+        #define OPENKNX_SERIALLED_ENABLE
+        #define OPENKNX_LEDCOLOR_CALIBRATION {50, 35, 63}
+        
+        #define PROG_LED_PIN REG1_FRONT_PIN8
+        #define PROG_LED_PIN_ACTIVE_ON HIGH
+
+        #define INFO1_LED_PIN REG1_FRONT_PIN1
+        #define INFO1_LED_PIN_ACTIVE_ON HIGH
+
+        #define INFO2_LED_PIN REG1_FRONT_PIN4
+        #define INFO2_LED_PIN_ACTIVE_ON HIGH
+
+        #define INFO3_LED_PIN REG1_FRONT_PIN7
+        #define INFO3_LED_PIN_ACTIVE_ON HIGH
+
+
+        #define PROG_BUTTON_PIN REG1_FRONT_PIN10
+
+        #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
+
+        #define LED_INIT() \
+            pinMode(REG1_FRONT_PIN7, INPUT); \
+            if (digitalRead(REG1_FRONT_PIN7)) \
+            { \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(0, PROG_LED_PIN, OpenKNX::Led::Color::Red), OpenKNX::Led::LED_TYPE_PROG); \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(1, PROG_LED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO1); \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(2, PROG_LED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO2); \
+                openknx.leds.addLed(new OpenKNX::Led::Serial(3, PROG_LED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO3); \
+            } \
+            else \
+            { \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO1_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1); \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO2_LED_PIN, INFO2_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO2); \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO3_LED_PIN, INFO3_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO3); \
+            }
 
     #endif
 
