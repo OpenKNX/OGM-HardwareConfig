@@ -116,7 +116,7 @@ def main():
     print(f"[DONE] {len(all_devices_list)} Device-Definitions found\n")
 
     # map the devices by DeviceID
-    all_devices_map = {dev["DeviceID"]: dev for dev in all_devices_list}
+    all_devices_map = dict(sorted({dev["DeviceID"]: dev for dev in all_devices_list}.items()))
     if len(all_devices_map) != len(all_devices_list):
         print(f"::error::{len(all_devices_list) - len(all_devices_map)} duplicates found in DeviceID:")
         duplicates = {}
@@ -140,6 +140,10 @@ def main():
     for dev in all_devices_list:
         devices_by_family.setdefault(dev["DeviceFamily"], {"responsible": dev["Responsible"], "devices": {}})
         devices_by_family[dev["DeviceFamily"]]["devices"][dev["DeviceID"]] = dev
+    # sort on device level
+    for family in devices_by_family.values():
+        family['devices'] = dict(sorted(family['devices'].items()))
+    devices_by_family = dict(sorted(devices_by_family.items()))
 
         # exit(1)
     print(f"[DONE] Mapped Definitions by DeviceID")
@@ -150,7 +154,7 @@ def main():
         json.dump({
             "OpenKnxContentType": "OpenKNX/Devices/Flat",
             "OpenKnxFormatVersion": "v0.1.0",
-            "data": all_devices_map
+            "data": dict(sorted(all_devices_map.items()))
         }, json_file, indent=4, ensure_ascii=False)
     output_file = "devices_by_family.json"
     with open(output_file, 'w', encoding='utf-8') as json_file:
