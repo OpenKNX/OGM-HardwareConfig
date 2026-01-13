@@ -33,14 +33,53 @@
  * OpenKNXiao RP2040 / SAMD / ESP / ESP32-S2
  */
 
+/**
+ Device Hardware ID Structure:
+ 
+ Bits 15-12: Main Group (4 bits = 16 main groups)
+ Bits 11-8:  Subgroup   (4 bits = 16 subgroups)
+ Bits 7-0:   Variant    (8 bits = 256 variants)
+
+ Format: 0xHUVV
+         H = Main Group
+         U = Subgroup
+         VV = Variant
+  Example: 0x1201 = Main Group 1, Subgroup 2, Variant 1
+
+
+  Main Group 0x1 = OpenKNX (0x1000-0x1FFF)
+├─ 0x10 = REG1  (0x1000-0x10FF) → 256 variants
+├─ 0x11 = REG2  (0x1100-0x11FF) → 256 variants
+├─ 0x12 = UP1   (0x1200-0x12FF) → 256 variants
+├─ 0x13 = XIAO  (0x1300-0x13FF) → 256 variants
+│  ├─ 0x130x = XIAO RP2040   (0x1300-0x130F) → KNeoPix, Mini
+│  ├─ 0x131x = XIAO RP2350   (0x1310-0x131F) → KNeoPix
+│  ├─ 0x132x = XIAO ESP32S3  (0x1320-0x132F) → KNeoPix, Mini
+│  ├─ 0x133x = XIAO ESP32C6  (0x1330-0x133F) → KNeoPix, Mini (future)
+│  └─ 0x135x = XIAO ESP32C3  (0x1350-0x135F) → KNeoPix, Mini
+└─ ... to 0x1F (16 subgroups)
+
+Main Group 0x2 = OpenKNX-Ready (0x2000-0x2FFF)
+├─ 0x20 = Partner A
+├─ 0x21 = Partner B
+└─ ...
+Main Group 0x3 = Community Devices (0x3000-0x3FFF)
+├─ 0x30 = Device A
+├─ 0x31 = Device B
+└─ ...
+ */
+
+
 // Needs the new macro in common!
 #if defined(OKNXHW_OPENKNXIAO_RP2040_MINI_V1) \
   || defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1) \
   || defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2350_V1) \
   || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1) \
-  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1) \
-  || defined(OKNXHW_OPENKNXIAO_SAMD21_MINI_V1) \
-  || defined(OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1)
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C3_V1) \
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C6_V1) \
+  || defined(OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1) \
+  || defined(OKNXHW_OPENKNXIAO_ESP32C3_MINI_V1) \
+  || defined(OKNXHW_OPENKNXIAO_ESP32C6_MINI_V1)
     #define PREFIX_ID "OKNXIAO-"      // 10 characters
     #define PREFIX_NAME "OpenKNXiao " // 13 characters
 #endif
@@ -48,6 +87,7 @@
 // OpenKNXiao KNeoPix RP2040 V1
 // https://github.com/OpenKNX/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V1
+    #define DEVICE_HW_ID 0x1300
     #define DEVICE_ID PREFIX_ID "V10-KNeoPix-2040"
     #define DEVICE_NAME PREFIX_NAME "V1.0 KNeoPix RP2040"
     #define OKNXHW_OPENKNXIAO_RP2040
@@ -62,18 +102,20 @@
 // OpenKNXiao KNeoPix RP2350 V1.4
 // https://...
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2350_V1
+    #define DEVICE_HW_ID 0x1310
     #define DEVICE_ID PREFIX_ID "V14-KNeoPix-2350"
     #define DEVICE_NAME PREFIX_NAME "V1.4 KNeoPix RP2350"
     #define OKNXHW_OPENKNXIAO_RP2350
     #define OKNXHW_OPENKNXIAO_V1_COMMON
     #define OKNXHW_OPENKNXIAO_V1_TERMINAL
     #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
-    #define OKNXHW_OPENKNXIAO_V1_NEOPIXEL
+    //#define OKNXHW_OPENKNXIAO_V1_NEOPIXEL
 #endif
 
 // OpenKNXiao KNeoPix ESP32-S3 V1
 // http://www.openknx.de/OpenKNX-KNeoPiX
 #ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1
+    #define DEVICE_HW_ID 0x1320
     #define DEVICE_ID PREFIX_ID "V1-KNeoPix-ESP32S3"
     #define DEVICE_NAME PREFIX_NAME "V1 KNeoPix ESP32S3"
     #define OKNXHW_OPENKNXIAO_ESP32S3
@@ -83,11 +125,36 @@
     #define OKNXHW_OPENKNXIAO_V1_NEOPIXEL
 #endif
 
+// OpenKNXiao KNeoPix ESP32-C3 V1
+// http://www.openknx.de/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C3_V1
+    #define DEVICE_HW_ID 0x1350
+    #define DEVICE_ID PREFIX_ID "V1-KNeoPix-ESP32C3"
+    #define DEVICE_NAME PREFIX_NAME "V1 KNeoPix ESP32C3"
+    #define OKNXHW_OPENKNXIAO_ESP32C3
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+#endif
+
+// OpenKNXiao KNeoPix ESP32-C6 V1
+// http://www.openknx.de/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C6_V1
+    #define DEVICE_HW_ID 0x1330
+    #define DEVICE_ID PREFIX_ID "V1-KNeoPix-ESP32C6"
+    #define DEVICE_NAME PREFIX_NAME "V1 KNeoPix ESP32C6"
+    #define OKNXHW_OPENKNXIAO_ESP32C6
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+#endif
+
 // OpenKNXiao Mini RP2040 V1
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_RP2040_MINI_V1
+    #define DEVICE_HW_ID 0x1301
     #define DEVICE_ID PREFIX_ID "V10-Mini-2040"
-    #define DEVICE_NAME PREFIX_NAME " V1.0 Mini RP2040"
+    #define DEVICE_NAME PREFIX_NAME "V1.0 Mini RP2040"
     #define OKNXHW_OPENKNXIAO_RP2040
     #define OKNXHW_OPENKNXIAO_V1_COMMON
     #define OKNXHW_OPENKNXIAO_V1_TERMINAL
@@ -100,8 +167,9 @@
 // OpenKNXiao Mini ESP32-S3 V1
 // https://github.com/OpenKNX/OpenKNXiao-Mini
 #ifdef OKNXHW_OPENKNXIAO_ESP32S3_MINI_V1
+    #define DEVICE_HW_ID 0x1321
     #define DEVICE_ID PREFIX_ID "V10-Mini-ESP32S3"
-    #define DEVICE_NAME PREFIX_NAME " V1.0 Mini ESP32S3"
+    #define DEVICE_NAME PREFIX_NAME "V1.0 Mini ESP32S3"
     #define OKNXHW_OPENKNXIAO_ESP32S3
     #define OKNXHW_OPENKNXIAO_V1_COMMON
     #define OKNXHW_OPENKNXIAO_V1_TERMINAL
@@ -109,31 +177,19 @@
     #define OKNXHW_OPENKNXIAO_V1_NEOPIXEL
 #endif
 
-// OpenKNXiao KNeoPix SAMD21 V1
-// https://github.com/OpenKNX/OpenKNX-KNeoPiX
-#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_SAMD21_V1
-    #define DEVICE_ID PREFIX_ID "V10-KNeoPix-SAMD21"
-    #define DEVICE_NAME PREFIX_NAME " V1.0 KNeoPix SAMD21"
-    #define OKNXHW_OPENKNXIAO_SAMD21
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_COMMON
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL_NEOPIX
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_LED1
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_LED2
+// OpenKNXiao Mini ESP32-C3 V1
+// https://github.com/OpenKNX/OpenKNXiao-Mini
+#ifdef OKNXHW_OPENKNXIAO_ESP32C3_MINI_V1
+    #define DEVICE_HW_ID 0x1351
+    #define DEVICE_ID PREFIX_ID "V10-Mini-ESP32C3"
+    #define DEVICE_NAME PREFIX_NAME "V1.0 Mini ESP32C3"
+    #define OKNXHW_OPENKNXIAO_ESP32C3
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_MINI
 #endif
 
-// OpenKNXiao Mini SAMD21 V1
-// https://github.com/OpenKNX/OpenKNXiao-Mini
-#ifdef OKNXHW_OPENKNXIAO_SAMD21_MINI_V1
-    #define DEVICE_ID PREFIX_ID "V10-Mini-SAMD21"
-    #define DEVICE_NAME PREFIX_NAME " V1.0 Mini SAMD21"
-    #define OKNXHW_OPENKNXIAO_SAMD21
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_COMMON
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL_MINI
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_LED1
-    #define OKNXHW_OPENKNXIAO_SAMD21_V1_LED2
-#endif
+
 
 
 /* #################################################################################
@@ -209,8 +265,52 @@
 
     #define OKNXHW_OPENKNXIAO_NEOPIXEL_PWR -1 // N/A
     #define OKNXHW_OPENKNXIAO_NEOPIXEL -1   // N/A
+#elif defined(OKNXHW_OPENKNXIAO_ESP32C3)
+    // XIAO ESP32-C3 Pin Definitions
+    #define OKNXHW_OPENKNXIAO_D0  2
+    #define OKNXHW_OPENKNXIAO_D1  3
+    #define OKNXHW_OPENKNXIAO_D2  4
+    #define OKNXHW_OPENKNXIAO_D3  5
+    #define OKNXHW_OPENKNXIAO_D4  6   // SDA
+    #define OKNXHW_OPENKNXIAO_D5  7   // SCL
+    #define OKNXHW_OPENKNXIAO_D6  21  // TX
+    #define OKNXHW_OPENKNXIAO_D7  20  // RX
+    #define OKNXHW_OPENKNXIAO_D8  8
+    #define OKNXHW_OPENKNXIAO_D9  9
+    #define OKNXHW_OPENKNXIAO_D10 10
+
+    #define OKNXHW_OPENKNXIAO_NO_USER_LED  -1
+    #define OKNXHW_OPENKNXIAO_LED_1_GREEN -1 // N/A
+    #define OKNXHW_OPENKNXIAO_LED_1_RED   -1 // N/A
+    #define OKNXHW_OPENKNXIAO_LED_1_BLUE  -1 // N/A
+    #define OKNXHW_OPENKNXIAO_LED_1_YELLOW 21 // Build-In LED YELLOW
+
+    #define OKNXHW_OPENKNXIAO_NEOPIXEL_PWR -1 // N/A
+    #define OKNXHW_OPENKNXIAO_NEOPIXEL -1   // N/A
+#elif defined(OKNXHW_OPENKNXIAO_ESP32C6)
+    // XIAO ESP32-C6 Pin Definitions
+    #define OKNXHW_OPENKNXIAO_D0  0
+    #define OKNXHW_OPENKNXIAO_D1  1
+    #define OKNXHW_OPENKNXIAO_D2  2
+    #define OKNXHW_OPENKNXIAO_D3  21
+    #define OKNXHW_OPENKNXIAO_D4  22  // SDA
+    #define OKNXHW_OPENKNXIAO_D5  23  // SCL
+    #define OKNXHW_OPENKNXIAO_D6  16  // TX
+    #define OKNXHW_OPENKNXIAO_D7  17  // RX
+    #define OKNXHW_OPENKNXIAO_D8  19  // CLK
+    #define OKNXHW_OPENKNXIAO_D9  20
+    #define OKNXHW_OPENKNXIAO_D10 18
+
+    #define OKNXHW_OPENKNXIAO_NO_USER_LED  -1
+    #define OKNXHW_OPENKNXIAO_LED_1_GREEN -1 // N/A
+    #define OKNXHW_OPENKNXIAO_LED_1_RED   -1 // N/A
+    #define OKNXHW_OPENKNXIAO_LED_1_BLUE  -1 // N/A
+    #define OKNXHW_OPENKNXIAO_LED_1_YELLOW 15 // Build-In User LED YELLOW
+
+    #define OKNXHW_OPENKNXIAO_NEOPIXEL_PWR -1 // N/A
+    #define OKNXHW_OPENKNXIAO_NEOPIXEL -1   // N/A
 #else
-    //#error "No OpenKNXiao RP2040 / Rp2350 / ESP / ESP32-S3 / SAMD21 hardware version defined!"
+    //#error "No OpenKNXiao RP2040 / Rp2350 / ESP32-S3/C3/C6  hardware version defined!"
 #endif
 
 
@@ -218,7 +318,7 @@
 
 /**
  * Section: Hardware specific Pin Definitions
- * OpenKNXiao RP2040 / SAMD / ESP
+ * OpenKNXiao RP2040 / ESP
  */
 
 
@@ -270,6 +370,12 @@
     #elif defined( OKNXHW_OPENKNXIAO_ESP32S3)
         #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
         #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #elif defined( OKNXHW_OPENKNXIAO_ESP32C3)
+        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_NO_USER_LED // N/A
+        #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #elif defined( OKNXHW_OPENKNXIAO_ESP32C6)
+        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
+        #define PROG_LED_PIN_ACTIVE_ON HIGH
     #elif defined(OKNXHW_OPENKNXIAO_RP2040)
         #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_RED
         #define PROG_LED_PIN_ACTIVE_ON LOW
@@ -306,67 +412,4 @@
     #define KNXIAO_TERM_PIN6 OKNXHW_OPENKNXIAO_D8
     #define KNXIAO_TERM_PIN7 OKNXHW_OPENKNXIAO_D9
     #define KNXIAO_TERM_PIN8 OKNXHW_OPENKNXIAO_D10
-#endif
-
-
-/**
- * Section: Hardware specific Pin Definitions
- * OpenKNXiao SAMD21
- */
-
-// OpenKNXiao SAMD V1 LED1
-#ifdef OKNXHW_OPENKNXIAO_SAMD21_V1_LED1
-    #define INFO1_LED_PIN 11 // Build-In 1st LED BLUE
-    #define INFO1_LED_PIN_ACTIVE_ON HIGH
-#endif
-
-// OpenKNXiao SAMD V1 LED2
-#ifdef OKNXHW_OPENKNXIAO_SAMD21_V1_LED2
-    #define INFO2_LED_PIN 12 // Build-In 2nd LED also BLUE
-    #define INFO2_LED_PIN_ACTIVE_ON HIGH
-#endif
-
-/**
- * Section: Common Hardware (CHW) Pin Definitions
- * OpenKNXiao SAMD21
- */
-
-// OpenKNXiao SAMD21 CHW Pins
-#ifdef OKNXHW_OPENKNXIAO_SAMD21_V1_COMMON
-    #define PROG_LED_PIN 13                      // Build-In LED YELLOW
-    #define PROG_LED_PIN_ACTIVE_ON HIGH          // Active on HIGH
-    #define PROG_BUTTON_PIN 0                    // GPIO0 | UART0 RX | I2C1 SDA | PWM0 A
-    #define OPENKNX_BUTTON_DEBOUNCE 0            // Software Debouncer delay in ms. 0 will Disables software debounce. Since we use the hardware debounce.
-    
-    #define KNX_SERIAL Serial1                   // Serial1 for UART1
-    #define KNX_UART_NUM 0
-    #define KNX_UART_RX_PIN 6                    // GPIO6 | SPI1 TX  | UART1 RX  | I2C0 SCL | PWM4 B
-    #define KNX_UART_TX_PIN 7                    // GPIO7 | SPI1 RX  | UART1 TX  | I2C0 SDA | PWM4 A
-
-    // Possible pins for the OpenKNXiao SAMD21 V1
-    #define KNXIAO_SAMD21_PIN1 1  // GPIO1  | SPI0 CSn | UART1 RTS | I2C1 SCL | PWM1 A
-    #define KNXIAO_SAMD21_PIN2 2  // GPIO2  | SPI0 TX  | UART1 RTS | I2C1 SDA | PWM1 B
-    #define KNXIAO_SAMD21_PIN3 3  // GPIO3  | SPI0 RX  | UART1 TX  | I2C1 SCL | PWM2 B
-    #define KNXIAO_SAMD21_PIN4 4  // GPIO4  | SPI0 RX  | UART1 TX  | I2C0 SDA | PWM2 A
-    #define KNXIAO_SAMD21_PIN5 5  // GPIO5  | SPI0 TX  | UART1 RX  | I2C0 SCL | PWM3 A
-    #define KNXIAO_SAMD21_PIN6 8  // GPIO8  | SPI1 RX  | UART1 TX  | I2C0 SDA | PWM4 A
-    #define KNXIAO_SAMD21_PIN7 9  // GPIO9  | SPI1 TX  | UART1 RX  | I2C0 SCL | PWM4 B
-    #define KNXIAO_SAMD21_PIN8 10 // GPIO10 | SPI1 SCK | UART1 CTS | I2C1 SDA | PWM5 A
-#endif
-
-// OpenKNXiao SAMD21 V1 Terminal Connections
-#ifdef OKNXHW_OPENKNXIAO_SAMD21_V1_TERMINAL
-    #define KNXIAO_SAMD21_TERM_PIN1 KNXIAO_SAMD21_PIN1 // GPIO1  | SPI0 CSn | UART1 RTS | I2C1 SCL | PWM1 A
-    #define KNXIAO_SAMD21_TERM_PIN2 KNXIAO_SAMD21_PIN2 // GPIO2  | SPI0 TX  | UART1 RTS | I2C1 SDA | PWM1 B
-    #define KNXIAO_SAMD21_TERM_PIN3 KNXIAO_SAMD21_PIN3 // GPIO3  | SPI0 RX  | UART1 TX  | I2C1 SCL | PWM2 B
-
-    #define KNXIAO_SAMD21_TERM_PIN6 KNXIAO_SAMD21_PIN6 // GPIO8  | SPI1 RX  | UART1 TX  | I2C0 SDA | PWM4 A
-    #define KNXIAO_SAMD21_TERM_PIN7 KNXIAO_SAMD21_PIN7 // GPIO9  | SPI1 TX  | UART1 RX  | I2C0 SCL | PWM4 B
-    #define KNXIAO_SAMD21_TERM_PIN8 KNXIAO_SAMD21_PIN8 // GPIO10 | SPI1 SCK | UART1 CTS | I2C1 SDA | PWM5 A
-#endif
-
-// OpenKNXiao SAMD21 V1 Terminal Mini Connections
-#ifdef OKNXHW_OPENKNXIAO_SAMD21_TERMINAL_MINI
-    #define KNXIAO_SAMD21_TERM_PIN4 KNXIAO_SAMD21_PIN4 // GPIO4  | SPI0 RX  | UART1 TX  | I2C0 SDA | PWM2 A
-    #define KNXIAO_SAMD21_TERM_PIN5 KNXIAO_SAMD21_PIN5 // GPIO5  | SPI0 TX  | UART1 RX  | I2C0 SCL | PWM3 A
 #endif
