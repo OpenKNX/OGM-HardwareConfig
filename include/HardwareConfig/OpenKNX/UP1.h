@@ -153,10 +153,48 @@
     #define I2C_WIRE Wire
     #define I2C_SDA_PIN 16
     #define I2C_SCL_PIN 17
+#endif
 
-    #define OPENKNX_BI_GPIO_PINS 18
-    #define OPENKNX_BI_GPIO_COUNT 1
-    #define OPENKNX_BI_ONLEVEL LOW
+// device.openknx.de/UP1-WLAN-2xUART
+// XIAO ESP32-S3
+#ifdef DEVICE_UP1_WLAN_2XUART
+    #define DEVICE_ID "UP1-WLAN-2xUART"
+    #define DEVICE_NAME "OpenKNX UP1 WLAN UART Gateway"
+
+    #ifdef DEVICE_UP1_WLAN_2XUART_ONBOARD
+        #define PROG_LED_PIN LED_BUILTIN
+        #define PROG_LED_PIN_ACTIVE_ON LOW
+        #define PROG_BUTTON_PIN 0 // BOOT button
+    #else
+        #define PROG_LED_PIN (D8)    // D8 - GPIO7
+        #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #define PROG_BUTTON_PIN (D7)  // D7 - GPIO44
+    #endif
+
+    #define SAVE_INTERRUPT_PIN (D6) // D6 - GPIO43
+
+    #ifdef DEVICE_UP1_WLAN_2XUART_BCU
+        #define KNX_SERIAL Serial1
+        #define KNX_UART_NUM 0
+        #define KNX_UART_RX_PIN (D10) // D10 - GPIO9
+        #define KNX_UART_TX_PIN (D9) // D9 - GPIO8
+    #else
+        #define SAVE_POWER_PIN (D9) // D9 - GPIO8
+        #define SAVE_POWER_PIN_POWER_OFF (LOW)
+        #define SAVE_POWER_PIN_POWER_ON (HIGH)
+        #define DEVICE_INIT() \
+            pinMode(SAVE_POWER_PIN, OUTPUT); \
+            digitalWrite(SAVE_POWER_PIN, SAVE_POWER_PIN_POWER_ON)
+    #endif
+
+    #define UART1_RX_PIN (D2) // D2 - GPIO3
+    #define UART1_TX_PIN (D4) // D4 - GPIO5
+    #define UART2_RX_PIN (D3) // D3 - GPIO4
+    #define UART2_TX_PIN (D5) // D5 - GPIO6
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN (D0) // D0 - GPIO1
+    #define I2C_SCL_PIN (D1) // D1 - GPIO2
 #endif
 
 #ifdef DEVICE_UP1_GW_IR
@@ -166,6 +204,33 @@
     #define OKNXHW_UP1_CONTROLLER2040
 
     #define OKNXHW_UP1_APP_IR
+#endif
+
+#ifdef DEVICE_UP1_LED_4x24V
+    #define HARDWARE_NAME "UP1-LED-4x24V"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define INFO_LED_PIN                            12
+    #define INFO_LED_PIN_ACTIVE_ON                  HIGH
+
+    #define OPENKNX_LED_TEMPSENS_WIRE               Wire
+    #define OPENKNX_LED_TEMPSENS_PIN_SCL            29
+    #define OPENKNX_LED_TEMPSENS_PIN_SDA            28
+
+    #define LED_PWM_PIN_A                           24
+    #define LED_PWM_PIN_B                           22
+    #define LED_PWM_PIN_C                           20
+    #define LED_PWM_PIN_D                           18
+
+    #define BI_PIN_A                                13
+    #define BI_PIN_B                                14
+    #define BI_PIN_C                                15
+    #define BI_PIN_D                                17
+
+    #define I2C_WIRE                                Wire1
+    #define I2C_SDA_PIN                             26
+    #define I2C_SCL_PIN                             27
 #endif
 
 #pragma endregion
