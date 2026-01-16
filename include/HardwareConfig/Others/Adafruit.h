@@ -74,6 +74,8 @@
     #ifndef LED_INIT
         #define OPENKNX_SERIALLED_ENABLE
         #define LED_INIT() \
+            pinMode(OPENKNX_SERIALLED_POWER_PIN, OUTPUT); \
+            digitalWrite(OPENKNX_SERIALLED_POWER_PIN, HIGH); \
             openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
             openknx.leds.addLed(new OpenKNX::Led::Serial(0, OPENKNX_SERIALLED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO1); \
             PROG_LED2_INIT() \
