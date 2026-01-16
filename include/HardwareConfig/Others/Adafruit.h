@@ -36,6 +36,12 @@
     #ifndef KNX_UART_TX_PIN
         #define KNX_UART_TX_PIN 25
     #endif
+    #ifndef OPENKNX_SERIALLED_PIN
+        #define OPENKNX_SERIALLED_PIN 0
+    #endif
+    #ifndef OPENKNX_SERIALLED_POWER_PIN
+        #define OPENKNX_SERIALLED_POWER_PIN 2
+    #endif
     #ifndef PROG_LED_PIN
         #define PROG_LED_PIN LED_BUILTIN
         #ifndef PROG_LED_PIN_ACTIVE_ON
@@ -45,6 +51,34 @@
     #ifndef PROG_BUTTON_PIN
         #define PROG_BUTTON_PIN 38
     #endif
-     
+    #ifndef PROG_LED_PIN2_ACTIVE_ON
+        #define PROG_LED_PIN2_ACTIVE_ON HIGH
+    #endif
+    #ifndef PROG_LED_PIN3_ACTIVE_ON
+        #define PROG_LED_PIN3_ACTIVE_ON HIGH
+    #endif
+
+    #ifdef PROG_LED_PIN2
+        #define PROG_LED2_INIT() \
+            openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN2, PROG_LED_PIN2_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG);
+    #else
+        #define PROG_LED2_INIT()
+    #endif
+    #ifdef PROG_LED_PIN3
+    #define PROG_LED3_INIT() \
+       openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN3, PROG_LED_PIN3_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG);
+    #else
+        #define PROG_LED3_INIT()
+    #endif
+
+    #ifndef LED_INIT
+        #define OPENKNX_SERIALLED_ENABLE
+        #define LED_INIT() \
+            openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+            openknx.leds.addLed(new OpenKNX::Led::Serial(0, OPENKNX_SERIALLED_PIN, OpenKNX::Led::Color::Green), OpenKNX::Led::LED_TYPE_INFO1); \
+            PROG_LED2_INIT() \
+            PROG_LED3_INIT()
+    #endif
+
 #endif
 #pragma endregion
