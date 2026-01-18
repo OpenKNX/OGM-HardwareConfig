@@ -345,6 +345,7 @@
             #define KNX_UART_TX_PIN (5)
         #endif
 
+        #define ETH_PHY_TYPE  ETH_PHY_GENERIC     // type of PHY used, needed for IDF
         #define ETH_PHY_ADDR  (0)                 // PHYs I2C address
         #define ETH_PHY_MDC   (33)                
         #define ETH_PHY_MDIO  (32)
@@ -357,7 +358,7 @@
         #define REG1_APP_PIN4 (14)
         #define REG1_APP_PIN5 (8)
         #define REG1_APP_PIN6 (7)
-        #define REG1_APP_PIN7 (17)
+        #define REG1_APP_PIN7 (20)
 
         #define REG1_FRONT_PIN3  (38)
         #define REG1_FRONT_PIN4  (34)
