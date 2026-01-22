@@ -71,6 +71,11 @@
         #define PROG_LED3_INIT()
     #endif
 
+    #ifndef OPENKNX_INFOLED1_DEFAULT
+        #define OPENKNX_INFOLED1_DEFAULT 10
+    #endif
+
+    #define OPENKNX_LEDCOLOR_CALIBRATION {10, 10, 10}
     #ifndef LED_INIT
         #define OPENKNX_SERIALLED_ENABLE
         #define LED_INIT() \
