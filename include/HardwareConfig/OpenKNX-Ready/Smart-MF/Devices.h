@@ -345,6 +345,14 @@
     #define DEVICE_ID "SMARTMF-GC"
     #define DEVICE_NAME "Smart-MF GardenControl"
 
+    #define PROG_LED_PIN 24
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 25
+    #define SAVE_INTERRUPT_PIN 23
+    #define KNX_UART_RX_PIN 17
+    #define KNX_UART_TX_PIN 16
+    #define KNX_UART_NUM 0
+
 #endif
 
 /************************************************** */
