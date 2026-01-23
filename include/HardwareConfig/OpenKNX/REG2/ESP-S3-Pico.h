@@ -14,20 +14,20 @@
  *
  */
 
-#if defined(OKNXHW_REG2_ESP_S3_PICO_V1) \
-    || defined(OKNXHW_REG2_ESP_S3_PICO_V1_DD) \
-    || defined(OKNXHW_REG2_ESP_S3_PICO_V1_DD_METER) \
-    || defined(OKNXHW_REG2_ESP_S3_PICO_W_V1) \
-    || defined(OKNXHW_REG2_ESP_S3_PICO_W_V1_DD_METER) \
-    || defined(OKNXHW_REG2_ESP_S3_PICO_W_ETH_V1) \
-    || defined(OKNXHW_REG2_ESP_S3_PICO_W_ETH_V1_DD_METER)
+#if defined(DEVICE_REG2_ESP_S3_PICO_V1) \
+    || defined(DEVICE_REG2_ESP_S3_PICO_V1_DD) \
+    || defined(DEVICE_REG2_ESP_S3_PICO_V1_DD_METER) \
+    || defined(DEVICE_REG2_ESP_S3_PICO_W_V1) \
+    || defined(DEVICE_REG2_ESP_S3_PICO_W_V1_DD_METER) \
+    || defined(DEVICE_REG2_ESP_S3_PICO_W_ETH_V1) \
+    || defined(DEVICE_REG2_ESP_S3_PICO_W_ETH_V1_DD_METER)
   
     #define PREFIX_ID "REG2-ESP-V1"                // 12 characters
     #define PREFIX_NAME "OpenKNX REG2 ESP-Pico V1" // 24 characters
 #endif
 
 // REG2-ESP-S3-Pico V1 (Base)
-#if defined(OKNXHW_REG2_ESP_S3_PICO_V1)
+#if defined(DEVICE_REG2_ESP_S3_PICO_V1)
     #define DEVICE_ID PREFIX_ID ""
     #define DEVICE_NAME PREFIX_NAME ""                 // 24 characters
     #define OKNXHW_REG2_ESPS3PICO_V1_COMMON          // Common pins for all REG2-ESP-S3-Pico V1
