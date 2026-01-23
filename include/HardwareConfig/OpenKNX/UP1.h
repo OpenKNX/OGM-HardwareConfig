@@ -155,6 +155,22 @@
     #define I2C_SCL_PIN 17
 #endif
 
+// device.openknx.de/UP1-GW-UART
+#ifdef DEVICE_UP1_GW_UART
+    #define DEVICE_ID "UP1-GW-UART"
+    #define DEVICE_NAME "OpenKNX UP1 UART Gateway"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define UART1_RX_PIN (21)
+    #define UART1_TX_PIN (20)
+    #define UART2_TX_PIN (28)
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 16
+    #define I2C_SCL_PIN 17
+#endif
+
 // device.openknx.de/UP1-WLAN-2xUART
 // XIAO ESP32-S3
 #ifdef DEVICE_UP1_WLAN_2XUART
