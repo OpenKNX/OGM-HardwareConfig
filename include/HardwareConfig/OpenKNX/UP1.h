@@ -165,6 +165,8 @@
     #define UART1_RX_PIN (21)
     #define UART1_TX_PIN (20)
     #define UART2_TX_PIN (28)
+	
+	#define VISO_SENSE_PIN (26)
 
     #define I2C_WIRE Wire
     #define I2C_SDA_PIN 16
