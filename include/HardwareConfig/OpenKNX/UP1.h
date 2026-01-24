@@ -233,6 +233,7 @@
 
 // device.openknx.de/UP1-GW-UART
 #ifdef DEVICE_UP1_GW_UART
+    #define DEVICE_HW_ID  0x1220 // Used for demo/testing purposes only
     #define DEVICE_ID "UP1-GW-UART"
     #define DEVICE_NAME "OpenKNX UP1 UART Gateway"
 
