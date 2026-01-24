@@ -357,7 +357,7 @@
         #define REG1_APP_PIN4 (14)
         #define REG1_APP_PIN5 (8)
         #define REG1_APP_PIN6 (7)
-        #define REG1_APP_PIN7 (17)
+        #define REG1_APP_PIN7 (20)
 
         #define REG1_FRONT_PIN3  (38)
         #define REG1_FRONT_PIN4  (34)
