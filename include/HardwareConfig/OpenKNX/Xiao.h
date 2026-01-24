@@ -439,23 +439,47 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 // OpenKNXiao RP2040 CHW Pins
 #ifdef OKNXHW_OPENKNXIAO_V1_COMMON
     #ifdef OKNXHW_OPENKNXIAO_RP2350
-        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
-        #define PROG_LED_PIN_ACTIVE_ON LOW
+        #ifndef PROG_LED_PIN
+            #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
+        #endif
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON LOW
+        #endif
     #elif defined( OKNXHW_OPENKNXIAO_ESP32S3)
-        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
-        #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #ifndef PROG_LED_PIN
+            #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
+        #endif
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON LOW
+        #endif
     #elif defined( OKNXHW_OPENKNXIAO_ESP32C3)
-        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_NO_USER_LED // N/A
-        #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #ifndef PROG_LED_PIN
+            #define PROG_LED_PIN OKNXHW_OPENKNXIAO_NO_USER_LED // N/A
+        #endif
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #endif
     #elif defined( OKNXHW_OPENKNXIAO_ESP32C5)
-        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
-        #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #ifndef PROG_LED_PIN
+            #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
+        #endif
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON LOW
+        #endif
     #elif defined( OKNXHW_OPENKNXIAO_ESP32C6)
-        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
-        #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #ifndef PROG_LED_PIN
+            #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_YELLOW
+        #endif
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON LOW
+        #endif
     #elif defined(OKNXHW_OPENKNXIAO_RP2040)
-        #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_RED
-        #define PROG_LED_PIN_ACTIVE_ON LOW
+        #ifndef PROG_LED_PIN
+            #define PROG_LED_PIN OKNXHW_OPENKNXIAO_LED_1_RED
+        #endif
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON LOW
+        #endif
         #ifdef OKNXHW_OPENKNXIAO_RP2040_V1_LED1 // OpenKNXiao RP2040 V1 LED1
             #define INFO1_LED_PIN OKNXHW_OPENKNXIAO_LED_1_GREEN
             #define INFO1_LED_PIN_ACTIVE_ON LOW
