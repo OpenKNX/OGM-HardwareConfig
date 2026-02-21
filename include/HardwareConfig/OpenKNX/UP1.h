@@ -104,6 +104,7 @@
     #define OPENKNX_BI_GPIO_COUNT 6
     #define OPENKNX_BI_ONLEVEL LOW
 
+    #define OPENKNX_SLED_COUNT 1
     #define OPENKNX_SLED_IDs 10
 
     // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deactivated by setting to PULLUP
@@ -169,6 +170,7 @@
     #define OPENKNX_BI_GPIO_COUNT 2
     #define OPENKNX_BI_ONLEVEL LOW
 
+    #define OPENKNX_SLED_COUNT 4
     #define OPENKNX_SLED_IDs 10, 11, 12, 13
 
     // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deactivated by setting to PULLUP
