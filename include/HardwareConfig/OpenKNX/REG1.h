@@ -133,11 +133,10 @@
 
     #endif
 
-// REG1-LAN-TP-2xDali
-// http://device.openknx.de/REG1-LAN-TP-2xDali
-    #ifdef DEVICE_REG1_LAN_TP_2XDALI
-        #define DEVICE_ID "REG1-LAN-TP-2xDali"
-        #define DEVICE_NAME "OpenKNX REG1 Dual Dali Gateway LAN"
+// REG1-LAN-TP-Dali
+    #ifdef DEVICE_REG1_LAN_TP_DALI
+        #define DEVICE_ID "REG1-LAN-TP-Dali"
+        #define DEVICE_NAME "OpenKNX REG1 Dali Gateway LAN"
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
@@ -499,13 +498,13 @@
         #define OPENKNX_SERIALLED_PIN REG1_FRONT_PIN8
         #define OPENKNX_SERIALLED_NUM 4
         #define PROG_LED_PIN 0
-        #define PROG_LED_COLOR OpenKNX::Led::Color::Red
+        //#define PROG_LED_COLOR OpenKNX::Led::Color::Red
         #define INFO1_LED_PIN 1
-        #define INFO1_LED_COLOR OpenKNX::Led::Color::Green
+        //#define INFO1_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO2_LED_PIN 2
-        #define INFO2_LED_COLOR OpenKNX::Led::Color::Green
+        //#define INFO2_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO3_LED_PIN 3
-        #define INFO3_LED_COLOR OpenKNX::Led::Color::Green
+        //#define INFO3_LED_COLOR OpenKNX::Led::Color::Green
         #define OPENKNX_LEDEFFECT_PULSE_MIN 50
 
 
