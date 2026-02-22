@@ -383,6 +383,28 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 
     #define OKNXHW_OPENKNXIAO_NEOPIXEL_PWR -1 // N/A
     #define OKNXHW_OPENKNXIAO_NEOPIXEL -1   // N/A
+
+    // ============================================================
+    // RF Switch Configuration - XIAO ESP32-C6 (FM8625H)
+    // ============================================================
+    // Antenna Selection via RF Switch (U5 - FM8625H SP2T)
+    //   RF1 = ANT1 = KH5220-A36 -> Onboard PCB Chip Antenna
+    //   RF2 = ANT2 = U.FL-R-SMT-1 -> External U.FL Antenna Connector
+    //
+    // RF Switch Port Selection (VCTL -> GPIO14):
+    //   LOW  (0) = RF1 -> Internal PCB Antenna (default)
+    //   HIGH (1) = RF2 -> External U.FL Antenna
+    //
+    // RF Switch Power Control (Q3 LP0404N3T5G -> GPIO3/ADC1_CH3):
+    //   LOW  (0) = RF Switch ON  (VDD supplied via MOSFET)
+    //   HIGH (1) = RF Switch OFF (VDD disconnected)
+    //
+    // Note: Always enable power (GPIO3=LOW) before switching antenna!
+    // ============================================================
+
+    #define OKNXHW_OPENKNXIAO_RF_SWITCH_PIN 14 // RF Switch Port Select (LOW: RF1 internal, HIGH: RF2 external U.FL)
+    #define OKNXHW_OPENKNXIAO_RF_POWER_PIN 3   // RF Switch Power Control (LOW: ON, HIGH: OFF) – GPIO3/ADC1_CH3
+    
 #else
     //#error "No OpenKNXiao RP2040 / Rp2350 / ESP32-S3/C3/C6  hardware version defined!"
 #endif
