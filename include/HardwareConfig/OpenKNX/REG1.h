@@ -498,13 +498,13 @@
         #define OPENKNX_SERIALLED_PIN REG1_FRONT_PIN8
         #define OPENKNX_SERIALLED_NUM 4
         #define PROG_LED_PIN 0
-        //#define PROG_LED_COLOR OpenKNX::Led::Color::Red
+        #define PROG_LED_COLOR OpenKNX::Led::Color::Red
         #define INFO1_LED_PIN 1
-        //#define INFO1_LED_COLOR OpenKNX::Led::Color::Green
+        #define INFO1_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO2_LED_PIN 2
-        //#define INFO2_LED_COLOR OpenKNX::Led::Color::Green
+        #define INFO2_LED_COLOR OpenKNX::Led::Color::Green
         #define INFO3_LED_PIN 3
-        //#define INFO3_LED_COLOR OpenKNX::Led::Color::Green
+        #define INFO3_LED_COLOR OpenKNX::Led::Color::Green
         #define OPENKNX_LEDEFFECT_PULSE_MIN 50
 
 
