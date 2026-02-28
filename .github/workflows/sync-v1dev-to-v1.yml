@@ -1,0 +1,57 @@
+name: Keep v1dev in sync with v1
+
+on:
+  push:
+    branches:
+      - v1
+
+permissions:
+  contents: write
+
+jobs:
+  sync-v1dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout v1 branch
+        uses: actions/checkout@v4
+        with:
+          ref: v1
+          fetch-depth: 0 # fetch all history so we can compare
+
+      - name: Fetch all branches
+        run: git fetch origin v1dev:v1dev
+
+      - name: Check if v1dev can(not) be fast-forwarded, or is already the same as v1
+        id: check
+        run: |
+          HEADv1=$(git rev-parse v1)
+          HEADv1dev=$(git rev-parse v1dev)
+          BASE=$(git merge-base v1 v1dev)
+          if [ "HEADv1" = "$HEADv1dev" ]; then
+            echo "result=same" >> $GITHUB_OUTPUT
+          elif [ "$BASE" = "$HEADv1dev" ]; then
+            echo "result=ff" >> $GITHUB_OUTPUT
+          else
+            echo "result=noff" >> $GITHUB_OUTPUT
+          fi
+
+      # will not result in a visible commit
+      - name: Set up Git user
+        if: steps.check.outputs.result == 'ff'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fast-forward v1dev to v1
+        if: steps.check.outputs.result == 'ff'
+        run: |
+          git checkout v1dev
+          git merge --ff-only v1
+          git push origin v1dev
+
+      - name: Fail if fast-forward is not possible
+        if: steps.check.outputs.result == 'noff'
+        run: |
+          # Note: possible alternative solutions here (like merge or PR) 
+          echo "::error::Fast-forward merge from v1 to v1dev is not possible. Needs manual merge"
+          exit 1
