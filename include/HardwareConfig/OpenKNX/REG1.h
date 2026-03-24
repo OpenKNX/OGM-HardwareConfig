@@ -133,6 +133,18 @@
 
     #endif
 
+    #ifdef DEVICE_REG1_GW_RS485
+        #define DEVICE_ID "REG1-GW-RS485"
+        #define DEVICE_NAME "OpenKNX REG1 RS485 Gateway"
+
+        #define OKNXHW_REG1_CONTROLLER2040_V1
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_APP_RS485
+
+    #endif
+
 // REG1-LAN-TP-Dali
     #ifdef DEVICE_REG1_LAN_TP_DALI
         #define DEVICE_ID "REG1-LAN-TP-Dali"
@@ -452,6 +464,18 @@
         #define OKNXHW_REG1_APP_DALI_TX REG1_APP_PIN6
         #define OKNXHW_REG1_APP_DALI2_RX REG1_APP_PIN5
         #define OKNXHW_REG1_APP_DALI2_TX REG1_APP_PIN4
+    #endif
+
+    #ifdef OKNXHW_REG1_APP_RS485
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT1_PIN   REG1_APP_PIN7
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT2_PIN   REG1_APP_PIN6
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT3_PIN   REG1_APP_PIN5
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT4_PIN   REG1_APP_PIN4
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT_ONLEVEL  LOW
+
+        #define RS485_UART_RX_PIN REG1_APP_PIN3
+        #define RS485_UART_TX_PIN REG1_APP_PIN1
+        #define RS485_UART_DIR_PIN REG1_APP_PIN2
     #endif
 
 #pragma endregion
