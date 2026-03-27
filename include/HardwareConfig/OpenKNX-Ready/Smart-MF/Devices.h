@@ -338,6 +338,9 @@
     #define OPENKNX_ADC_ADS_SDA I2C_SDA_1WIRE_PIN
     #define OPENKNX_ADC_ADS_SCL I2C_SCL_1WIRE_PIN
 
+    #define LED_INIT()                        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); 
+
 #endif
 
 // Smart-MF GardenControl

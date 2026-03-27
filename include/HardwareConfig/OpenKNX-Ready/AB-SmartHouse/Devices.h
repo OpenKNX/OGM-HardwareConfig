@@ -154,6 +154,7 @@
     #define OPENKNX_BI_GPIO_COUNT 2
     #define OPENKNX_BI_ONLEVEL LOW
 
+    #define OPENKNX_SLED_COUNT 2
     #define OPENKNX_SLED_IDs OpenKNX::Led::LED_TYPE_USER, OpenKNX::Led::LED_TYPE_USER+1
 
     #define DEVICE_INIT()                     \
@@ -162,6 +163,7 @@
 
     #define LED_INIT()                        \
         openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO_LED_PIN, INFO_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1); \
         openknx.leds.addLed(new OpenKNX::Led::GPIO(PRESENCE_LED_PIN, PRESENCE_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_USER); \
         openknx.leds.addLed(new OpenKNX::Led::GPIO(MOVE_LED_PIN, MOVE_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_USER+1);
 
