@@ -38,8 +38,43 @@
     #define I2C_WIRE Wire
     #define I2C_SDA_PIN 4
     #define I2C_SCL_PIN 5
+
+    #define BUTTON_TOP_LEFT_PIN 12
+    #define BUTTON_BOTTOM_LEFT_PIN 3
+    #define BUTTON_TOP_RIGHT_PIN 19
+    #define BUTTON_BOTTOM_RIGHT_PIN 0
+
+
     #define OPENKNX_BI_GPIO_COUNT 4
-    #define OPENKNX_BI_GPIO_PINS 3,0,12,19
+    #define OPENKNX_BI_GPIO_PINS BUTTON_TOP_LEFT_PIN,BUTTON_BOTTOM_LEFT_PIN,BUTTON_TOP_RIGHT_PIN,BUTTON_BOTTOM_RIGHT_PIN
+
+    #define LED1_R_PIN 15
+    #define LED1_G_PIN 13
+    #define LED1_B_PIN 14
+    #define LED1_ACTIVE_ON LOW
+
+    #define LED2_R_PIN 1
+    #define LED2_G_PIN 2
+    #define LED2_B_PIN 6
+    #define LED2_ACTIVE_ON LOW    
+
+    #define OPENKNX_SLED_COUNT 2
+    #define OPENKNX_SLED_IDs 10, 11
+
+    #define DEVICE_INIT()                      \
+        pinMode(LED1_R_PIN, INPUT_PULLUP);     \
+        pinMode(LED1_G_PIN, INPUT_PULLUP);     \
+        pinMode(LED1_B_PIN, INPUT_PULLUP);     \
+        pinMode(LED2_R_PIN, INPUT_PULLUP);     \
+        pinMode(LED2_G_PIN, INPUT_PULLUP);     \
+        pinMode(LED2_B_PIN, INPUT_PULLUP);     
+
+    #define LED_INIT()                                                                                                                                                               \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG);                                                              \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO_LED_PIN, INFO_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1);                                                              \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(LED1_R_PIN, LED1_G_PIN, LED1_B_PIN, LED1_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER);                 \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(LED2_R_PIN, LED2_G_PIN, LED2_B_PIN, LED2_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER + 1);             
+
 #endif
 
 // #define SMARTMF_BE1_PIN 2
