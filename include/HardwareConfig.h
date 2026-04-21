@@ -34,3 +34,4 @@
 // Other 3rd Party Hardware Configurations
 //  #include "HardwareConfig/Others/XYZ-Hardware.h"
 #include "HardwareConfig/Others/Adafruit.h"
+#include "HardwareConfig/Others/Gledopto.h"
