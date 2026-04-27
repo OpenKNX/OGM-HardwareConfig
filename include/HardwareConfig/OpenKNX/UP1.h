@@ -313,7 +313,9 @@
         openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON, false), OpenKNX::Led::LED_TYPE_PROG); \
         openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1);
 
+    #define OPENKNX_LED_TEMPSENS_TYPE_LM75          1
     #define OPENKNX_LED_TEMPSENS_WIRE               Wire
+    #define OPENKNX_LED_TEMPSENS_ADDR               0x49
     #define OPENKNX_LED_TEMPSENS_PIN_SCL            29
     #define OPENKNX_LED_TEMPSENS_PIN_SDA            28
 
@@ -326,6 +328,30 @@
     #define BI_PIN_B                                14
     #define BI_PIN_C                                15
     #define BI_PIN_D                                17
+
+    #define I2C_WIRE                                Wire1
+    #define I2C_SDA_PIN                             26
+    #define I2C_SCL_PIN                             27
+#endif
+
+#ifdef DEVICE_UP1_LED_4x24V
+    #define HARDWARE_NAME "UP1-LED-4x24V"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define LED_INIT() \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON, false), OpenKNX::Led::LED_TYPE_PROG);
+
+    #define OPENKNX_LED_TEMPSENS_TYPE_LM75          1
+    #define OPENKNX_LED_TEMPSENS_WIRE               Wire
+    #define OPENKNX_LED_TEMPSENS_ADDR               0x49
+    #define OPENKNX_LED_TEMPSENS_PIN_SCL            29
+    #define OPENKNX_LED_TEMPSENS_PIN_SDA            28
+
+    #define LED_PWM_PIN_A                           25
+    #define LED_PWM_PIN_B                           23
+    #define LED_PWM_PIN_C                           21
+    #define LED_PWM_PIN_D                           20
 
     #define I2C_WIRE                                Wire1
     #define I2C_SDA_PIN                             26
