@@ -191,6 +191,24 @@
 
     #endif
 
+// REG1-LAN-SEN-Multi
+// http://device.openknx.de/REG1-LAN-SEN-Multi
+    #ifdef DEVICE_REG1_LAN_SEN_MULTI
+        #define DEVICE_ID "REG1-LAN-SEN-Multi"
+        #define DEVICE_NAME "OpenKNX REG1 Multisensor LAN"
+
+        #define OKNXHW_REG1_CONTROLLERESP_DCU
+        #define OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_APP_SEN_MULTI
+
+        #define DEVICE_INIT() \
+            pinMode(ETH_PHY_POWER, OUTPUT); \
+            digitalWrite(ETH_PHY_POWER, LOW);
+    #endif
+
 
 #pragma endregion
 

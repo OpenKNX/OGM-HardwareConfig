@@ -304,13 +304,17 @@
     #define OKNXHW_UP1_APP_IR
 #endif
 
-#ifdef DEVICE_UP1_LED_4x24V
-    #define HARDWARE_NAME "UP1-LED-4x24V"
+#ifdef DEVICE_UP1_LED_4x24V_V0001
+    #define HARDWARE_NAME "UP1-LED-4x24V V00.01"
 
     #define OKNXHW_UP1_CONTROLLER2040
 
     #define INFO_LED_PIN                            12
     #define INFO_LED_PIN_ACTIVE_ON                  HIGH
+
+    #define LED_INIT() \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON, false), OpenKNX::Led::LED_TYPE_PROG); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1);
 
     #define OPENKNX_LED_TEMPSENS_WIRE               Wire
     #define OPENKNX_LED_TEMPSENS_PIN_SCL            29
