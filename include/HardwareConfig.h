@@ -35,3 +35,4 @@
 //  #include "HardwareConfig/Others/XYZ-Hardware.h"
 #include "HardwareConfig/Others/Adafruit.h"
 #include "HardwareConfig/Others/Gledopto.h"
+#include "HardwareConfig/Others/QuinLed.h"

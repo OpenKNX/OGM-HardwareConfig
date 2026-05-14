@@ -72,7 +72,7 @@
     #endif
 
     #ifndef PROG_LED_PIN
-        #define PROG_LED_PIN 33 // GPIO33 is input-only on ESP32-WROOM-32, effectively disables prog LED
+        #define PROG_LED_PIN (-1) // No dedicated prog LED on this hardware; keep the LED object but disable GPIO access.
         #ifndef PROG_LED_PIN_ACTIVE_ON
             #define PROG_LED_PIN_ACTIVE_ON HIGH
         #endif
