@@ -199,9 +199,6 @@
     #define SMARTMF_HARDWARE_REVISION_ID2_PIN 3
     #define SMARTMF_HARDWARE_REVISION_ID3_PIN 15
 
-    #define PROG_LED_PIN 11
-    #define PROG_LED_PIN_ACTIVE_ON HIGH
-    #define PROG_BUTTON_PIN 14
     #define SAVE_INTERRUPT_PIN 8
     #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
@@ -219,6 +216,8 @@
 
     #define SMARTMF_SML2_RX_PIN 23
     #define SMARTMF_SML2_TX_PIN 22
+
+    #define DEVICE_SMARTMF_2TE_FRONT
 #endif
 
 // Smart-MF Modbus Gateway + 3x BIN
@@ -230,9 +229,6 @@
     #define SMARTMF_HARDWARE_REVISION_ID2_PIN 3
     #define SMARTMF_HARDWARE_REVISION_ID3_PIN 15
 
-    #define PROG_LED_PIN 11
-    #define PROG_LED_PIN_ACTIVE_ON HIGH
-    #define PROG_BUTTON_PIN 14
     #define SAVE_INTERRUPT_PIN 8
     #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
@@ -245,6 +241,8 @@
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 24
+
+    #define DEVICE_SMARTMF_2TE_FRONT
 #endif
 
 // Smart-MF Wetterstation Gateway
@@ -440,4 +438,38 @@
     #define HF_UART_TX_PIN 4
     #define HF_UART_RX_PIN 5
 
+#endif
+
+#ifdef DEVICE_SMARTMF_2TE_FRONT
+    #define PROG_BUTTON_PIN 14
+
+    #define PROG_LED_PIN 11
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+ 
+    #define INFO1_LED_PIN 10
+    #define INFO1_LED_PIN_ACTIVE_ON HIGH
+
+    #define OPENKNX_GPIO_NUM 1
+    #define OPENKNX_GPIO_TYPES OPENKNX_GPIO_T_TCA9555
+    #define OPENKNX_GPIO_ADDRS 0x22
+    #define OPENKNX_GPIO_INTS 0xFF
+    #define OPENKNX_GPIO_WIRE Wire
+    #define OPENKNX_GPIO_CLOCK 400000
+    #define OPENKNX_GPIO_SDA 12
+    #define OPENKNX_GPIO_SCL 13
+
+    #define SMARTMF_LED01 0x0104
+    #define SMARTMF_LED02 0x0103
+    #define SMARTMF_LED03 0x0102
+    #define SMARTMF_LED04 0x0101
+    #define SMARTMF_LED05 0x0100
+
+    #define LED_INIT()                                                                                                  \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO1_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED01, LOW, false), OpenKNX::Led::LED_TYPE_USER + 1);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED02, LOW, false), OpenKNX::Led::LED_TYPE_USER + 2);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED03, LOW, false), OpenKNX::Led::LED_TYPE_USER + 3);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED04, LOW, false), OpenKNX::Led::LED_TYPE_USER + 4);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED05, LOW, false), OpenKNX::Led::LED_TYPE_USER + 5);
 #endif
