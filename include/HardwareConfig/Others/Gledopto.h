@@ -84,4 +84,105 @@
 
 #endif
 
+#ifdef DEVICE_GLEDOPTO_GL_C_017WL
+    // ============================================================================
+    // Gledopto GL-C-017WL - ESP32, 4 LED channels + 1 relay
+    // ============================================================================
+    // Chip:  ESP32, WiFi 2.4 GHz
+    // Ports (from board inspection / HW tests):
+    //   GPIO16 / 12 / 4 / 2 = LED 1-4
+    //   GPIO13              = relay (confirmed: toggling it switches the relay)
+    //   GPIO18              = onboard relay (additional)
+    //   GPIO17              = function / prog button (CONFIRMED on HW)
+    //   PDM microphone:     CLK = GPIO15, DATA = GPIO32
+    // No dedicated prog LED on a GPIO -> PROG_LED_PIN = -1.
+    // ============================================================================
+
+    #define GLEDOPTO_BUTTON_GPIO 17    // Function / prog button (active LOW)
+
+    #define DEVICE_HW_ID 0x2001
+    #define DEVICE_ID "GL-C-017WL"
+    #define DEVICE_NAME "Gledopto GL-C-017WL ESP32"
+
+    #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
+        #define KNX_IP_WIFI
+    #endif
+
+    #ifndef SERIAL_DEBUG
+        #define SERIAL_DEBUG Serial
+    #endif
+
+    #ifndef KNX_SERIAL
+        #define KNX_SERIAL Serial1
+    #endif
+    #ifndef KNX_UART_NUM
+        #define KNX_UART_NUM 1
+    #endif
+    #ifndef KNX_UART_RX_PIN
+        #define KNX_UART_RX_PIN 36
+    #endif
+    #ifndef KNX_UART_TX_PIN
+        #define KNX_UART_TX_PIN 3
+    #endif
+
+    #ifndef PROG_LED_PIN
+        #define PROG_LED_PIN (-1) // No dedicated prog LED on a GPIO (GPIO13 only toggled the relay).
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #endif
+    #endif
+
+    #ifndef PROG_BUTTON_PIN
+        #define PROG_BUTTON_PIN GLEDOPTO_BUTTON_GPIO
+    #endif
+
+#endif
+
+#ifdef DEVICE_GLEDOPTO_GL_C_620WL
+    // ============================================================================
+    // Gledopto GL-C-620WL - ESP32, 2 LED channels + 1 relay (Ethernet)
+    // ============================================================================
+    #define GLEDOPTO_BUTTON_GPIO 0     // Function button (active LOW)
+    #define GLEDOPTO_LED_DATA1_GPIO 16 // LED data output 1
+    #define GLEDOPTO_LED_DATA2_GPIO 2  // LED data output 2
+    #define GLEDOPTO_RELAIS1_GPIO 18   // Relais output 1
+
+    #define DEVICE_HW_ID 0x2002
+    #define DEVICE_ID "GL-C-620WL"
+    #define DEVICE_NAME "Gledopto GL-C-620WL ESP32"
+
+    #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
+        #define KNX_IP_LAN
+    #endif
+
+    #ifndef SERIAL_DEBUG
+        #define SERIAL_DEBUG Serial
+    #endif
+
+    #ifndef KNX_SERIAL
+        #define KNX_SERIAL Serial1
+    #endif
+    #ifndef KNX_UART_NUM
+        #define KNX_UART_NUM 1
+    #endif
+    #ifndef KNX_UART_RX_PIN
+        #define KNX_UART_RX_PIN 36
+    #endif
+    #ifndef KNX_UART_TX_PIN
+        #define KNX_UART_TX_PIN 3
+    #endif
+
+    #ifndef PROG_LED_PIN
+        #define PROG_LED_PIN (-1) // No dedicated prog LED on this hardware; keep the LED object but disable GPIO access.
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #endif
+    #endif
+
+    #ifndef PROG_BUTTON_PIN
+        #define PROG_BUTTON_PIN GLEDOPTO_BUTTON_GPIO
+    #endif
+
+#endif
+
 #pragma endregion

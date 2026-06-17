@@ -11,6 +11,28 @@
  *    It will be included by the HardwareConfig.h file.
  */
 
+/**
+ Device Hardware ID Structure:
+
+ Bits 15-12: Main Group (4 bits = 16 main groups)
+ Bits 11-8:  Subgroup   (4 bits = 16 subgroups)
+ Bits 7-0:   Variant    (8 bits = 256 variants)
+
+ Format: 0xHUVV
+         H  = Main Group
+         U  = Subgroup
+         VV = Variant
+  Example: 0x2122 = Main Group 2 (OpenKNX-Ready), Subgroup 1 (QuinLED), Variant 0x22
+
+ QuinLED devices live under Main Group 0x2 = OpenKNX-Ready (0x2000-0x2FFF):
+ └─ 0x21 = QuinLED (0x2100-0x21FF) → 256 variants
+    ├─ 0x210x = Dig2Go          (0x2100)
+    ├─ 0x211x = Dig-Uno-V3       (0x2110 WiFi, 0x2111 Ethernet, 0x2112 WiFi+AE_Plus)
+    ├─ 0x212x = Dig-Quad-V3      (0x2120 WiFi, 0x2121 Ethernet, 0x2122 WiFi+AE_Plus)
+    ├─ 0x213x = Dig-Octa-32-8L   (0x2130 Ethernet, 0x2131 WiFi)
+    └─ 0x214x = Dig-Next-2       (0x2140)
+ */
+
 #pragma region "QuinLED Controllers"
 
 #if defined(DEVICE_QUINLED_DIG_UNO_V3) && !defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) && !defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET) && !defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS)
@@ -178,7 +200,11 @@
     #define QUINLED_LED_PORT_COUNT 2
     #define QUINLED_RELAY_COUNT 1
 
-    #define QUINLED_BUTTON_GPIO 0 // WLED button (pulled high)
+    // AE+ overrides the button pin below (Touch button = 33); only set the WLED
+    // default for non-AE+ variants to avoid the redefinition warning.
+    #if !QUINLED_ESP32_AE_PLUS
+        #define QUINLED_BUTTON_GPIO 0 // WLED button (pulled high)
+    #endif
     #define QUINLED_Q1_GPIO 15    // Dedicated external GPIO Q1 (can be pulled low)
     #define QUINLED_Q2_GPIO 12    // Dedicated external GPIO Q2 (can be pulled low)
     #define QUINLED_Q3_GPIO 2     // Dedicated external GPIO Q3 (can be pulled high)
@@ -296,8 +322,12 @@
     #define QUINLED_LED_PORT_COUNT 4
     #define QUINLED_RELAY_COUNT 1
 
-    #define QUINLED_BUTTON_GPIO 0 // WLED Button (is pulled high)
-    #define QUINLED_IR_GPIO (-1)
+    // AE+ defines its own button/IR pins above; only set the WLED defaults for the
+    // non-AE+ variants to avoid clobbering them (and the redefinition warning).
+    #if !QUINLED_ESP32_AE_PLUS
+        #define QUINLED_BUTTON_GPIO 0 // WLED Button (is pulled high)
+        #define QUINLED_IR_GPIO (-1)
+    #endif
     #define QUINLED_Q1_GPIO 15        // Relais
     #define QUINLED_Q2_GPIO 12        // External GPIO (can be pulled low)
     #define QUINLED_Q3_GPIO 2         // External GPIO (can be pulled high)
