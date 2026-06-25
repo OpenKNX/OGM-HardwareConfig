@@ -209,6 +209,20 @@
             digitalWrite(ETH_PHY_POWER, LOW);
     #endif
 
+// REG1-GW-RF868M
+// http://device.openknx.de/REG1-GW-RF868M
+    #ifdef DEVICE_REG1_GW_RF868M
+        #define DEVICE_ID "REG1-GW-RF868M"
+        #define DEVICE_NAME "OpenKNX REG1 868MHz-Gateway"
+
+        #define OKNXHW_REG1_CONTROLLER2040_V1
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_APP_GW_RF868M
+    #endif
+
+
 
 #pragma endregion
 
@@ -484,6 +498,7 @@
         #define OKNXHW_REG1_APP_DALI2_TX REG1_APP_PIN4
     #endif
 
+    // REG1-App-GW-RS485
     #ifdef OKNXHW_REG1_APP_RS485
         #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT1_PIN   REG1_APP_PIN7
         #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT2_PIN   REG1_APP_PIN6
@@ -494,6 +509,17 @@
         #define RS485_UART_RX_PIN REG1_APP_PIN3
         #define RS485_UART_TX_PIN REG1_APP_PIN1
         #define RS485_UART_DIR_PIN REG1_APP_PIN2
+    #endif
+
+    // REG1-App-GW-RF868M
+    #ifdef OKNXHW_REG1_APP_GW_RF868M
+        #define OKNXHW_REG1_APP_GW_RF868M_SDA_TX_PIN   REG1_APP_PIN7
+        #define OKNXHW_REG1_APP_GW_RF868M_SCL_RX_PIN   REG1_APP_PIN6
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_GD00      REG1_APP_PIN5
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_CLK       REG1_APP_PIN4
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_MOSI      REG1_APP_PIN3
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_MISO      REG1_APP_PIN2
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_CS        REG1_APP_PIN1 
     #endif
 
 #pragma endregion
