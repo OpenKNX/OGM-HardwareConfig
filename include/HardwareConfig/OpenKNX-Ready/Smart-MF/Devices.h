@@ -374,6 +374,7 @@
     #define KNX_UART_NUM 0
 
     #define SMARTMF_LED 15
+    #define RS485_SERIAL Serial2
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 14
