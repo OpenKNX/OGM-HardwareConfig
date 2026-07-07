@@ -42,7 +42,7 @@
 
 
 // REG2-ESP-S3-Pico V1 (Device Display)
-#if defined(OKNXHW_REG2_ESP_S3_PICO_V1_DD)
+#if defined(DEVICE_REG2_ESP_S3_PICO_V1_DD)
     #define DEVICE_ID PREFIX_ID "-DD"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_ESPS3PICO_V1_COMMON          // Common pins for all REG2-ESP-S3-Pico V1
@@ -72,8 +72,8 @@
     #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // Using internal pullup of the ESP32 (aprox. 45kOhm)
     #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
     
-    #define KNX_SERIAL Serial1                  // Uart0
-    #define KNX_UART_NUM 0                      // Uart0
+    #define KNX_SERIAL Serial1                  // Uart1
+    #define KNX_UART_NUM 1                      // Uart1 - must match KNX_SERIAL=Serial1. Keeps UART0 free for the debug console (SERIAL_DEBUG=Serial on ESP32-S3 with CDC_ON_BOOT=0) -> clean serial monitor, no 19200/115200 collision.
     #define KNX_UART_RX_PIN 12  // ESP32 GPIO12 | PI PICO GPIO1
     #define KNX_UART_TX_PIN 11  // ESP32 GPIO11 | PI PICO GPIO0
 
@@ -127,16 +127,21 @@
 
     #define OPENKNX_SERIALLED_ENABLE
     #define OPENKNX_SERIALLED_PIN NEOPIX_LED_PIN
-    #define OPENKNX_SERIALLED_NUM 4 // NEOPIX_LED_COUNT
-    #define PROG_LED_PIN 0
-    #define PROG_LED_COLOR OPENKNX_SERIALLED_COLOR_RED
-    #define INFO1_LED_PIN 1
-    #define INFO1_LED_COLOR OPENKNX_SERIALLED_COLOR_GREEN
-    #define INFO2_LED_PIN 2
-    #define INFO2_LED_COLOR OPENKNX_SERIALLED_COLOR_BLUE
-    #define INFO3_LED_PIN 3
-    #define INFO3_LED_COLOR OPENKNX_SERIALLED_COLOR_YELLOW
+    #define OPENKNX_SERIALLED_NUM 1 // 1 physical onboard WS2812 (used for PROG). INFO LEDs live on the PCA9557 expander (see LED_INIT).
     #define OPENKNX_LEDEFFECT_PULSE_MIN 50
+
+    // Mixed LED wiring for the REG2-ESP-S3-Pico front panel:
+    //   PROG    -> onboard WS2812 NeoPixel  (serial strip, index 0)
+    //   INFO2/3 -> single green/red LEDs on the PCA9557 I2C expander (single-colour, on/off)
+    // The Led::Manager auto-config can only do all-Serial OR all-GPIO, so we mix them manually via the LED_INIT hook.
+    // Led::GPIO treats a pin > 0xFF as an I2C-expander pin and drives it through openknx.gpio (PCA9557).
+    // NOTE: expander LEDs assumed active-HIGH; change HIGH -> LOW below if they are inverted on your board.
+    //       Swap INFO2/INFO3 if you'd rather have green=KNX / red=NET.
+    #define LED_INIT() do { \
+        addLed(new OpenKNX::Led::Serial(0, NEOPIX_LED_PIN, OPENKNX_SERIALLED_COLOR_RED), OpenKNX::Led::LED_TYPE_PROG); \
+        addLed(new OpenKNX::Led::GPIO(FRONT_CTRL_LED2_G, HIGH), OpenKNX::Led::LED_TYPE_INFO2); /* green (PCA9557 pin 2) -> NET_STATE */ \
+        addLed(new OpenKNX::Led::GPIO(FRONT_CTRL_LED1_R, HIGH), OpenKNX::Led::LED_TYPE_INFO3); /* red   (PCA9557 pin 1) -> BASE_KNX  */ \
+    } while (0)
 #endif
 
 /**
@@ -168,7 +173,7 @@
       pinMode(ETH_PHY_RST, OUTPUT), \
       digitalWrite(ETH_PHY_RST, LOW);
     //#define OPENKNX_SD_CARD_MODULE_ENABLE       // Enable the SD Card Module Support 
-    #define SDCARD_SPI_INTERFACE HSPI           // HSPI or VSPI, depends on the pins (HSPI is SPI2 on ESP32-S3)
+    #define SDCARD_SPI_INTERFACE HSPI           // On ESP32-S3 Arduino: HSPI = SPI3 (getrennt vom ETH-W5500 auf SPI2_HOST -> kein Bus-Konflikt)
     #define PIN_SDCARD_CD (REG2_APP_PIN12)      // Card Detect - GPIO14 SPI1 SCK UART0 CTS I2C1 SDA PWM7_A SIO PIO0 PIO1
     #define PIN_SDCARD_CS (REG2_APP_PIN13)      // Chip Select - GPIO13 SPI1 RX UART0 TX I2C0 SDA PWM6_B SIO PIO0 PIO1
     #define PIN_SDCARD_SCK (REG2_APP_PIN16)     // Clock - GPIO10 SPI1 SCK UART1 CTS I2C1 SDA PWM5_A SIO PIO0 PIO1

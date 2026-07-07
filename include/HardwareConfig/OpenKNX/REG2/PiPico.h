@@ -442,7 +442,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 // REG2-Pi-Pico FwF: Device Display Support
 #if defined(OKNXHW_REG2_DEVICE_DISPLAY) || defined(OKNXHW_REG2_USING_APP_BOARD)
     // Default pins for the I2C bus to connect the hardware display
-    #define OKNXHW_REG2_HWDISPLAY_I2C_INST i2c1 // i2c1 | i2c0
+    #define OKNXHW_REG2_HWDISPLAY_I2C_INST Wire1 // TwoWire object. i2cDisplay aliases i2c_inst_t=TwoWire (Wire refactor); DeviceDisplay takes &Wire1 => TwoWire*. Same bus as OPENKNX_GPIO_WIRE (Wire1).
 
     #ifdef OKNXHW_REG2_USING_APP_BOARD
         #define OKNXHW_REG2_HWDISPLAY_I2C_SDA 22 // GPIO22 | SPI0 SCK | UART1 TX | I2C1 SDA | PWM3 A | ADC2
