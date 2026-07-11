@@ -262,8 +262,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    // LED2/LED3 (front-panel LEDs) are enabled centrally in the Device-Display/App-Board block below
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
