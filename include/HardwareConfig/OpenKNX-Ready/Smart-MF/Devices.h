@@ -93,7 +93,7 @@
     #define SMARTMF_BE1_PIN 14
     #define SMARTMF_BE2_PIN 15
     #define SMARTMF_BE3_PIN 4
-
+   
     #define SMARTMF_BE_VCC_PIN 5
 #endif
 
@@ -135,6 +135,7 @@
 
     #define SMARTMF_LED 15
 
+    #define RS485_SERIAL Serial2
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 14
@@ -238,6 +239,7 @@
     #define SMARTMF_BE2_PIN 27
     #define SMARTMF_BE3_PIN 26
 
+    #define RS485_SERIAL Serial2
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 24
@@ -372,6 +374,7 @@
     #define KNX_UART_NUM 0
 
     #define SMARTMF_LED 15
+    #define RS485_SERIAL Serial2
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 14

@@ -522,7 +522,7 @@
         #define OKNXHW_REG1_APP_GW_RF868M_RF_CLK       REG1_APP_PIN4
         #define OKNXHW_REG1_APP_GW_RF868M_RF_MOSI      REG1_APP_PIN3
         #define OKNXHW_REG1_APP_GW_RF868M_RF_MISO      REG1_APP_PIN2
-        #define OKNXHW_REG1_APP_GW_RF868M_RF_CS        REG1_APP_PIN1 
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_CS        REG1_APP_PIN1
     #endif
 
 #pragma endregion

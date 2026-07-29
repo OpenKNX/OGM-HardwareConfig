@@ -248,8 +248,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    // LED2/LED3 (front-panel LEDs) are enabled centrally in the Device-Display/App-Board block below
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
@@ -263,8 +262,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    // LED2/LED3 (front-panel LEDs) are enabled centrally in the Device-Display/App-Board block below
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
@@ -442,7 +440,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 // REG2-Pi-Pico FwF: Device Display Support
 #if defined(OKNXHW_REG2_DEVICE_DISPLAY) || defined(OKNXHW_REG2_USING_APP_BOARD)
     // Default pins for the I2C bus to connect the hardware display
-    #define OKNXHW_REG2_HWDISPLAY_I2C_INST i2c1 // i2c1 | i2c0
+    #define OKNXHW_REG2_HWDISPLAY_I2C_INST Wire1 // TwoWire object. i2cDisplay aliases i2c_inst_t=TwoWire (Wire refactor); DeviceDisplay takes &Wire1 => TwoWire*. Same bus as OPENKNX_GPIO_WIRE (Wire1).
 
     #ifdef OKNXHW_REG2_USING_APP_BOARD
         #define OKNXHW_REG2_HWDISPLAY_I2C_SDA 22 // GPIO22 | SPI0 SCK | UART1 TX | I2C1 SDA | PWM3 A | ADC2
@@ -469,6 +467,11 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define FRONT_CTRL_RIGHT  0x105   // PIN 5 (RIGHT)
     #define FRONT_CTRL_OK     0x106   // PIN 6 (OK / SELECT)
     #define FRONT_CTRL_UP     0x107   // PIN 7 (UP)
+
+    // Front-panel status LEDs sit on this PCA9557 (identical front board on ESP32-S3 and RP2040):
+    // enable INFO2 (green) / INFO3 (red) for every REG2 variant that carries this board.
+    #define OKNXHW_REG2_PIPICO_V1_LED2
+    #define OKNXHW_REG2_PIPICO_V1_LED3
 
     #define OPENKNX_PCA9557_PINS_COUNT 8
     #define OPENKNX_PCA9557_PINS \
@@ -551,15 +554,15 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define INFO1_LED_PIN_ACTIVE_ON HIGH
 #endif
 
-// REG2-Pi-Pico V1: Info2 LED
+// REG2-Pi-Pico V1: Info2 LED -> green front LED on PCA9557 (via openknx.gpio, like ESP32-S3 REG2)
 #ifdef OKNXHW_REG2_PIPICO_V1_LED2
-    //#define INFO2_LED_PIN 3 // ToDo: Option use of DD Front Control LEDs
-    //#define INFO2_LED_PIN_ACTIVE_ON HIGH
+    #define INFO2_LED_PIN FRONT_CTRL_LED2_G // PCA9557 pin 2 (green)
+    #define INFO2_LED_PIN_ACTIVE_ON HIGH
 #endif
-// REG2-Pi-Pico V1: Info3 LED
+// REG2-Pi-Pico V1: Info3 LED -> red front LED on PCA9557 (via openknx.gpio, like ESP32-S3 REG2)
 #ifdef OKNXHW_REG2_PIPICO_V1_LED3
-    //#define INFO3_LED_PIN 21 // ToDo: Optional use of DD Front Control LEDs
-    //#define INFO3_LED_PIN_ACTIVE_ON HIGH
+    #define INFO3_LED_PIN FRONT_CTRL_LED1_R // PCA9557 pin 1 (red)
+    #define INFO3_LED_PIN_ACTIVE_ON HIGH
 #endif
 
 // REG2-Pi-Pico V1: Interrupt Pin
