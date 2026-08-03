@@ -172,7 +172,7 @@
     #define DEVICE_INIT() \
       pinMode(ETH_PHY_RST, OUTPUT), \
       digitalWrite(ETH_PHY_RST, LOW);
-    //#define OPENKNX_SD_CARD_MODULE_ENABLE       // Enable the SD Card Module Support 
+    //#define OPENKNX_SDCARD       // Enable the SD Card Module Support 
     #define SDCARD_SPI_INTERFACE HSPI           // On ESP32-S3 Arduino: HSPI = SPI3 (getrennt vom ETH-W5500 auf SPI2_HOST -> kein Bus-Konflikt)
     #define PIN_SDCARD_CD (REG2_APP_PIN12)      // Card Detect - GPIO14 SPI1 SCK UART0 CTS I2C1 SDA PWM7_A SIO PIO0 PIO1
     #define PIN_SDCARD_CS (REG2_APP_PIN13)      // Chip Select - GPIO13 SPI1 RX UART0 TX I2C0 SDA PWM6_B SIO PIO0 PIO1
