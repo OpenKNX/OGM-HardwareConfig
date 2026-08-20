@@ -402,6 +402,7 @@
     #define KNX_UART_TX_PIN 16
     #define KNX_UART_NUM 0
 
+    #define SERIAL_PORT Serial
     #define OPENKNX_ENO_SERIAL Serial2
     #define OPENKNX_ENO_UART_RX_PIN 5
     #define OPENKNX_ENO_UART_TX_PIN 4
