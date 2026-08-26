@@ -84,6 +84,70 @@
 
 #endif
 
+#ifdef DEVICE_GLEDOPTO_GL_C_017WL
+// ============================================================================
+// Gledopto GL-C-017WL - ESP32 controller with 4 LED outputs and 2 relais
+// ============================================================================
+// Chip: ESP32, WiFi 2.4 GHz
+//
+// IO-Port map:
+//   GPIO16 - LED data output 1
+//   GPIO12 - LED data output 2
+//   GPIO4  - LED data output 3
+//   GPIO2  - LED data output 4
+//   GPIO13 - Relais output 1
+//   GPIO18 - Onboard relais
+// ============================================================================
+
+    #define GLEDOPTO_BUTTON_GPIO 17    // Function button
+    #define GLEDOPTO_LED_DATA1_GPIO 16 // LED data output 1
+    #define GLEDOPTO_LED_DATA2_GPIO 12 // LED data output 2
+    #define GLEDOPTO_LED_DATA3_GPIO 4  // LED data output 3
+    #define GLEDOPTO_LED_DATA4_GPIO 2  // LED data output 4
+    #define GLEDOPTO_RELAIS1_GPIO 13   // Relais output 1
+    #define GLEDOPTO_RELAIS2_GPIO 18   // Onboard relais
+
+    #define GLEDOPTO_MIC_SD_GPIO 32
+    #define GLEDOPTO_MIC_WS_GPIO 15
+
+    #define DEVICE_HW_ID 0x2002
+    #define DEVICE_ID "GL-C-017WL"
+    #define DEVICE_NAME "Gledopto GL-C-017WL ESP32"
+
+    #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
+        #define KNX_IP_WIFI
+    #endif
+
+    #ifndef SERIAL_DEBUG
+        #define SERIAL_DEBUG Serial
+    #endif
+
+    #ifndef KNX_SERIAL
+        #define KNX_SERIAL Serial1
+    #endif
+    #ifndef KNX_UART_NUM
+        #define KNX_UART_NUM 1
+    #endif
+    #ifndef KNX_UART_RX_PIN
+        #define KNX_UART_RX_PIN 36
+    #endif
+    #ifndef KNX_UART_TX_PIN
+        #define KNX_UART_TX_PIN 3
+    #endif
+
+    #ifndef PROG_LED_PIN
+        #define PROG_LED_PIN (-1) // No dedicated prog LED on this hardware; keep the LED object but disable GPIO access.
+        #ifndef PROG_LED_PIN_ACTIVE_ON
+            #define PROG_LED_PIN_ACTIVE_ON HIGH
+        #endif
+    #endif
+
+    #ifndef PROG_BUTTON_PIN
+        #define PROG_BUTTON_PIN GLEDOPTO_BUTTON_GPIO
+    #endif
+
+#endif
+
 #ifdef DEVICE_GLEDOPTO_GL_C_620WL
 // ============================================================================
 // Gledopto GL-C-620WL - ESP32 LAN Controller
