@@ -17,6 +17,34 @@
  *    It will be included by the HardwareConfig.h file.
  */
 
+
+ // Smart-MF GardenControl
+#ifdef DEVICE_SMARTMF_WIEGAND_READER
+    #define DEVICE_ID "SMARTMF-WR"
+    #define DEVICE_NAME "Smart-MF Wiegand Reader"
+
+    #define INFO_LED_PIN 11
+    #define INFO_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_LED_PIN 10
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 9
+    #define SAVE_INTERRUPT_PIN 0
+    #define KNX_UART_RX_PIN 13
+    #define KNX_UART_TX_PIN 12
+    #define KNX_UART_NUM 0
+
+    #define Wiegand_D0      20
+    #define Wiegand_D1      19
+    #define Wiegand_LED     18
+    #define Wiegand_Buzzer  17
+    #define Wiegand_W34     16
+
+    #define FP_UART_TX 4
+    #define FP_UART_RX 5
+    #define FP_Wake    2
+
+#endif
+
 /************************************************** */
 //  SOM
 /************************************************** */
