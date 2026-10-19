@@ -85,20 +85,30 @@
 #endif
 
 #ifdef DEVICE_GLEDOPTO_GL_C_017WL
-    // ============================================================================
-    // Gledopto GL-C-017WL - ESP32, 4 LED channels + 1 relay
-    // ============================================================================
-    // Chip:  ESP32, WiFi 2.4 GHz
-    // Ports (from board inspection / HW tests):
-    //   GPIO16 / 12 / 4 / 2 = LED 1-4
-    //   GPIO13              = relay (confirmed: toggling it switches the relay)
-    //   GPIO18              = onboard relay (additional)
-    //   GPIO17              = function / prog button (CONFIRMED on HW)
-    //   PDM microphone:     CLK = GPIO15, DATA = GPIO32
-    // No dedicated prog LED on a GPIO -> PROG_LED_PIN = -1.
-    // ============================================================================
+// ============================================================================
+// Gledopto GL-C-017WL - ESP32 controller with 4 LED outputs and 2 relais
+// ============================================================================
+// Chip: ESP32, WiFi 2.4 GHz
+//
+// IO-Port map:
+//   GPIO16 - LED data output 1
+//   GPIO12 - LED data output 2
+//   GPIO4  - LED data output 3
+//   GPIO2  - LED data output 4
+//   GPIO13 - Relais output 1
+//   GPIO18 - Onboard relais
+// ============================================================================
 
-    #define GLEDOPTO_BUTTON_GPIO 17    // Function / prog button (active LOW)
+    #define GLEDOPTO_BUTTON_GPIO 17    // Function button
+    #define GLEDOPTO_LED_DATA1_GPIO 16 // LED data output 1
+    #define GLEDOPTO_LED_DATA2_GPIO 12 // LED data output 2
+    #define GLEDOPTO_LED_DATA3_GPIO 4  // LED data output 3
+    #define GLEDOPTO_LED_DATA4_GPIO 2  // LED data output 4
+    #define GLEDOPTO_RELAIS1_GPIO 13   // Relais output 1
+    #define GLEDOPTO_RELAIS2_GPIO 18   // Onboard relais
+
+    #define GLEDOPTO_MIC_SD_GPIO 32
+    #define GLEDOPTO_MIC_WS_GPIO 15
 
     #define DEVICE_HW_ID 0x2001
     #define DEVICE_ID "GL-C-017WL"
@@ -126,7 +136,7 @@
     #endif
 
     #ifndef PROG_LED_PIN
-        #define PROG_LED_PIN (-1) // No dedicated prog LED on a GPIO (GPIO13 only toggled the relay).
+        #define PROG_LED_PIN (-1) // No dedicated prog LED on this hardware; keep the LED object but disable GPIO access.
         #ifndef PROG_LED_PIN_ACTIVE_ON
             #define PROG_LED_PIN_ACTIVE_ON HIGH
         #endif
@@ -139,13 +149,44 @@
 #endif
 
 #ifdef DEVICE_GLEDOPTO_GL_C_620WL
-    // ============================================================================
-    // Gledopto GL-C-620WL - ESP32, 2 LED channels + 1 relay (Ethernet)
-    // ============================================================================
-    #define GLEDOPTO_BUTTON_GPIO 0     // Function button (active LOW)
-    #define GLEDOPTO_LED_DATA1_GPIO 16 // LED data output 1
-    #define GLEDOPTO_LED_DATA2_GPIO 2  // LED data output 2
-    #define GLEDOPTO_RELAIS1_GPIO 18   // Relais output 1
+// ============================================================================
+// Gledopto GL-C-620WL - ESP32 LAN Controller
+// ============================================================================
+// Product: GL-C-620WL
+// Chip:    ESP32-D0WD-V3 (Revision 3.1)
+// Network: LAN8720A Ethernet PHY connected to the ESP32 RMII interface
+//
+// Confirmed IO-Port map:
+//   GPIO13 - Programming / function button
+//   GPIO16 - LED data output 1 (Strip1)
+//   GPIO2  - LED data output 2 (Strip2)
+//   GPIO18 - Relay output
+//
+// Confirmed RMII data lines: (fixed ESP32 RMII pin)
+//   GPIO21 - LAN8720A TX_EN
+//   GPIO26 - LAN8720A RXD1
+//   GPIO25 - LAN8720A RXD0
+//   GPIO22 - LAN8720A TXD1
+//   GPIO19 - LAN8720A TXD0
+//   GPIO27 - LAN8720A CRS_DV
+// ============================================================================
+
+    #define GLEDOPTO_BUTTON_GPIO 13
+    #define GLEDOPTO_LED_DATA1_GPIO 16
+    #define GLEDOPTO_LED_DATA2_GPIO 2
+    #define GLEDOPTO_RELAIS1_GPIO 18
+
+    #define GLEDOPTO_ETHERNET_TXEN_GPIO 21
+    #define GLEDOPTO_ETHERNET_TXD0_GPIO 19
+    #define GLEDOPTO_ETHERNET_TXD1_GPIO 22
+    #define GLEDOPTO_ETHERNET_RXD0_GPIO 25
+    #define GLEDOPTO_ETHERNET_RXD1_GPIO 26
+    #define GLEDOPTO_ETHERNET_CRS_DV_GPIO 27
+
+    #define GLEDOPTO_ETHERNET_MDC_GPIO 23
+    #define GLEDOPTO_ETHERNET_MDIO_GPIO 33
+    #define GLEDOPTO_ETHERNET_POWER_GPIO 5
+    #define GLEDOPTO_ETHERNET_CLK_MODE ETH_CLOCK_GPIO0_IN
 
     #define DEVICE_HW_ID 0x2002
     #define DEVICE_ID "GL-C-620WL"
@@ -153,6 +194,25 @@
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_LAN
+    #endif
+
+    #ifndef ETH_PHY_TYPE
+        #define ETH_PHY_TYPE ETH_PHY_LAN8720
+    #endif
+    #ifndef ETH_PHY_ADDR
+        #define ETH_PHY_ADDR 1
+    #endif
+    #ifndef ETH_PHY_MDC
+        #define ETH_PHY_MDC GLEDOPTO_ETHERNET_MDC_GPIO
+    #endif
+    #ifndef ETH_PHY_MDIO
+        #define ETH_PHY_MDIO GLEDOPTO_ETHERNET_MDIO_GPIO
+    #endif
+    #ifndef ETH_PHY_POWER
+        #define ETH_PHY_POWER GLEDOPTO_ETHERNET_POWER_GPIO
+    #endif
+    #ifndef ETH_CLK_MODE
+        #define ETH_CLK_MODE GLEDOPTO_ETHERNET_CLK_MODE
     #endif
 
     #ifndef SERIAL_DEBUG
@@ -173,7 +233,7 @@
     #endif
 
     #ifndef PROG_LED_PIN
-        #define PROG_LED_PIN (-1) // No dedicated prog LED on this hardware; keep the LED object but disable GPIO access.
+        #define PROG_LED_PIN (-1) // No dedicated prog LED for this hardware
         #ifndef PROG_LED_PIN_ACTIVE_ON
             #define PROG_LED_PIN_ACTIVE_ON HIGH
         #endif
