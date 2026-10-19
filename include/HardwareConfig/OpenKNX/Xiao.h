@@ -82,7 +82,13 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
   || defined(OKNXHW_OPENKNXIAO_ESP32C3_MINI_V1) \
   || defined(OKNXHW_OPENKNXIAO_ESP32C5_MINI_V1) \
   || defined(OKNXHW_OPENKNXIAO_ESP32C6_MINI_V1) \
-  || defined(OKNXHW_OPENKNXIAO_RP2350_MINI_V1)
+  || defined(OKNXHW_OPENKNXIAO_RP2350_MINI_V1) \
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V15) \
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_RP2350_V15) \
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V15) \
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C3_V15) \
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C5_V15) \
+  || defined(OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C6_V15)
     #define PREFIX_ID "OKNXIAO-"      // 10 characters
     #define PREFIX_NAME "OpenKNXiao " // 13 characters
 #endif
@@ -158,6 +164,89 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1330
     #define DEVICE_ID PREFIX_ID "V1-KNeoPix-ESP32C6"
     #define DEVICE_NAME PREFIX_NAME "V1 KNeoPix ESP32C6"
+    #define OKNXHW_OPENKNXIAO_ESP32C6
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+#endif
+
+// ----------------------------------------------------------------------------
+// KNeoPix V1.5 - same board and pinout as V1, level shifter changed from
+// TXS0108E to SN74LV8T245 and the data lines carry MCU-side pull-downs.
+// Separate DEVICE_HW_IDs so ETS and the firmware can tell the revisions apart.
+// ----------------------------------------------------------------------------
+
+// OpenKNXiao KNeoPix RP2040 V1.5
+// https://github.com/OpenKNX/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2040_V15
+    #define DEVICE_HW_ID 0x1302
+    #define DEVICE_ID PREFIX_ID "V15-KNeoPix-2040"
+    #define DEVICE_NAME PREFIX_NAME "V1.5 KNeoPix RP2040"
+    #define OKNXHW_OPENKNXIAO_RP2040
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+    #define OKNXHW_OPENKNXIAO_RP2040_V1_LED1
+    #define OKNXHW_OPENKNXIAO_RP2040_V1_LED2
+    #define OKNXHW_OPENKNXIAO_V1_NEOPIXEL
+#endif
+
+// OpenKNXiao KNeoPix RP2350 V1.5
+// https://github.com/OpenKNX/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_RP2350_V15
+    #define DEVICE_HW_ID 0x1312
+    #define DEVICE_ID PREFIX_ID "V15-KNeoPix-2350"
+    #define DEVICE_NAME PREFIX_NAME "V1.5 KNeoPix RP2350"
+    #define OKNXHW_OPENKNXIAO_RP2350
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+    //#define OKNXHW_OPENKNXIAO_V1_NEOPIXEL
+#endif
+
+// OpenKNXiao KNeoPix ESP32-S3 V1.5
+// http://www.openknx.de/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V15
+    #define DEVICE_HW_ID 0x1322
+    #define DEVICE_ID PREFIX_ID "V15-KNeoPix-ESP32S3"
+    #define DEVICE_NAME PREFIX_NAME "V1.5 KNeoPix ESP32S3"
+    #define OKNXHW_OPENKNXIAO_ESP32S3
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+    #define OKNXHW_OPENKNXIAO_V1_NEOPIXEL
+#endif
+
+// OpenKNXiao KNeoPix ESP32-C3 V1.5
+// http://www.openknx.de/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C3_V15
+    #define DEVICE_HW_ID 0x1352
+    #define DEVICE_ID PREFIX_ID "V15-KNeoPix-ESP32C3"
+    #define DEVICE_NAME PREFIX_NAME "V1.5 KNeoPix ESP32C3"
+    #define OKNXHW_OPENKNXIAO_ESP32C3
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+#endif
+
+// OpenKNXiao KNeoPix ESP32-C5 V1.5
+// http://www.openknx.de/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C5_V15
+    #define DEVICE_HW_ID 0x1342
+    #define DEVICE_ID PREFIX_ID "V15-KNeoPix-ESP32C5"
+    #define DEVICE_NAME PREFIX_NAME "V1.5 KNeoPix ESP32C5"
+    #define OKNXHW_OPENKNXIAO_ESP32C5
+    #define OKNXHW_OPENKNXIAO_V1_COMMON
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL
+    #define OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX
+#endif
+
+// OpenKNXiao KNeoPix ESP32-C6 V1.5
+// http://www.openknx.de/OpenKNX-KNeoPiX
+#ifdef OKNXHW_OPENKNXIAO_KNEOPIX_ESP32C6_V15
+    #define DEVICE_HW_ID 0x1332
+    #define DEVICE_ID PREFIX_ID "V15-KNeoPix-ESP32C6"
+    #define DEVICE_NAME PREFIX_NAME "V1.5 KNeoPix ESP32C6"
     #define OKNXHW_OPENKNXIAO_ESP32C6
     #define OKNXHW_OPENKNXIAO_V1_COMMON
     #define OKNXHW_OPENKNXIAO_V1_TERMINAL
