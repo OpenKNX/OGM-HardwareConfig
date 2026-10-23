@@ -185,7 +185,8 @@
 #if defined(OKNXHW_REG2_ESP_DEVICE_DISPLAY) || defined(OKNXHW_REG2_ESP_USING_APP_BOARD)
     // Default pins for the I2C bus to connect the hardware display
     #ifdef ARDUINO_ARCH_ESP32
-        #define OKNXHW_REG2_HWDISPLAY_I2C_INST Wire1
+        #define OPENKNX_I2C_SCHEDULER // I2C port 1 is owned by OGM-Common's ScheduledWire: PCA9557 LED soft-PWM edges, display and buttons share it
+        #define OKNXHW_REG2_HWDISPLAY_I2C_INST openknxScheduledWire
     #else
         #define OKNXHW_REG2_HWDISPLAY_I2C_INST i2c1 // i2c1 | i2c0
     #endif

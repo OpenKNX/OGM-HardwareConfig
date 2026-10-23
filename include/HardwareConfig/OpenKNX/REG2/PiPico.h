@@ -440,7 +440,8 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 // REG2-Pi-Pico FwF: Device Display Support
 #if defined(OKNXHW_REG2_DEVICE_DISPLAY) || defined(OKNXHW_REG2_USING_APP_BOARD)
     // Default pins for the I2C bus to connect the hardware display
-    #define OKNXHW_REG2_HWDISPLAY_I2C_INST Wire1 // TwoWire object. i2cDisplay aliases i2c_inst_t=TwoWire (Wire refactor); DeviceDisplay takes &Wire1 => TwoWire*. Same bus as OPENKNX_GPIO_WIRE (Wire1).
+    #define OPENKNX_I2C_SCHEDULER // I2C1 is owned by OGM-Common's ScheduledWire: PCA9557 LED soft-PWM edges, display and buttons share it
+    #define OKNXHW_REG2_HWDISPLAY_I2C_INST openknxScheduledWire // TwoWire object for display + PCA9557 (same bus as OPENKNX_GPIO_WIRE)
 
     #ifdef OKNXHW_REG2_USING_APP_BOARD
         #define OKNXHW_REG2_HWDISPLAY_I2C_SDA 22 // GPIO22 | SPI0 SCK | UART1 TX | I2C1 SDA | PWM3 A | ADC2
@@ -488,7 +489,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OPENKNX_GPIO_TYPES  OPENKNX_GPIO_T_PCA9557
     #define OPENKNX_GPIO_ADDRS  0x18      // PCA9557 I2C address 0x18 (A0-A2 = 0) A0-A2 are connected to GND if A1 is connected to VCC the address is 0x19
     #define OPENKNX_GPIO_INTS   0xFF
-    #define OPENKNX_GPIO_WIRE   Wire1     // OKNXHW_REG2_HWDISPLAY_I2C_INST
+    #define OPENKNX_GPIO_WIRE   OKNXHW_REG2_HWDISPLAY_I2C_INST // same bus as the display
     #define OPENKNX_GPIO_CLOCK  400000    // I2C Taktfrequenz in Hz (400kHz für schnelle I2C-Kommunikation)
 
     #define OKNXHW_DEVICE_DISPLAY_I2C_INST    OKNXHW_REG2_HWDISPLAY_I2C_INST
