@@ -579,6 +579,20 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define SAVE_INTERRUPT_PIN 21
 #endif
 
+// REG2-Pi-Pico V1: optional on-board external flash W25Q128 (OFM-ExternalFlash) on SPI1
+#if defined(OPENKNX_EXTFLASH) || defined(EXTERNAL_FLASH_MODULE)
+    #if defined(OKNXHW_REG2_PIPICO_APP_ETH) && defined(OPENKNX_SDCARD)
+        #error "REG2-Pi-Pico: external flash and the ETH app board SD card share SPI1 GP10-GP14"
+    #endif
+    #define OKNXHW_REG2_EXTFLASH_SPI_INST SPI1
+    #define OKNXHW_REG2_EXTFLASH_SPI_SCK 10  // SPI1_SCK
+    #define OKNXHW_REG2_EXTFLASH_SPI_MOSI 11 // SPI1_TX
+    #define OKNXHW_REG2_EXTFLASH_SPI_MISO 12 // SPI1_RX
+    #define OKNXHW_REG2_EXTFLASH_SPI_CS 13   // SPI1_CSN
+    #define OKNXHW_REG2_EXTFLASH_SPI_WP 14   // GPIO_WP
+    #define OKNXHW_REG2_EXTFLASH_SPI_HOLD 15 // GPIO_HOLD
+#endif
+
 /**
  * Section: Common Hardware (CHW) Pin Definitions
  * REG2-Pi-Pico V1
