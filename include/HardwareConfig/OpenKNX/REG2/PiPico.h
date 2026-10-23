@@ -602,7 +602,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define PROG_LED_PIN 2
     #define PROG_LED_PIN_ACTIVE_ON HIGH
     #define PROG_BUTTON_PIN 20
-    #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // Using internal pullup of the ESP32 (aprox. 45kOhm)
+    #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // internal pull-up of the RP2040/RP2350; the board has none, button and 100 nF go to GND
     #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
     #define KNX_SERIAL Serial1 // Uart0
     #define KNX_UART_NUM 0     // Uart0 
