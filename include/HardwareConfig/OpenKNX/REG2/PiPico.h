@@ -469,10 +469,13 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define FRONT_CTRL_OK     0x106   // PIN 6 (OK / SELECT)
     #define FRONT_CTRL_UP     0x107   // PIN 7 (UP)
 
-    // Front-panel status LEDs sit on this PCA9557 (identical front board on ESP32-S3 and RP2040):
-    // enable INFO2 (green) / INFO3 (red) for every REG2 variant that carries this board.
-    #define OKNXHW_REG2_PIPICO_V1_LED2
-    #define OKNXHW_REG2_PIPICO_V1_LED3
+    // Front-panel status LEDs sit on this PCA9557 (identical front board on ESP32-S3 and RP2040).
+    #ifdef OKNXHW_REG2_DEVICE_DISPLAY
+        #define OKNXHW_REG2_DD_FRONT_LEDS // with display: INFO1 = red (left), INFO2 = green (right), no INFO3
+    #else
+        #define OKNXHW_REG2_PIPICO_V1_LED2
+        #define OKNXHW_REG2_PIPICO_V1_LED3
+    #endif
 
     #define OPENKNX_PCA9557_PINS_COUNT 8
     #define OPENKNX_PCA9557_PINS \
@@ -543,8 +546,14 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
  * OpenKNX REG2-Pi-Pico
  */
 
+// REG2-Pi-Pico V1 with display: INFO1/INFO2 = front LEDs on the PCA9557 (same as REG2-ESP-S3-Pico with display)
+#ifdef OKNXHW_REG2_DD_FRONT_LEDS
+    #define INFO1_LED_PIN FRONT_CTRL_LED1_R // PCA9557 pin 1 (red, left)
+    #define INFO1_LED_PIN_ACTIVE_ON HIGH
+    #define INFO2_LED_PIN FRONT_CTRL_LED2_G // PCA9557 pin 2 (green, right)
+    #define INFO2_LED_PIN_ACTIVE_ON HIGH
 // REG2-Pi-Pico V1: Info1 LED
-#ifdef OKNXHW_REG2_PIPICO_V1_LED1
+#elif defined(OKNXHW_REG2_PIPICO_V1_LED1)
     #define INFO1_LED_PIN 25 // PiPico Onboard LED
     #define INFO1_LED_PIN_ACTIVE_ON HIGH
 #endif

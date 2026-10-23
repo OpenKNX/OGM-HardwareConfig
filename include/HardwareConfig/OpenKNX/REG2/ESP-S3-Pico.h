@@ -127,20 +127,21 @@
 
     #define OPENKNX_SERIALLED_ENABLE
     #define OPENKNX_SERIALLED_PIN NEOPIX_LED_PIN
-    #define OPENKNX_SERIALLED_NUM 1 // 1 physical onboard WS2812 (not assigned). INFO LEDs live on the PCA9557 expander (see LED_INIT).
+    #define OPENKNX_SERIALLED_NUM 1 // 1 physical onboard WS2812 (INFO3). INFO1/INFO2 live on the PCA9557 expander (see LED_INIT).
     #define OPENKNX_LEDEFFECT_PULSE_MIN 50
 
-    // Mixed LED wiring for the REG2-ESP-S3-Pico front panel:
-    //   PROG    -> prog LED on GPIO13 (PI PICO GPIO2)
-    //   INFO2/3 -> single green/red LEDs on the PCA9557 I2C expander (single-colour, on/off)
+    // Mixed LED wiring for the REG2-ESP-S3-Pico with display (same INFO1/INFO2 as REG2-Pi-Pico with display):
+    //   PROG  -> prog LED on GPIO13 (PI PICO GPIO2)
+    //   INFO1 -> red front LED (left) on the PCA9557 I2C expander
+    //   INFO2 -> green front LED (right) on the PCA9557 I2C expander
+    //   INFO3 -> onboard WS2812 NeoPixel (serial strip, index 0)
     // The Led::Manager auto-config can only do all-Serial OR all-GPIO, so we mix them manually via the LED_INIT hook.
     // Led::GPIO treats a pin > 0xFF as an I2C-expander pin and drives it through openknx.gpio (PCA9557).
-    // NOTE: expander LEDs assumed active-HIGH; change HIGH -> LOW below if they are inverted on your board.
-    //       Swap INFO2/INFO3 if you'd rather have green=KNX / red=NET.
     #define LED_INIT() do { \
-        addLed(new OpenKNX::Led::GPIO(13, HIGH), OpenKNX::Led::LED_TYPE_PROG); /* ESP32 GPIO13 | PI PICO GPIO2 */ \
-        addLed(new OpenKNX::Led::GPIO(FRONT_CTRL_LED2_G, HIGH), OpenKNX::Led::LED_TYPE_INFO2); /* green (PCA9557 pin 2) -> NET_STATE */ \
-        addLed(new OpenKNX::Led::GPIO(FRONT_CTRL_LED1_R, HIGH), OpenKNX::Led::LED_TYPE_INFO3); /* red   (PCA9557 pin 1) -> BASE_KNX  */ \
+        addLed(new OpenKNX::Led::GPIO(13, HIGH), OpenKNX::Led::LED_TYPE_PROG);                 /* ESP32 GPIO13 | PI PICO GPIO2 */ \
+        addLed(new OpenKNX::Led::GPIO(FRONT_CTRL_LED1_R, HIGH), OpenKNX::Led::LED_TYPE_INFO1); /* red   (PCA9557 pin 1) */ \
+        addLed(new OpenKNX::Led::GPIO(FRONT_CTRL_LED2_G, HIGH), OpenKNX::Led::LED_TYPE_INFO2); /* green (PCA9557 pin 2) */ \
+        addLed(new OpenKNX::Led::Serial(0, NEOPIX_LED_PIN, OPENKNX_SERIALLED_COLOR_GREEN), OpenKNX::Led::LED_TYPE_INFO3); \
     } while (0)
 #endif
 
