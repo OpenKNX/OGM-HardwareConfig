@@ -279,7 +279,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
 #endif
@@ -291,7 +291,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
 #endif
@@ -303,7 +303,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     // #define OKNXHW_REG2_PIPICO_V1_LED2
     // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -316,7 +316,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     // #define OKNXHW_REG2_PIPICO_V1_LED2
     // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -329,7 +329,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Display RTC" // 24 + 14 = 38 characters --> + 22 = 60 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -343,7 +343,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Display RTC" // 24 + 14 = 38 characters --> + 22 = 60 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -357,7 +357,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -371,7 +371,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -385,7 +385,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_PIPICO_APP_ETH
@@ -398,7 +398,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_PIPICO_APP_ETH
@@ -411,7 +411,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -425,7 +425,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -559,9 +559,8 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 #endif
 
 // REG2-Pi-Pico Wifi V1: Info1 LED
-#ifdef OKNXHW_REG2_PIPICO_W_V1_LED1
-    #define INFO1_LED_PIN LED_BUILTIN // PiPicoW1 GPIO 32 / PiPicoW2 GPIO 64 (Onboard LED WiFi)
-    #define INFO1_LED_PIN_ACTIVE_ON HIGH
+#ifdef OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    #define OPENKNX_WIFI_LED_PIN LED_BUILTIN // Pico W / Pico 2 W onboard LED at the WiFi chip (pin 64): fixed WiFi state, no info LED, no dimming
 #endif
 
 // REG2-Pi-Pico V1: Info2 LED -> green front LED on PCA9557 (via openknx.gpio, like ESP32-S3 REG2)
