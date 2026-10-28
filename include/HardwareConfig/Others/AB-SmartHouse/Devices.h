@@ -1,9 +1,9 @@
 #pragma once
 /**
- * AB-SmartHouse OpenKNX ready Hardware definition header file
+ * AB-SmartHouse Hardware definition header file
  *
- * File: Device.h
- * Hardware: OpenKNX Miscellanous Hardware
+ * File: Devices.h
+ * Hardware: Other
  * Responsible: AB-SmartHouse
  *
  * Defines hardware IO pins and functionalities for the AB-SmartHouse Hardware.
