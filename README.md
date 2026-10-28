@@ -19,7 +19,7 @@ jede Geräte-Pindefinition wird von einem
 eingeschlossen.
 
 
-`<DeviceID>` darf aus a-z, A-Z, 0-9, _ und - bestehen. OpenKNX-Ready und andere HW wird ein jeweilig einheitlichen Präfix vorangestellt.  
+`<DeviceID>` darf aus a-z, A-Z, 0-9, _ und - bestehen. Hardware von Drittanbietern muss ein jeweilig einheitliches Präfix vorangestellt werden.  
 Maximallänge: am besten nicht länger als 16 Zeichen
 Beispiel: `PiPico-BCU-Connector` (OpenKNX) oder `SMARTMF-Modbus-RTU-3BE` (OpenKNX-Ready, Präfix SMARTMF)
 
