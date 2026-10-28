@@ -4,8 +4,7 @@ OpenKNX Hardware Definition Headers
 
 ## Regeln
 
-jede Geräte-Pindefinition wird von einem
-
+Jede Geräte-Definition erfolgt als ein Block, abhängig von `DEVICE_<DeviceID-Macro>`:
 ```
 #ifdef DEVICE_<DeviceID-Macro>
     #define DEVICE_ID "<DeviceID>"
@@ -16,7 +15,6 @@ jede Geräte-Pindefinition wird von einem
     // etc. ...
 #endif
 ```
-eingeschlossen.
 
 
 `<DeviceID>` darf aus a-z, A-Z, 0-9, _ und - bestehen. Hardware von Drittanbietern muss ein jeweilig einheitliches Präfix vorangestellt werden.  
@@ -28,11 +26,11 @@ Beispiel: `PiPico-BCU-Connector` (OpenKNX) oder `SMARTMF-Modbus-RTU-3BE` (OpenKN
 Beispiel: `SMARTMF-Modbus-RTU-3BE` wird zu `SMARTMF_MODBUS_RTU_3BE` und somit zu `DEVICE_SMARTMF_MODBUS_RTU_3BE`
 
 
-`<DeviceName>` darf aus allen Asciizeichen bestehen. Möglichst keine Klammern verwenden.
+`<DeviceName>` darf aus allen ASCII-Zeichen bestehen. Möglichst keine Klammern verwenden.
 Maximallänge: am besten nicht länger als 32 Zeichen
 
 ## Wichtig:
-`<DeviceID>` und `<DeviceName>` müssen exakt so lauten, wir auch in der Geräteliste im Wiki definiert.  
+`<DeviceID>` und `<DeviceName>` müssen exakt so lauten, wie auch in der Geräteliste im Wiki definiert.  
 https://openknx.atlassian.net/wiki/spaces/OPENKNXDEV/database/131098?atl_f=PAGETREE
 
 
