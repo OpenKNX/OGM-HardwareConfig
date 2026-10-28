@@ -18,22 +18,6 @@
                 }
             }
         },
-        "OpenKNX Miscellanous Hardware": {
-            "responsible": "AB-SmartHouse",
-            "devices": {
-                "AB-BUT-GIR": {
-                    "Condition": "#ifdef DEVICE_AB_BUT_GIR",
-                    "DeviceID": "AB-BUT-GIR",
-                    "DeviceName": "AB-SmartHouse Push Buttons for Gira",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/AB-SmartHouse/Devices.h:17-26",
-                    "Teaser": [
-                        "Taster"
-                    ],
-                    "DeviceFamily": "OpenKNX Miscellanous Hardware",
-                    "Responsible": "AB-SmartHouse"
-                }
-            }
-        },
         "OpenKNX REG1": {
             "responsible": "Ing-Dom",
             "devices": {
@@ -343,171 +327,182 @@
                 }
             }
         },
-        "Ready Hardware": {
-            "responsible": "Smart-MF",
+        "Other": {
+            "responsible": "AB-SmartHouse",
             "devices": {
+                "AB-BUT-GIR": {
+                    "Condition": "#ifdef DEVICE_AB_BUT_GIR",
+                    "DeviceID": "AB-BUT-GIR",
+                    "DeviceName": "AB-SmartHouse Push Buttons for Gira",
+                    "SourceFile": "./include/HardwareConfig/Others/AB-SmartHouse/Devices.h:17-26",
+                    "Teaser": [
+                        "Taster"
+                    ],
+                    "DeviceFamily": "Other",
+                    "Responsible": "AB-SmartHouse"
+                },
                 "SMARTMF-1TE-BE-3CH": {
                     "Condition": "#ifdef DEVICE_SMARTMF_1TE_BE_3CH",
                     "DeviceID": "SMARTMF-1TE-BE-3CH",
                     "DeviceName": "Smart-MF S0-Zählermodul",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:97-106",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:97-106",
                     "Teaser": [
                         "REG 1TE",
                         "Smart-MF 1TE 3x Binary Inputs"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-1Wire-3CH": {
                     "Condition": "#ifdef DEVICE_SMARTMF_1WIRE_3CH",
                     "DeviceID": "SMARTMF-1Wire-3CH",
                     "DeviceName": "Smart-MF 1-Wire Gateway 3CH",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:189-198",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:189-198",
                     "Teaser": [
                         "REG 2TE",
                         "Smart-MF 1-Wire Gateway 3CH"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-2SML-3BE": {
                     "Condition": "#ifdef DEVICE_SMARTMF_2SML_3BE",
                     "DeviceID": "SMARTMF-2SML-3BE",
                     "DeviceName": "Smart-MF eHZ Schnittstelle",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:220-225",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:220-225",
                     "Teaser": [
                         "Smart-MF SML Reader (2x SML + 3x BIN)"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-ENO": {
                     "Condition": "#ifdef DEVICE_SMARTMF_ENOCEANGATEWAY_V2",
                     "DeviceID": "SMARTMF-ENO",
                     "DeviceName": "Smart-MF Enocean Gateway V2",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:414-421",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:414-421",
                     "Teaser": [
                         "Smart-MF Enocean Gateway V2 RP2040"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-GC": {
                     "Condition": "#ifdef DEVICE_SMARTMF_GARDENCONTROL",
                     "DeviceID": "SMARTMF-GC",
                     "DeviceName": "Smart-MF GardenControl",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:372-377",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:372-377",
                     "Teaser": [
                         "Smart-MF GardenControl"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-Modbus-Aussen": {
                     "Condition": "#ifdef DEVICE_SMARTMF_MODBUS_AUSSEN",
                     "DeviceID": "SMARTMF-Modbus-Aussen",
                     "DeviceName": "Smart-MF Modbus RTU Aussen",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:387-394",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:387-394",
                     "Teaser": [
                         "Smart-MF Modbus Gehäuse Außen"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-Modbus-RTU-3BE": {
                     "Condition": "#ifdef DEVICE_SMARTMF_MODBUS_RTU_3BE",
                     "DeviceID": "SMARTMF-Modbus-RTU-3BE",
                     "DeviceName": "Smart-MF Modbus-RTU Gateway",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:250-255",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:250-255",
                     "Teaser": [
                         "Smart-MF Modbus Gateway + 3x BIN"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-RP-V2": {
                     "Condition": "#ifdef DEVICE_SMARTMF_REALPRESENCE_V2",
                     "DeviceID": "SMARTMF-RP-V2",
                     "DeviceName": "Smart-MF RealPresence 2.0",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:444-449",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:444-449",
                     "Teaser": [
                         "Smart-MF RealPresence 2.0 (HLK)"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-SEN-V4": {
                     "Condition": "#ifdef DEVICE_SMARTMF_SENSORMODUL",
                     "DeviceID": "SMARTMF-SEN-V4",
                     "DeviceName": "Smart-MF Sensormodul V4",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:304-313",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:304-313",
                     "Teaser": [
                         "Sensormodul",
                         "Smart-MF Sensormodul"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-Taster": {
                     "Condition": "#ifdef DEVICE_SMARTMF_TASTERINTERFACE",
                     "DeviceID": "SMARTMF-Taster",
                     "DeviceName": "Smart-MF Tasterinterface",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:437-442",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:437-442",
                     "Teaser": [
                         "Smart-MF Tasterinterface"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-WN90LP": {
                     "Condition": "#ifdef DEVICE_SMARTMF_ECOWITT_WN90LP",
                     "DeviceID": "SMARTMF-WN90LP",
                     "DeviceName": "Smart-MF Ecowitt WN90LP",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:276-281",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:276-281",
                     "Teaser": [
                         "Smart-MF Wetterstation Gateway"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SMARTMF-WR": {
                     "Condition": "#ifdef DEVICE_SMARTMF_WIEGAND_READER",
                     "DeviceID": "SMARTMF-WR",
                     "DeviceName": "Smart-MF Wiegand Reader",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:17-24",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:17-24",
                     "Teaser": [
                         "Smart-MF GardenControl"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SOM-UP": {
                     "Condition": "#ifdef DEVICE_SMARTMF_SOM_UP",
                     "DeviceID": "SOM-UP",
                     "DeviceName": "Smart-MF Soundmodul UP",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:46-53",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:46-53",
                     "Teaser": [
                         "SOM"
                     ],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SOM-UP-EXT-PWR": {
                     "Condition": "#ifdef DEVICE_SMARTMF_SOM_UP_EXT_PWR",
                     "DeviceID": "SOM-UP-EXT-PWR",
                     "DeviceName": "Smart-MF Soundmodul UP (Ext-Power)",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:60-64",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:60-64",
                     "Teaser": [],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 },
                 "SOM-UP-REG": {
                     "Condition": "#ifdef DEVICE_SMARTMF_SOM_REG",
                     "DeviceID": "SOM-UP-REG",
                     "DeviceName": "Smart-MF Soundmodul REG",
-                    "SourceFile": "./include/HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h:67-71",
+                    "SourceFile": "./include/HardwareConfig/Others/Smart-MF/Devices.h:67-71",
                     "Teaser": [],
-                    "DeviceFamily": "Ready Hardware",
+                    "DeviceFamily": "Other",
                     "Responsible": "Smart-MF"
                 }
             }
