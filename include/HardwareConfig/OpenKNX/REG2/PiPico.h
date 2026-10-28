@@ -7,6 +7,17 @@
  * Responsible: OpenKNX - Erkan Çolak
  *
  * Defines hardware IO pins and functionalities for OpenKNX REG2-Pi-Pico platform.
+ * Includes pin assignments for LEDs, buttons, serial communication, I2C interfaces,
+ * terminal board pins, application board pins, and other peripherals. Ensures 
+ * compatibility with various configurations:
+ * - REG2-Pi-Pico / Pi-Pico2 (Current Versions: V1)
+ * - REG2-Pi-Pico W / Pi-Pico2 W with WiFi
+ * - Device Display, RTC, Meter support
+ * - Ethernet App Board configurations
+ *
+ * Each configuration is guarded by preprocessor directives to enable/disable features.
+ *
+ * More info about the Hardware visit: www.openknx.de
  *
  * ATTENTION:
  *    Do not include this file directly.
@@ -19,6 +30,48 @@
  * OpenKNX REG2-Pi-Pico
  */
 
+/**
+ Device Hardware ID Structure:
+ 
+ Bits 15-12: Main Group (4 bits = 16 main groups)
+ Bits 11-8:  Subgroup   (4 bits = 16 subgroups)
+ Bits 7-0:   Variant    (8 bits = 256 variants)
+
+ Format: 0xHUVV
+         H = Main Group
+         U = Subgroup
+         VV = Variant
+  Example: 0x1201 = Main Group 1, Subgroup 2, Variant 1
+
+
+  Main Group 0x1 = OpenKNX (0x1000-0x1FFF)
+├─ 0x10 = REG1  (0x1000-0x10FF) → 256 variants
+├─ 0x11 = REG2  (0x1100-0x11FF) → 256 variants
+│  ├─ 0x110x = REG2 PiPico    (0x1100-0x110F) → Base, DD, RTC, Meter, ETH
+│  ├─ 0x111x = REG2 PiPico W  (0x1110-0x111F) → WiFi variants
+│  ├─ 0x112x = REG2 PiPico2   (0x1120-0x112F) → RP2350 variants
+│  └─ 0x113x = REG2 PiPico2 W (0x1130-0x113F) → RP2350 WiFi variants
+├─ 0x12 = UP1   (0x1200-0x12FF) → 256 variants
+├─ 0x13 = XIAO  (0x1300-0x13FF) → 256 variants
+│  ├─ 0x130x = XIAO RP2040   (0x1300-0x130F) → KNeoPix, Mini
+│  ├─ 0x131x = XIAO RP2350   (0x1310-0x131F) → KNeoPix
+│  ├─ 0x132x = XIAO ESP32S3  (0x1320-0x132F) → KNeoPix, Mini
+│  ├─ 0x133x = XIAO ESP32C6  (0x1330-0x133F) → KNeoPix, Mini (future)
+│  └─ 0x135x = XIAO ESP32C3  (0x1350-0x135F) → KNeoPix, Mini
+└─ ... to 0x1F (16 subgroups)
+
+Main Group 0x2 = OpenKNX-Ready (0x2000-0x2FFF)
+├─ 0x20 = Partner A
+├─ 0x21 = Partner B
+└─ ...
+Main Group 0x3 = Community Devices (0x3000-0x3FFF)
+├─ 0x30 = Device A
+├─ 0x31 = Device B
+└─ ...
+ */
+
+
+// DEVICE-based definitions (for full device configurations)
 #if defined(DEVICE_REG2_PIPICO_V1) \
   || defined(DEVICE_REG2_PIPICO_V1_DD) \
   || defined(DEVICE_REG2_PIPICO_V1_DD_RTC) \
@@ -50,8 +103,9 @@
 #endif
 
 
-// REG2-Pi-Pico V1
-#if defined(DEVICE_REG2_PIPICO_V1) || defined(DEVICE_REG2_PIPICO2_V1)
+// REG2-Pi-Pico V1 (RP2040)
+#if defined(DEVICE_REG2_PIPICO_V1)
+    #define DEVICE_HW_ID 0x1100
     #define DEVICE_ID PREFIX_ID
     #define DEVICE_NAME PREFIX_NAME
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
@@ -61,8 +115,21 @@
 // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3
 #endif
 
-// REG2-Pi-Pico V1 (Device Display)
-#if defined(DEVICE_REG2_PIPICO_V1_DD) || defined(DEVICE_REG2_PIPICO2_V1_DD)
+// REG2-Pi-Pico2 V1 (RP2350)
+#if defined(DEVICE_REG2_PIPICO2_V1)
+    #define DEVICE_HW_ID 0x1120
+    #define DEVICE_ID PREFIX_ID
+    #define DEVICE_NAME PREFIX_NAME
+    #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_V1_LED1   // LED1
+// #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2
+// #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3
+#endif
+
+// REG2-Pi-Pico V1 (Device Display, RP2040)
+#if defined(DEVICE_REG2_PIPICO_V1_DD)
+    #define DEVICE_HW_ID 0x1101
     #define DEVICE_ID PREFIX_ID "-DD"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
@@ -73,8 +140,22 @@
     #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
 #endif
 
-// REG2-Pi-Pico V1 (Device Display + RTC)
-#if defined(DEVICE_REG2_PIPICO_V1_DD_RTC) || defined(DEVICE_REG2_PIPICO2_V1_DD_RTC)
+// REG2-Pi-Pico2 V1 (Device Display, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_V1_DD)
+    #define DEVICE_HW_ID 0x1121
+    #define DEVICE_ID PREFIX_ID "-DD"                // 12 + 8 = 20 characters
+    #define DEVICE_NAME PREFIX_NAME " DeviceDisplay" // 24 + 16 = 40 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
+    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
+    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
+#endif
+
+// REG2-Pi-Pico V1 (Device Display + RTC, RP2040)
+#if defined(DEVICE_REG2_PIPICO_V1_DD_RTC)
+    #define DEVICE_HW_ID 0x1102
     #define DEVICE_ID PREFIX_ID "-DD-RTC"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay RTC" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
@@ -86,8 +167,23 @@
     #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
 #endif
 
-// REG2-Pi-Pico V1 (Device Display + Meter)
-#if defined(DEVICE_REG2_PIPICO_V1_DD_METER) || defined(DEVICE_REG2_PIPICO2_V1_DD_METER)
+// REG2-Pi-Pico2 V1 (Device Display + RTC, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_V1_DD_RTC)
+    #define DEVICE_HW_ID 0x1122
+    #define DEVICE_ID PREFIX_ID "-DD-RTC"                // 12 + 8 = 20 characters
+    #define DEVICE_NAME PREFIX_NAME " DeviceDisplay RTC" // 24 + 16 = 40 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
+    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
+    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
+    #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
+#endif
+
+// REG2-Pi-Pico V1 (Device Display + Meter, RP2040)
+#if defined(DEVICE_REG2_PIPICO_V1_DD_METER)
+    #define DEVICE_HW_ID 0x1103
     #define DEVICE_ID PREFIX_ID "-DD-Meter"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay Meter" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON                   // Common pins for all REG2-Pi-Pico
@@ -100,11 +196,26 @@
     #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
 #endif
 
-// REG2-Pi-Pico V1 ETH App
-#if defined(DEVICE_REG2_PIPICO_V1_ETH) || defined(DEVICE_REG2_PIPICO2_V1_ETH)
+// REG2-Pi-Pico2 V1 (Device Display + Meter, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_V1_DD_METER)
+    #define DEVICE_HW_ID 0x1123
+    #define DEVICE_ID PREFIX_ID "-DD-Meter"                // 12 + 8 = 20 characters
+    #define DEVICE_NAME PREFIX_NAME " DeviceDisplay Meter" // 24 + 16 = 40 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON                   // Common pins for all REG2-Pi-Pico
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_V1_LED1                     // LED1
+    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
+    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
+    #define OKNXHW_REG2_METER          // Meter Support
+    #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
+#endif
+
+// REG2-Pi-Pico V1 ETH App (RP2040)
+#if defined(DEVICE_REG2_PIPICO_V1_ETH)
+    #define DEVICE_HW_ID 0x1104
     #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
     #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
-    #define DEVICE_REG2_PIPICO_V1
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1
@@ -114,17 +225,44 @@
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
 
-// REG2-Pi-Pico V1 ETH App
-#if defined(DEVICE_REG2_PIPICO_V1_ETH_DD) || defined(DEVICE_REG2_PIPICO2_V1_ETH_DD)
+// REG2-Pi-Pico2 V1 ETH App (RP2350)
+#if defined(DEVICE_REG2_PIPICO2_V1_ETH)
+    #define DEVICE_HW_ID 0x1124
     #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
     #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
-    #define DEVICE_REG2_PIPICO_V1
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_V1_LED1
+    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
+    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    #define OKNXHW_REG2_USING_APP_BOARD
+    #define OKNXHW_REG2_PIPICO_APP_ETH
+#endif
+
+// REG2-Pi-Pico V1 ETH App (Device Display, RP2040)
+#if defined(DEVICE_REG2_PIPICO_V1_ETH_DD)
+    #define DEVICE_HW_ID 0x1105
+    #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
+    #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
+    // LED2/LED3 (front-panel LEDs) are enabled centrally in the Device-Display/App-Board block below
+    #define OKNXHW_REG2_USING_APP_BOARD
+    #define OKNXHW_REG2_PIPICO_APP_ETH
+#endif
+
+// REG2-Pi-Pico2 V1 ETH App (Device Display, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_V1_ETH_DD)
+    #define DEVICE_HW_ID 0x1125
+    #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
+    #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_DEVICE_DISPLAY
+    #define OKNXHW_REG2_PIPICO_V1_LED1
+    // LED2/LED3 (front-panel LEDs) are enabled centrally in the Device-Display/App-Board block below
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
@@ -134,76 +272,160 @@
  * OpenKNX REG2-Pi-Pico Wi-Fi
  */
 
-// REG2-Pi-Pico Wi-Fi V1
-#if defined(DEVICE_REG2_PIPICO_W_V1) || defined(DEVICE_REG2_PIPICO2_W_V1)
+// REG2-Pi-Pico Wi-Fi V1 (RP2040)
+#if defined(DEVICE_REG2_PIPICO_W_V1)
+    #define DEVICE_HW_ID 0x1110
     #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
 #endif
 
-// REG2-Pi-Pico Wi-Fi V1
-#if defined(DEVICE_REG2_PIPICO_W_V1_DD) || defined(DEVICE_REG2_PIPICO2_W_V1_DD)
+// REG2-Pi-Pico2 Wi-Fi V1 (RP2350)
+#if defined(DEVICE_REG2_PIPICO2_W_V1)
+    #define DEVICE_HW_ID 0x1130
     #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    //#define OKNXHW_REG2_PIPICO_V1_LED2
+    //#define OKNXHW_REG2_PIPICO_V1_LED3
+#endif
+
+// REG2-Pi-Pico Wi-Fi V1 (Device Display, RP2040)
+#if defined(DEVICE_REG2_PIPICO_W_V1_DD)
+    #define DEVICE_HW_ID 0x1111
+    #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     // #define OKNXHW_REG2_PIPICO_V1_LED2
     // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
 #endif
 
-// REG2-Pi-Pico Wi-Fi V1 (Device Display + RTC)
-#if defined(DEVICE_REG2_PIPICO_W_V1_DD_RTC) || defined(DEVICE_REG2_PIPICO2_W_V1_DD_RTC)
+// REG2-Pi-Pico2 Wi-Fi V1 (Device Display, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_W_V1_DD)
+    #define DEVICE_HW_ID 0x1131
+    #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    // #define OKNXHW_REG2_PIPICO_V1_LED2
+    // #define OKNXHW_REG2_PIPICO_V1_LED3
+    #define OKNXHW_REG2_DEVICE_DISPLAY
+#endif
+
+// REG2-Pi-Pico Wi-Fi V1 (Device Display + RTC, RP2040)
+#if defined(DEVICE_REG2_PIPICO_W_V1_DD_RTC)
+    #define DEVICE_HW_ID 0x1112
     #define DEVICE_ID PREFIX_ID "-W-DD-RTC"             // 12 + 10 = 22 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display RTC" // 24 + 14 = 38 characters --> + 22 = 60 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_DEVICE_RTC
 #endif
 
-// REG2-Pi-Pico Wi-Fi V1 (Device Display + Meter)
-#if defined(DEVICE_REG2_PIPICO_W_V1_DD_METER) || defined(DEVICE_REG2_PIPICO2_W_V1_DD_METER)
+// REG2-Pi-Pico2 Wi-Fi V1 (Device Display + RTC, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_W_V1_DD_RTC)
+    #define DEVICE_HW_ID 0x1132
+    #define DEVICE_ID PREFIX_ID "-W-DD-RTC"             // 12 + 10 = 22 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Display RTC" // 24 + 14 = 38 characters --> + 22 = 60 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    //#define OKNXHW_REG2_PIPICO_V1_LED2
+    //#define OKNXHW_REG2_PIPICO_V1_LED3
+    #define OKNXHW_REG2_DEVICE_DISPLAY
+    #define OKNXHW_REG2_DEVICE_RTC
+#endif
+
+// REG2-Pi-Pico Wi-Fi V1 (Device Display + Meter, RP2040)
+#if defined(DEVICE_REG2_PIPICO_W_V1_DD_METER)
+    #define DEVICE_HW_ID 0x1113
     #define DEVICE_ID PREFIX_ID "-W-DD-Meter"             // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_METER
 #endif
 
-// REG2-Pi-Pico WiFi V1 ETH App
-#if defined(DEVICE_REG2_PIPICO_W_V1_ETH) || defined(DEVICE_REG2_PIPICO2_W_V1_ETH)
-    #define DEVICE_ID PREFIX_ID "-W-ETH"             // 12 + 6 = 18 characters
-    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
-    #define DEVICE_REG2_PIPICO_W_V1
+// REG2-Pi-Pico2 Wi-Fi V1 (Device Display + Meter, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_W_V1_DD_METER)
+    #define DEVICE_HW_ID 0x1133
+    #define DEVICE_ID PREFIX_ID "-W-DD-Meter"             // 12 + 8 = 20 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    //#define OKNXHW_REG2_PIPICO_V1_LED2
+    //#define OKNXHW_REG2_PIPICO_V1_LED3
+    #define OKNXHW_REG2_DEVICE_DISPLAY
+    #define OKNXHW_REG2_METER
+#endif
+
+// REG2-Pi-Pico WiFi V1 ETH App (RP2040)
+#if defined(DEVICE_REG2_PIPICO_W_V1_ETH)
+    #define DEVICE_HW_ID 0x1114
+    #define DEVICE_ID PREFIX_ID "-W-ETH"             // 12 + 6 = 18 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
 
-// REG2-Pi-Pico WiFi V1 ETH App (Device Display)
-#if defined(DEVICE_REG2_PIPICO_W_V1_ETH_DD) || defined(DEVICE_REG2_PIPICO2_W_V1_ETH_DD)
-    #define DEVICE_ID PREFIX_ID "-W-ETH-DD"           // 12 + 12 = 24 characters
-    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
-    #define DEVICE_REG2_PIPICO_W_V1
+// REG2-Pi-Pico2 WiFi V1 ETH App (RP2350)
+#if defined(DEVICE_REG2_PIPICO2_W_V1_ETH)
+    #define DEVICE_HW_ID 0x1134
+    #define DEVICE_ID PREFIX_ID "-W-ETH"             // 12 + 6 = 18 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
-    #define OKNXHW_REG2_PIPICO_W_V1_LED1
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    //#define OKNXHW_REG2_PIPICO_V1_LED2
+    //#define OKNXHW_REG2_PIPICO_V1_LED3
+    #define OKNXHW_REG2_PIPICO_APP_ETH
+#endif
+
+// REG2-Pi-Pico WiFi V1 ETH App (Device Display, RP2040)
+#if defined(DEVICE_REG2_PIPICO_W_V1_ETH_DD)
+    #define DEVICE_HW_ID 0x1115
+    #define DEVICE_ID PREFIX_ID "-W-ETH-DD"           // 12 + 12 = 24 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    //#define OKNXHW_REG2_PIPICO_V1_LED2
+    // #define OKNXHW_REG2_PIPICO_V1_LED3
+    #define OKNXHW_REG2_DEVICE_DISPLAY
+    #define OKNXHW_REG2_PIPICO_APP_ETH
+#endif
+
+// REG2-Pi-Pico2 WiFi V1 ETH App (Device Display, RP2350)
+#if defined(DEVICE_REG2_PIPICO2_W_V1_ETH_DD)
+    #define DEVICE_HW_ID 0x1135
+    #define DEVICE_ID PREFIX_ID "-W-ETH-DD"           // 12 + 12 = 24 characters
+    #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
+    #define OKNXHW_REG2_PIPICO_V1_COMMON
+    #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
+    #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     //#define OKNXHW_REG2_PIPICO_V1_LED2
     // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -218,7 +440,8 @@
 // REG2-Pi-Pico FwF: Device Display Support
 #if defined(OKNXHW_REG2_DEVICE_DISPLAY) || defined(OKNXHW_REG2_USING_APP_BOARD)
     // Default pins for the I2C bus to connect the hardware display
-    #define OKNXHW_REG2_HWDISPLAY_I2C_INST i2c1 // i2c1 | i2c0
+    #define OPENKNX_I2C_SCHEDULER // I2C1 is owned by OGM-Common's ScheduledWire: PCA9557 LED soft-PWM edges, display and buttons share it
+    #define OKNXHW_REG2_HWDISPLAY_I2C_INST openknxScheduledWire // TwoWire object for display + PCA9557 (same bus as OPENKNX_GPIO_WIRE)
 
     #ifdef OKNXHW_REG2_USING_APP_BOARD
         #define OKNXHW_REG2_HWDISPLAY_I2C_SDA 22 // GPIO22 | SPI0 SCK | UART1 TX | I2C1 SDA | PWM3 A | ADC2
@@ -246,6 +469,14 @@
     #define FRONT_CTRL_OK     0x106   // PIN 6 (OK / SELECT)
     #define FRONT_CTRL_UP     0x107   // PIN 7 (UP)
 
+    // Front-panel status LEDs sit on this PCA9557 (identical front board on ESP32-S3 and RP2040).
+    #ifdef OKNXHW_REG2_DEVICE_DISPLAY
+        #define OKNXHW_REG2_DD_FRONT_LEDS // with display: INFO1 = red (left), INFO2 = green (right), no INFO3
+    #else
+        #define OKNXHW_REG2_PIPICO_V1_LED2
+        #define OKNXHW_REG2_PIPICO_V1_LED3
+    #endif
+
     #define OPENKNX_PCA9557_PINS_COUNT 8
     #define OPENKNX_PCA9557_PINS \
                 FRONT_CTRL_LEFT, \
@@ -261,7 +492,7 @@
     #define OPENKNX_GPIO_TYPES  OPENKNX_GPIO_T_PCA9557
     #define OPENKNX_GPIO_ADDRS  0x18      // PCA9557 I2C address 0x18 (A0-A2 = 0) A0-A2 are connected to GND if A1 is connected to VCC the address is 0x19
     #define OPENKNX_GPIO_INTS   0xFF
-    #define OPENKNX_GPIO_WIRE   Wire1     // OKNXHW_REG2_HWDISPLAY_I2C_INST
+    #define OPENKNX_GPIO_WIRE   OKNXHW_REG2_HWDISPLAY_I2C_INST // same bus as the display
     #define OPENKNX_GPIO_CLOCK  400000    // I2C Taktfrequenz in Hz (400kHz für schnelle I2C-Kommunikation)
 
     #define OKNXHW_DEVICE_DISPLAY_I2C_INST    OKNXHW_REG2_HWDISPLAY_I2C_INST
@@ -315,32 +546,51 @@
  * OpenKNX REG2-Pi-Pico
  */
 
+// REG2-Pi-Pico V1 with display: INFO1/INFO2 = front LEDs on the PCA9557 (same as REG2-ESP-S3-Pico with display)
+#ifdef OKNXHW_REG2_DD_FRONT_LEDS
+    #define INFO1_LED_PIN FRONT_CTRL_LED1_R // PCA9557 pin 1 (red, left)
+    #define INFO1_LED_PIN_ACTIVE_ON HIGH
+    #define INFO2_LED_PIN FRONT_CTRL_LED2_G // PCA9557 pin 2 (green, right)
+    #define INFO2_LED_PIN_ACTIVE_ON HIGH
 // REG2-Pi-Pico V1: Info1 LED
-#ifdef OKNXHW_REG2_PIPICO_V1_LED1
+#elif defined(OKNXHW_REG2_PIPICO_V1_LED1)
     #define INFO1_LED_PIN 25 // PiPico Onboard LED
     #define INFO1_LED_PIN_ACTIVE_ON HIGH
 #endif
 
 // REG2-Pi-Pico Wifi V1: Info1 LED
-#ifdef OKNXHW_REG2_PIPICO_W_V1_LED1
-    #define INFO1_LED_PIN LED_BUILTIN // PiPicoW1 GPIO 32 / PiPicoW2 GPIO 64 (Onboard LED WiFi)
-    #define INFO1_LED_PIN_ACTIVE_ON HIGH
+#ifdef OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
+    #define OPENKNX_WIFI_LED_PIN LED_BUILTIN // Pico W / Pico 2 W onboard LED at the WiFi chip (pin 64): fixed WiFi state, no info LED, no dimming
 #endif
 
-// REG2-Pi-Pico V1: Info2 LED
+// REG2-Pi-Pico V1: Info2 LED -> green front LED on PCA9557 (via openknx.gpio, like ESP32-S3 REG2)
 #ifdef OKNXHW_REG2_PIPICO_V1_LED2
-    //#define INFO2_LED_PIN 3 // ToDo: Option use of DD Front Control LEDs
-    //#define INFO2_LED_PIN_ACTIVE_ON HIGH
+    #define INFO2_LED_PIN FRONT_CTRL_LED2_G // PCA9557 pin 2 (green)
+    #define INFO2_LED_PIN_ACTIVE_ON HIGH
 #endif
-// REG2-Pi-Pico V1: Info3 LED
+// REG2-Pi-Pico V1: Info3 LED -> red front LED on PCA9557 (via openknx.gpio, like ESP32-S3 REG2)
 #ifdef OKNXHW_REG2_PIPICO_V1_LED3
-    //#define INFO3_LED_PIN 21 // ToDo: Optional use of DD Front Control LEDs
-    //#define INFO3_LED_PIN_ACTIVE_ON HIGH
+    #define INFO3_LED_PIN FRONT_CTRL_LED1_R // PCA9557 pin 1 (red)
+    #define INFO3_LED_PIN_ACTIVE_ON HIGH
 #endif
 
 // REG2-Pi-Pico V1: Interrupt Pin
 #ifdef OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define SAVE_INTERRUPT_PIN 21
+#endif
+
+// REG2-Pi-Pico V1: optional on-board external flash W25Q128 (OFM-ExternalFlash) on SPI1
+#if defined(OPENKNX_EXTFLASH) || defined(EXTERNAL_FLASH_MODULE)
+    #if defined(OKNXHW_REG2_PIPICO_APP_ETH) && defined(OPENKNX_SDCARD)
+        #error "REG2-Pi-Pico: external flash and the ETH app board SD card share SPI1 GP10-GP14"
+    #endif
+    #define OKNXHW_REG2_EXTFLASH_SPI_INST SPI1
+    #define OKNXHW_REG2_EXTFLASH_SPI_SCK 10  // SPI1_SCK
+    #define OKNXHW_REG2_EXTFLASH_SPI_MOSI 11 // SPI1_TX
+    #define OKNXHW_REG2_EXTFLASH_SPI_MISO 12 // SPI1_RX
+    #define OKNXHW_REG2_EXTFLASH_SPI_CS 13   // SPI1_CSN
+    #define OKNXHW_REG2_EXTFLASH_SPI_WP 14   // GPIO_WP
+    #define OKNXHW_REG2_EXTFLASH_SPI_HOLD 15 // GPIO_HOLD
 #endif
 
 /**
@@ -352,7 +602,7 @@
     #define PROG_LED_PIN 2
     #define PROG_LED_PIN_ACTIVE_ON HIGH
     #define PROG_BUTTON_PIN 20
-    #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // Using internal pullup of the ESP32 (aprox. 45kOhm)
+    #define PROG_BUTTON_PIN_MODE INPUT_PULLUP   // internal pull-up of the RP2040/RP2350; the board has none, button and 100 nF go to GND
     #define OPENKNX_BUTTON_DEBOUNCE 0           // Software Debouncer in ms. 0 will Disables software debounce. Since we use the hardware debounce.
     #define KNX_SERIAL Serial1 // Uart0
     #define KNX_UART_NUM 0     // Uart0 

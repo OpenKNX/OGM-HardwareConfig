@@ -92,11 +92,6 @@
     #define BLUE_LED_PIN 27 // blue channel of central RGB LED
     #define BLUE_LED_PIN_ACTIVE_ON LOW
 
-    #define PRESENCE_LED_PIN RED_LED_PIN
-    #define PRESENCE_LED_PIN_ACTIVE_ON RED_LED_PIN_ACTIVE_ON
-    #define MOVE_LED_PIN BLUE_LED_PIN
-    #define MOVE_LED_PIN_ACTIVE_ON BLUE_LED_PIN_ACTIVE_ON
-
     #define I2C_WIRE Wire
     #define I2C_SDA_PIN 28
     #define I2C_SCL_PIN 29
@@ -109,11 +104,18 @@
     #define OPENKNX_BI_GPIO_COUNT 6
     #define OPENKNX_BI_ONLEVEL LOW
 
-    // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deativated by setting to PULLUP
+    #define OPENKNX_SLED_COUNT 1
+    #define OPENKNX_SLED_IDs 10
+
+    // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deactivated by setting to PULLUP
     #define DEVICE_INIT()                     \
         pinMode(RED_LED_PIN, INPUT_PULLUP);   \
         pinMode(GREEN_LED_PIN, INPUT_PULLUP); \
         pinMode(BLUE_LED_PIN, INPUT_PULLUP);
+
+    #define LED_INIT()                        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO_RGB(RED_LED_PIN, GREEN_LED_PIN, BLUE_LED_PIN, RED_LED_PIN_ACTIVE_ON, OpenKNX::Led::Color::Blue), OpenKNX::Led::LED_TYPE_USER);                 \
 
 #endif
 
@@ -168,9 +170,10 @@
     #define OPENKNX_BI_GPIO_COUNT 2
     #define OPENKNX_BI_ONLEVEL LOW
 
+    #define OPENKNX_SLED_COUNT 4
     #define OPENKNX_SLED_IDs 10, 11, 12, 13
 
-    // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deativated by setting to PULLUP
+    // since INPUT_PULLDOWN is the default state and LED are Active LOW, LED must be deactivated by setting to PULLUP
     #define DEVICE_INIT()                      \
         pinMode(LED1_R_PIN, INPUT_PULLUP);     \
         pinMode(LED1_G_PIN, INPUT_PULLUP);     \
@@ -231,6 +234,25 @@
     #define I2C_SCL_PIN 17
 #endif
 
+// device.openknx.de/UP1-GW-UART
+#ifdef DEVICE_UP1_GW_UART
+    #define DEVICE_HW_ID  0x1220 // Used for demo/testing purposes only
+    #define DEVICE_ID "UP1-GW-UART"
+    #define DEVICE_NAME "OpenKNX UP1 UART Gateway"
+
+    #define OKNXHW_UP1_CONTROLLER2040
+
+    #define UART1_RX_PIN (21)
+    #define UART1_TX_PIN (20)
+    #define UART2_TX_PIN (28)
+	
+	#define VISO_SENSE_PIN (26)
+
+    #define I2C_WIRE Wire
+    #define I2C_SDA_PIN 16
+    #define I2C_SCL_PIN 17
+#endif
+
 // device.openknx.de/UP1-WLAN-2xUART
 // XIAO ESP32-S3
 #ifdef DEVICE_UP1_WLAN_2XUART
@@ -282,13 +304,17 @@
     #define OKNXHW_UP1_APP_IR
 #endif
 
-#ifdef DEVICE_UP1_LED_4x24V
-    #define HARDWARE_NAME "UP1-LED-4x24V"
+#ifdef DEVICE_UP1_LED_4x24V_V0001
+    #define HARDWARE_NAME "UP1-LED-4x24V V00.01"
 
     #define OKNXHW_UP1_CONTROLLER2040
 
     #define INFO_LED_PIN                            12
     #define INFO_LED_PIN_ACTIVE_ON                  HIGH
+
+    #define LED_INIT() \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON, false), OpenKNX::Led::LED_TYPE_PROG); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1);
 
     #define OPENKNX_LED_TEMPSENS_WIRE               Wire
     #define OPENKNX_LED_TEMPSENS_PIN_SCL            29

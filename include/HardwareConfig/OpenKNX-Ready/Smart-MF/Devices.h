@@ -17,6 +17,34 @@
  *    It will be included by the HardwareConfig.h file.
  */
 
+
+ // Smart-MF GardenControl
+#ifdef DEVICE_SMARTMF_WIEGAND_READER
+    #define DEVICE_ID "SMARTMF-WR"
+    #define DEVICE_NAME "Smart-MF Wiegand Reader"
+
+    #define INFO_LED_PIN 11
+    #define INFO_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_LED_PIN 10
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 9
+    #define SAVE_INTERRUPT_PIN 0
+    #define KNX_UART_RX_PIN 13
+    #define KNX_UART_TX_PIN 12
+    #define KNX_UART_NUM 0
+
+    #define Wiegand_D0      20
+    #define Wiegand_D1      19
+    #define Wiegand_LED     18
+    #define Wiegand_Buzzer  17
+    #define Wiegand_W34     16
+
+    #define FP_UART_TX 4
+    #define FP_UART_RX 5
+    #define FP_Wake    2
+
+#endif
+
 /************************************************** */
 //  SOM
 /************************************************** */
@@ -93,7 +121,7 @@
     #define SMARTMF_BE1_PIN 14
     #define SMARTMF_BE2_PIN 15
     #define SMARTMF_BE3_PIN 4
-
+   
     #define SMARTMF_BE_VCC_PIN 5
 #endif
 
@@ -135,6 +163,7 @@
 
     #define SMARTMF_LED 15
 
+    #define RS485_SERIAL Serial2
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 14
@@ -199,9 +228,6 @@
     #define SMARTMF_HARDWARE_REVISION_ID2_PIN 3
     #define SMARTMF_HARDWARE_REVISION_ID3_PIN 15
 
-    #define PROG_LED_PIN 11
-    #define PROG_LED_PIN_ACTIVE_ON HIGH
-    #define PROG_BUTTON_PIN 14
     #define SAVE_INTERRUPT_PIN 8
     #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
@@ -219,6 +245,8 @@
 
     #define SMARTMF_SML2_RX_PIN 23
     #define SMARTMF_SML2_TX_PIN 22
+
+    #define DEVICE_SMARTMF_2TE_FRONT
 #endif
 
 // Smart-MF Modbus Gateway + 3x BIN
@@ -230,9 +258,6 @@
     #define SMARTMF_HARDWARE_REVISION_ID2_PIN 3
     #define SMARTMF_HARDWARE_REVISION_ID3_PIN 15
 
-    #define PROG_LED_PIN 11
-    #define PROG_LED_PIN_ACTIVE_ON HIGH
-    #define PROG_BUTTON_PIN 14
     #define SAVE_INTERRUPT_PIN 8
     #define KNX_UART_NUM 0
     #define KNX_UART_RX_PIN 1
@@ -242,9 +267,12 @@
     #define SMARTMF_BE2_PIN 27
     #define SMARTMF_BE3_PIN 26
 
+    #define RS485_SERIAL Serial2
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 24
+
+    #define DEVICE_SMARTMF_2TE_FRONT
 #endif
 
 // Smart-MF Wetterstation Gateway
@@ -338,12 +366,23 @@
     #define OPENKNX_ADC_ADS_SDA I2C_SDA_1WIRE_PIN
     #define OPENKNX_ADC_ADS_SCL I2C_SCL_1WIRE_PIN
 
+    #define LED_INIT()                        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); 
+
 #endif
 
 // Smart-MF GardenControl
 #ifdef DEVICE_SMARTMF_GARDENCONTROL
     #define DEVICE_ID "SMARTMF-GC"
     #define DEVICE_NAME "Smart-MF GardenControl"
+
+    #define PROG_LED_PIN 24
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+    #define PROG_BUTTON_PIN 25
+    #define SAVE_INTERRUPT_PIN 23
+    #define KNX_UART_RX_PIN 17
+    #define KNX_UART_TX_PIN 16
+    #define KNX_UART_NUM 0
 
 #endif
 
@@ -363,6 +402,7 @@
     #define KNX_UART_NUM 0
 
     #define SMARTMF_LED 15
+    #define RS485_SERIAL Serial2
     #define SMARTMF_MODBUS_RX_PIN 5
     #define SMARTMF_MODBUS_TX_PIN 4
     #define SMARTMF_MODBUS_DIR_PIN 14
@@ -390,6 +430,7 @@
     #define KNX_UART_TX_PIN 16
     #define KNX_UART_NUM 0
 
+    #define SERIAL_PORT Serial
     #define OPENKNX_ENO_SERIAL Serial2
     #define OPENKNX_ENO_UART_RX_PIN 5
     #define OPENKNX_ENO_UART_TX_PIN 4
@@ -429,4 +470,38 @@
     #define HF_UART_TX_PIN 4
     #define HF_UART_RX_PIN 5
 
+#endif
+
+#ifdef DEVICE_SMARTMF_2TE_FRONT
+    #define PROG_BUTTON_PIN 14
+
+    #define PROG_LED_PIN 11
+    #define PROG_LED_PIN_ACTIVE_ON HIGH
+ 
+    #define INFO1_LED_PIN 10
+    #define INFO1_LED_PIN_ACTIVE_ON HIGH
+
+    #define OPENKNX_GPIO_NUM 1
+    #define OPENKNX_GPIO_TYPES OPENKNX_GPIO_T_TCA9555
+    #define OPENKNX_GPIO_ADDRS 0x22
+    #define OPENKNX_GPIO_INTS 0xFF
+    #define OPENKNX_GPIO_WIRE Wire
+    #define OPENKNX_GPIO_CLOCK 400000
+    #define OPENKNX_GPIO_SDA 12
+    #define OPENKNX_GPIO_SCL 13
+
+    #define SMARTMF_LED01 0x0104
+    #define SMARTMF_LED02 0x0103
+    #define SMARTMF_LED03 0x0102
+    #define SMARTMF_LED04 0x0101
+    #define SMARTMF_LED05 0x0100
+
+    #define LED_INIT()                                                                                                  \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO1_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1); \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED01, LOW, false), OpenKNX::Led::LED_TYPE_USER + 1);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED02, LOW, false), OpenKNX::Led::LED_TYPE_USER + 2);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED03, LOW, false), OpenKNX::Led::LED_TYPE_USER + 3);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED04, LOW, false), OpenKNX::Led::LED_TYPE_USER + 4);        \
+        openknx.leds.addLed(new OpenKNX::Led::GPIO(SMARTMF_LED05, LOW, false), OpenKNX::Led::LED_TYPE_USER + 5);
 #endif

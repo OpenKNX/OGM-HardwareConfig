@@ -133,11 +133,22 @@
 
     #endif
 
-// REG1-LAN-TP-2xDali
-// http://device.openknx.de/REG1-LAN-TP-2xDali
-    #ifdef DEVICE_REG1_LAN_TP_2XDALI
-        #define DEVICE_ID "REG1-LAN-TP-2xDali"
-        #define DEVICE_NAME "OpenKNX REG1 Dual Dali Gateway LAN"
+    #ifdef DEVICE_REG1_GW_RS485
+        #define DEVICE_ID "REG1-GW-RS485"
+        #define DEVICE_NAME "OpenKNX REG1 RS485 Gateway"
+
+        #define OKNXHW_REG1_CONTROLLER2040_V1
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_APP_RS485
+
+    #endif
+
+// REG1-LAN-TP-Dali
+    #ifdef DEVICE_REG1_LAN_TP_DALI
+        #define DEVICE_ID "REG1-LAN-TP-Dali"
+        #define DEVICE_NAME "OpenKNX REG1 Dali Gateway LAN"
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
@@ -179,6 +190,41 @@
             digitalWrite(ETH_PHY_POWER, LOW);
 
     #endif
+
+// REG1-LAN-SEN-Multi
+// http://device.openknx.de/REG1-LAN-SEN-Multi
+    #ifdef DEVICE_REG1_LAN_SEN_MULTI
+        #define DEVICE_ID "REG1-LAN-SEN-Multi"
+        #define DEVICE_NAME "OpenKNX REG1 Multisensor LAN"
+
+        #define OKNXHW_REG1_CONTROLLERESP_DCU
+        #define OKNXHW_REG1_CONTROLLERESP_V00_11
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_APP_SEN_MULTI
+
+        #define DEVICE_INIT() \
+            pinMode(ETH_PHY_POWER, OUTPUT); \
+            digitalWrite(ETH_PHY_POWER, LOW);
+    #endif
+
+// REG1-GW-RF868M
+// http://device.openknx.de/REG1-GW-RF868M
+    #ifdef DEVICE_REG1_GW_RF868M
+        #define DEVICE_ID "REG1-GW-RF868M"
+        #define DEVICE_NAME "OpenKNX REG1 868MHz-Gateway"
+
+        #define OKNXHW_REG1_CONTROLLER2040_V1
+
+        #define OKNXHW_REG1_FRONT_RGB
+
+        #define OKNXHW_REG1_SENSOR_SDA_TX_PIN (8) // RP2040 GPIO 8 / SPI1 RX / UART1 TX / I2C0 SDA / PWM4 A
+        #define OKNXHW_REG1_SENSOR_SCL_RX_PIN (9) // RP2040 GPIO 9 / SPI1 CSn / UART1 RX / I2C0 SCL / PWM4 B
+
+        #define OKNXHW_REG1_APP_GW_RF868M
+    #endif
+
 
 
 #pragma endregion
@@ -308,7 +354,7 @@
         #define REG1_APP_PIN4 (5)
         #define REG1_APP_PIN5 (8)
         #define REG1_APP_PIN6 (7)
-        #define REG1_APP_PIN7 (20)
+        #define REG1_APP_PIN7 (17)
 
         #define REG1_FRONT_PIN3  (38)
         #define REG1_FRONT_PIN4  (34)
@@ -345,6 +391,7 @@
             #define KNX_UART_TX_PIN (5)
         #endif
 
+        #define ETH_PHY_TYPE  ETH_PHY_GENERIC     // type of PHY used, needed for IDF
         #define ETH_PHY_ADDR  (0)                 // PHYs I2C address
         #define ETH_PHY_MDC   (33)                
         #define ETH_PHY_MDIO  (32)
@@ -454,6 +501,30 @@
         #define OKNXHW_REG1_APP_DALI2_TX REG1_APP_PIN4
     #endif
 
+    // REG1-App-GW-RS485
+    #ifdef OKNXHW_REG1_APP_RS485
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT1_PIN   REG1_APP_PIN7
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT2_PIN   REG1_APP_PIN6
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT3_PIN   REG1_APP_PIN5
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT4_PIN   REG1_APP_PIN4
+        #define OKNXHW_REG1_APP_GW_RS485_BINARY_INPUT_ONLEVEL  LOW
+
+        #define RS485_UART_RX_PIN REG1_APP_PIN3
+        #define RS485_UART_TX_PIN REG1_APP_PIN1
+        #define RS485_UART_DIR_PIN REG1_APP_PIN2
+    #endif
+
+    // REG1-App-GW-RF868M
+    #ifdef OKNXHW_REG1_APP_GW_RF868M
+        #define OKNXHW_REG1_APP_GW_RF868M_SDA_TX_PIN   REG1_APP_PIN7
+        #define OKNXHW_REG1_APP_GW_RF868M_SCL_RX_PIN   REG1_APP_PIN6
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_GD00      REG1_APP_PIN5
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_CLK       REG1_APP_PIN4
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_MOSI      REG1_APP_PIN3
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_MISO      REG1_APP_PIN2
+        #define OKNXHW_REG1_APP_GW_RF868M_RF_CS        REG1_APP_PIN1
+    #endif
+
 #pragma endregion
 
 #pragma region "REG1 Front"
@@ -479,6 +550,12 @@
         #define PROG_BUTTON_PIN REG1_FRONT_PIN10
 
         #define FUNC1_BUTTON_PIN REG1_FRONT_PIN3
+
+        #define LED_INIT() \
+            openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
+            openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO1_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1); \
+            openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO2_LED_PIN, INFO2_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO2); \
+            openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO3_LED_PIN, INFO3_LED_PIN_ACTIVE_ON, false), OpenKNX::Led::LED_TYPE_INFO3);
 
     #endif
 
@@ -548,7 +625,7 @@
                 openknx.leds.addLed(new OpenKNX::Led::GPIO(PROG_LED_PIN, PROG_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_PROG); \
                 openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO1_LED_PIN, INFO1_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO1); \
                 openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO2_LED_PIN, INFO2_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO2); \
-                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO3_LED_PIN, INFO3_LED_PIN_ACTIVE_ON), OpenKNX::Led::LED_TYPE_INFO3); \
+                openknx.leds.addLed(new OpenKNX::Led::GPIO(INFO3_LED_PIN, INFO3_LED_PIN_ACTIVE_ON, false), OpenKNX::Led::LED_TYPE_INFO3); \
             }
 
     #endif
