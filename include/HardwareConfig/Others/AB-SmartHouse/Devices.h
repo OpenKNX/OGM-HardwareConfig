@@ -214,6 +214,27 @@
     #define KNX_RESETB_PIN 37
     #define KNX_ANAOUT_PIN 32
 
+    #define FRONT_GA_SWT_PIN 0x0100
+    #define FRONT_GA_LED_PIN 0x0103
+    #define FRONT_PA_SWT_PIN 0x0101
+    #define FRONT_PA_LED_PIN 0x0102
+    #define FRONT_IP_ACTIVE_LED_PIN 0x0107
+    #define FRONT_IP_FAULT_LED_PIN 0x0106
+    #define FRONT_TP_ACTIVE_LED_PIN 0x0104
+    #define FRONT_TP_FAULT_LED_PIN 0x0105
+    #define FRONT_SWT_PIN_ACTIVE_ON LOW
+    #define FRONT_LED_PIN_ACTIVE_ON HIGH
+
+    #define OPENKNX_GPIO_NUM 1
+    #define OPENKNX_GPIO_TYPES OPENKNX_GPIO_T_PCA9554
+    #define OPENKNX_GPIO_ADDRS 0x20
+    #define OPENKNX_GPIO_INTS 23
+
+    #define OPENKNX_GPIO_WIRE Wire
+    #define OPENKNX_GPIO_SDA 21
+    #define OPENKNX_GPIO_SCL 22
+    #define OPENKNX_GPIO_CLOCK 400000
+
     #define ETH_PHY_RST 51
 
     // NCN5130 communication mode, set by the level of the mode pins at power-up.
