@@ -28,8 +28,8 @@
 #include "HardwareConfig/OpenKNX/misc.h"
 
 // OpenKNX Ready Hardware Configurations
-#include "HardwareConfig/OpenKNX-Ready/AB-SmartHouse/Devices.h"
-#include "HardwareConfig/OpenKNX-Ready/Smart-MF/Devices.h"
+#include "HardwareConfig/Others/AB-SmartHouse/Devices.h"
+#include "HardwareConfig/Others/Smart-MF/Devices.h"
 
 // Other 3rd Party Hardware Configurations
 //  #include "HardwareConfig/Others/XYZ-Hardware.h"
