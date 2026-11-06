@@ -1,0 +1,19 @@
+{
+  "id": "REG1-Base",
+  "name": "OpenKNX REG1 Basismodul",
+  "vendor": "OpenKNX",
+  "category": "universal",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "stable",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP1 Reiheneinbaugerät für 35mm Hutschiene. Ideale Basis für Applikationen mit keinem oder wenig IO-Bedarf.\n1x 4Pin Sensoranschluss UART/I2C incl. 3.3V Versorgung auf steckbarer 3.5mm Schraubklemme",
+  "links": {
+    "source": "https://muster.ing-dom.de/KNX-Geraete/OpenKNX-REG1-Base-Komplettbausatz.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/1813112-openknx-reg1-erweiterbare-1te-hutschienenger%C3%A4te-powered-by-rp2040",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "UP1-PM-HF",
+  "name": "OpenKNX UP1 Präsenzmelder+",
+  "vendor": "OpenKNX",
+  "category": "sensor",
+  "platform": "UP1",
+  "formFactor": { "type": "UP" },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "stable",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP1 Unterputz-Präsenzmelder für die Montage auf 60mm UP-Dosen und Integration in 55mm Programme.\nFront: HLK-LD2420 HF/Radarsensor, VEML7700 Lichtsensor, TOF400 Entfernungsmesser für Lichtschrankenfunktion, Touch-Taste und Status-LED (RGB)\nRückseite: 4 Binäreingänge, Anschlussmöglichkeit für abgesetzten Temp/Feuchte-Sensor (z.B. SHT31)",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-UP1/OpenKNX-UP1-PM-HF.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2011772-openknx-up1-pr%C3%A4senzmelder-up1-pm-hf-neuer-pr%C3%A4senzmelder-u-a-f%C3%BCr-die-wandmontage",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-UP1"
+  }
+}

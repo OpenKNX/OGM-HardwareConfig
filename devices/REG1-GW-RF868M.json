@@ -1,0 +1,18 @@
+{
+  "id": "REG1-GW-RF868M",
+  "name": "OpenKNX REG1 868MHz-Gateway",
+  "vendor": "OpenKNX",
+  "category": "gateway",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "alpha",
+  "availability": ["opensource"],
+  "description": "KNX-TP1 Reiheneinbaugerät für 35mm Hutschiene mit 868MHz-Funkschnittstelle.\nWireless-M-Bus-Gateway zur Anbindung von Wasser- und Wärmemengenzählern, zusätzlich zwei SML-Schnittstellen für Stromzähler des Netzbetreibers.",
+  "links": {
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/1988477-openknx-z%C3%A4hlermodul-sml",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

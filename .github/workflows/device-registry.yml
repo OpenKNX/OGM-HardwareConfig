@@ -1,0 +1,36 @@
+name: Device-Registry
+
+on:
+  pull_request:
+    paths:
+      - "devices/**"
+      - "include/**"
+      - "scripts/registry/**"
+      - ".github/workflows/device-registry.yml"
+  push:
+    paths:
+      - "devices/**"
+      - "include/**"
+      - "scripts/registry/**"
+      - ".github/workflows/device-registry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Gerätedateien prüfen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Abhängigkeiten
+        run: pip install jsonschema
+
+      - name: Prüfen (Schema, Abgleich mit den Headern)
+        run: python scripts/registry/check_devices.py

@@ -1,0 +1,19 @@
+{
+  "id": "UP1-GW-UART",
+  "name": "OpenKNX UP1 UART Gateway",
+  "vendor": "OpenKNX",
+  "category": "gateway",
+  "platform": "UP1",
+  "formFactor": { "type": "UP" },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "beta",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP1 Unterputz-Gerät mit isolierter UART / Universal Schnittstelle.\nIsolierte Universal-Schnittstelle mit 1 Eingang und 2 Ausgängen, geeignet für u.A. TTL UART Kommunikation oder Neopixel.\nI2C Sensoranschluss für separaten Temp/Feuchtesensor.",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-UP1/OpenKNX-UP1-GW-UART.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2085279-openknx-up1-uart-gateway-up1-gw-uart",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-UP1"
+  }
+}

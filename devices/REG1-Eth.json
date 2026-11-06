@@ -1,0 +1,19 @@
+{
+  "id": "REG1-Eth",
+  "name": "OpenKNX REG1 LAN Gateway",
+  "vendor": "OpenKNX",
+  "category": "gateway",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["knx-tp", "lan"],
+  "power": ["bus"],
+  "status": "stable",
+  "availability": ["opensource", "pcb"],
+  "description": "KNX-TP Reiheneinbaugerät für 35mm Hutschiene und REG1-App-Eth Erweiterung mit 10/100Base-T Ethernet. Komplett busversorgt. Ideale Basis für Interoperabilität zwischen KNX und IP-Welt.",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-REG1/",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/1917749-openknx-ip-router",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

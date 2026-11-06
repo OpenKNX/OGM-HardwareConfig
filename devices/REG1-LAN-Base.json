@@ -1,0 +1,19 @@
+{
+  "id": "REG1-LAN-Base",
+  "name": "OpenKNX REG1 Basismodul LAN",
+  "vendor": "OpenKNX",
+  "category": "universal",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "ESP32",
+  "network": ["lan"],
+  "power": ["dc"],
+  "status": "beta",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-IP Reiheneinbaugerät für 35mm Hutschiene mit 10/100Base-T Ethernet.\nIdeale Basis für Interoperabilität zwischen KNX und IP-Welt.",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-REG1/OpenKNX-REG1-LAN-Base-Komplettbausatz.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2016368-openknx-reg1-goes-esp32",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

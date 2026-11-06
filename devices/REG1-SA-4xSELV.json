@@ -1,0 +1,19 @@
+{
+  "id": "REG1-SA-4xSELV",
+  "name": "OpenKNX REG1 Schaltaktor 4xSELV",
+  "vendor": "OpenKNX",
+  "category": "actuator",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "beta",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP1 Reiheneinbaugerät für 35mm Hutschiene.\n4x bistabile Wechsler-Relais (NC, NO, COM) für SELV-Stromkreise (2A bis 30VDC, 1A bis 50VAC) auf steckbarer 3.5mm Schraubklemme\n4Pin Sensoranschluss UART/I2C incl. 3.3V Versorgung auf steckbarer 3.5mm Schraubklemme",
+  "links": {
+    "source": "https://muster.ing-dom.de/KNX-Geraete/OpenKNX-REG1-SA-4xSELV-Komplettbausatz.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2007767-openknx-reg1-schaltaktor-4xselv-reg1-sa-4xselv",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

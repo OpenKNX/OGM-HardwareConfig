@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OpenKNX/OGM-HardwareConfig/blob/v1/devices/schema.json",
+  "title": "OpenKNX Device-Registry: Gerätedatei devices/<DEVICE_ID>.json",
+  "description": "Nicht im Schema prüfbar und deshalb Aufgabe von scripts/registry/check_devices.py: Dateiname = id, ein Makro in den Headern ergibt diese DEVICE_ID, name = DEVICE_NAME. Bilder liegen im Repo OpenKNX/OpenKNX.github.io unter data/devices/img/<DEVICE_ID>.jpg und stehen nicht in der Datei. Neue Werte für vendor oder platform kommen per PR in dieses Schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "vendor", "category", "formFactor", "mcu", "network", "power", "status", "availability"],
+  "properties": {
+    "id": {
+      "description": "DEVICE_ID aus dem Header, zugleich Dateiname ohne .json.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "name": {
+      "description": "Gleich DEVICE_NAME im Header (CI prüft).",
+      "type": "string",
+      "minLength": 1
+    },
+    "vendor": {
+      "description": "Hersteller, zugleich Anzeigename. kind (openknx/third-party) leitet der Aggregator daraus ab.",
+      "enum": ["OpenKNX"]
+    },
+    "category": {
+      "description": "Gruppen der Wiki-Geräteübersicht: universal = Universal-/Logikmodule, gateway = Gateways und Koppler, sensor = Sensormodule, actuator = Aktormodule, binary-input = Binäreingänge, control = Taster und Bediengeräte, other = Sonstige. „Alte Geräte“ ist keine Kategorie, sondern status deprecated.",
+      "enum": ["universal", "gateway", "sensor", "actuator", "binary-input", "control", "other"]
+    },
+    "platform": {
+      "description": "OpenKNX-Plattform.",
+      "enum": ["REG1", "REG2", "UP1"]
+    },
+    "formFactor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["REG", "UP", "AP", "other"] },
+        "units": {
+          "description": "Teilungseinheiten, nur bei REG.",
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "if": { "properties": { "type": { "const": "REG" } } },
+      "then": { "required": ["units"] },
+      "else": { "not": { "required": ["units"] } }
+    },
+    "mcu": {
+      "enum": ["RP2040", "RP2350", "ESP32", "ESP32-S3"]
+    },
+    "network": {
+      "description": "Anschlüsse zur Steuerungsebene. knx-tp, knx-rf = KNX-Bus; lan, wlan, spe = IP-fähig (spe = Single Pair Ethernet). KNX/IP ist ein Firmware-Feature und braucht einen IP-fähigen Anschluss. Der Aggregator leitet daraus ip (true/false) ab.",
+      "type": "array",
+      "items": { "enum": ["knx-tp", "knx-rf", "lan", "wlan", "spe"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "power": {
+      "description": "Mögliche Versorgungen; jede einzelne reicht für den Betrieb. bus = KNX-Bus (TP), dc = externe Gleichspannung (z. B. 24 V), ac = Netzspannung 230 V, poe = Power over Ethernet, usb = USB.",
+      "type": "array",
+      "items": { "enum": ["bus", "dc", "ac", "poe", "usb"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "status": {
+      "description": "Reifegrad der Hardware, unabhängig vom Stand der Applikationen.",
+      "enum":["planned", "alpha", "beta", "stable", "deprecated"]
+    },
+    "availability": {
+      "description": "opensource = EDA/CAD-Quellen unter offener Lizenz, kit = als Bausatz erhältlich, pcb = (ggf. teilbestückte) Platinen erhältlich.",
+      "type": "array",
+      "items": { "enum": ["opensource", "kit", "pcb"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "description": {
+      "description": "Deutsch. Höchstens 400 Zeichen und 4 Zeilen.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400,
+      "pattern": "^[^\\n]*(\\n[^\\n]*){0,3}$"
+    },
+    "translations": {
+      "description": "Übersetzungen von name und description. Schlüssel = Sprachcode nach ISO 639-1, nicht de (die Hauptfelder sind Deutsch). Fehlt ein Feld, gilt der deutsche Text.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z]{2}$", "not": { "const": "de" } },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400,
+            "pattern": "^[^\\n]*(\\n[^\\n]*){0,3}$"
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "source": { "description": "Bezugsquelle (Shop, Bausatz).", "type": "string", "format": "uri", "pattern": "^https://" },
+        "forum": { "description": "Projekt-Thread im knx-user-forum.", "type": "string", "format": "uri", "pattern": "^https://" },
+        "hardware": { "description": "Hardware-Repo, Schaltplan, Pinbelegung.", "type": "string", "format": "uri", "pattern": "^https://" },
+        "wiki": { "description": "Wiki-Seite, nur wenn abweichend von https://device.openknx.de/<id>. Fehlt dort die Weiterleitung, hat das Gerät keinen Wiki-Link.", "type": "string", "format": "uri", "pattern": "^https://" }
+      }
+    }
+  }
+}

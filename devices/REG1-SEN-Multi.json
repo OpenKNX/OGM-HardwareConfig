@@ -1,0 +1,19 @@
+{
+  "id": "REG1-SEN-Multi",
+  "name": "OpenKNX REG1 Multisensor",
+  "vendor": "OpenKNX",
+  "category": "sensor",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "stable",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP Reiheneinbaugerät für 35mm Hutschiene und Multi-Sensor Erweiterungsplatine.\n1x 4Pin Sensoranschluss UART/I2C incl. 3.3V Versorgung auf steckbarer 3.5mm Schraubklemme\n2x 4Pin Sensoranschluss UART/I2C incl. 3.3V Versorgung RJ10/RJ22\n3x galvanisch getrennte Binäreingänge für potentialfreie Kontakte (S0, Taster, Magnetkontakte etc..) auf steckbarer 3.5mm Schraubklemme",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-REG1/OpenKNX-REG1-SEN-Multi-Komplettbausatz.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2016953-openknx-reg1-multisensor-reg1-sen-multi-reg-f%C3%BCr-div-sensoren-mit-bin%C3%A4reing%C3%A4ngen",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

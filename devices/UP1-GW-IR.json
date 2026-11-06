@@ -1,0 +1,17 @@
+{
+  "id": "UP1-GW-IR",
+  "name": "OpenKNX UP1 Infrarot Gateway",
+  "vendor": "OpenKNX",
+  "category": "gateway",
+  "platform": "UP1",
+  "formFactor": { "type": "UP" },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "beta",
+  "availability": ["opensource"],
+  "description": "Ein Infrarot Gateway basierend auf dem OpenKNX UP1 System, welches das Senden und Empfangen von IR-Signalen unterstützt.",
+  "links": {
+    "hardware": "https://github.com/OpenKNX/OAM-InfraredGateway/tree/v1/doc/Hardware"
+  }
+}

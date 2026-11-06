@@ -1,0 +1,19 @@
+{
+  "id": "UP1-TAS-4x",
+  "name": "OpenKNX UP1 Taster",
+  "vendor": "OpenKNX",
+  "category": "control",
+  "platform": "UP1",
+  "formFactor": { "type": "UP" },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "beta",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP1 Gerät für die Montage auf 60mm UP-Dosen und Integration in 55mm Programme mit handelsüblichen Tastwippen mit oder ohne Status-LED.\nErweiterbar mit einer Taster-Extension für ein weiteres 55mm Feld mit Tastwippen (insgesamt 8 Taster und 4 Status-LED).\n2 Binäreingänge sowie I2C Sensoranschluss für separaten Temp/Feuchtesensor (z.B. SHT31).",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-UP1/OpenKNX-UP1-TAS-4x.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2030358-openknx-4fach-taster-mit-2-rgb-statusleuchten",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-UP1"
+  }
+}

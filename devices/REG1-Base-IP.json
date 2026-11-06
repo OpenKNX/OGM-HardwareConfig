@@ -1,0 +1,17 @@
+{
+  "id": "REG1-Base-IP",
+  "name": "OpenKNX REG1 Basismodul IP",
+  "vendor": "OpenKNX",
+  "category": "universal",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["lan"],
+  "power": ["dc"],
+  "status": "deprecated",
+  "availability": ["opensource"],
+  "description": "KNX-IP Reiheneinbaugerät für 35mm Hutschiene. Ideale Basis für Applikationen mit hohem Datenaufkommen und ohne IO-Bedarf. Auch für Anwendung abseits KNX anwendbar.",
+  "links": {
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

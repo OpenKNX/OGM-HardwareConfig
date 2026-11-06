@@ -1,0 +1,18 @@
+{
+  "id": "PiPico-BCU-Connector",
+  "name": "OpenKNX PiPico BCU Connector",
+  "vendor": "OpenKNX",
+  "category": "other",
+  "formFactor": { "type": "other" },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "stable",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "Der PiPico BCU Connector ist eine Adapter-Platine, die ein Raspberry Pi Pico Mikrocontroller-Board mit einer NanoBCU (oder MicroBCU) verbindet. Sie verfügt über einen KNX-Anschluss, einen Reset- und Prog-Taster sowie eine Prog-LED.",
+  "links": {
+    "source": "https://muster.ing-dom.de/Zubehoer/PiPico-BCU-Connector.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/1805071-pipico-bcu-connector",
+    "hardware": "https://github.com/OpenKNX/OpenKNX/tree/main/Hardware/OpenKNX/PiPico_BCU_Connector"
+  }
+}

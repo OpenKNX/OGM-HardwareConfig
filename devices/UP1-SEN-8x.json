@@ -1,0 +1,19 @@
+{
+  "id": "UP1-SEN-8x",
+  "name": "OpenKNX UP1 8xSensor",
+  "vendor": "OpenKNX",
+  "category": "sensor",
+  "platform": "UP1",
+  "formFactor": { "type": "UP" },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "stable",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP1 Unterputz-Sensormodul mit 8 herausgeführten I2C-Kanälen, 3.3V und GND. Technisch sind 16 ESD-geschützte GPIOs mit optionalen PullUps auf den externen Klemmen verfügbar.",
+  "links": {
+    "source": "https://muster.ing-dom.de/KNX-Geraete/OpenKNX-UP1-SEN-8x.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/1804897-sen-up1-8xth-8fach-sensormodul-f%C3%BCr-temperatur-luftfeuchte-und-luftdrucksensoren",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-UP1"
+  }
+}

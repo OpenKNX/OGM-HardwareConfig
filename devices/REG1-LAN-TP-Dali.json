@@ -1,0 +1,19 @@
+{
+  "id": "REG1-LAN-TP-Dali",
+  "name": "OpenKNX REG1 Dali Gateway LAN+TP",
+  "vendor": "OpenKNX",
+  "category": "gateway",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "ESP32",
+  "network": ["knx-tp", "lan"],
+  "power": ["bus"],
+  "status": "beta",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP Reiheneinbaugerät für 35mm Hutschiene mit 10/100Base-T Ethernet. Komplett busversorgt.\nMit Dali Erweiterungsplatine für den Einsatz als KNX / Dali Gateway.",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-REG1/OpenKNX-REG1-LAN-TP-Dali-Komplettbausatz.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/1914525-beta-openknx-dali-gateway-powered-by-reg1",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

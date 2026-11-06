@@ -1,0 +1,19 @@
+{
+  "id": "REG1-LAN-SEN-Multi",
+  "name": "OpenKNX REG1 Multisensor LAN",
+  "vendor": "OpenKNX",
+  "category": "sensor",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "ESP32",
+  "network": ["lan"],
+  "power": ["dc"],
+  "status": "beta",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-IP Reiheneinbaugerät für 35mm Hutschiene mit 10/100Base-T Ethernet und Multi-Sensor Erweiterungsplatine.\n2x 4Pin Sensoranschluss UART/I2C incl. 3.3V Versorgung RJ10/RJ22\n3x galvanisch getrennte Binäreingänge für potentialfreie Kontakte (S0, Taster, Magnetkontakte etc..) auf steckbarer 3.5mm Schraubklemme",
+  "links": {
+    "source": "https://samples.ing-dom.de/produkt/openknx-reg1-lan-sen-multi-komplettbausatz/",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2112409-openknx-reg1-multisensor-lan-reg1-lan-sen-multi-reg-f%C3%BCr-div-sensoren-mit-bin%C3%A4reing%C3%A4ngen",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "REG1-GW-RS485",
+  "name": "OpenKNX REG1 RS485 Gateway",
+  "vendor": "OpenKNX",
+  "category": "gateway",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "beta",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP1 Reiheneinbaugerät für 35mm Hutschiene mit RS485 Schnittstelle.\nRS485 / Modbus RTU Gateway - RS485 galvanisch von KNX getrennt und komplett busversorgt.\nVier isolierte Binäreingänge für potentialfreie Kontakte - z.B. S0\nI2C/UART Sensoranschluss für versch. Sensoren (u.A. SML)",
+  "links": {
+    "source": "https://muster.ing-dom.de/OpenKNX-REG1/OpenKNX-REG1-GW-RS485-Komplettbausatz.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/2059817-openknx-rs485-gateway-up1-gw-rs485-und-reg1-gw-rs485",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}

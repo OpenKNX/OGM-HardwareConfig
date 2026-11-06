@@ -1,0 +1,19 @@
+{
+  "id": "REG1-Dali",
+  "name": "OpenKNX REG1 Dali Gateway",
+  "vendor": "OpenKNX",
+  "category": "gateway",
+  "platform": "REG1",
+  "formFactor": { "type": "REG", "units": 1 },
+  "mcu": "RP2040",
+  "network": ["knx-tp"],
+  "power": ["bus"],
+  "status": "stable",
+  "availability": ["opensource", "kit", "pcb"],
+  "description": "KNX-TP Reiheneinbaugerät für 35mm Hutschiene.\nREG1-App-Dali Erweiterung für den Einsatz als KNX / Dali Gateway.",
+  "links": {
+    "source": "https://muster.ing-dom.de/KNX-Geraete/OpenKNX-REG1-Dali-Komplettbausatz.html",
+    "forum": "https://knx-user-forum.de/forum/projektforen/openknx/1914525-beta-openknx-dali-gateway-powered-by-reg1",
+    "hardware": "https://github.com/OpenKNX/OpenKNX-REG1"
+  }
+}
