@@ -297,7 +297,7 @@
 
 #ifdef DEVICE_UP1_GW_IR
     #define DEVICE_ID "UP1-GW-IR"
-    #define DEVICE_NAME "OpenKNX UP1 Infrared Gateway"
+    #define DEVICE_NAME "OpenKNX UP1 Infrarot Gateway"
 
     #define OKNXHW_UP1_CONTROLLER2040
 

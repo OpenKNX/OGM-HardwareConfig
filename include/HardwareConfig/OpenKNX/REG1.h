@@ -148,7 +148,7 @@
 // REG1-LAN-TP-Dali
     #ifdef DEVICE_REG1_LAN_TP_DALI
         #define DEVICE_ID "REG1-LAN-TP-Dali"
-        #define DEVICE_NAME "OpenKNX REG1 Dali Gateway LAN"
+        #define DEVICE_NAME "OpenKNX REG1 Dali Gateway LAN+TP"
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
