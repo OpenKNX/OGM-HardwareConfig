@@ -63,23 +63,23 @@
     #endif
 #endif
 
-#if defined(DEVICE_QUINLED_DIG2GO) ||                   \
-    defined(DEVICE_QUINLED_DIG_NEXT2) ||                \
-    defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) ||          \
-    defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET) ||      \
-    defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS) ||  \
-    defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI) ||         \
-    defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET) ||     \
-    defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS) || \
-    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI) ||      \
-    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET) || \
-    defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI) ||        \
-    defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET) ||    \
-    defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI) ||       \
-    defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET) ||   \
-    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI) ||  \
+#if defined(DEVICE_QUINLED_DIG2GO) ||                     \
+    defined(DEVICE_QUINLED_DIG_NEXT2) ||                  \
+    defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) ||            \
+    defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET) ||        \
+    defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS) ||    \
+    defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI) ||           \
+    defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET) ||       \
+    defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS) ||   \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI) ||        \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET) ||    \
+    defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI) ||            \
+    defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET) ||        \
+    defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI) ||           \
+    defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET) ||       \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI) ||     \
     defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET) || \
-    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI) ||  \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI) ||     \
     defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
     #ifndef SERIAL_DEBUG
         #define SERIAL_DEBUG Serial
@@ -96,7 +96,7 @@
 #ifdef DEVICE_QUINLED_DIG2GO
     #define DEVICE_HW_ID 0x2100
     #define DEVICE_ID "QuinLED-Dig2Go"
-    #define DEVICE_NAME "QuinLED Dig2Go"
+    #define DEVICE_NAME "QuinLED Dig2Go" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -134,7 +134,7 @@
 #ifdef DEVICE_QUINLED_DIG_NEXT2
     #define DEVICE_HW_ID 0x2140
     #define DEVICE_ID "QuinLED-Dig-Next-2"
-    #define DEVICE_NAME "QuinLED Dig-Next 2"
+    #define DEVICE_NAME "QuinLED Dig-Next 2" // Flash: 8 MB, PSRAM: 2MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -171,7 +171,7 @@
 #if defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI)
     #define DEVICE_HW_ID 0x2110
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-WiFi"
-    #define DEVICE_NAME "QuinLED Dig-Uno V3 (WiFi)"
+    #define DEVICE_NAME "QuinLED Dig-Uno V3 (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -182,7 +182,7 @@
 #elif defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET)
     #define DEVICE_HW_ID 0x2111
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-Ethernet"
-    #define DEVICE_NAME "QuinLED Dig-Uno V3 (Ethernet)"
+    #define DEVICE_NAME "QuinLED Dig-Uno V3 (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_LAN
@@ -193,7 +193,7 @@
 #elif defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS)
     #define DEVICE_HW_ID 0x2112
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-WiFi-AE-Plus"
-    #define DEVICE_NAME "QuinLED Dig-Uno V3 (WiFi + AE_Plus)"
+    #define DEVICE_NAME "QuinLED Dig-Uno V3 (WiFi + AE_Plus)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -213,10 +213,10 @@
     #if !QUINLED_ESP32_AE_PLUS
         #define QUINLED_BUTTON_GPIO 0 // WLED button (pulled high)
     #endif
-    #define QUINLED_Q1_GPIO 15    // Dedicated external GPIO Q1 (can be pulled low)
-    #define QUINLED_Q2_GPIO 12    // Dedicated external GPIO Q2 (can be pulled low)
-    #define QUINLED_Q3_GPIO 2     // Dedicated external GPIO Q3 (can be pulled high)
-    #define QUINLED_Q4_GPIO 32    // Dedicated external GPIO Q4 (can be pulled high)
+    #define QUINLED_Q1_GPIO 15 // Dedicated external GPIO Q1 (can be pulled low)
+    #define QUINLED_Q2_GPIO 12 // Dedicated external GPIO Q2 (can be pulled low)
+    #define QUINLED_Q3_GPIO 2  // Dedicated external GPIO Q3 (can be pulled high)
+    #define QUINLED_Q4_GPIO 32 // Dedicated external GPIO Q4 (can be pulled high)
 
     #if QUINLED_HAS_ETHERNET
         #define QUINLED_ETHERNET_POWER_GPIO 5   // Ethernet PHY enable
@@ -265,7 +265,7 @@
 #if defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI)
     #define DEVICE_HW_ID 0x2120
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-WiFi"
-    #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi)"
+    #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -276,7 +276,7 @@
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET)
     #define DEVICE_HW_ID 0x2121
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-Ethernet"
-    #define DEVICE_NAME "QuinLED Dig-Quad V3 (Ethernet)"
+    #define DEVICE_NAME "QuinLED Dig-Quad V3 (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_LAN
@@ -287,7 +287,7 @@
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS)
     #define DEVICE_HW_ID 0x2122
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-WiFi-AE-Plus"
-    #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi + AE_Plus)"
+    #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi + AE_Plus)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -358,7 +358,7 @@
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET)
     #define DEVICE_HW_ID 0x2130
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-Ethernet"
-    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (Ethernet)"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_LAN
@@ -367,7 +367,7 @@
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI)
     #define DEVICE_HW_ID 0x2131
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-WiFi"
-    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (WiFi)"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -378,7 +378,7 @@
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET)
     #define DEVICE_HW_ID 0x2132
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-Ethernet"
-    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (Ethernet)"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (Ethernet)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_LAN
         #define KNX_IP_LAN
     #endif
@@ -386,7 +386,7 @@
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI)
     #define DEVICE_HW_ID 0x2133
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-WiFi"
-    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (WiFi)"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (WiFi)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_WIFI
         #define KNX_IP_WIFI
     #endif
@@ -440,7 +440,7 @@
 #if defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI)
     #define DEVICE_HW_ID 0x2113
     #define DEVICE_ID "QuinLED-Dig-Uno-V4-WiFi"
-    #define DEVICE_NAME "QuinLED Dig-Uno V4 (WiFi)"
+    #define DEVICE_NAME "QuinLED Dig-Uno V4 (WiFi)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_WIFI
         #define KNX_IP_WIFI
     #endif
@@ -448,7 +448,7 @@
 #elif defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2114
     #define DEVICE_ID "QuinLED-Dig-Uno-V4-Ethernet"
-    #define DEVICE_NAME "QuinLED Dig-Uno V4 (Ethernet)"
+    #define DEVICE_NAME "QuinLED Dig-Uno V4 (Ethernet)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_LAN
         #define KNX_IP_LAN
     #endif
@@ -456,7 +456,7 @@
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI)
     #define DEVICE_HW_ID 0x2123
     #define DEVICE_ID "QuinLED-Dig-Quad-V4-WiFi"
-    #define DEVICE_NAME "QuinLED Dig-Quad V4 (WiFi)"
+    #define DEVICE_NAME "QuinLED Dig-Quad V4 (WiFi)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_WIFI
         #define KNX_IP_WIFI
     #endif
@@ -464,7 +464,7 @@
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2124
     #define DEVICE_ID "QuinLED-Dig-Quad-V4-Ethernet"
-    #define DEVICE_NAME "QuinLED Dig-Quad V4 (Ethernet)"
+    #define DEVICE_NAME "QuinLED Dig-Quad V4 (Ethernet)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_LAN
         #define KNX_IP_LAN
     #endif
@@ -512,7 +512,7 @@
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2134
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-Ethernet"
-    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (Ethernet)"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (Ethernet)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_LAN
         #define KNX_IP_LAN
     #endif
@@ -520,7 +520,7 @@
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI)
     #define DEVICE_HW_ID 0x2135
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-WiFi"
-    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (WiFi)"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (WiFi)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_WIFI
         #define KNX_IP_WIFI
     #endif
