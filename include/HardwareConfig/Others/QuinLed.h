@@ -27,9 +27,9 @@
  QuinLED devices live under Main Group 0x2 = OpenKNX-Ready (0x2000-0x2FFF):
  └─ 0x21 = QuinLED (0x2100-0x21FF) → 256 variants
     ├─ 0x210x = Dig2Go          (0x2100)
-    ├─ 0x211x = Dig-Uno-V3       (0x2110 WiFi, 0x2111 Ethernet, 0x2112 WiFi+AE_Plus)
-    ├─ 0x212x = Dig-Quad-V3      (0x2120 WiFi, 0x2121 Ethernet, 0x2122 WiFi+AE_Plus)
-    ├─ 0x213x = Dig-Octa-32-8L   (0x2130 Ethernet, 0x2131 WiFi)
+    ├─ 0x211x = Dig-Uno          (V3: 0x2110 WiFi, 0x2111 Ethernet, 0x2112 WiFi+AE_Plus; V4: 0x2113 WiFi, 0x2114 Ethernet)
+    ├─ 0x212x = Dig-Quad         (V3: 0x2120 WiFi, 0x2121 Ethernet, 0x2122 WiFi+AE_Plus; V4: 0x2123 WiFi, 0x2124 Ethernet)
+    ├─ 0x213x = Dig-Octa-32-8L   (legacy: 0x2130 Ethernet, 0x2131 WiFi; V2: 0x2132 Ethernet, 0x2133 WiFi; V4: 0x2134 Ethernet, 0x2135 WiFi)
     └─ 0x214x = Dig-Next-2       (0x2140)
  */
 
@@ -72,7 +72,15 @@
     defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET) ||     \
     defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS) || \
     defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI) ||      \
-    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET)
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET) || \
+    defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI) ||        \
+    defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET) ||    \
+    defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI) ||       \
+    defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET) ||   \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI) ||  \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET) || \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI) ||  \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
     #ifndef SERIAL_DEBUG
         #define SERIAL_DEBUG Serial
     #endif
@@ -367,7 +375,26 @@
     #define QUINLED_HAS_ETHERNET 0
 #endif
 
-#if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI)
+#if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET)
+    #define DEVICE_HW_ID 0x2132
+    #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-Ethernet"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (Ethernet)"
+    #ifndef KNX_IP_LAN
+        #define KNX_IP_LAN
+    #endif
+    #define QUINLED_HAS_ETHERNET 1
+#elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI)
+    #define DEVICE_HW_ID 0x2133
+    #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-WiFi"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (WiFi)"
+    #ifndef KNX_IP_WIFI
+        #define KNX_IP_WIFI
+    #endif
+    #define QUINLED_HAS_ETHERNET 0
+#endif
+
+#if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI) || \
+    defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI)
 
     #define QUINLED_LED_PORT_COUNT 8
     #define QUINLED_RELAY_COUNT 1
@@ -408,7 +435,151 @@
     #endif
 #endif
 
+// V4 Uno/Quad: https://quinled.info/quinled-dig-quad-pinout-guide/
+// Ethernet PHY: WLED wled00/network.cpp, WLED_ETH_QUINLED_V4.
+#if defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI)
+    #define DEVICE_HW_ID 0x2113
+    #define DEVICE_ID "QuinLED-Dig-Uno-V4-WiFi"
+    #define DEVICE_NAME "QuinLED Dig-Uno V4 (WiFi)"
+    #ifndef KNX_IP_WIFI
+        #define KNX_IP_WIFI
+    #endif
+    #define QUINLED_HAS_ETHERNET 0
+#elif defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET)
+    #define DEVICE_HW_ID 0x2114
+    #define DEVICE_ID "QuinLED-Dig-Uno-V4-Ethernet"
+    #define DEVICE_NAME "QuinLED Dig-Uno V4 (Ethernet)"
+    #ifndef KNX_IP_LAN
+        #define KNX_IP_LAN
+    #endif
+    #define QUINLED_HAS_ETHERNET 1
+#elif defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI)
+    #define DEVICE_HW_ID 0x2123
+    #define DEVICE_ID "QuinLED-Dig-Quad-V4-WiFi"
+    #define DEVICE_NAME "QuinLED Dig-Quad V4 (WiFi)"
+    #ifndef KNX_IP_WIFI
+        #define KNX_IP_WIFI
+    #endif
+    #define QUINLED_HAS_ETHERNET 0
+#elif defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
+    #define DEVICE_HW_ID 0x2124
+    #define DEVICE_ID "QuinLED-Dig-Quad-V4-Ethernet"
+    #define DEVICE_NAME "QuinLED Dig-Quad V4 (Ethernet)"
+    #ifndef KNX_IP_LAN
+        #define KNX_IP_LAN
+    #endif
+    #define QUINLED_HAS_ETHERNET 1
+#endif
+
+#if defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI) || defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET) || \
+    defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI) || defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
+    #define QUINLED_ESP32_AE_PLUS 0
+    #define QUINLED_HAS_AUDIO_INPUT 1
+    #define QUINLED_RELAY_COUNT 1
+    #define QUINLED_BUTTON_GPIO 37
+    #define QUINLED_Q1_GPIO 32
+    #define QUINLED_Q2_GPIO 33
+    #define QUINLED_Q3_GPIO 13
+    #define QUINLED_Q4_GPIO 15
+    #define QUINLED_RELAY1_GPIO QUINLED_Q1_GPIO
+    #define QUINLED_LED_DATA1_GPIO 2
+    #define QUINLED_LED_DATA2_GPIO 4
+    #if defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI) || defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
+        #define QUINLED_LED_PORT_COUNT 4
+        #define QUINLED_LED_DATA3_GPIO 12
+        #define QUINLED_LED_DATA4_GPIO 14
+    #else
+        #define QUINLED_LED_PORT_COUNT 2
+    #endif
+    #define QUINLED_TEMPERATURE_SENSOR_1WIRE_GPIO 20
+    #define QUINLED_AUDIO_INPUT_GPIO 36
+    #define QUINLED_I2C_SDA_GPIO 1
+    #define QUINLED_I2C_SCL_GPIO 3
+    #define QUINLED_I2S_WS_GPIO 5
+    #define QUINLED_I2S_SD_GPIO 38
+    #if QUINLED_HAS_ETHERNET
+        #define QUINLED_ETHERNET_MDC_GPIO 7
+        #define QUINLED_ETHERNET_MDIO_GPIO 8
+        #define QUINLED_ETHERNET_CLK_IN_GPIO 0
+        #define ETH_CLK_MODE ETH_CLOCK_GPIO0_IN
+    #endif
+    #ifndef PROG_BUTTON_PIN
+        #define PROG_BUTTON_PIN QUINLED_BUTTON_GPIO
+    #endif
+#endif
+
+// V4 Octa: https://quinled.info/quinled-dig-octa-brainboard-32-8l-pinout-guide/
+#if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
+    #define DEVICE_HW_ID 0x2134
+    #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-Ethernet"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (Ethernet)"
+    #ifndef KNX_IP_LAN
+        #define KNX_IP_LAN
+    #endif
+    #define QUINLED_HAS_ETHERNET 1
+#elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI)
+    #define DEVICE_HW_ID 0x2135
+    #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-WiFi"
+    #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (WiFi)"
+    #ifndef KNX_IP_WIFI
+        #define KNX_IP_WIFI
+    #endif
+    #define QUINLED_HAS_ETHERNET 0
+#endif
+
+#if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI)
+    #define QUINLED_LED_PORT_COUNT 8
+    #define QUINLED_RELAY_COUNT 1
+    #define QUINLED_HAS_AUDIO_INPUT 1
+    #define QUINLED_BUTTON1_GPIO 34
+    #define QUINLED_BUTTON2_GPIO 35
+    #define QUINLED_RELAY1_GPIO 33
+    #define QUINLED_LED_DATA1_GPIO 1
+    #define QUINLED_LED_DATA2_GPIO 2
+    #define QUINLED_LED_DATA3_GPIO 3
+    #define QUINLED_LED_DATA4_GPIO 4
+    #define QUINLED_LED_DATA5_GPIO 5
+    #define QUINLED_LED_DATA6_GPIO 12
+    #define QUINLED_LED_DATA7_GPIO 13
+    #define QUINLED_LED_DATA8_GPIO 14
+    #define QUINLED_I2C_SDA_GPIO 32
+    #define QUINLED_I2C_SCL_GPIO 16
+    #define QUINLED_I2S_WS_GPIO 17
+    #define QUINLED_I2S_SD_GPIO 39
+    #define QUINLED_SDCARD_CLK_GPIO 15
+    #define QUINLED_SDCARD_DI_GPIO 16
+    #define QUINLED_SDCARD_CS_GPIO 17
+    #define QUINLED_SDCARD_DO_GPIO 36
+    #if QUINLED_HAS_ETHERNET
+        #define QUINLED_ETHERNET_MDC_GPIO 23
+        #define QUINLED_ETHERNET_MDIO_GPIO 18
+        #define QUINLED_ETHERNET_CLK_IN_GPIO 0
+        #define ETH_CLK_MODE ETH_CLOCK_GPIO0_IN
+    #endif
+    #ifndef PROG_BUTTON_PIN
+        #define PROG_BUTTON_PIN QUINLED_BUTTON1_GPIO
+    #endif
+#endif
+
 #if defined(QUINLED_HAS_ETHERNET) && QUINLED_HAS_ETHERNET
+    #ifndef QUINLED_ETHERNET_TXD0_GPIO
+        #define QUINLED_ETHERNET_TXD0_GPIO 19
+    #endif
+    #ifndef QUINLED_ETHERNET_TXD1_GPIO
+        #define QUINLED_ETHERNET_TXD1_GPIO 22
+    #endif
+    #ifndef QUINLED_ETHERNET_RXD0_GPIO
+        #define QUINLED_ETHERNET_RXD0_GPIO 25
+    #endif
+    #ifndef QUINLED_ETHERNET_RXD1_GPIO
+        #define QUINLED_ETHERNET_RXD1_GPIO 26
+    #endif
+    #ifndef QUINLED_ETHERNET_CRS_DV_GPIO
+        #define QUINLED_ETHERNET_CRS_DV_GPIO 27
+    #endif
+    #if !defined(QUINLED_ETHERNET_TX_EN_GPIO) && !defined(QUINLED_ETHERNET_TXEN_GPIO)
+        #define QUINLED_ETHERNET_TX_EN_GPIO 21
+    #endif
     #ifndef ETH_PHY_TYPE
         #define ETH_PHY_TYPE ETH_PHY_LAN8720
     #endif
