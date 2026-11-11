@@ -1,0 +1,72 @@
+# Checks every change of OGM-HardwareConfig: board headers (IDs, names, texts) and the generator.
+# Runs the generator with Windows PowerShell 5.1 (the version of a Windows 10 developer machine).
+#   1. -ListIds: every DEVICE_HW_ID once, DEVICE_ID / DEVICE_NAME present, HW_INFO_TEXT <= 255 characters
+#   2. -Check on the demo: the committed generated files match the headers and the generator
+#   3. job summary: board list and, when the check fails, which generated files the change affects
+# Only the PlatformIO CLI is installed (no platforms): the preprocessor is the host compiler (g++ / clang++ in PATH)
+# without ARDUINO_ARCH_* defines, see generator/README.md "Ein Ausdruck, zwei Verbraucher".
+name: Hardware profile
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Checkout OGM-HardwareConfig
+        uses: actions/checkout@v4
+
+      - name: Checkout OGM-Common (platformio ini files of the demo)
+        uses: actions/checkout@v4
+        with:
+          repository: OpenKNX/OGM-Common
+          path: _deps/OGM-Common
+
+      - name: Tools (PlatformIO, C++ preprocessor)
+        run: |
+          $PSVersionTable.PSVersion
+          python -m pip install --quiet platformio
+          if (-not (Get-Command g++ -ErrorAction SilentlyContinue)) { choco install mingw -y --no-progress }
+          g++ --version
+
+      - name: Demo library links
+        run: |
+          $lib = "examples/HardwareProfileDemo/lib"
+          New-Item -ItemType Directory -Force -Path $lib | Out-Null
+          New-Item -ItemType Junction -Path "$lib/OGM-Common" -Target (Resolve-Path "_deps/OGM-Common") | Out-Null
+          New-Item -ItemType Junction -Path "$lib/OGM-HardwareConfig" -Target (Resolve-Path ".") | Out-Null
+
+      - name: Board headers (-ListIds)
+        run: |
+          # in-process call: the table rows come back as strings (no console width, no wrapping); banner and steps
+          # are Write-Host and stay out of $out; exit in the script ends only the script and sets $LASTEXITCODE
+          $global:LASTEXITCODE = 0
+          $out = @(& ./generator/Build-HardwareProfile.ps1 -ListIds -Markdown)
+          $rc = $LASTEXITCODE
+          $out
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          $table = @($out | ForEach-Object { "$_" } | Where-Object { $_.StartsWith("|") })
+          [System.IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, "## Boards with DEVICE_HW_ID`n`n" + ($table -join "`n") + "`n", $utf8)
+          if ($rc -ne 0) { exit 1 }
+
+      - name: Generated files of the demo are current (-Check)
+        working-directory: examples/HardwareProfileDemo
+        run: |
+          powershell -NoProfile -File ../../generator/Build-HardwareProfile.ps1 -Check
+          if ($LASTEXITCODE -eq 0) { exit 0 }
+          # show what the change does to the generated files (new files included)
+          powershell -NoProfile -File ../../generator/Build-HardwareProfile.ps1
+          $genRc = $LASTEXITCODE
+          $changed = @(git status --porcelain -- .)
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          $fence = ([string][char]96) * 3
+          if ($genRc -ne 0) { $text = "## The generator stops on this change (see the step log)`n" }
+          else { $text = "## Generated files that change (run the generator and commit them)`n`n$fence`n" + ($changed -join "`n") + "`n$fence`n" }
+          [System.IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, $text, $utf8)
+          $changed
+          exit 1

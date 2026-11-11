@@ -5,6 +5,10 @@
         "OGM-Common": "^1.2.0"
       },
     "description": "Hardware configuration for OpenKNX projects",
+    "build": {
+        "srcDir": "include",
+        "includeDir": "include"
+    },
     "homepage": "https://openknx.de",
     "authors": {
         "name": "OpenKNX",

@@ -28,6 +28,7 @@
 
 // REG2-ESP-S3-Pico V1 (Base)
 #if defined(DEVICE_REG2_ESP_S3_PICO_V1)
+    #define DEVICE_HW_ID 0x1140
     #define DEVICE_ID PREFIX_ID ""
     #define DEVICE_NAME PREFIX_NAME ""                 // 24 characters
     #define OKNXHW_REG2_ESPS3PICO_V1_COMMON          // Common pins for all REG2-ESP-S3-Pico V1
@@ -43,6 +44,7 @@
 
 // REG2-ESP-S3-Pico V1 (Device Display)
 #if defined(DEVICE_REG2_ESP_S3_PICO_V1_DD)
+    #define DEVICE_HW_ID 0x1141
     #define DEVICE_ID PREFIX_ID "-DD"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay" // 24 + 16 = 40 characters
     #define OKNXHW_REG2_ESPS3PICO_V1_COMMON          // Common pins for all REG2-ESP-S3-Pico V1

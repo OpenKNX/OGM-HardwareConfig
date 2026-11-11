@@ -36,3 +36,4 @@
 #include "HardwareConfig/Others/Adafruit.h"
 #include "HardwareConfig/Others/Gledopto.h"
 #include "HardwareConfig/Others/QuinLed.h"
+#include "HardwareConfig/Others/Shelly.h"

@@ -1,0 +1,40 @@
+# Board slots of the GPIO role parameters (Build-HardwareProfile.ps1). Commit this file.
+# Never edit or reuse a number: it is part of the ETS parameter ID of every GPIO role.
+0x1310 = 0
+0x1320 = 1
+0x1132 = 2
+0x1021 = 3
+0x1022 = 4
+0x1203 = 5
+0x2400 = 6
+0x2121 = 7
+0x3F00 = 8
+0x3F01 = 9
+0x3F02 = 10
+0x3F10 = 11
+0x3F11 = 12
+0x3F12 = 13
+0x3F13 = 14
+0x3F14 = 15
+# Bit order of the device query (firmware in the field reads by position): append only, never insert or remove.
+cap 0 = ThirdParty
+cap 1 = Tp
+cap 2 = Lan
+cap 3 = Wifi
+cap 4 = Display
+cap 5 = Rtc
+cap 6 = SdCard
+cap 7 = Buzzer
+cap 8 = LargeFlash
+cap 9 = PowerMeter
+cap 10 = Temperature
+cap 11 = FrontControls
+cap 12 = TempHum
+cap 13 = Co2
+cap 14 = Lux
+cap 15 = Presence
+cap 16 = SensorModule
+val 0 = BinaryInputs
+val 1 = StatusLeds
+val 2 = FlashMB
+val 3 = Relays

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
+  <op:minOpenKNXproducerVersion value="4.3.8" />
+  <op:config name="%BASE_VerifyVersion%" value="2.0" />
+  <op:config name="%UCT_VerifyVersion%" value="0.6" />
+
+  <!-- Generated hardware profile feature flags: %HWP_SelectRef%, %HWP_CAP_<Name>%, %HWP_VAL_<Name>_GE_<n>% -->
+  <op:config href="HardwareProfile.conf.xml" />
+
+  <!-- Demo product. OpenKnxId/ApplicationNumber are placeholders: assign official numbers before shipping. -->
+  <op:ETS
+    OpenKnxId="0xAD"
+    ApplicationNumber="240"
+    ApplicationVersion="0.4"
+    ReplacesVersionsDownTo="0.1"
+    ApplicationRevision="0"
+    ProductName="OpenKNX Hardware-Profil Demo"
+    BusCurrent="10"
+    BuildSuffix=""
+    BuildSuffixText=""
+    MediumTypes="MT-0 MT-5"
+    OrderNumber="HWProfileDemo" />
+
+  <op:define prefix="BASE" ModuleType="10"
+    share="../lib/OGM-Common/src/Common.share.xml">
+    <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="%BASE_VerifyVersion%" />
+  </op:define>
+
+  <!-- configuration transfer; also completes the module list of Common -->
+  <op:define prefix="UCT" ModuleType="19"
+    share="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml">
+    <op:verify File="../lib/OFM-ConfigTransfer/library.json" ModuleVersion="%UCT_VerifyVersion%" />
+  </op:define>
+
+  <!-- generated module: hardware selection, profile overview, device query, GPIO roles -->
+  <op:define prefix="HWP" ModuleType="45" configTransferName="Hardware"
+    share="HardwareProfile.share.xml" />
+
+  <!-- hand-written demo module: shows and hides its settings with the generated feature flags -->
+  <op:define prefix="DEMO" ModuleType="46" configTransferName="Demo"
+    share="HardwareProfileDemo.share.xml" />
+
+  <!-- developer view of the hardware page (generated with the hardware module, HardwareProfile.xml <Page dev>) -->
+  <op:define prefix="HWPDEV" ModuleType="47" share="HardwareProfile.dev.gen.xml" />
+
+  <generate>
+    <Dynamic>
+      <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="BASE" />
+      <op:include href="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="UCT" />
+      <op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWP" />
+      <op:include href="HardwareProfileDemo.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="DEMO" />
+      <op:include href="HardwareProfile.dev.gen.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWPDEV" />
+    </Dynamic>
+  </generate>
+</KNX>

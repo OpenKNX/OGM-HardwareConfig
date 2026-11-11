@@ -19,6 +19,7 @@
 // REG1-Eth
 // http://device.openknx.de/REG1-Eth
     #ifdef DEVICE_REG1_ETH_V0
+        #define DEVICE_HW_ID 0x1000
         #define DEVICE_ID "REG1-Eth-V0"
         #define DEVICE_NAME "OpenKNX REG1 LAN Gateway V0"
 
@@ -30,6 +31,7 @@
     #endif
 
     #ifdef DEVICE_REG1_ETH
+        #define DEVICE_HW_ID 0x1001
         #define DEVICE_ID "REG1-Eth"
         #define DEVICE_NAME "OpenKNX REG1 LAN Gateway" 
 
@@ -50,6 +52,7 @@
 // REG1-Base
 // http://device.openknx.de/REG1-Base
     #ifdef DEVICE_REG1_BASE_V0
+        #define DEVICE_HW_ID 0x1002
         #define DEVICE_ID "REG1-Base-V0"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul V0"
         #define OKNXHW_REG1_CONTROLLER2040
@@ -59,6 +62,7 @@
     #endif
 
     #ifdef DEVICE_REG1_BASE
+        #define DEVICE_HW_ID 0x1003
         #define DEVICE_ID "REG1-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul"
 
@@ -76,6 +80,7 @@
 // REG1-Base-IP
 // http://device.openknx.de/REG1-Base-IP
     #ifdef DEVICE_REG1_BASE_IP
+        #define DEVICE_HW_ID 0x1010
         #define DEVICE_ID "REG1-Base-IP"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul IP"
 
@@ -88,6 +93,7 @@
 // REG1-SEN-Multi
 // http://device.openknx.de/REG1-SEN-Multi
     #ifdef DEVICE_REG1_SEN_MULTI
+        #define DEVICE_HW_ID 0x1004
         #define DEVICE_ID "REG1-SEN-Multi"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor"
 
@@ -105,6 +111,7 @@
 // REG1_SA-4xSELV
 // http://device.openknx.de/REG1_SA-4xSELV
     #ifdef DEVICE_REG1_SA_4XSELV
+        #define DEVICE_HW_ID 0x1005
         #define DEVICE_ID "REG1-SA-4xSELV"
         #define DEVICE_NAME "OpenKNX REG1 Schaltaktor 4xSELV"
 
@@ -122,6 +129,7 @@
 // REG1_DALI
 // http://device.openknx.de/REG1-Dali
     #ifdef DEVICE_REG1_DALI
+        #define DEVICE_HW_ID 0x1006
         #define DEVICE_ID "REG1-Dali"
         #define DEVICE_NAME "OpenKNX REG1 Dali Gateway"
 
@@ -134,6 +142,7 @@
     #endif
 
     #ifdef DEVICE_REG1_GW_RS485
+        #define DEVICE_HW_ID 0x1007
         #define DEVICE_ID "REG1-GW-RS485"
         #define DEVICE_NAME "OpenKNX REG1 RS485 Gateway"
 
@@ -147,6 +156,7 @@
 
 // REG1-LAN-TP-Dali
     #ifdef DEVICE_REG1_LAN_TP_DALI
+        #define DEVICE_HW_ID 0x1020
         #define DEVICE_ID "REG1-LAN-TP-Dali"
         #define DEVICE_NAME "OpenKNX REG1 Dali Gateway LAN"
 
@@ -161,6 +171,7 @@
 // REG1-LAN-TP-Base
 // http://device.openknx.de/REG1-LAN-TP-Base
     #ifdef DEVICE_REG1_LAN_TP_BASE
+        #define DEVICE_HW_ID 0x1021
         #define DEVICE_ID "REG1-LAN-TP-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP"
 
@@ -177,6 +188,7 @@
 // REG1-LAN-Base
 // http://device.openknx.de/REG1-LAN-Base
     #ifdef DEVICE_REG1_LAN_BASE
+        #define DEVICE_HW_ID 0x1022
         #define DEVICE_ID "REG1-LAN-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN"
 
@@ -194,6 +206,7 @@
 // REG1-LAN-SEN-Multi
 // http://device.openknx.de/REG1-LAN-SEN-Multi
     #ifdef DEVICE_REG1_LAN_SEN_MULTI
+        #define DEVICE_HW_ID 0x1023
         #define DEVICE_ID "REG1-LAN-SEN-Multi"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor LAN"
 
@@ -212,6 +225,7 @@
 // REG1-GW-RF868M
 // http://device.openknx.de/REG1-GW-RF868M
     #ifdef DEVICE_REG1_GW_RF868M
+        #define DEVICE_HW_ID 0x1008
         #define DEVICE_ID "REG1-GW-RF868M"
         #define DEVICE_NAME "OpenKNX REG1 868MHz-Gateway"
 
@@ -232,6 +246,7 @@
 #pragma region "REG1 Prototypen / Devboards"
 
     #ifdef DEVICE_DEV_REG1_LAN_TP_Base_V00_02
+        #define DEVICE_HW_ID 0x10F0
         #define DEVICE_ID "REG1-DEV-LAN-TP-Base-V00-02"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP Devboard V00.02"
 
@@ -241,6 +256,7 @@
     #endif
 
     #ifdef DEVICE_DEV_REG1_LAN_TP_Base_V00_11
+        #define DEVICE_HW_ID 0x10F1
         #define DEVICE_ID "REG1-DEV-LAN-TP-Base-V00-11"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP Devboard V00.11"
 
@@ -250,6 +266,7 @@
     #endif
 
         #ifdef DEVICE_DEV_REG1_LAN_SEN_MULTI_V00_11
+        #define DEVICE_HW_ID 0x10F2
         #define DEVICE_ID "REG1-DEV-LAN-SEN-Multi-V00-11"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor LAN Devboard V00.11"
 

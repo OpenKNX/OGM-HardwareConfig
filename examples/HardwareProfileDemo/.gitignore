@@ -1,0 +1,11 @@
+.DS_Store
+.pio
+.vscode/
+**/*.knxprod
+**/*.debug.xml
+include/versions.h
+include/buildtime.h
+include/webassets.h
+release/
+src/*.baggages
+lib/

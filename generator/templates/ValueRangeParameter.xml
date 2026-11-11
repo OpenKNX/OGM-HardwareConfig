@@ -1,0 +1,67 @@
+@@# A selection 0..n where n is the manifest <Value> of the selected board: one parameter per value n that occurs,
+@@# all in one <Union> on the same byte (the caller writes <Union SizeInBit="8"><Memory .../> ... </Union> around Part
+@@# 'Parameter'); ETS shows the parameter of the selected board's n. ETS cannot filter the items of one list, so every
+@@# list length is its own ParameterType (op:nowarn: the overlap in the union is intended; the output needs xmlns:op). The parameter of a board is active in exactly one branch, so ETS writes the byte.
+@@#   n = 0          : hidden (ParameterRef Access="None"), <Assign> 0
+@@#   Fixed n        : shown read-only (Access="Read"), <Assign> n - no choice, the value is the hardware value
+@@#   any other n    : list ZeroText, 1..n
+@@# Not selected: unselected="showAll" shows the longest list, "hide" shows nothing.
+@@# Part = Type | Parameter | ParameterRef | Choose. Number = parameter number with $n, e.g. '%TT%{{D5 (300 + $n)}}'.
+@@# Params: Part, Value (manifest <Value> name), Name (prefix of parameter and type names), Number, Text, ZeroText,
+@@#         Default (number, or 'max' = n), Fixed (script block, $_ = n: $true = no choice), SelectRef, IndentLevel, UIHint
+@@params Part! Value! Name! Number Text ZeroText Default Fixed SelectRef IndentLevel UIHint
+@@default SizeInBit = 8
+@@if @($M.Values | Where-Object { $_.Name -ceq $P.Value }).Count -eq 0
+{{ throw ("ValueRangeParameter: Value '" + $P.Value + "' is no <Value> of the manifest") }}
+@@end
+@@default IndentLevel = '1'
+@@set $values = @($Boards | ForEach-Object { [int]$_.Val[$P.Value] } | Sort-Object -Unique)
+@@set $top = MaxOf $Boards { $_.Val[$P.Value] } 0
+@@if $P.Part -eq 'Type'
+@@for $n in $values
+<ParameterType Id="%AID%_PT-{{$P.Name}}R{{$n}}" Name="{{$P.Name}}R{{$n}}">
+  <TypeRestriction Base="Value" SizeInBit="{{$P.SizeInBit}}"{{ if ($P.UIHint) { ' UIHint="' + $P.UIHint + '"' } }}>
+    <Enumeration Text="{{Xml $P.ZeroText}}" Value="0" Id="%ENID%" />
+@@for $i in (Range 1 $n)
+    <Enumeration Text="{{$i}}" Value="{{$i}}" Id="%ENID%" />
+@@end
+  </TypeRestriction>
+</ParameterType>
+@@end
+@@elseif $P.Part -eq 'Parameter'
+@@for $n in $values
+@@set $num = Expand $P.Number
+@@set $def = 0
+@@if $P.Default -eq 'max'
+@@set $def = $n
+@@elseif $P.Default
+@@set $def = [Math]::Min([int]$P.Default, $n)
+@@end
+<Parameter Id="%AID%_UP-{{$num}}" Name="{{$P.Name}}R{{$n}}" ParameterType="%AID%_PT-{{$P.Name}}R{{$n}}" Offset="0" BitOffset="0" Text="{{Xml $P.Text}}" Value="{{$def}}" op:nowarn="true" />
+@@end
+@@elseif $P.Part -eq 'ParameterRef'
+@@for $n in $values
+@@set $num = Expand $P.Number
+@@set $fixed = ($n -gt 0 -and $P.Fixed -and @($n | Where-Object $P.Fixed).Count -gt 0)
+<ParameterRef Id="%AID%_UP-{{$num}}_R-{{$num}}01" RefId="%AID%_UP-{{$num}}"{{ if ($n -eq 0) { ' Access="None"' } elseif ($fixed) { ' Access="Read"' } }} />
+@@end
+@@elseif $P.Part -eq 'Choose'
+<choose ParamRefId="{{$P.SelectRef}}">
+@@for $n in $values
+@@set $num = Expand $P.Number
+@@set $ref = '%AID%_UP-' + $num + '_R-' + $num + '01'
+@@set $ids = @($Boards | Where-Object { [int]$_.Val[$P.Value] -eq $n } | ForEach-Object { [string]$_.HwId })
+@@if $n -eq $top -and $M.Unselected -eq 'showAll'
+@@set $ids = @([string]$M.UnselectedValue) + $ids
+@@end
+  <when test="{{$ids -join ' '}}">
+    <ParameterRefRef RefId="{{$ref}}" IndentLevel="{{$P.IndentLevel}}" />
+@@if $n -eq 0 -or ($P.Fixed -and @($n | Where-Object $P.Fixed).Count -gt 0)
+    <Assign TargetParamRefRef="{{$ref}}" Value="{{$n}}" />
+@@end
+  </when>
+@@end
+</choose>
+@@else
+{{ throw ("ValueRangeParameter: unknown Part '" + $P.Part + "'") }}
+@@end

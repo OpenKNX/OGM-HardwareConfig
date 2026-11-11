@@ -19,16 +19,19 @@ jobs:
           ref: v1
           fetch-depth: 0 # fetch all history so we can compare
 
-      - name: Fetch all branches
-        run: git fetch origin v1dev:v1dev
-
-      - name: Check if v1dev can(not) be fast-forwarded, or is already the same as v1
+      - name: Check if v1dev exists and can(not) be fast-forwarded, or is already the same as v1
         id: check
         run: |
+          if ! git ls-remote --exit-code --heads origin v1dev > /dev/null; then
+            echo "v1dev does not exist, nothing to do"
+            echo "result=none" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          git fetch origin v1dev:v1dev
           HEADv1=$(git rev-parse v1)
           HEADv1dev=$(git rev-parse v1dev)
           BASE=$(git merge-base v1 v1dev)
-          if [ "HEADv1" = "$HEADv1dev" ]; then
+          if [ "$HEADv1" = "$HEADv1dev" ]; then
             echo "result=same" >> $GITHUB_OUTPUT
           elif [ "$BASE" = "$HEADv1dev" ]; then
             echo "result=ff" >> $GITHUB_OUTPUT
@@ -53,6 +56,6 @@ jobs:
       - name: Fail if fast-forward is not possible
         if: steps.check.outputs.result == 'noff'
         run: |
-          # Note: possible alternative solutions here (like merge or PR) 
+          # Note: possible alternative solutions here (like merge or PR)
           echo "::error::Fast-forward merge from v1 to v1dev is not possible. Needs manual merge"
           exit 1

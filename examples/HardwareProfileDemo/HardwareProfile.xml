@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Hardware profile manifest of OAM-HardwareProfileDemo.
+  Read by lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1.
+
+  What a developer writes: this file. Everything else (ETS selection, capability tokens, device
+  query, firmware header) is generated from it and from the board headers in OGM-HardwareConfig.
+-->
+<!-- unselected="showAll": "Nicht gewählt" shows everything (instead of a test device in the list);
+     portManualValue / portNoneValue: port values of the port selections (0..n-1 = port n, 10 = manual GPIO, 15 = no port),
+     read by the GPIO conflict check (<Conflicts>) and the firmware header (HardwareProfile::signalGpio) -->
+<HardwareProfile prefix="HWP" moduleType="45" text="Hardware" unselected="showAll" order="hwid" portManualValue="10" portNoneValue="15">
+
+  <!-- demo boards next to the real ones: include/HardwareConfig.h adds include/DemoBoards.h -->
+  <IncludePath>include</IncludePath>
+
+  <!-- generated files -->
+  <Output conf="src/HardwareProfile.conf.xml"
+          share="src/HardwareProfile.share.xml"
+          script="src/HardwareProfile.script.js"
+          header="include/HardwareProfileData.h" />
+  <!-- selection 0..n per hardware (example of templates/ValueRangeParameter.xml) -->
+  <Generate template="src/hw/Ranges.xml" output="src/HardwareProfile.ranges.gen.xml" />
+
+  <!-- standard capabilities (LAN, WLAN, TP, display, RTC, SD, buzzer, binary inputs, status LEDs, flash) -->
+  <Import href="../../generator/capabilities/Common.caps.xml" />
+
+  <!-- an application may add its own capability on top of the pack -->
+  <Capability name="LargeFlash" text="Großer Datenspeicher (mind. 8 MB Flash)" expr="defined(DEVICE_FLASH_SIZE_MB) &amp;&amp; DEVICE_FLASH_SIZE_MB >= 8" />
+
+  <!-- features of a board (defines of the board header; names proposed in generator/Anwendungsfaelle.md) -->
+  <Capability name="PowerMeter"    text="Leistungsmessung"   expr="defined(HW_POWER_METER)" />
+  <Capability name="Temperature"   text="Gerätetemperatur"   expr="defined(HW_TEMP_SENSOR)" />
+  <Capability name="FrontControls" text="Frontbedienung"     expr="defined(HW_FRONT_CONTROLS)" />
+  <Capability name="TempHum"       text="Temperatur/Feuchte" expr="defined(HW_SENSOR_TEMP_HUM)" />
+  <Capability name="Co2"           text="CO2"                expr="defined(HW_SENSOR_CO2)" />
+  <Capability name="Lux"           text="Helligkeit"         expr="defined(HW_SENSOR_LUX)" />
+  <Capability name="Presence"      text="Präsenz"            expr="defined(HW_SENSOR_PRESENCE)" />
+  <!-- plug-in module: the board has the slot (expr), runtime="true": the firmware detects the module at run time and reports
+       it through answerQuery(runtimeCaps); switch="true": on/off on the hardware page, the device query sets it from the module -->
+  <Capability name="SensorModule"  text="Steckmodul Sensor"  expr="defined(HW_SLOT_SENSOR)" switch="true" runtime="true" />
+
+  <!-- number of relays of the board (HW_RELAY_COUNT): channels, lists 0..n, fixed values -->
+  <Value name="Relays" text="Relais" expr="HW_RELAY_COUNT" default="0" max="4" />
+
+  <!-- The boards this product supports. Real OGM-HardwareConfig devices. flags = build flags of the
+       env that change a capability (Pico W: WiFi is chosen at build time, not by the board). -->
+  <!-- the boards with a firmware of this demo come from its release_* envs (the page shows "Firmware: <env>") -->
+  <Boards platformio="release_*" />
+  <Board define="DEVICE_REG2_PIPICO2_W_V1_DD_RTC" flags="-DKNX_IP_WIFI" />
+  <Board define="DEVICE_REG1_LAN_TP_BASE" />
+  <Board define="DEVICE_REG1_LAN_BASE" />
+  <Board define="DEVICE_UP1_TAS_4X" />
+  <Board define="DEVICE_AB_BUT_GIR" />
+  <Board define="DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET" />
+  <!-- demo boards (ETS only, include/DemoBoards.h) -->
+  <Board define="DEMO_RAUMCONTROLLER_BASIC" />
+  <Board define="DEMO_RAUMCONTROLLER_PLUS" />
+  <Board define="DEMO_RAUMCONTROLLER_PRO" />
+  <Board define="DEMO_SHELLY_PLUS_1" />
+  <Board define="DEMO_SHELLY_PLUS_1PM" />
+  <Board define="DEMO_SHELLY_PLUS_2PM" />
+  <Board define="DEMO_SHELLY_PLUS_I4" />
+  <Board define="DEMO_SHELLY_PLUG_S" />
+
+  <!-- the hardware page: device card (logo or third-party badge, name, board text, QR code only with HW_INFO_URL),
+       optional texts firmware / changeInfo, third-party notice, developer view (dev, features), help = context help -->
+  <Page text="Hardware" icon="memory" help="DEMO-Hardware" dev="src/HardwareProfile.dev.gen.xml"
+        features="Tp Lan Wifi PowerMeter Temperature FrontControls TempHum Co2 Lux Presence SensorModule Relays BinaryInputs StatusLeds"
+        firmware="Firmware: {env}"
+        changeInfo="Nach einem Wechsel der Hardware die Kanäle und Werte der Applikation prüfen." />
+  <Notice when="ThirdParty" title="Produkt eines Drittanbieters: OpenKNX stellt nur eine kompatible Firmware bereit. Gewährleistung, Support und Produktsicherheit liegen beim Hersteller." />
+  <InfoImage style="card" />
+
+  <!-- A GPIO role: the user picks a free pin per slot, the dropdown lists only the pins of the selected
+       board. number = part of the ETS parameter ID, never change it. scan = regular expression over the
+       macro names of the board header ($1 = first group). Pins the platform uses (KNX UART, prog
+       button/LED, ...) are left out by the <ReservedPins> below. -->
+  <!-- the application's list of pins that are never offered in a GPIO role (macro names, values from the board headers).
+       ETH_PHY_ADDR and ETH_PHY_SPI_HOST are left out on purpose: their value is an address / host number, not a GPIO. -->
+  <ReservedPins macros="KNX_UART_RX_PIN KNX_UART_TX_PIN PROG_BUTTON_PIN PROG_LED_PIN SAVE_INTERRUPT_PIN INFO_LED_PIN INFO1_LED_PIN INFO2_LED_PIN INFO3_LED_PIN OPENKNX_SERIALLED_PIN" />
+  <ReservedPins macros="PIN_ETH_SS PIN_ETH_SCK PIN_ETH_MOSI PIN_ETH_MISO PIN_ETH_INT PIN_ETH_RES ETH_PHY_RST ETH_PHY_POWER ETH_PHY_MDC ETH_PHY_MDIO ETH_PHY_CS ETH_PHY_IRQ ETH_PHY_SPI_SCK ETH_PHY_SPI_MISO ETH_PHY_SPI_MOSI" />
+  <ReservedPins macros="PIN_SDCARD_SCK PIN_SDCARD_MOSI PIN_SDCARD_MISO PIN_SDCARD_CS PIN_SDCARD_CD I2C_SDA_PIN I2C_SCL_PIN" />
+  <GpioRole name="Pin" number="1" text="Freier Anschluss" count="2">
+    <Pins board="OKNXHW_OPENKNXIAO_*" scan="^OKNXHW_OPENKNXIAO_D(\d+)$" label="D$1" />
+    <Pins board="DEVICE_QUINLED_*"    scan="^QUINLED_(Q\d|EXTRA\d)_GPIO$" label="$1" />
+    <Pins board="DEVICE_REG1_*"       scan="^REG1_APP_PIN(\d+)$" label="APP-Pin $1" />
+  </GpioRole>
+
+  <!-- port selections per board of the demo module (src/hw/Outputs.xml, values: port number - 1, 10 = manual, 15 = none) -->
+  <Generate template="src/hw/Outputs.xml" output="src/HardwareProfile.outputs.gen.xml" />
+
+  <!-- GPIO conflict check (page "7 GPIO-Konflikte"): every active use resolves to a GPIO of the selected board, two uses with
+       the same GPIO both show their error block. The parts go into the demo module (ModuleType 46, %TT%): flags 900..907
+       without memory, one calculation. port = ParamRefId per board ($b = board, $tt = ModuleType 45 of the hardware module).
+       value="port": port value (portManualValue / portNoneValue of the root); value="gpio": the value is the GPIO -->
+  <!-- reserved="true": a use on a GPIO the selected board uses itself shows its own message (flag 2): the pins OGM-Common drives
+       (PROG_BUTTON/LED, INFO LEDs, serial LED, FUNC buttons, SAVE_INTERRUPT), the KNX UART of a TP build (a board with TP and IP
+       firmware variants or without env: hint, flag 3), the flash / PSRAM bus of an ESP32 and the <ReservedPins> above; the same
+       set is HardwareProfile::isReservedGpio of the firmware header -->
+  <Conflicts output="src/HardwareProfile.conflicts.gen.xml" number="900" reserved="true">
+    <Param name="Outputs" ref="%AID%_P-%TT%00023_R-%TT%0002301" />
+    <Param name="Signal1" ref="%AID%_P-%TT%00024_R-%TT%0002401" />
+    <Param name="Signal2" ref="%AID%_P-%TT%00025_R-%TT%0002501" />
+    <!-- free pins of the hardware page: the value is the GPIO (255 = not used) -->
+    <Use name="Pin1" text="Freier Anschluss 1" value="gpio" port="%AID%_UP-{{$tt}}{{D5 (11000 + $b.Slot)}}_R-{{$tt}}{{D5 (11000 + $b.Slot)}}01" />
+    <Use name="Pin2" text="Freier Anschluss 2" value="gpio" port="%AID%_UP-{{$tt}}{{D5 (12000 + $b.Slot)}}_R-{{$tt}}{{D5 (12000 + $b.Slot)}}01" />
+    <!-- outputs: active up to "Genutzte Ausgänge"; SPI signals (1, 2) take the MOSI GPIO when manual and use the clock -->
+    <Use name="Out1Data" text="Ausgang 1 Daten" when="Outputs >= 1" port="%AID%_UP-%TT%{{D5 (1000 + $b.Slot)}}_R-%TT%{{D5 (1000 + $b.Slot)}}01">
+      <Manual when="Signal1 in 1 2" ref="%AID%_P-%TT%00027_R-%TT%0002701" />
+      <Manual ref="%AID%_P-%TT%00026_R-%TT%0002601" />
+    </Use>
+    <Use name="Out1Clock" text="Ausgang 1 Takt" when="Outputs >= 1 and Signal1 in 1 2" port="%AID%_UP-%TT%{{D5 (1100 + $b.Slot)}}_R-%TT%{{D5 (1100 + $b.Slot)}}01">
+      <Manual ref="%AID%_P-%TT%00028_R-%TT%0002801" />
+    </Use>
+    <Use name="Out2Data" text="Ausgang 2 Daten" when="Outputs >= 2" port="%AID%_UP-%TT%{{D5 (1200 + $b.Slot)}}_R-%TT%{{D5 (1200 + $b.Slot)}}01">
+      <Manual when="Signal2 in 1 2" ref="%AID%_P-%TT%00030_R-%TT%0003001" />
+      <Manual ref="%AID%_P-%TT%00029_R-%TT%0002901" />
+    </Use>
+    <Use name="Out2Clock" text="Ausgang 2 Takt" when="Outputs >= 2 and Signal2 in 1 2" port="%AID%_UP-%TT%{{D5 (1300 + $b.Slot)}}_R-%TT%{{D5 (1300 + $b.Slot)}}01">
+      <Manual ref="%AID%_P-%TT%00031_R-%TT%0003101" />
+    </Use>
+    <!-- hard-wired relays (HW_RELAY_<n>_GPIO): the pin is always occupied on boards with that relay -->
+    <Use name="Relay1" text="Relais 1" wiredRelay="1" />
+    <Use name="Relay2" text="Relais 2" wiredRelay="2" />
+  </Conflicts>
+</HardwareProfile>

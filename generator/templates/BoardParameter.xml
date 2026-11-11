@@ -1,0 +1,42 @@
+@@# A per-board parameter family: one element per board for the part asked for.
+@@# Number is the parameter number of a board, e.g. '%TT%{{D5 (200 + $b.Slot)}}' (Id %AID%_UP-<Number>,
+@@# ref %AID%_UP-<Number>_R-<Number>01). In every template $b is the board, $Ref the ParameterRef Id.
+@@# Part = Parameter    : Name, Type (ParameterType name), Text, Value, Offset, BitOffset
+@@#        ParameterRef :
+@@#        ParameterRefRef : Alias
+@@#        When         : <when test="HW-ID"> with Body, or a ParameterRefRef (IndentLevel, HelpContext)
+@@#        Calc         : CalcId, CalcName, Function, RLFunction, InAlias, Target (ref Id written), OutAlias
+@@# Where (script block, $_ = board) limits the boards.
+@@params Part! Number! Name Type Text Value Offset Alias HelpContext Body CalcId CalcName Function RLFunction InAlias Target OutAlias Where
+@@default BitOffset = '0'
+@@default IndentLevel = '1'
+@@for $b in (Select-TBoards $Boards $P.Where)
+@@set $num = Expand $P.Number
+@@set $Ref = '%AID%_UP-' + $num + '_R-' + $num + '01'
+@@if $P.Part -eq 'Parameter'
+<Parameter Id="%AID%_UP-{{$num}}" Offset="{{Expand $P.Offset}}" BitOffset="{{Expand $P.BitOffset}}" Name="{{Expand $P.Name}}" ParameterType="%AID%_PT-{{Expand $P.Type}}" Text="{{Xml (Expand $P.Text)}}" Value="{{Expand $P.Value}}"/>
+@@elseif $P.Part -eq 'ParameterRef'
+<ParameterRef Id="{{$Ref}}" RefId="%AID%_UP-{{$num}}" />
+@@elseif $P.Part -eq 'ParameterRefRef'
+<ParameterRefRef RefId="{{$Ref}}" AliasName="{{Expand $P.Alias}}" />
+@@elseif $P.Part -eq 'When'
+<when test="{{$b.HwId}}">
+@@if $P.Body
+@@expand $P.Body
+@@else
+  <ParameterRefRef RefId="{{$Ref}}" IndentLevel="{{$P.IndentLevel}}"{{ if ($P.HelpContext) { ' HelpContext="' + $P.HelpContext + '"' } }}/>
+@@end
+</when>
+@@elseif $P.Part -eq 'Calc'
+<ParameterCalculation Id="%AID%_PC-{{Expand $P.CalcId}}" Language="JavaScript" Name="{{Expand $P.CalcName}}" LRTransformationFunc="{{$P.Function}}" RLTransformationFunc="{{$P.RLFunction}}">
+  <LParameters>
+    <ParameterRefRef RefId="{{$Ref}}" AliasName="{{$P.InAlias}}" />
+  </LParameters>
+  <RParameters>
+    <ParameterRefRef RefId="{{Expand $P.Target}}" AliasName="{{$P.OutAlias}}" />
+  </RParameters>
+</ParameterCalculation>
+@@else
+{{ throw ("BoardParameter: unknown Part '" + $P.Part + "'") }}
+@@end
+@@end

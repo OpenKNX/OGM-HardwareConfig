@@ -50,13 +50,15 @@
 │  ├─ 0x110x = REG2 PiPico    (0x1100-0x110F) → Base, DD, RTC, Meter, ETH
 │  ├─ 0x111x = REG2 PiPico W  (0x1110-0x111F) → WiFi variants
 │  ├─ 0x112x = REG2 PiPico2   (0x1120-0x112F) → RP2350 variants
-│  └─ 0x113x = REG2 PiPico2 W (0x1130-0x113F) → RP2350 WiFi variants
+│  ├─ 0x113x = REG2 PiPico2 W (0x1130-0x113F) → RP2350 WiFi variants
+│  └─ 0x114x = REG2 ESP-S3-Pico (0x1140-0x114F) → Base, DD
 ├─ 0x12 = UP1   (0x1200-0x12FF) → 256 variants
 ├─ 0x13 = XIAO  (0x1300-0x13FF) → 256 variants
 │  ├─ 0x130x = XIAO RP2040   (0x1300-0x130F) → KNeoPix, Mini
 │  ├─ 0x131x = XIAO RP2350   (0x1310-0x131F) → KNeoPix
 │  ├─ 0x132x = XIAO ESP32S3  (0x1320-0x132F) → KNeoPix, Mini
 │  ├─ 0x133x = XIAO ESP32C6  (0x1330-0x133F) → KNeoPix, Mini (future)
+│  ├─ 0x134x = XIAO ESP32C5  (0x1340-0x134F) → KNeoPix, Mini
 │  └─ 0x135x = XIAO ESP32C3  (0x1350-0x135F) → KNeoPix, Mini
 └─ ... to 0x1F (16 subgroups)
 
@@ -90,7 +92,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
   || defined(DEVICE_REG2_PIPICO2_V1_DD) \
   || defined(DEVICE_REG2_PIPICO2_V1_DD_RTC) \
   || defined(DEVICE_REG2_PIPICO2_V1_DD_METER) \
-  || defined(DEVICE_REG2_PIPICO2_V1_ET) \
+  || defined(DEVICE_REG2_PIPICO2_V1_ETH) \
   || defined(DEVICE_REG2_PIPICO2_V1_ETH_DD) \
   || defined(DEVICE_REG2_PIPICO2_W_V1) \
   || defined(DEVICE_REG2_PIPICO2_W_V1_DD) \

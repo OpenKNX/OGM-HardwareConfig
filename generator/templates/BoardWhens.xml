@@ -1,0 +1,9 @@
+@@# One <when> per board: <when test="Test">Body</when>; Test defaults to the DEVICE_HW_ID.
+@@# Params: Body (template with $b), Test (template with $b), Where (script block, $_ = board)
+@@params Body! Where
+@@default Test = '{{$b.HwId}}'
+@@for $b in (Select-TBoards $Boards $P.Where)
+<when test="{{Expand $P.Test}}">
+@@expand $P.Body
+</when>
+@@end

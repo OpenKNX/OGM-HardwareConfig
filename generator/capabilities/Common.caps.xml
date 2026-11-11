@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Capability pack "Common" - shared by every OpenKNX application.
+
+  A capability is a C preprocessor expression over the defines of the board headers. The generator
+  evaluates it per board for ETS; the generated firmware header evaluates the same expression at
+  compile time. Both see the board header and the <Board flags>; build flags of an env that are not
+  in the manifest are seen by the firmware only (the device query reports such a difference).
+
+  The board headers name the same feature in different ways (LAN: ETH_SPI_INTERFACE, ETH_CLK_MODE,
+  ETH_PHY_SPI_HOST, ETH_PHY_RST, KNX_IP_LAN). This pack maps them once, so an application does not have to.
+
+  Bit order = order in this file, then the manifest's own entries. An entry added here moves the bits of
+  every application's own capabilities and values; the slot file of such an application then stops its run.
+  Inserting or removing an entry changes the device query layout of every application.
+
+  Known header gaps (fix in the header, not here): UP1-WLAN-2xUART has no WiFi define;
+  REG2 PiPico W DD-Meter (0x1113/0x1133) has no OKNXHW_REG2_DEVICE_RTC.
+-->
+<CapabilityPack name="Common">
+  <!-- KNX TP interface: every TP board defines the UART RX pin -->
+  <Capability name="Tp"      text="KNX TP"            expr="defined(KNX_UART_RX_PIN)" />
+  <!-- Ethernet: W5500 over SPI (RP2040/RP2350), RMII PHY (ESP32), SPI PHY (ESP32-S3), ESP32-P4 PHY, or set by the board -->
+  <Capability name="Lan"     text="LAN"               expr="defined(KNX_IP_LAN) || defined(ETH_SPI_INTERFACE) || defined(ETH_CLK_MODE) || defined(ETH_PHY_SPI_HOST) || defined(ETH_PHY_RST)" />
+  <!-- WiFi is often a build decision (Pico W can run without it): set by the board or by <Board flags> -->
+  <Capability name="Wifi"    text="WLAN"              expr="defined(KNX_IP_WIFI)" />
+  <!-- DEVICE_DISPLAY_MODULE is a build flag (IP-Interface), not a header define -->
+  <Capability name="Display" text="Display"           expr="defined(OKNXHW_REG2_DEVICE_DISPLAY) || defined(OKNXHW_REG2_ESP_DEVICE_DISPLAY) || defined(DEVICE_DISPLAY_MODULE)" />
+  <Capability name="Rtc"     text="Echtzeituhr (RTC)" expr="defined(OKNXHW_REG2_DEVICE_RTC)" />
+  <Capability name="SdCard"  text="SD-Karte"          expr="defined(SDCARD_SPI_INTERFACE)" />
+  <Capability name="Buzzer"  text="Summer / Vibration" expr="defined(OPENKNX_BUZZER_PIN) || defined(OPENKNX_VIBRATION_PIN) || defined(BUZZER_PIN) || defined(SMARTMF_BUZZER_PIN)" />
+
+  <!-- Numbers (one byte each). ifdef = macro that must exist, else default. -->
+  <Value name="BinaryInputs" text="Binäreingänge"  expr="OPENKNX_BI_GPIO_COUNT" default="0" max="8" />
+  <Value name="StatusLeds"   text="Status-LEDs"    expr="OPENKNX_SLED_COUNT"    default="0" max="8" />
+  <Value name="FlashMB"      text="Flash-Speicher" expr="DEVICE_FLASH_SIZE_MB"  default="0" max="16" unit="MB" />
+
+  <!-- No <ReservedPins> here: every pin is allowed unless the application lists it in its own manifest. The pins OGM-Common and
+       the chip use are reserved by <Conflicts reserved="true"> without a list (generator README, "Reservierte GPIOs"). -->
+</CapabilityPack>

@@ -95,8 +95,12 @@
 
 #ifdef DEVICE_QUINLED_DIG2GO
     #define DEVICE_HW_ID 0x2100
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig2Go"
     #define DEVICE_NAME "QuinLED Dig2Go" // Flash: 4 MB, PSRAM: 0 MB
+    #ifndef DEVICE_FLASH_SIZE_MB
+        #define DEVICE_FLASH_SIZE_MB 4 // quinled.info Dig2Go specifications: "ESP32 with 4MB of flash memory"
+    #endif
 
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)
         #define KNX_IP_WIFI
@@ -133,6 +137,8 @@
 
 #ifdef DEVICE_QUINLED_DIG_NEXT2
     #define DEVICE_HW_ID 0x2140
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74AHCT125
     #define DEVICE_ID "QuinLED-Dig-Next-2"
     #define DEVICE_NAME "QuinLED Dig-Next 2" // Flash: 8 MB, PSRAM: 2MB
 
@@ -170,6 +176,8 @@
 
 #if defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI)
     #define DEVICE_HW_ID 0x2110
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Uno V3 (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -181,6 +189,8 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET)
     #define DEVICE_HW_ID 0x2111
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Uno V3 (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -192,6 +202,7 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS)
     #define DEVICE_HW_ID 0x2112
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-WiFi-AE-Plus"
     #define DEVICE_NAME "QuinLED Dig-Uno V3 (WiFi + AE_Plus)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -204,6 +215,10 @@
 #endif
 
 #if defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) || defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET) || defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS)
+
+    #ifndef DEVICE_FLASH_SIZE_MB
+        #define DEVICE_FLASH_SIZE_MB 4 // minimum: QuinLED-ESP32 v2 has 4 MB, v4 has 8 MB
+    #endif
 
     #define QUINLED_LED_PORT_COUNT 2
     #define QUINLED_RELAY_COUNT 1
@@ -264,6 +279,7 @@
 
 #if defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI)
     #define DEVICE_HW_ID 0x2120
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -275,6 +291,7 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET)
     #define DEVICE_HW_ID 0x2121
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Quad V3 (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -286,6 +303,7 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS)
     #define DEVICE_HW_ID 0x2122
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-WiFi-AE-Plus"
     #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi + AE_Plus)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -298,6 +316,10 @@
 #endif
 
 #if defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI) || defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET) || defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS)
+
+    #ifndef DEVICE_FLASH_SIZE_MB
+        #define DEVICE_FLASH_SIZE_MB 4 // minimum: QuinLED-ESP32 v2 has 4 MB, v4 has 8 MB
+    #endif
 
     #if QUINLED_HAS_ETHERNET
         #define QUINLED_ETHERNET_POWER_GPIO 5   // Ethernet PHY enable
@@ -357,6 +379,7 @@
 
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET)
     #define DEVICE_HW_ID 0x2130
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -366,6 +389,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI)
     #define DEVICE_HW_ID 0x2131
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
 
@@ -377,6 +401,7 @@
 
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET)
     #define DEVICE_HW_ID 0x2132
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (Ethernet)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_LAN
@@ -385,6 +410,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI)
     #define DEVICE_HW_ID 0x2133
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (WiFi)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_WIFI
@@ -439,6 +465,8 @@
 // Ethernet PHY: WLED wled00/network.cpp, WLED_ETH_QUINLED_V4.
 #if defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI)
     #define DEVICE_HW_ID 0x2113
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V4-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Uno V4 (WiFi)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_WIFI
@@ -447,6 +475,8 @@
     #define QUINLED_HAS_ETHERNET 0
 #elif defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2114
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V4-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Uno V4 (Ethernet)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_LAN
@@ -455,6 +485,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI)
     #define DEVICE_HW_ID 0x2123
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V4-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Quad V4 (WiFi)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_WIFI
@@ -463,6 +494,8 @@
     #define QUINLED_HAS_ETHERNET 0
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2124
+    #define HW_INFO_TEXT "ESP32-Controller von QuinLED mit 4 LED-Ausgängen und einem Relais-Ausgang, 8 MB Flash, 2 MB PSRAM. KNX über IP per Ethernet." // board description on the ETS hardware page (max. 255 characters)
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V4-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Quad V4 (Ethernet)" // Flash: 8 MB, PSRAM: 2 MB
     #ifndef KNX_IP_LAN
@@ -511,6 +544,7 @@
 // V4 Octa: https://quinled.info/quinled-dig-octa-brainboard-32-8l-pinout-guide/
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2134
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (Ethernet)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_LAN
@@ -519,6 +553,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI)
     #define DEVICE_HW_ID 0x2135
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (WiFi)" // Flash: 16 MB, PSRAM: 0 MB
     #ifndef KNX_IP_WIFI
@@ -608,6 +643,186 @@
             #error Unsupported QuinLED Ethernet clock mode
         #endif
     #endif
+#endif
+
+#pragma endregion
+
+/**
+ * Section: Port description
+ * HW_PORT_COUNT, HW_PORT_<n>_GPIO and HW_PORT_<n>_LABEL name the outputs an application may offer
+ * as ports, in this order. Read by the firmware and by OGM-HardwareConfig/generator.
+ */
+#pragma region Port description
+
+#if defined(DEVICE_QUINLED_DIG2GO)
+    #define HW_PORT_COUNT 2
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_2_LABEL "IO12 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) || defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET)
+    #define HW_PORT_COUNT 3
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO3 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_3_LABEL "IO15 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS)
+    #define HW_PORT_COUNT 6
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO3 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_LED_DATA6_GPIO
+    #define HW_PORT_3_LABEL "IO21 (LED 6 / AE+)"
+    #define HW_PORT_4_GPIO QUINLED_LED_DATA7_GPIO
+    #define HW_PORT_4_LABEL "IO17 (LED 7 / AE+)"
+    #define HW_PORT_5_GPIO QUINLED_LED_DATA8_GPIO
+    #define HW_PORT_5_LABEL "IO22 (LED 8 / AE+)"
+    #define HW_PORT_6_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_6_LABEL "IO15 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI) || defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET)
+    #define HW_PORT_COUNT 5
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO3 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_LED_DATA3_GPIO
+    #define HW_PORT_3_LABEL "IO1 (LED 3)"
+    #define HW_PORT_4_GPIO QUINLED_LED_DATA4_GPIO
+    #define HW_PORT_4_LABEL "IO4 (LED 4)"
+    #define HW_PORT_5_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_5_LABEL "IO15 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS)
+    #define HW_PORT_COUNT 8
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO3 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_LED_DATA3_GPIO
+    #define HW_PORT_3_LABEL "IO1 (LED 3)"
+    #define HW_PORT_4_GPIO QUINLED_LED_DATA4_GPIO
+    #define HW_PORT_4_LABEL "IO4 (LED 4)"
+    #define HW_PORT_5_GPIO QUINLED_LED_DATA5_GPIO
+    #define HW_PORT_5_LABEL "IO21 (LED 5 / AE+)"
+    #define HW_PORT_6_GPIO QUINLED_LED_DATA6_GPIO
+    #define HW_PORT_6_LABEL "IO17 (LED 6 / AE+)"
+    #define HW_PORT_7_GPIO QUINLED_LED_DATA7_GPIO
+    #define HW_PORT_7_LABEL "IO22 (LED 7 / AE+)"
+    #define HW_PORT_8_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_8_LABEL "IO15 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET)
+    #define HW_PORT_COUNT 9
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO0 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO1 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_LED_DATA3_GPIO
+    #define HW_PORT_3_LABEL "IO2 (LED 3)"
+    #define HW_PORT_4_GPIO QUINLED_LED_DATA4_GPIO
+    #define HW_PORT_4_LABEL "IO3 (LED 4)"
+    #define HW_PORT_5_GPIO QUINLED_LED_DATA5_GPIO
+    #define HW_PORT_5_LABEL "IO4 (LED 5)"
+    #define HW_PORT_6_GPIO QUINLED_LED_DATA6_GPIO
+    #define HW_PORT_6_LABEL "IO5 (LED 6)"
+    #define HW_PORT_7_GPIO QUINLED_LED_DATA7_GPIO
+    #define HW_PORT_7_LABEL "IO12 (LED 7)"
+    #define HW_PORT_8_GPIO QUINLED_LED_DATA8_GPIO
+    #define HW_PORT_8_LABEL "IO13 (LED 8)"
+    #define HW_PORT_9_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_9_LABEL "IO33 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_NEXT2)
+    #define HW_PORT_COUNT 6
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO2 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO4 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_3_LABEL "IO5 (Relais)"
+    #define HW_PORT_4_GPIO QUINLED_EXTRA1_GPIO
+    #define HW_PORT_4_LABEL "IO20 (5A 1)"
+    #define HW_PORT_5_GPIO QUINLED_EXTRA2_GPIO
+    #define HW_PORT_5_LABEL "IO21 (10A 1)"
+    #define HW_PORT_6_GPIO QUINLED_EXTRA3_GPIO
+    #define HW_PORT_6_LABEL "IO22 (5A 2)"
+#elif defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI) || defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET)
+    #define HW_PORT_COUNT 3
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO2 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO4 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_3_LABEL "IO32 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI) || defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
+    #define HW_PORT_COUNT 5
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO2 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO4 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_LED_DATA3_GPIO
+    #define HW_PORT_3_LABEL "IO12 (LED 3)"
+    #define HW_PORT_4_GPIO QUINLED_LED_DATA4_GPIO
+    #define HW_PORT_4_LABEL "IO14 (LED 4)"
+    #define HW_PORT_5_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_5_LABEL "IO32 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET)
+    #define HW_PORT_COUNT 9
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO0 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO1 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_LED_DATA3_GPIO
+    #define HW_PORT_3_LABEL "IO2 (LED 3)"
+    #define HW_PORT_4_GPIO QUINLED_LED_DATA4_GPIO
+    #define HW_PORT_4_LABEL "IO3 (LED 4)"
+    #define HW_PORT_5_GPIO QUINLED_LED_DATA5_GPIO
+    #define HW_PORT_5_LABEL "IO4 (LED 5)"
+    #define HW_PORT_6_GPIO QUINLED_LED_DATA6_GPIO
+    #define HW_PORT_6_LABEL "IO5 (LED 6)"
+    #define HW_PORT_7_GPIO QUINLED_LED_DATA7_GPIO
+    #define HW_PORT_7_LABEL "IO12 (LED 7)"
+    #define HW_PORT_8_GPIO QUINLED_LED_DATA8_GPIO
+    #define HW_PORT_8_LABEL "IO13 (LED 8)"
+    #define HW_PORT_9_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_9_LABEL "IO33 (Relais)"
+#elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
+    #define HW_PORT_COUNT 9
+    #define HW_PORT_1_GPIO QUINLED_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO1 (LED 1)"
+    #define HW_PORT_2_GPIO QUINLED_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO2 (LED 2)"
+    #define HW_PORT_3_GPIO QUINLED_LED_DATA3_GPIO
+    #define HW_PORT_3_LABEL "IO3 (LED 3)"
+    #define HW_PORT_4_GPIO QUINLED_LED_DATA4_GPIO
+    #define HW_PORT_4_LABEL "IO4 (LED 4)"
+    #define HW_PORT_5_GPIO QUINLED_LED_DATA5_GPIO
+    #define HW_PORT_5_LABEL "IO5 (LED 5)"
+    #define HW_PORT_6_GPIO QUINLED_LED_DATA6_GPIO
+    #define HW_PORT_6_LABEL "IO12 (LED 6)"
+    #define HW_PORT_7_GPIO QUINLED_LED_DATA7_GPIO
+    #define HW_PORT_7_LABEL "IO13 (LED 7)"
+    #define HW_PORT_8_GPIO QUINLED_LED_DATA8_GPIO
+    #define HW_PORT_8_LABEL "IO14 (LED 8)"
+    #define HW_PORT_9_GPIO QUINLED_RELAY1_GPIO
+    #define HW_PORT_9_LABEL "IO33 (Relais)"
+#endif
+
+#pragma endregion
+
+/**
+ * Section: Relay description
+ * HW_RELAY_COUNT, HW_RELAY_<n>_GPIO and HW_RELAY_<n>_LABEL name the relay outputs wired on the board (hard-wired, not
+ * a free port). Read by the firmware and by OGM-HardwareConfig/generator.
+ */
+#pragma region Relay description
+
+// only the Dig2Go has a relay on the board; the relay output (QUINLED_RELAY1_GPIO) of Uno and Quad (V3, V4),
+// Octa (V1, V2, V4) and Next2 is a free port that can drive LED data or an external relay
+#if defined(DEVICE_QUINLED_DIG2GO)
+    #define HW_RELAY_COUNT QUINLED_RELAY_COUNT
+    #define HW_RELAY_1_GPIO QUINLED_RELAY1_GPIO
+    #define HW_RELAY_1_LABEL "IO12 (Relais)"
 #endif
 
 #pragma endregion

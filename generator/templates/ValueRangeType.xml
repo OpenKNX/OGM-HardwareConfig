@@ -1,0 +1,13 @@
+@@# ParameterType 0..max: ZeroText for 0, then 1..(largest value of the manifest <Value> over all boards).
+@@# Params: Name, Value (name of the manifest <Value>), ZeroText, SizeInBit, UIHint
+@@params Name! Value! ZeroText! UIHint
+@@default SizeInBit = 8
+@@set $max = MaxOf $Boards { $_.Val[$P.Value] } 0
+<ParameterType Id="%AID%_PT-{{$P.Name}}" Name="{{$P.Name}}">
+  <TypeRestriction Base="Value" SizeInBit="{{$P.SizeInBit}}"{{ if ($P.UIHint) { ' UIHint="' + $P.UIHint + '"' } }}>
+    <Enumeration Text="{{Xml $P.ZeroText}}" Value="0" Id="%ENID%" />
+@@for $n in (Range 1 $max)
+    <Enumeration Text="{{$n}}" Value="{{$n}}" Id="%ENID%" />
+@@end
+  </TypeRestriction>
+</ParameterType>

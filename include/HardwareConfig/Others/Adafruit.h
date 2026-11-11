@@ -16,6 +16,7 @@
 #pragma region "Adafruit Dev Boards"
 // https://github.com/OpenKNX/OpenKNX/wiki/Adafruit-ESP32-Feather-V2
 #ifdef DEVICE_ADAFRUIT_ESP32_FEATHER_V2
+    #define DEVICE_HW_ID 0x2200
     #define DEVICE_ID "ADF-ESP32-FEATHER-V2"
     #define DEVICE_NAME "Adafruit ESP32 Feather V2"
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)

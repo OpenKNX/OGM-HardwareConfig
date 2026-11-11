@@ -42,11 +42,12 @@
     #define GLEDOPTO_BUTTON_GPIO 0     // Function button (active LOW)
     #define GLEDOPTO_LED_DATA1_GPIO 16 // LED data output 1 (primary)
     #define GLEDOPTO_LED_DATA2_GPIO 2  // LED data output 2 (secondary)
-    #define GLEDOPTO_RELAIS1_GPIO 12   // Relais output 1
+    #define GLEDOPTO_RELAIS1_GPIO 12   // I/O port (no relay on the board)
                                        // #define GLEDOPTO_GPIO 33         // Note: GPIO33 is input-only on ESP32-WROOM-32
                                        //  -----------------------------------------------------------------
 
     #define DEVICE_HW_ID 0x2000
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "GL-C-309WL"
     #define DEVICE_NAME "Gledopto GL-C-309WL ESP32"
 
@@ -104,13 +105,15 @@
     #define GLEDOPTO_LED_DATA2_GPIO 12 // LED data output 2
     #define GLEDOPTO_LED_DATA3_GPIO 4  // LED data output 3
     #define GLEDOPTO_LED_DATA4_GPIO 2  // LED data output 4
-    #define GLEDOPTO_RELAIS1_GPIO 13   // Relais output 1
+    #define GLEDOPTO_RELAIS1_GPIO 13   // extension GPIO port (free use, e.g. external relay)
     #define GLEDOPTO_RELAIS2_GPIO 18   // Onboard relais
 
     #define GLEDOPTO_MIC_SD_GPIO 32
     #define GLEDOPTO_MIC_WS_GPIO 15
 
     #define DEVICE_HW_ID 0x2001
+    #define HW_INFO_TEXT "ESP32-Controller von Gledopto mit 4 LED-Ausgängen und eingebautem Relais (IO18). KNX über IP per WLAN." // board description on the ETS hardware page (max. 255 characters)
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "GL-C-017WL"
     #define DEVICE_NAME "Gledopto GL-C-017WL ESP32"
 
@@ -187,8 +190,10 @@
     #define GLEDOPTO_ETHERNET_MDIO_GPIO 33
     #define GLEDOPTO_ETHERNET_POWER_GPIO 5
     #define GLEDOPTO_ETHERNET_CLK_MODE ETH_CLOCK_GPIO0_IN
+    #define GLEDOPTO_ETHERNET_CLK_IN_GPIO 0 // RMII clock input of ETH_CLOCK_GPIO0_IN
 
     #define DEVICE_HW_ID 0x2002
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "GL-C-620WL"
     #define DEVICE_NAME "Gledopto GL-C-620WL ESP32"
 
@@ -243,6 +248,67 @@
         #define PROG_BUTTON_PIN GLEDOPTO_BUTTON_GPIO
     #endif
 
+#endif
+
+#pragma endregion
+
+/**
+ * Section: Port description
+ * HW_PORT_COUNT, HW_PORT_<n>_GPIO and HW_PORT_<n>_LABEL name the outputs an application may offer
+ * as ports, in this order. Read by the firmware and by OGM-HardwareConfig/generator.
+ */
+#pragma region Port description
+
+#if defined(DEVICE_GLEDOPTO_ESP32_WLED_DIGITAL_UP)
+    #define HW_PORT_COUNT 3
+    #define HW_PORT_1_GPIO GLEDOPTO_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED Primary)"
+    #define HW_PORT_2_GPIO GLEDOPTO_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO2 (LED Secondary)"
+    #define HW_PORT_3_GPIO GLEDOPTO_RELAIS1_GPIO
+    #define HW_PORT_3_LABEL "IO12 (Relais)"
+#elif defined(DEVICE_GLEDOPTO_GL_C_017WL)
+    #define HW_PORT_COUNT 6
+    #define HW_PORT_1_GPIO GLEDOPTO_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED 1)"
+    #define HW_PORT_2_GPIO GLEDOPTO_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO12 (LED 2)"
+    #define HW_PORT_3_GPIO GLEDOPTO_LED_DATA3_GPIO
+    #define HW_PORT_3_LABEL "IO4 (LED 3)"
+    #define HW_PORT_4_GPIO GLEDOPTO_LED_DATA4_GPIO
+    #define HW_PORT_4_LABEL "IO2 (LED 4)"
+    #define HW_PORT_5_GPIO GLEDOPTO_RELAIS1_GPIO
+    #define HW_PORT_5_LABEL "IO13 (Relais)"
+    #define HW_PORT_6_GPIO GLEDOPTO_RELAIS2_GPIO
+    #define HW_PORT_6_LABEL "IO18 (Onboard Relais)"
+#elif defined(DEVICE_GLEDOPTO_GL_C_620WL)
+    #define HW_PORT_COUNT 3
+    #define HW_PORT_1_GPIO GLEDOPTO_LED_DATA1_GPIO
+    #define HW_PORT_1_LABEL "IO16 (LED 1)"
+    #define HW_PORT_2_GPIO GLEDOPTO_LED_DATA2_GPIO
+    #define HW_PORT_2_LABEL "IO2 (LED 2)"
+    #define HW_PORT_3_GPIO GLEDOPTO_RELAIS1_GPIO
+    #define HW_PORT_3_LABEL "IO18 (Relais)"
+#endif
+
+#pragma endregion
+
+/**
+ * Section: Relay description
+ * HW_RELAY_COUNT, HW_RELAY_<n>_GPIO and HW_RELAY_<n>_LABEL name the relay outputs wired on the board (hard-wired, not
+ * a free port). Read by the firmware and by OGM-HardwareConfig/generator.
+ */
+#pragma region Relay description
+
+// onboard relay on IO18 of GL-C-017WL and GL-C-620WL; IO13 of GL-C-017WL and IO12 of GL-C-309WL are free ports
+#if defined(DEVICE_GLEDOPTO_GL_C_017WL)
+    #define HW_RELAY_COUNT 1
+    #define HW_RELAY_1_GPIO GLEDOPTO_RELAIS2_GPIO
+    #define HW_RELAY_1_LABEL "IO18 (Onboard Relais)"
+#elif defined(DEVICE_GLEDOPTO_GL_C_620WL)
+    #define HW_RELAY_COUNT 1
+    #define HW_RELAY_1_GPIO GLEDOPTO_RELAIS1_GPIO
+    #define HW_RELAY_1_LABEL "IO18 (Relais)"
 #endif
 
 #pragma endregion

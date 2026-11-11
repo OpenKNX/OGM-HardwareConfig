@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+  <!--
+    Demo module (hand-written). It shows how an application module uses the generated hardware profile:
+    no hardware list, no IDs, no script - only the feature flags from HardwareProfile.conf.xml:
+      %HWP_SelectRef%            ParamRefId of the hardware selection
+      %HWP_CAP_<Name>%           hardware IDs with the capability (e.g. %HWP_CAP_Lan%)
+      %HWP_NOCAP_<Name>%         hardware IDs without it
+      %HWP_VAL_<Name>_GE_<n>%    hardware IDs whose value is at least n (e.g. 3 binary inputs)
+    A new board in HardwareProfile.xml changes the feature flags; this file stays as it is.
+  -->
+  <!-- port selection per board (src/hw/Outputs.xml): the parameters of one selection share one byte on purpose (union) -->
+  <op:nowarn id="10" regex="Parameter DEMO_Out[12](Data|Clock)B\d+" />
+  <ManufacturerData>
+    <Manufacturer>
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <ParameterTypes>
+              <ParameterType Id="%AID%_PT-DemoYesNo" Name="DemoYesNo">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Nein" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Ja" Value="1" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoText32" Name="DemoText32">
+                <TypeText SizeInBit="256" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoPercent" Name="DemoPercent">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoVolume" Name="DemoVolume">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Aus" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Leise" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Normal" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Laut" Value="3" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoInputMode" Name="DemoInputMode">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Inaktiv" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Schalten" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Dimmen" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Jalousie" Value="3" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <op:include href="HardwareProfile.ranges.gen.xml" xpath="//ApplicationProgram/Static/ParameterTypes/ParameterType" />
+              <!-- GPIO conflict check (page 7): output count, signal type, manual GPIO, port lists per board, conflict flag -->
+              <ParameterType Id="%AID%_PT-DemoOutputs" Name="DemoOutputs">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="keine" Value="0" Id="%ENID%" />
+                  <Enumeration Text="1" Value="1" Id="%ENID%" />
+                  <Enumeration Text="2" Value="2" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoSignal" Name="DemoSignal">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Eindraht (Daten)" Value="0" Id="%ENID%" />
+                  <Enumeration Text="SPI (MOSI + Takt)" Value="1" Id="%ENID%" />
+                  <Enumeration Text="SPI, Takt invertiert" Value="2" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoGpio" Name="DemoGpio">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="255" />
+              </ParameterType>
+              <op:include href="HardwareProfile.outputs.gen.xml" xpath="//ApplicationProgram/Static/ParameterTypes/ParameterType" />
+              <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//ApplicationProgram/Static/ParameterTypes/ParameterType" />
+              <ParameterType Id="%AID%_PT-DemoSwitchMode" Name="DemoSwitchMode">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Aus" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Schalten" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Treppenlicht" Value="2" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="%AID%_P-%TT%00001" Name="LanDhcp" ParameterType="%AID%_PT-DemoYesNo" Text="IP-Adresse per DHCP" Value="1">
+                <Memory CodeSegment="%MID%" Offset="0" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00002" Name="WifiSsid" ParameterType="%AID%_PT-DemoText32" Text="WLAN-Name (SSID)" Value="">
+                <Memory CodeSegment="%MID%" Offset="1" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00003" Name="DisplayBrightness" ParameterType="%AID%_PT-DemoPercent" Text="Display-Helligkeit" Value="70" SuffixText="%">
+                <Memory CodeSegment="%MID%" Offset="33" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00004" Name="BuzzerVolume" ParameterType="%AID%_PT-DemoVolume" Text="Lautstärke Summer" Value="2">
+                <Memory CodeSegment="%MID%" Offset="34" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00005" Name="Input1" ParameterType="%AID%_PT-DemoInputMode" Text="Eingang 1" Value="0">
+                <Memory CodeSegment="%MID%" Offset="35" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00006" Name="Input2" ParameterType="%AID%_PT-DemoInputMode" Text="Eingang 2" Value="0">
+                <Memory CodeSegment="%MID%" Offset="36" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00007" Name="Input3" ParameterType="%AID%_PT-DemoInputMode" Text="Eingang 3" Value="0">
+                <Memory CodeSegment="%MID%" Offset="37" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00008" Name="Input4" ParameterType="%AID%_PT-DemoInputMode" Text="Eingang 4" Value="0">
+                <Memory CodeSegment="%MID%" Offset="38" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00009" Name="Logger" ParameterType="%AID%_PT-DemoYesNo" Text="Messwerte im Flash aufzeichnen" Value="0">
+                <Memory CodeSegment="%MID%" Offset="39" BitOffset="0" />
+              </Parameter>
+              <!-- selection 0..n per hardware: one byte each, one parameter per list length in a union -->
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="40" BitOffset="0" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='BiParameters']/*" />
+              </Union>
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="41" BitOffset="0" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='LedParameters']/*" />
+              </Union>
+              <Parameter Id="%AID%_P-%TT%00010" Name="PowerSend" ParameterType="%AID%_PT-DemoYesNo" Text="Leistung senden" Value="1">
+                <Memory CodeSegment="%MID%" Offset="44" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00011" Name="TempSend" ParameterType="%AID%_PT-DemoYesNo" Text="Gerätetemperatur senden" Value="1">
+                <Memory CodeSegment="%MID%" Offset="45" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00012" Name="FrontLock" ParameterType="%AID%_PT-DemoYesNo" Text="Frontbedienung sperren" Value="0">
+                <Memory CodeSegment="%MID%" Offset="46" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00013" Name="TempHumSend" ParameterType="%AID%_PT-DemoYesNo" Text="Temperatur/Feuchte senden" Value="1">
+                <Memory CodeSegment="%MID%" Offset="47" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00014" Name="Co2Send" ParameterType="%AID%_PT-DemoYesNo" Text="CO2 senden" Value="1">
+                <Memory CodeSegment="%MID%" Offset="48" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00015" Name="LuxSend" ParameterType="%AID%_PT-DemoYesNo" Text="Helligkeit senden" Value="1">
+                <Memory CodeSegment="%MID%" Offset="49" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00016" Name="PresenceDelay" ParameterType="%AID%_PT-DemoPercent" Text="Nachlaufzeit Präsenz (min)" Value="5">
+                <Memory CodeSegment="%MID%" Offset="50" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00017" Name="ModuleSend" ParameterType="%AID%_PT-DemoYesNo" Text="Werte des Steckmoduls senden" Value="1">
+                <Memory CodeSegment="%MID%" Offset="51" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00018" Name="Shutter" ParameterType="%AID%_PT-DemoYesNo" Text="Kanäle 1 und 2 als Jalousie" Value="0">
+                <Memory CodeSegment="%MID%" Offset="52" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00019" Name="Channel1" ParameterType="%AID%_PT-DemoSwitchMode" Text="Schaltkanal 1" Value="1">
+                <Memory CodeSegment="%MID%" Offset="53" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00020" Name="Channel2" ParameterType="%AID%_PT-DemoSwitchMode" Text="Schaltkanal 2" Value="1">
+                <Memory CodeSegment="%MID%" Offset="54" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00021" Name="Channel3" ParameterType="%AID%_PT-DemoSwitchMode" Text="Schaltkanal 3" Value="1">
+                <Memory CodeSegment="%MID%" Offset="55" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00022" Name="Channel4" ParameterType="%AID%_PT-DemoSwitchMode" Text="Schaltkanal 4" Value="1">
+                <Memory CodeSegment="%MID%" Offset="56" BitOffset="0" />
+              </Parameter>
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="42" BitOffset="0" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='RelParameters']/*" />
+              </Union>
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="43" BitOffset="0" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='ChnParameters']/*" />
+              </Union>
+              <!-- GPIO conflict check (page 7) -->
+              <Parameter Id="%AID%_P-%TT%00023" Name="Outputs" ParameterType="%AID%_PT-DemoOutputs" Text="Genutzte Ausgänge" Value="0">
+                <Memory CodeSegment="%MID%" Offset="57" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00024" Name="Out1Signal" ParameterType="%AID%_PT-DemoSignal" Text="Signal" Value="0">
+                <Memory CodeSegment="%MID%" Offset="58" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00025" Name="Out2Signal" ParameterType="%AID%_PT-DemoSignal" Text="Signal" Value="0">
+                <Memory CodeSegment="%MID%" Offset="59" BitOffset="0" />
+              </Parameter>
+              <!-- port of the selected board: one byte per selection, one parameter per board -->
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="60" BitOffset="0" />
+                <op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out1DataParameters']/*" />
+              </Union>
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="61" BitOffset="0" />
+                <op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out1ClockParameters']/*" />
+              </Union>
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="62" BitOffset="0" />
+                <op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out2DataParameters']/*" />
+              </Union>
+              <Union SizeInBit="8">
+                <Memory CodeSegment="%MID%" Offset="63" BitOffset="0" />
+                <op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out2ClockParameters']/*" />
+              </Union>
+              <!-- manual GPIO (port "Manuell"); 255 = none -->
+              <Parameter Id="%AID%_P-%TT%00026" Name="Out1DataGpio" ParameterType="%AID%_PT-DemoGpio" Text="Daten-GPIO" Value="255">
+                <Memory CodeSegment="%MID%" Offset="64" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00027" Name="Out1MosiGpio" ParameterType="%AID%_PT-DemoGpio" Text="MOSI-GPIO" Value="255">
+                <Memory CodeSegment="%MID%" Offset="65" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00028" Name="Out1ClockGpio" ParameterType="%AID%_PT-DemoGpio" Text="Takt-GPIO" Value="255">
+                <Memory CodeSegment="%MID%" Offset="66" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00029" Name="Out2DataGpio" ParameterType="%AID%_PT-DemoGpio" Text="Daten-GPIO" Value="255">
+                <Memory CodeSegment="%MID%" Offset="67" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00030" Name="Out2MosiGpio" ParameterType="%AID%_PT-DemoGpio" Text="MOSI-GPIO" Value="255">
+                <Memory CodeSegment="%MID%" Offset="68" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00031" Name="Out2ClockGpio" ParameterType="%AID%_PT-DemoGpio" Text="Takt-GPIO" Value="255">
+                <Memory CodeSegment="%MID%" Offset="69" BitOffset="0" />
+              </Parameter>
+              <!-- conflict flags without memory (written by the calculation) -->
+              <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Parameters']/*" />
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="%AID%_P-%TT%00001_R-%TT%0000101" RefId="%AID%_P-%TT%00001" />
+              <ParameterRef Id="%AID%_P-%TT%00002_R-%TT%0000201" RefId="%AID%_P-%TT%00002" />
+              <ParameterRef Id="%AID%_P-%TT%00003_R-%TT%0000301" RefId="%AID%_P-%TT%00003" />
+              <ParameterRef Id="%AID%_P-%TT%00004_R-%TT%0000401" RefId="%AID%_P-%TT%00004" />
+              <ParameterRef Id="%AID%_P-%TT%00005_R-%TT%0000501" RefId="%AID%_P-%TT%00005" />
+              <ParameterRef Id="%AID%_P-%TT%00006_R-%TT%0000601" RefId="%AID%_P-%TT%00006" />
+              <ParameterRef Id="%AID%_P-%TT%00007_R-%TT%0000701" RefId="%AID%_P-%TT%00007" />
+              <ParameterRef Id="%AID%_P-%TT%00008_R-%TT%0000801" RefId="%AID%_P-%TT%00008" />
+              <ParameterRef Id="%AID%_P-%TT%00009_R-%TT%0000901" RefId="%AID%_P-%TT%00009" />
+              <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='ParameterRefs']/*" />
+              <ParameterRef Id="%AID%_P-%TT%00010_R-%TT%0001001" RefId="%AID%_P-%TT%00010" />
+              <ParameterRef Id="%AID%_P-%TT%00011_R-%TT%0001101" RefId="%AID%_P-%TT%00011" />
+              <ParameterRef Id="%AID%_P-%TT%00012_R-%TT%0001201" RefId="%AID%_P-%TT%00012" />
+              <ParameterRef Id="%AID%_P-%TT%00013_R-%TT%0001301" RefId="%AID%_P-%TT%00013" />
+              <ParameterRef Id="%AID%_P-%TT%00014_R-%TT%0001401" RefId="%AID%_P-%TT%00014" />
+              <ParameterRef Id="%AID%_P-%TT%00015_R-%TT%0001501" RefId="%AID%_P-%TT%00015" />
+              <ParameterRef Id="%AID%_P-%TT%00016_R-%TT%0001601" RefId="%AID%_P-%TT%00016" />
+              <ParameterRef Id="%AID%_P-%TT%00017_R-%TT%0001701" RefId="%AID%_P-%TT%00017" />
+              <ParameterRef Id="%AID%_P-%TT%00018_R-%TT%0001801" RefId="%AID%_P-%TT%00018" />
+              <ParameterRef Id="%AID%_P-%TT%00019_R-%TT%0001901" RefId="%AID%_P-%TT%00019" />
+              <ParameterRef Id="%AID%_P-%TT%00020_R-%TT%0002001" RefId="%AID%_P-%TT%00020" />
+              <ParameterRef Id="%AID%_P-%TT%00021_R-%TT%0002101" RefId="%AID%_P-%TT%00021" />
+              <ParameterRef Id="%AID%_P-%TT%00022_R-%TT%0002201" RefId="%AID%_P-%TT%00022" />
+              <ParameterRef Id="%AID%_P-%TT%00023_R-%TT%0002301" RefId="%AID%_P-%TT%00023" />
+              <ParameterRef Id="%AID%_P-%TT%00024_R-%TT%0002401" RefId="%AID%_P-%TT%00024" />
+              <ParameterRef Id="%AID%_P-%TT%00025_R-%TT%0002501" RefId="%AID%_P-%TT%00025" />
+              <ParameterRef Id="%AID%_P-%TT%00026_R-%TT%0002601" RefId="%AID%_P-%TT%00026" />
+              <ParameterRef Id="%AID%_P-%TT%00027_R-%TT%0002701" RefId="%AID%_P-%TT%00027" />
+              <ParameterRef Id="%AID%_P-%TT%00028_R-%TT%0002801" RefId="%AID%_P-%TT%00028" />
+              <ParameterRef Id="%AID%_P-%TT%00029_R-%TT%0002901" RefId="%AID%_P-%TT%00029" />
+              <ParameterRef Id="%AID%_P-%TT%00030_R-%TT%0003001" RefId="%AID%_P-%TT%00030" />
+              <ParameterRef Id="%AID%_P-%TT%00031_R-%TT%0003101" RefId="%AID%_P-%TT%00031" />
+              <op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='ParameterRefs']/*" />
+              <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='ParameterRefs']/*" />
+            </ParameterRefs>
+            <ParameterCalculations>
+              <!-- GPIO conflict check: one calculation, function and tables in the generated hardware script -->
+              <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Calculation']/*" />
+            </ParameterCalculations>
+            <ComObjectTable>
+              <ComObject Id="%AID%_O-%TT%00001" Name="Power" Text="Leistung" Number="101" FunctionText="Ausgang" ObjectSize="4 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-56" />
+              <ComObject Id="%AID%_O-%TT%00002" Name="DeviceTemp" Text="Gerätetemperatur" Number="102" FunctionText="Ausgang" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-1" />
+              <ComObject Id="%AID%_O-%TT%00003" Name="TempHum" Text="Raumtemperatur" Number="103" FunctionText="Ausgang" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-1" />
+              <ComObject Id="%AID%_O-%TT%00004" Name="Co2" Text="CO2" Number="104" FunctionText="Ausgang" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-8" />
+              <ComObject Id="%AID%_O-%TT%00005" Name="Lux" Text="Helligkeit" Number="105" FunctionText="Ausgang" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-4" />
+              <ComObject Id="%AID%_O-%TT%00006" Name="Presence" Text="Präsenz" Number="106" FunctionText="Ausgang" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-18" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="%AID%_O-%TT%00001_R-%TT%0000101" RefId="%AID%_O-%TT%00001" />
+              <ComObjectRef Id="%AID%_O-%TT%00002_R-%TT%0000201" RefId="%AID%_O-%TT%00002" />
+              <ComObjectRef Id="%AID%_O-%TT%00003_R-%TT%0000301" RefId="%AID%_O-%TT%00003" />
+              <ComObjectRef Id="%AID%_O-%TT%00004_R-%TT%0000401" RefId="%AID%_O-%TT%00004" />
+              <ComObjectRef Id="%AID%_O-%TT%00005_R-%TT%0000501" RefId="%AID%_O-%TT%00005" />
+              <ComObjectRef Id="%AID%_O-%TT%00006_R-%TT%0000601" RefId="%AID%_O-%TT%00006" />
+            </ComObjectRefs>
+          </Static>
+          <Dynamic>
+            <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="Demo" Text="Demo-Funktionen" Icon="puzzle-outline">
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Overview" Text="Übersicht" Icon="puzzle-outline" HelpContext="DEMO-Uebersicht">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Hardware-Profil Demo" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Wählen Sie unter Hardware → Hardware ein Gerät. Jede Seite hier zeigt einen Anwendungsfall; die Kontexthilfe (F1) erklärt, was Sie sehen und wie es entsteht." />
+                <choose ParamRefId="%HWP_SelectRef%"><when test="0"><ParameterSeparator Id="%AID%_PS-nnn" Text="Nicht gewählt: Die Demo zeigt alles (unselected=&quot;showAll&quot;). Wählen Sie eine Hardware, damit die Seiten auf sie schrumpfen." UIHint="Information" /></when></choose>
+              </ParameterBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Modules" Text="1 Module und Kanäle" Icon="puzzle-outline" HelpContext="DEMO-Module">
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_Relays_EQ_0%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Diese Hardware hat keine Relais: der Schaltaktor fehlt." UIHint="Information" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_Relays_GE_1%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Schaltaktor" UIHint="Headline" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_Relays_GE_1%"><ParameterRefRef RefId="%AID%_P-%TT%00019_R-%TT%0001901" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_Relays_GE_2%"><ParameterRefRef RefId="%AID%_P-%TT%00020_R-%TT%0002001" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_Relays_GE_3%"><ParameterRefRef RefId="%AID%_P-%TT%00021_R-%TT%0002101" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_Relays_GE_4%"><ParameterRefRef RefId="%AID%_P-%TT%00022_R-%TT%0002201" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_Relays_GE_2%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Jalousie" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00018_R-%TT%0001801" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_BinaryInputs_GE_1%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00005_R-%TT%0000501" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_BinaryInputs_GE_2%"><ParameterRefRef RefId="%AID%_P-%TT%00006_R-%TT%0000601" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_BinaryInputs_GE_3%"><ParameterRefRef RefId="%AID%_P-%TT%00007_R-%TT%0000701" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_VAL_BinaryInputs_GE_4%"><ParameterRefRef RefId="%AID%_P-%TT%00008_R-%TT%0000801" IndentLevel="1" /></when></choose>
+              </ParameterBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Features" Text="2 Merkmale" Icon="puzzle-outline" HelpContext="DEMO-Merkmale" ShowInComObjectTree="true">
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_PowerMeter%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00010_R-%TT%0001001" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00001_R-%TT%0000101" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Temperature%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00011_R-%TT%0001101" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00002_R-%TT%0000201" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_FrontControls%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00012_R-%TT%0001201" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Display%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Display" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00003_R-%TT%0000301" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Buzzer%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Akustische Rückmeldung" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00004_R-%TT%0000401" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_LargeFlash%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Datenaufzeichnung" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00009_R-%TT%0000901" IndentLevel="1" /></when></choose>
+              </ParameterBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Lists" Text="3 Listen je Hardware" Icon="puzzle-outline" HelpContext="DEMO-Listen">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Liste je Hardware" UIHint="Headline" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='RelChoose']/*" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='BiChoose']/*" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Fester Wert der Hardware" UIHint="Headline" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='ChnChoose']/*" />
+                <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='LedChoose']/*" />
+              </ParameterBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Sensors" Text="4 Sensoren" Icon="puzzle-outline" HelpContext="DEMO-Sensoren" ShowInComObjectTree="true">
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_TempHum%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00013_R-%TT%0001301" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00003_R-%TT%0000301" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Co2%"><ParameterSeparator Id="%AID%_PS-nnn" Text="CO2" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00014_R-%TT%0001401" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00004_R-%TT%0000401" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Lux%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00015_R-%TT%0001501" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00005_R-%TT%0000501" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Presence%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00016_R-%TT%0001601" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00006_R-%TT%0000601" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_SensorModule%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00017_R-%TT%0001701" IndentLevel="1" /><ParameterSeparator Id="%AID%_PS-nnn" Text="Ob ein Modul steckt, meldet das Gerät bei der Abfrage; Schalter auf der Seite Hardware." UIHint="Information" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_NOCAP_TempHum%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Diese Hardware hat keine fest eingebauten Raumsensoren." UIHint="Information" /></when></choose>
+              </ParameterBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Network" Text="5 Netzwerk" Icon="puzzle-outline" HelpContext="DEMO-Netzwerk">
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_NOCAP_Tp%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Kein KNX-TP-Anschluss: das Gerät kommuniziert nur über IP." UIHint="Information" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Lan%"><ParameterSeparator Id="%AID%_PS-nnn" Text="LAN" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00001_R-%TT%0000101" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Wifi_OR_NONE%"><ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00002_R-%TT%0000201" IndentLevel="1" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_NOCAP_Lan%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Kein LAN auf dieser Hardware." UIHint="Information" /></when></choose>
+              </ParameterBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Firmware" Text="6 Firmware" Icon="puzzle-outline" HelpContext="DEMO-Firmware">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Geräteabfrage und Firmware" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Hardware → Hardware: Knopf „Hardware vom Gerät abfragen“ (nur bei „Nicht gewählt“). Die Firmware antwortet mit HardwareProfile::answerQuery()." />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Firmware prüft die Auswahl mit HardwareProfile::checkSelection(): nur bei „Match“ liest sie hardwareabhängige Parameter." />
+              </ParameterBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Conflicts" Text="7 GPIO-Konflikte" Icon="puzzle-outline" HelpContext="DEMO-Konflikte">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="GPIO-Konflikte" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Belegen zwei Einstellungen denselben GPIO der gewählten Hardware, zeigt jede eine Fehlermeldung. Ohne gewählte Hardware wird nicht geprüft." />
+                <choose ParamRefId="%HWP_SelectRef%"><when test="0"><ParameterSeparator Id="%AID%_PS-nnn" Text="Keine Hardware gewählt: die Port-Auswahl und die Prüfung brauchen eine Hardware." UIHint="Information" /></when></choose>
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Ausgänge" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_P-%TT%00023_R-%TT%0002301" IndentLevel="1" />
+                <choose ParamRefId="%AID%_P-%TT%00023_R-%TT%0002301">
+                  <when test="1 2">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Ausgang 1" UIHint="Headline" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%00024_R-%TT%0002401" IndentLevel="1" />
+                    <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out1DataSelect']/*" /></choose>
+                    <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out1DataManual']/*" /></choose>
+                    <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Out1Data']/*" />
+                    <choose ParamRefId="%AID%_P-%TT%00024_R-%TT%0002401">
+                      <when test="1 2">
+                        <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out1ClockSelect']/*" /></choose>
+                        <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out1ClockManual']/*" /></choose>
+                        <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Out1Clock']/*" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="%AID%_P-%TT%00023_R-%TT%0002301">
+                  <when test="2">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Ausgang 2" UIHint="Headline" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%00025_R-%TT%0002501" IndentLevel="1" />
+                    <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out2DataSelect']/*" /></choose>
+                    <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out2DataManual']/*" /></choose>
+                    <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Out2Data']/*" />
+                    <choose ParamRefId="%AID%_P-%TT%00025_R-%TT%0002501">
+                      <when test="1 2">
+                        <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out2ClockSelect']/*" /></choose>
+                        <choose ParamRefId="%HWP_SelectRef%"><op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='Out2ClockManual']/*" /></choose>
+                        <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Out2Clock']/*" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Freie Anschlüsse (Seite Hardware)" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Pins wählt man auf der Seite Hardware; ihr Fehlerblock steht hier." />
+                <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Pin1']/*" />
+                <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Pin2']/*" />
+                <choose ParamRefId="%HWP_SelectRef%">
+                  <when test="%HWP_VAL_Relays_GE_1%">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Fest verdrahtete Relais" UIHint="Headline" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Der GPIO eines fest verdrahteten Relais ist immer belegt." />
+                    <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Relay1']/*" />
+                    <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Relay2']/*" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+            </Channel>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Baggages>
+        <Baggage TargetPath="" Name="Help_de.zip" Id="%FILE-HELP-de%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="Icons.zip" Id="%FILE-ICONS%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+      </Baggages>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>
