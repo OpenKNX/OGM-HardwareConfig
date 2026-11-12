@@ -26,7 +26,7 @@ danach das Bild dort per PR einreichen.
 | `vendor` | ja | `OpenKNX` |
 | `category` | ja | `universal`, `gateway`, `sensor`, `actuator`, `binary-input`, `control`, `other` (Gruppen der Wiki-Geräteübersicht) |
 | `platform` | nein | `REG1`, `REG2`, `UP1` |
-| `formFactor` | ja | `type`: `REG`, `UP`, `AP`, `other`; `units` (Teilungseinheiten) Pflicht bei `REG`, sonst nicht erlaubt |
+| `formFactor` | ja | `type`: `reg`, `up`, `ap`, `other`; `units` (Teilungseinheiten) Pflicht bei `reg`, sonst nicht erlaubt; `frame` Pflicht bei `up` (`true` = mit Tragring auf der Dose, im Schalterprogramm; `false` = in der Dose), sonst nicht erlaubt |
 | `mcu` | ja | `RP2040`, `RP2350`, `ESP32`, `ESP32-S3` |
 | `network` | ja | Anschlüsse zur Steuerungsebene, mindestens einer: `knx-tp`, `knx-rf`, `lan`, `wlan`, `spe`. KNX/IP ist ein Firmware-Feature und braucht einen IP-fähigen Anschluss |
 | `power` | ja | mögliche Versorgungen, jede reicht allein: `bus`, `dc`, `ac`, `poe`, `usb` |

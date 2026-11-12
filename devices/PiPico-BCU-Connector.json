@@ -8,7 +8,7 @@
   "network": ["knx-tp"],
   "power": ["bus"],
   "status": "stable",
-  "availability": ["opensource", "kit", "pcb"],
+  "availability": ["opensource", "pcb"],
   "description": "Der PiPico BCU Connector ist eine Adapter-Platine, die ein Raspberry Pi Pico Mikrocontroller-Board mit einer NanoBCU (oder MicroBCU) verbindet. Sie verfügt über einen KNX-Anschluss, einen Reset- und Prog-Taster sowie eine Prog-LED.",
   "links": {
     "source": "https://muster.ing-dom.de/Zubehoer/PiPico-BCU-Connector.html",

@@ -4,7 +4,7 @@
   "vendor": "OpenKNX",
   "category": "gateway",
   "platform": "REG1",
-  "formFactor": { "type": "REG", "units": 1 },
+  "formFactor": { "type": "reg", "units": 1 },
   "mcu": "ESP32",
   "network": ["knx-tp", "lan"],
   "power": ["bus"],

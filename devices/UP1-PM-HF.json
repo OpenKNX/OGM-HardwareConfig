@@ -4,7 +4,7 @@
   "vendor": "OpenKNX",
   "category": "sensor",
   "platform": "UP1",
-  "formFactor": { "type": "UP" },
+  "formFactor": { "type": "up", "frame": true },
   "mcu": "RP2040",
   "network": ["knx-tp"],
   "power": ["bus"],

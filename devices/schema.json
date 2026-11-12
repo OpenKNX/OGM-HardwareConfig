@@ -34,16 +34,32 @@
       "additionalProperties": false,
       "required": ["type"],
       "properties": {
-        "type": { "enum": ["REG", "UP", "AP", "other"] },
+        "type": {
+          "description": "reg = Reiheneinbau (Hutschiene), up = Unterputz, ap = Aufputz, other = sonstige (z. B. Adapterplatine).",
+          "enum": ["reg", "up", "ap", "other"]
+        },
         "units": {
-          "description": "Teilungseinheiten, nur bei REG.",
+          "description": "Teilungseinheiten, nur bei reg.",
           "type": "integer",
           "minimum": 1
+        },
+        "frame": {
+          "description": "Nur bei up. true = sitzt mit Tragring auf der Dose und fügt sich in ein Schalterprogramm ein (z. B. Taster, Präsenzmelder), false = verschwindet in der Dose.",
+          "type": "boolean"
         }
       },
-      "if": { "properties": { "type": { "const": "REG" } } },
-      "then": { "required": ["units"] },
-      "else": { "not": { "required": ["units"] } }
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "reg" } } },
+          "then": { "required": ["units"] },
+          "else": { "not": { "required": ["units"] } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "up" } } },
+          "then": { "required": ["frame"] },
+          "else": { "not": { "required": ["frame"] } }
+        }
+      ]
     },
     "mcu": {
       "enum": ["RP2040", "RP2350", "ESP32", "ESP32-S3"]

@@ -4,7 +4,7 @@
   "vendor": "OpenKNX",
   "category": "universal",
   "platform": "REG1",
-  "formFactor": { "type": "REG", "units": 1 },
+  "formFactor": { "type": "reg", "units": 1 },
   "mcu": "RP2040",
   "network": ["knx-tp"],
   "power": ["bus"],
