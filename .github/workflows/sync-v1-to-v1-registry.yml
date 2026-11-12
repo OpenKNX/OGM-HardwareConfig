@@ -1,0 +1,67 @@
+name: Keep v1-registry in sync with v1
+run-name: "Branch-Auto-Sync: v1 to v1-registry"
+
+# Jeder Push auf v1 wird per Merge-Commit nach v1-registry übernommen (v1-registry hat eigene Commits,
+# ein Fast-Forward ist daher nicht möglich). Bei einem Konflikt schlägt der Lauf fehl: von Hand mergen.
+# Gibt es v1-registry nicht (mehr), tut der Lauf nichts.
+
+on:
+  push:
+    branches:
+      - v1
+
+permissions:
+  contents: write
+  actions: write # Prüfung auf v1-registry anstoßen (Pushes mit GITHUB_TOKEN lösen keine Workflows aus)
+
+concurrency:
+  group: sync-v1-to-v1-registry
+  cancel-in-progress: false
+
+jobs:
+  sync-v1-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout v1 branch
+        uses: actions/checkout@v4
+        with:
+          ref: v1
+          fetch-depth: 0 # fetch all history so we can merge
+
+      - name: Check if v1-registry exists and already contains v1
+        id: check
+        run: |
+          if ! git ls-remote --exit-code --heads origin v1-registry > /dev/null; then
+            echo "v1-registry does not exist, nothing to do"
+            echo "result=none" >> $GITHUB_OUTPUT
+          else
+            git fetch origin v1-registry:v1-registry
+            if git merge-base --is-ancestor v1 v1-registry; then
+              echo "result=same" >> $GITHUB_OUTPUT
+            else
+              echo "result=merge" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Set up Git user
+        if: steps.check.outputs.result == 'merge'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge v1 into v1-registry
+        if: steps.check.outputs.result == 'merge'
+        run: |
+          git checkout v1-registry
+          if ! git merge --no-ff --no-edit -m "Merge branch 'v1' into v1-registry" v1; then
+            git merge --abort
+            echo "::error::Merge from v1 to v1-registry has conflicts. Needs manual merge"
+            exit 1
+          fi
+          git push origin v1-registry
+
+      - name: Run device registry check on v1-registry
+        if: steps.check.outputs.result == 'merge'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run device-registry.yml --ref v1-registry
