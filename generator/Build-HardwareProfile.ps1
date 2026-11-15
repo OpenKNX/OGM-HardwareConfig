@@ -267,6 +267,27 @@ function Stop-OnSkip([string]$Text) {
   Stop-WithError ($Text + " - a left-out board drops its HW-ID from ETS and the firmware table; to drop a board on purpose, delete its env")
 }
 
+# @brief Ordinal, stable sort (same order on PowerShell 5.1 and 7 in every culture); -Unique drops equal keys (case-sensitive)
+function Get-OrdinalSorted($Items, [scriptblock]$Key = $null, [switch]$Unique) {
+  $arr = @(foreach ($x in $Items) { $x })   # foreach, not @($Items): @() on a generic List throws on PowerShell 7.6
+  if ($arr.Count -eq 0) { return }
+  $keys = New-Object 'string[]' $arr.Count
+  $comp = New-Object 'string[]' $arr.Count
+  $idx = New-Object 'int[]' $arr.Count
+  for ($i = 0; $i -lt $arr.Count; $i++) {
+    if ($Key) { $keys[$i] = [string](ForEach-Object -InputObject $arr[$i] -Process $Key) } else { $keys[$i] = [string]$arr[$i] }
+    $comp[$i] = $keys[$i] + [char]0 + $i.ToString("D8"); $idx[$i] = $i
+  }
+  [Array]::Sort($comp, $idx, [StringComparer]::Ordinal)
+  $last = $null
+  for ($k = 0; $k -lt $idx.Count; $k++) {
+    $i = $idx[$k]
+    if ($Unique -and $k -gt 0 -and [string]::Equals($keys[$i], $last, [StringComparison]::Ordinal)) { continue }
+    $last = $keys[$i]
+    $arr[$i]
+  }
+}
+
 function Write-Utf8File([string]$Path, [string]$Text) {
   $dir = [System.IO.Path]::GetDirectoryName($Path)
   if ($dir -and -not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
@@ -339,10 +360,10 @@ function Get-PioToolchains {
   $t = @{}
   $pkg = [System.IO.Path]::Combine((Get-PioCoreDir), "packages")
   if (Test-Path -LiteralPath $pkg) {
-    foreach ($d in @(Get-ChildItem -LiteralPath $pkg -Directory -Filter "toolchain-*" | Sort-Object Name)) {
+    foreach ($d in @(Get-OrdinalSorted @(Get-ChildItem -LiteralPath $pkg -Directory -Filter "toolchain-*") { $_.Name })) {
       $bin = [System.IO.Path]::Combine($d.FullName, "bin")
       if (-not (Test-Path -LiteralPath $bin)) { continue }
-      foreach ($f in @(Get-ChildItem -LiteralPath $bin -File | Sort-Object Name)) {
+      foreach ($f in @(Get-OrdinalSorted @(Get-ChildItem -LiteralPath $bin -File) { $_.Name })) {
         $mm = [regex]::Match($f.Name, '^(.+)-g\+\+(\.exe)?$')
         if ($mm.Success -and -not $t.ContainsKey($mm.Groups[1].Value)) { $t[$mm.Groups[1].Value] = $f.FullName }
       }
@@ -381,7 +402,7 @@ function Find-Compiler {
     return $path
   }
   $tc = Get-PioToolchains
-  foreach ($pfx in @(@("arm-none-eabi") + @($tc.Keys | Where-Object { $_ -ne "arm-none-eabi" } | Sort-Object))) {
+  foreach ($pfx in @(@("arm-none-eabi") + @(Get-OrdinalSorted @($tc.Keys | Where-Object { $_ -ne "arm-none-eabi" })))) {
     if ($tc.ContainsKey($pfx) -and (Test-CppPreprocessor $tc[$pfx])) { return $tc[$pfx] }
   }
   # -CommandType Application: "cpp" is an alias of Copy-ItemProperty in Windows PowerShell 5.1
@@ -1089,7 +1110,8 @@ function Invoke-BoardTablePreprocessor($Table, [string]$Define, [string]$Source,
 function Get-BoardTableValues($Table, [string]$Define, [string[]]$Defines) {
   $src = "#include `"HardwareConfig.h`"`n#include `"" + ($Table.Header -replace '\\', '/') + "`"`n"
   $names = @(Invoke-BoardTablePreprocessor $Table $Define $src $Defines -MacroList |
-    ForEach-Object { if ("$_" -match '^#define (\w+)') { $Matches[1] } } | Where-Object { $_ -cmatch $Table.Scan } | Sort-Object -CaseSensitive -Unique)
+    ForEach-Object { if ("$_" -match '^#define (\w+)') { $Matches[1] } } | Where-Object { $_ -cmatch $Table.Scan })
+  $names = @(Get-OrdinalSorted $names -Unique)
   $vals = @{}
   if ($names.Count -eq 0) { return $vals }
   $Table.Found = $true
@@ -1283,7 +1305,7 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
       $ch.Uses += $hit[0]
     }
     # one block, one text: the uses of a block share their error template (error=... of <Use>, else of <Conflicts>)
-    $templates = @($ch.Uses | ForEach-Object { $_.Error } | Sort-Object -Unique -CaseSensitive)
+    $templates = @(Get-OrdinalSorted @($ch.Uses | ForEach-Object { $_.Error }) -Unique)
     if ($templates.Count -gt 1) { Stop-WithError ("{0}: its uses have different error=... texts - give them one text (the block shows one message per channel)" -f $cw) }
     $ch.ErrorText = $templates[0].Replace("{text}", $cText)
     if ($ch.ErrorText.Length -gt 255) { Stop-WithError ("{0}: the error text has {1} characters, ETS shows at most 255" -f $cw, $ch.ErrorText.Length) }
@@ -1369,7 +1391,7 @@ function Get-PioBoardJson([string]$BoardId, [string]$ProjectDir) {
   $info = $null
   $dirs = @([System.IO.Path]::Combine($ProjectDir, "boards"))
   $plat = [System.IO.Path]::Combine((Get-PioCoreDir), "platforms")
-  if (Test-Path -LiteralPath $plat) { $dirs += @(Get-ChildItem -LiteralPath $plat -Directory | Sort-Object Name | ForEach-Object { [System.IO.Path]::Combine($_.FullName, "boards") }) }
+  if (Test-Path -LiteralPath $plat) { $dirs += @(Get-OrdinalSorted @(Get-ChildItem -LiteralPath $plat -Directory) { $_.Name } | ForEach-Object { [System.IO.Path]::Combine($_.FullName, "boards") }) }
   foreach ($d in $dirs) {
     $f = [System.IO.Path]::Combine($d, $BoardId + ".json")
     if (-not (Test-Path -LiteralPath $f -PathType Leaf)) { continue }
@@ -1599,8 +1621,9 @@ function Resolve-Board($M, $BoardEntry) {
   $needScan = $false
   foreach ($role in $M.Roles) { foreach ($s in $role.Sources) { if ($s.Scan -and (Test-Wildcard $s.Board $BoardEntry.Define)) { $needScan = $true } } }
   if ($needScan) {
-    $macroNames = Invoke-Preprocessor -Source "#include `"HardwareConfig.h`"`n" -Defines $defines -MacroList |
-      ForEach-Object { if ("$_" -match '^#define (\w+)\s') { $Matches[1] } } | Sort-Object
+    $macroNames = @(Invoke-Preprocessor -Source "#include `"HardwareConfig.h`"`n" -Defines $defines -MacroList |
+      ForEach-Object { if ("$_" -match '^#define (\w+)\s') { $Matches[1] } })
+    $macroNames = @(Get-OrdinalSorted $macroNames)
   }
 
   # pass 2: evaluate capabilities, values and pins with the preprocessor
@@ -1771,7 +1794,7 @@ function Resolve-Board($M, $BoardEntry) {
       if ($TP_RESERVED -contains $autoMacros[$i]) { $board.TpGpios += $ag } else { $own += $ag }
     }
     # the header compares (int)(MACRO): a value the generator cannot read as a number would differ between ETS and firmware
-    if ($nonInt.Count -gt 0) { Stop-WithError ("{0}: <Conflicts reserved>: the reserved pin macro(s) {1} do not resolve to an integer" -f $BoardEntry.Define, (($nonInt | Sort-Object -Unique) -join ", ")) }
+    if ($nonInt.Count -gt 0) { Stop-WithError ("{0}: <Conflicts reserved>: the reserved pin macro(s) {1} do not resolve to an integer" -f $BoardEntry.Define, ((Get-OrdinalSorted $nonInt -Unique) -join ", ")) }
     $chip = $null; if ($BoardEntry.Mcu -and $CHIP_RESERVED.ContainsKey("$($BoardEntry.Mcu)")) { $chip = $CHIP_RESERVED["$($BoardEntry.Mcu)"] }
     if ($chip) {
       $own += $chip.Base
@@ -1798,7 +1821,7 @@ function Resolve-Board($M, $BoardEntry) {
     $list.Add(@{ Gpio = $gpio; Label = $c.Label })
   }
   foreach ($role in $M.Roles) {
-    $sorted = @($board.Pins[$role.Name] | Sort-Object @{ Expression = { [regex]::Replace($_.Label, '\d+', { param($mt) $mt.Value.PadLeft(5, '0') }) } })
+    $sorted = @(Get-OrdinalSorted $board.Pins[$role.Name] { [regex]::Replace($_.Label, '\d+', { param($mt) $mt.Value.PadLeft(5, '0') }) })
     $board.Pins[$role.Name] = $sorted
   }
   # ports: n = 1..HW_PORT_COUNT, only the ones with HW_PORT_<n>_GPIO, in header order
@@ -3195,7 +3218,7 @@ function Resolve-Conflicts($M, $Boards) {
       if ($r -notmatch '^%AID%_\S+_R-\S+$' -and $r -notmatch '^%[A-Za-z0-9_]+%$') { Stop-WithError ("{0}: port gives '{1}' for {2}, not a ParamRefId (%AID%_..._R-...)" -f $uw, $r, $b.Define) }
       $u.BoardRefs[$b.Slot] = $r
     }
-    $distinct = @($u.BoardRefs.Values | Sort-Object -Unique -CaseSensitive)
+    $distinct = @(Get-OrdinalSorted @($u.BoardRefs.Values) -Unique)
     if ($distinct.Count -eq 0) { continue }
     # one parameter for every board that has one (also a per-board pattern that leaves a single board): input U<i>
     $u.Mode = 1
@@ -3464,7 +3487,7 @@ function Get-StaleConflictFiles($M, [string[]]$Outputs) {
   $current = ""
   if ($M.Conflicts) { $current = $M.Conflicts.Output }
   $stale = @()
-  foreach ($dir in @($Outputs | ForEach-Object { [System.IO.Path]::GetDirectoryName($_) } | Sort-Object -Unique)) {
+  foreach ($dir in @(Get-OrdinalSorted @($Outputs | ForEach-Object { [System.IO.Path]::GetDirectoryName($_) }) -Unique)) {
     if (-not (Test-Path -LiteralPath $dir -PathType Container)) { continue }
     foreach ($f in @(Get-ChildItem -LiteralPath $dir -Filter "*.xml" -File)) {
       if ($f.FullName -eq $current) { continue }
@@ -3498,7 +3521,7 @@ function Test-ConflictNumbers($M, [string[]]$Outputs) {
       if ($kind -eq "PC" -and $num -eq $calc) { $hits["PC-%TT%" + $num + " (calculation)"] = $true }
     }
     if ($hits.Count -gt 0) {
-      Write-Warn ("<Conflicts number={0}>: {1} uses {2} - if that file is the module that includes the parts, choose another number" -f $cf.Number, $f.Name, ((@($hits.Keys) | Sort-Object) -join ", "))
+      Write-Warn ("<Conflicts number={0}>: {1} uses {2} - if that file is the module that includes the parts, choose another number" -f $cf.Number, $f.Name, ((Get-OrdinalSorted @($hits.Keys)) -join ", "))
     }
   }
 }
@@ -3809,8 +3832,8 @@ function Invoke-Init {
   if (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($project, $caps)))) { Stop-WithError "Not found: $caps (relative to $project)" }
 
   # product XML(s): src/*.xml with <op:ETS (Dev and Release variants); module types and prefixes in use
-  $products = @(Get-ChildItem -Path ([System.IO.Path]::Combine($project, "src")) -Filter "*.xml" -File -ErrorAction SilentlyContinue |
-      Where-Object { $_.Name -notlike "*.debug.xml" } | Sort-Object Name |
+  $products = @(Get-OrdinalSorted @(Get-ChildItem -Path ([System.IO.Path]::Combine($project, "src")) -Filter "*.xml" -File -ErrorAction SilentlyContinue |
+      Where-Object { $_.Name -notlike "*.debug.xml" }) { $_.Name } |
       Where-Object { [System.IO.File]::ReadAllText($_.FullName).Contains("<op:ETS") })
   if ($products.Count -eq 0) { Stop-WithError "No product XML (src/*.xml with <op:ETS) in $project" }
   $usedTypes = @{}; $usedPrefixes = @{}
@@ -3830,7 +3853,7 @@ function Invoke-Init {
   $prefix = "HWP"; $n = 2
   while ($usedPrefixes.ContainsKey($prefix)) { $prefix = "HWP$n"; $n++ }
   Write-Step ("Product XML: {0}" -f (($products | ForEach-Object { $_.Name }) -join ", "))
-  Write-Step ("ModuleTypes in use: {0} -> moduleType {1}; prefixes in use: {2} -> prefix {3}" -f (($usedTypes.Keys | Sort-Object) -join ", "), $moduleType, (($usedPrefixes.Keys | Sort-Object) -join ", "), $prefix)
+  Write-Step ("ModuleTypes in use: {0} -> moduleType {1}; prefixes in use: {2} -> prefix {3}" -f (($usedTypes.Keys | Sort-Object) -join ", "), $moduleType, ((Get-OrdinalSorted @($usedPrefixes.Keys)) -join ", "), $prefix)
 
   # boards of the release_* envs; envs without a board go to exclude
   $script:InitMode = $true
@@ -3844,7 +3867,7 @@ function Invoke-Init {
     $rows[$ident.HwId].Envs += $eb.Env
   }
   $boards = @($rows.Values | Sort-Object { [int]$_.HwId })
-  $noBoard = @($script:NoBoardEnvs | Sort-Object -Unique)
+  $noBoard = @(Get-OrdinalSorted @($script:NoBoardEnvs) -Unique)
   foreach ($b in $boards) { Write-Ok ("0x{0:X4}  {1}  {2}  [{3}]" -f $b.HwId, $b.Define, $b.Name, ($b.Envs -join ", ")) }
   foreach ($e in $noBoard) { Write-Warn ("env {0} builds no board - written to exclude" -f $e) }
   if ($boards.Count -eq 0) { Stop-WithError "No release_* env builds a board with DEVICE_HW_ID - no manifest written" }
@@ -3942,13 +3965,13 @@ try {
       $names = @($be.Define)
       if ($isPattern) {
         if ($null -eq $allBoards) { $allBoards = @(Get-AllHardwareIdBoards) }
-        $names = @($allBoards | Where-Object { $_ -like $be.Define } | Sort-Object)
+        $names = @(Get-OrdinalSorted @($allBoards | Where-Object { $_ -like $be.Define }))
         if ($names.Count -eq 0) { Stop-OnSkip ("No board with DEVICE_HW_ID matches {0}" -f $be.Define) }
       }
       foreach ($n in $names) {
         $prev = @($expanded | Where-Object { $_.Define -eq $n })
         if ($prev.Count -eq 0) { $expanded.Add(@{ Define = $n; Flags = $be.Flags; Explicit = (-not $isPattern) }); continue }
-        $norm = { param($f) (@($f | ForEach-Object { $_ -replace '^-D', '' }) | Sort-Object) -join " " }
+        $norm = { param($f) (Get-OrdinalSorted @($f | ForEach-Object { $_ -replace '^-D', '' })) -join " " }
         $same = ((& $norm $prev[0].Flags) -eq (& $norm $be.Flags))
         if (-not $same -and (-not $isPattern -or -not $prev[0].Explicit)) {
           Stop-WithError ("Board {0} is listed twice with different flags ('{1}' / '{2}')" -f $n, ($prev[0].Flags -join " "), ($be.Flags -join " "))
@@ -4040,7 +4063,7 @@ try {
       foreach ($rn in @($o.Pins.Keys)) {
         $merged = @($first.Pins[$rn])
         foreach ($pin in $o.Pins[$rn]) { if (@($merged | Where-Object { $_.Gpio -eq $pin.Gpio }).Count -eq 0) { $merged += $pin } }
-        $first.Pins[$rn] = @($merged | Sort-Object @{ Expression = { [regex]::Replace($_.Label, '\d+', { param($mt) $mt.Value.PadLeft(5, '0') }) } })
+        $first.Pins[$rn] = @(Get-OrdinalSorted $merged { [regex]::Replace($_.Label, '\d+', { param($mt) $mt.Value.PadLeft(5, '0') }) })
       }
     }
     Write-Step ("0x{0:X4} built by {1} envs ({2}) - one entry (capabilities: merge any/all, values: largest)" -f [int]$g.Name, $g.Count, (($g.Group | ForEach-Object { $_.Env }) -join ", "))
