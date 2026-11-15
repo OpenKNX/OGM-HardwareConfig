@@ -133,7 +133,7 @@ auch ohne `<Import>` und ohne `header`.
 | `<Import href="…/Common.caps.xml">` | Standard-Fähigkeiten: TP, LAN, WLAN, Display, RTC, SD, … | nur `ThirdParty` und die eigenen |
 | `<Capability>`, `<Value>` | eigene Fähigkeit (`#if`-Ausdruck) / Zahl, als Feature-Flag nutzbar | keine eigenen |
 | `<Boards platformio exclude>`, `<Board define flags>` | welche Boards in der Auswahl stehen | Pflicht (mindestens zwei Boards) |
-| `<Page>`, `<InfoImage>`, `<Notice>` | eigene Seite „Gerät“ mit Gerätekarte, QR-Code, Hinweisen, Schritt-Bild | Auswahl, Abfrage-Knopf und Fähigkeiten-Übersicht ohne eigene Seite |
+| `<Page>`, `<InfoImage>` (`<Logo>`), `<Notice>` | eigene Seite „Gerät“ mit Gerätekarte (Logo, Badge, eigenes Bild oder keines je Board), QR-Code, Hinweisen, Schritt-Bild | Auswahl, Abfrage-Knopf und Fähigkeiten-Übersicht ohne eigene Seite |
 | `<GpioRole>` | GPIO-Auswahlfelder aus den Pin-Makros der Boards | keine |
 | `<Ports board use excludeRelayPins max>` | Teilmenge der `HW_PORT_*` je Board | alle beschriebenen Ports |
 | `<ReservedPins macros>` | Pins, die die Applikation nie anbietet / als reserviert meldet | jeder Pin erlaubt |

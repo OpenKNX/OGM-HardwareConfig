@@ -108,6 +108,10 @@ KNeoPix-Boards (V1, V1.5, jede MCU), beim UP1 UART Gateway (0x1220) und bei den 
 sonst ab). Der Generator zeigt sie auf der Hardware-Seite unter dem Gerätenamen (mit Info-URL links neben dem QR-Code); ohne Define
 gilt der Standardtext der Applikation. Gesetzt bei allen KNeoPix- und Mini-Boards, QuinLED Dig-Quad V4 (Ethernet), Gledopto GL-C-017WL und den Shelly-Geräten.
 
+Bild über dem Gerätenamen: OpenKNX-Logo, bei `#define DEVICE_THIRD_PARTY` im Board-Block das Badge „Drittanbieter“ mit
+Hinweis. Ein eigenes Bild oder keines je Board legt das Manifest der Applikation fest (`<InfoImage><Logo board file>`, siehe
+[Generator](generator/README.md#hardware-seite-gerätekarte)).
+
 ## Hardware-ID (`DEVICE_HW_ID`)
 
 Jedes Gerät bekommt zusätzlich eine eindeutige 16-Bit-Hardware-ID:

@@ -23,7 +23,7 @@ Header an (`<IncludePath>include</IncludePath>`). Sie haben keine Firmware.
 
 | Seite | Anwendungsfall | Mittel |
 |---|---|---|
-| OpenKNX → Gerät | Auswahl, Geräteabfrage, Gerätekarte, Firmware-Zeile, Wechsel-Hinweis, Steckmodul-Schalter, Kontexthilfe | `<Page>` (`help`), `<InfoImage>`, `<Notice>` |
+| OpenKNX → Gerät | Auswahl, Geräteabfrage, Gerätekarte (eigenes Logo: Raumcontroller Plus, ohne Logo: AB-SmartHouse), Firmware-Zeile, Wechsel-Hinweis, Steckmodul-Schalter, Kontexthilfe | `<Page>` (`help`), `<InfoImage>`, `<Notice>` |
 | 1 Module und Kanäle | Kanäle je Relais, Jalousie ab 2 Relais, Eingänge je Hardware | `%HWP_VAL_*_GE_n%`, `_EQ_0` |
 | 2 Merkmale | Leistungsmessung, Temperatur, Frontbedienung, Display, Summer, großer Flash; KOs nur mit Merkmal | `%HWP_CAP_*%` |
 | 3 Listen je Hardware | Liste 0..n je Gerät, fester Wert schreibgeschützt | `ValueRangeParameter.xml` |

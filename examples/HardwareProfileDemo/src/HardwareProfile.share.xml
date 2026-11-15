@@ -41,6 +41,7 @@
         </ParameterType>
         <ParameterType Id="%AID%_PT-HWPLogo" Name="HWPLogo"><TypePicture RefId="%FILE-HWPLogo%" HorizontalAlignment="Left" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPBadge" Name="HWPBadge"><TypePicture RefId="%FILE-HWPBadge%" HorizontalAlignment="Left" /></ParameterType>
+        <ParameterType Id="%AID%_PT-HWPLogo1" Name="HWPLogo1"><TypePicture RefId="%FILE-HWPLogo1%" HorizontalAlignment="Left" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo0" Name="HWPInfo0"><TypePicture RefId="%FILE-HWPInfo0%" HorizontalAlignment="Right" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo9" Name="HWPInfo9"><TypePicture RefId="%FILE-HWPInfo9%" HorizontalAlignment="Right" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo15" Name="HWPInfo15"><TypePicture RefId="%FILE-HWPInfo15%" HorizontalAlignment="Right" /></ParameterType>
@@ -212,6 +213,7 @@
         <Parameter Id="%AID%_P-%TT%00216" Name="SensorModuleFw" ParameterType="%AID%_PT-HWPReported" Text="Firmware" Value="0" />
         <Parameter Id="%AID%_P-%TT%00900" Name="Logo" ParameterType="%AID%_PT-HWPLogo" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%00901" Name="Badge" ParameterType="%AID%_PT-HWPBadge" Text="" Access="Read" Value="" />
+        <Parameter Id="%AID%_P-%TT%00910" Name="Logo1" ParameterType="%AID%_PT-HWPLogo1" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01000" Name="Info0" ParameterType="%AID%_PT-HWPInfo0" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01009" Name="Info9" ParameterType="%AID%_PT-HWPInfo9" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01015" Name="Info15" ParameterType="%AID%_PT-HWPInfo15" Text="" Access="Read" Value="" />
@@ -256,6 +258,7 @@
         <ParameterRef Id="%AID%_P-%TT%00216_R-%TT%0021601" RefId="%AID%_P-%TT%00216" Access="Read" />
         <ParameterRef Id="%AID%_P-%TT%00900_R-%TT%0090001" RefId="%AID%_P-%TT%00900" />
         <ParameterRef Id="%AID%_P-%TT%00901_R-%TT%0090101" RefId="%AID%_P-%TT%00901" />
+        <ParameterRef Id="%AID%_P-%TT%00910_R-%TT%0091001" RefId="%AID%_P-%TT%00910" />
         <ParameterRef Id="%AID%_P-%TT%01000_R-%TT%0100001" RefId="%AID%_P-%TT%01000" />
         <ParameterRef Id="%AID%_P-%TT%01009_R-%TT%0100901" RefId="%AID%_P-%TT%01009" />
         <ParameterRef Id="%AID%_P-%TT%01015_R-%TT%0101501" RefId="%AID%_P-%TT%01015" />
@@ -291,14 +294,17 @@
               </ParameterBlock>
             </when>
             <when default="true">
-              <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileMark" Inline="true" Layout="Grid">
-                <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
-                <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="100%" /></Columns>
-                <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
-                  <when test="4129 4130 4402 4611 4880 4896 9216 16128 16129 16130"><ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" /></when>
-                  <when test="8481 16144 16145 16146 16147 16148"><ParameterRefRef RefId="%AID%_P-%TT%00901_R-%TT%0090101" Cell="1,1" /></when>
-                </choose>
-              </ParameterBlock>
+              <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101"><when test="4129 4130 4402 4611 4880 4896 16128 16130 8481 16144 16145 16146 16147 16148 16129">
+                <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileMark" Inline="true" Layout="Grid">
+                  <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                  <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="100%" /></Columns>
+                  <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
+                    <when test="4129 4130 4402 4611 4880 4896 16128 16130"><ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" /></when>
+                    <when test="8481 16144 16145 16146 16147 16148"><ParameterRefRef RefId="%AID%_P-%TT%00901_R-%TT%0090101" Cell="1,1" /></when>
+                    <when test="16129"><ParameterRefRef RefId="%AID%_P-%TT%00910_R-%TT%0091001" Cell="1,1" /></when>
+                  </choose>
+                </ParameterBlock>
+              </when></choose>
               <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
                 <when test="4129">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG1 Basismodul LAN+TP" UIHint="Headline" />
@@ -429,6 +435,7 @@
   <Baggages>
     <Baggage TargetPath="HWPInfo" Name="Logo.png" Id="%FILE-HWPLogo%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Badge.png" Id="%FILE-HWPBadge%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+    <Baggage TargetPath="HWPInfo" Name="Logo1.png" Id="%FILE-HWPLogo1%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info0.png" Id="%FILE-HWPInfo0%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info9.png" Id="%FILE-HWPInfo9%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info15.png" Id="%FILE-HWPInfo15%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>

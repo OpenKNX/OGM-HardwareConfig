@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26">
+  <!-- Demo of an own device card picture (<InfoImage><Logo board file>): a 1960s computer panel with a glowing red lens.
+       Own drawing, 44x26 like the OpenKNX logo of the card. -->
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a5f66"/>
+      <stop offset="1" stop-color="#2c3036"/>
+    </linearGradient>
+    <radialGradient id="ring" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#f2f4f6"/>
+      <stop offset="0.6" stop-color="#9aa1a9"/>
+      <stop offset="1" stop-color="#4b5057"/>
+    </radialGradient>
+    <radialGradient id="lens" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff3a8"/>
+      <stop offset="0.18" stop-color="#ffb000"/>
+      <stop offset="0.45" stop-color="#e01a0f"/>
+      <stop offset="1" stop-color="#3a0000"/>
+    </radialGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="43" height="25" rx="3" fill="url(#plate)" stroke="#1d2024"/>
+  <circle cx="13" cy="13" r="10" fill="url(#ring)"/>
+  <circle cx="13" cy="13" r="7.4" fill="#120000"/>
+  <circle cx="13" cy="13" r="6.2" fill="url(#lens)"/>
+  <ellipse cx="10.6" cy="10.4" rx="1.6" ry="1" fill="#ffffff" fill-opacity="0.55"/>
+  <path d="M27 8.5h12M27 13h12M27 17.5h12" stroke="#1a1d21" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M27 9.6h12M27 14.1h12M27 18.6h12" stroke="#7d848c" stroke-width="0.6" stroke-linecap="round"/>
+</svg>

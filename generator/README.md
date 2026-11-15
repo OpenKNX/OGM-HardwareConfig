@@ -200,7 +200,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 | `<Value relays names>` | `relays="true"`: der Wert zählt Relais; die ersten `HW_RELAY_COUNT` sind die fest verdrahteten des Boards, jedes weitere belegt einen Port (Entwickleransicht: „1, fest verdrahtet“, „bis 4, Port wählbar“, „bis 2, 1 fest verdrahtet, 1 Port wählbar“, 0 = „nein“); `names="a b c"`: Anzeigename je Wert 0, 1, 2, … in der Entwickleransicht |
 | `<Ports board use excludeRelayPins max>` | angebotene Hardware-Ports der passenden Boards (siehe „Ports“) |
 | `<Generate template output [finalNewline]>` | ganze Datei aus einer Vorlage (siehe „Vorlagen“); `<Param name value>` → `$P.<name>`; `@hw/` = Ordner `templates` |
-| `<InfoImage style define default module version width urlFont supersample urlColor logo badge thirdPartyWhen>` | Gerätekarte der Hardware-Seite, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
+| `<InfoImage style define default module version width urlFont supersample urlColor logo badge thirdPartyWhen>` mit `<Logo board file>` | Gerätekarte der Hardware-Seite; `<Logo>`: eigenes Bild oder keines je Board, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
 | `<Page text icon help title label intro queryTitle query button queryHelp queryImage unselectedTitle infoDefault unselectedInfo unselectedText updateInfo firmware changeInfo features dev>` | Hardware-Seite als OpenKNX-Seite, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
 | `<Notice when title><Text>…</Text>…</Notice>` | Hinweis-Kasten für Boards mit der Fähigkeit `when`, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
 | `portManualValue`, `portNoneValue` (Wurzel) | Werte der Port-Auswahlen der Applikation: 0..n-1 = Port n des Boards, `portManualValue` (0..254) = manueller GPIO, `portNoneValue` (0..255) = kein Port, jeder andere Wert (z. B. nie geschrieben 255) = kein GPIO. Nur zusammen, verschieden. Einmal angegeben, gilt es für die Konfliktprüfung (`<Conflicts>`) und den Firmware-Header (`signalGpio`, siehe [Port-Auswahl in der Firmware](#port-auswahl-in-der-firmware)). Ein angebotener Port auf einem der beiden Werte bricht den Lauf ab |
@@ -344,12 +344,25 @@ nutzen ihre Begriffe (Gerät, physikalische Adresse, Programmiertaste).
 | `module`, `version` | 2, 3 | px je QR-Modul, QR-Version (größer nur, wenn die URL nicht passt: Warnung) |
 | `urlColor` | `#0067C0` | Farbe des Links |
 | `urlFont`, `supersample` | `NotoSans-Regular-44`, 4 | Glyphenatlas in `assets/fonts` und Faktor (11 px Schrift, auf 1/4 px gesetzt) |
-| `logo`, `badge` | `assets/card-badge.png`, `assets/third-party-badge.png` | eigene PNGs, Pfad relativ zum Manifest |
+| `logo`, `badge` | `assets/card-badge.png`, `assets/third-party-badge.png` | eigene PNGs, Pfad relativ zum Manifest; leer = kein Bild für alle OpenKNX- bzw. Drittanbieter-Boards |
 | `thirdPartyWhen` | `ThirdParty` | Fähigkeit, die Badge und `<Notice>` auslöst |
 
-Bilder: `Baggages/<prefix>Info/Logo.png`, `Badge.png`, je URL `Info<n>.png` (n = kleinste Board-Nummer der Gruppe),
-`Steps.png` (`<Page queryImage>`). Parameter ohne Speicher: Logo 900, Badge 901, Schritt-Bild 902, Baumtext 903, QR 1000 + n.
-Bilder im Ordner, die der Lauf nicht schreibt, löscht der Generator (mit `<Page>` oder `<InfoImage>`).
+Bild je Board über dem Namen: `<Logo board="..." file="..."/>` in `<InfoImage>` setzt für die passenden Boards ein eigenes
+PNG (Pfad relativ zum Manifest) oder mit `file=""` keines; sonst gilt `badge` (Board mit `thirdPartyWhen`) bzw. `logo`.
+`board` ist ein Define oder Muster (`*`, `?`); ein Define schlägt ein Muster, zwei gleichrangige Treffer brechen ab, ein
+`<Logo>` ohne Treffer gibt eine Warnung. Höchstens 10 eigene Bilder.
+
+```xml
+<InfoImage style="card">
+  <Logo board="DEVICE_AB_BUT_GIR" file="" />                           <!-- kein Bild -->
+  <Logo board="DEMO_RAUMCONTROLLER_PLUS" file="src/hw/logo-retro.png" /> <!-- eigenes Bild -->
+</InfoImage>
+```
+
+Bilder: `Baggages/<prefix>Info/Logo.png`, `Badge.png`, eigene `Logo1.png` … `Logo10.png`, je URL `Info<n>.png` (n = kleinste
+Board-Nummer der Gruppe), `Steps.png` (`<Page queryImage>`). Parameter ohne Speicher: Logo 900, Badge 901, Schritt-Bild 902,
+Baumtext 903, eigene Bilder 910–919, QR 1000 + n. Gleicher Dateiinhalt = ein Bild (auch über einen anderen Pfad). Bilder im
+Ordner, die der Lauf nicht schreibt, löscht der Generator (mit `<Page>` oder `<InfoImage>`).
 
 ### Regeln aus der ETS5-Messung
 

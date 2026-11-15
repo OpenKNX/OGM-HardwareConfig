@@ -1012,9 +1012,25 @@ function Read-Manifest([string]$Path) {
       if ($hex -notmatch '^#[0-9A-Fa-f]{6}$') { Stop-WithError "<InfoImage>: urlColor must be #RRGGBB" }
       $m.Info.UrlRgb = [byte[]]([Convert]::ToByte($hex.Substring(1, 2), 16), [Convert]::ToByte($hex.Substring(3, 2), 16), [Convert]::ToByte($hex.Substring(5, 2), 16))
     }
+    # logo / badge: picture of the OpenKNX / third-party boards; an empty attribute = no picture
     foreach ($a in @(@("logo", "Logo"), @("badge", "Badge"))) {
-      if ($ii.HasAttribute($a[0])) { $m.Info[$a[1]] = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, "$($ii.GetAttribute($a[0]))")) }
-      if (-not (Test-Path -LiteralPath $m.Info[$a[1]] -PathType Leaf)) { Stop-WithError ("<InfoImage>: {0} file not found: {1}" -f $a[0], $m.Info[$a[1]]) }
+      if ($ii.HasAttribute($a[0])) {
+        $f = "$($ii.GetAttribute($a[0]))"
+        if ($f) { $m.Info[$a[1]] = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $f)) } else { $m.Info[$a[1]] = "" }
+      }
+      if ($m.Info[$a[1]] -and -not (Test-Path -LiteralPath $m.Info[$a[1]] -PathType Leaf)) { Stop-WithError ("<InfoImage>: {0} file not found: {1}" -f $a[0], $m.Info[$a[1]]) }
+    }
+    # <Logo board="pattern" file="path"/>: picture of the matching boards instead of logo / badge, file="" = none; a define
+    # without * or ? wins over a pattern, two matching entries of the same kind stop the run
+    $m.Info.Logos = @()
+    foreach ($lg in $ii.SelectNodes("Logo")) {
+      if (-not "$($lg.board)" -or -not $lg.HasAttribute("file")) { Stop-WithError "<InfoImage><Logo> needs board=... and file=... (empty file = no picture)" }
+      $f = "$($lg.file)"
+      if ($f) {
+        $f = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $f))
+        if (-not (Test-Path -LiteralPath $f -PathType Leaf)) { Stop-WithError ("<InfoImage><Logo board=`"{0}`">: file not found: {1}" -f $lg.board, $f) }
+      }
+      $m.Info.Logos += @{ Board = "$($lg.board)"; File = $f; Pattern = ("$($lg.board)" -match '[\*\?]') }
     }
     if ($ii.HasAttribute("thirdPartyWhen")) {
       $m.Info.ThirdWhen = "$($ii.thirdPartyWhen)"
@@ -2124,6 +2140,51 @@ function Test-ThirdPartyBoard($M, $Board) {
   return [bool]($M.Info -and $M.Info.ThirdWhen -and $Board.Cap[$M.Info.ThirdWhen])
 }
 
+# @brief Pictures above the device card name: per board the file of a matching <InfoImage><Logo>, else the badge (third-party
+#        board) or the logo; boards grouped by file. Logo 00900, Badge 00901, own files Logo1..Logo10 = 00910..00919.
+#        A board without picture ("" file) is in no group.
+# @brief Content of a picture file as comparison key (the files are a few kB; no hash API, which FIPS policy can block)
+function Get-FileContentHash([string]$Path) {
+  return [System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes($Path))
+}
+
+function Get-CardMarks($M, $Boards) {
+  $marks = New-Object System.Collections.Generic.List[object]
+  if (-not $M.Info) { return ,$marks.ToArray() }
+  $own = 0
+  $used = @{}
+  foreach ($b in $Boards) {
+    $hits = @($M.Info.Logos | Where-Object { Test-Wildcard $_.Board $b.Define })
+    foreach ($h in $hits) { $used[$h.Board] = $true }
+    if ($hits.Count -gt 0) {
+      $exact = @($hits | Where-Object { -not $_.Pattern })
+      if ($exact.Count -gt 0) { $hits = $exact }
+      if ($hits.Count -gt 1) { Stop-WithError ("{0}: {1} <InfoImage><Logo> entries match ({2})" -f $b.Define, $hits.Count, (($hits | ForEach-Object { $_.Board }) -join ", ")) }
+      $file = $hits[0].File
+    }
+    elseif (Test-ThirdPartyBoard $M $b) { $file = $M.Info.Badge }
+    else { $file = $M.Info.Logo }
+    if (-not $file) { continue }
+    # same picture = same file content (a path through another folder or link is the same picture)
+    $hash = Get-FileContentHash $file
+    $g = @($marks | Where-Object { $_.Hash -eq $hash }) | Select-Object -First 1
+    if (-not $g) {
+      if ($M.Info.Logo -and $hash -eq (Get-FileContentHash $M.Info.Logo)) { $name = "Logo"; $num = $script:LogoParamNum }
+      elseif ($M.Info.Badge -and $hash -eq (Get-FileContentHash $M.Info.Badge)) { $name = "Badge"; $num = $script:BadgeParamNum }
+      else {
+        $own++
+        if ($own -gt 10) { Stop-WithError "<InfoImage><Logo>: at most 10 own pictures" }
+        $name = "Logo$own"; $num = "{0:D5}" -f (909 + $own)
+      }
+      $g = @{ Name = $name; File = $file; Num = $num; Hash = $hash; Boards = @() }
+      $marks.Add($g)
+    }
+    $g.Boards += $b
+  }
+  foreach ($lg in $M.Info.Logos) { if (-not $used.ContainsKey($lg.Board)) { Write-Warn ("<InfoImage><Logo board=`"{0}`">: matches no board" -f $lg.Board) } }
+  return ,$marks.ToArray()
+}
+
 # @brief Board text: HW_INFO_TEXT, else <Page infoDefault> (empty = none)
 function Get-BoardText($M, $Board) {
   if ($Board.InfoText) { return $Board.InfoText }
@@ -2152,16 +2213,22 @@ function Split-SentenceText([string]$Text, [int]$MaxLen = 255) {
 function New-PageInfoXml($M, $Boards, [string]$SelRef, $Switches, $InfoGroups, [string]$Ind) {
   $sb = New-Object System.Text.StringBuilder
   if ($M.Info) {
-    $third = @($Boards | Where-Object { Test-ThirdPartyBoard $M $_ })
-    $own = @($Boards | Where-Object { -not (Test-ThirdPartyBoard $M $_) })
-    [void]$sb.AppendLine("$Ind<ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"ProfileMark`" Inline=`"true`" Layout=`"Grid`">")
-    [void]$sb.AppendLine("$Ind  <Rows><Row Id=`"%AID%_PB-nnn_R-1`" Name=`"Row1`" /></Rows>")
-    [void]$sb.AppendLine("$Ind  <Columns><Column Id=`"%AID%_PB-nnn_C-1`" Name=`"Col1`" Width=`"100%`" /></Columns>")
-    [void]$sb.AppendLine("$Ind  <choose ParamRefId=`"$SelRef`">")
-    if ($own.Count -gt 0) { [void]$sb.AppendLine(("$Ind    <when test=`"{0}`"><ParameterRefRef RefId=`"%AID%_P-%TT%{1}_R-%TT%{1}01`" Cell=`"1,1`" /></when>" -f (Get-IdList $own), $script:LogoParamNum)) }
-    if ($third.Count -gt 0) { [void]$sb.AppendLine(("$Ind    <when test=`"{0}`"><ParameterRefRef RefId=`"%AID%_P-%TT%{1}_R-%TT%{1}01`" Cell=`"1,1`" /></when>" -f (Get-IdList $third), $script:BadgeParamNum)) }
-    [void]$sb.AppendLine("$Ind  </choose>")
-    [void]$sb.AppendLine("$Ind</ParameterBlock>")
+    # picture row (logo, badge or own picture); boards without picture get no row (no empty grid)
+    $marks = @($M.Marks)
+    $marked = @($marks | ForEach-Object { $_.Boards })
+    if ($marks.Count -gt 0) {
+      $mi = $Ind
+      $wrap = ($marked.Count -lt @($Boards).Count)
+      if ($wrap) { [void]$sb.AppendLine(("$Ind<choose ParamRefId=`"$SelRef`"><when test=`"{0}`">" -f (Get-IdList $marked))); $mi = "$Ind  " }
+      [void]$sb.AppendLine("$mi<ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"ProfileMark`" Inline=`"true`" Layout=`"Grid`">")
+      [void]$sb.AppendLine("$mi  <Rows><Row Id=`"%AID%_PB-nnn_R-1`" Name=`"Row1`" /></Rows>")
+      [void]$sb.AppendLine("$mi  <Columns><Column Id=`"%AID%_PB-nnn_C-1`" Name=`"Col1`" Width=`"100%`" /></Columns>")
+      [void]$sb.AppendLine("$mi  <choose ParamRefId=`"$SelRef`">")
+      foreach ($k in $marks) { [void]$sb.AppendLine(("$mi    <when test=`"{0}`"><ParameterRefRef RefId=`"%AID%_P-%TT%{1}_R-%TT%{1}01`" Cell=`"1,1`" /></when>" -f (Get-IdList $k.Boards), $k.Num)) }
+      [void]$sb.AppendLine("$mi  </choose>")
+      [void]$sb.AppendLine("$mi</ParameterBlock>")
+      if ($wrap) { [void]$sb.AppendLine("$Ind</when></choose>") }
+    }
     $qrPct = [int][Math]::Ceiling($M.Info.Width * 100.0 / $script:EtsPageWidth)
     # name, board text and QR picture: boards grouped by these three
     $cards = New-Object System.Collections.Generic.List[object]
@@ -2335,11 +2402,7 @@ function New-ShareXml($M, $Boards) {
   }
   $infoGroups = @($M.InfoGroups)
   # device card pictures: logo and badge left-aligned (full-width row), QR + link right-aligned in its grid cell
-  $marks = @()
-  if ($M.Info) {
-    if (@($Boards | Where-Object { -not (Test-ThirdPartyBoard $M $_) }).Count -gt 0) { $marks += @{ Name = "Logo"; Num = $script:LogoParamNum } }
-    if (@($Boards | Where-Object { Test-ThirdPartyBoard $M $_ }).Count -gt 0) { $marks += @{ Name = "Badge"; Num = $script:BadgeParamNum } }
-  }
+  $marks = @($M.Marks)
   foreach ($k in $marks) {
     [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}{1}`" Name=`"{0}{1}`"><TypePicture RefId=`"%FILE-{0}{1}%`" HorizontalAlignment=`"Left`" /></ParameterType>" -f $p, $k.Name))
   }
@@ -3820,16 +3883,16 @@ try {
 
   # device card pictures (logo, badge, QR code + link): rendered with the text outputs, written after them
   $m.InfoGroups = Get-InfoGroups $m $boards
+  $m.Marks = Get-CardMarks $m $boards
   $images = @()
   if ($m.Info) {
     $infoDir = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($m.Outputs["share"]), "Baggages", ($m.Prefix + "Info"))
     try {
       $urlFont = Read-GlyphFont ([System.IO.Path]::Combine($PSScriptRoot, "assets", "fonts")) $m.Info.UrlFont
-      foreach ($k in @(@("Logo", $m.Info.Logo, @($boards | Where-Object { -not (Test-ThirdPartyBoard $m $_) })), @("Badge", $m.Info.Badge, @($boards | Where-Object { Test-ThirdPartyBoard $m $_ })))) {
-        if (@($k[2]).Count -eq 0) { continue }
-        $img = Read-PngRgba $k[1]
-        $images += @{ Output = [System.IO.Path]::Combine($infoDir, $k[0] + ".png"); Image = $img }
-        Write-Step ("device card {0}.png: {1}x{2} px from {3}" -f $k[0], $img.Width, $img.Height, $k[1])
+      foreach ($k in $m.Marks) {
+        $img = Read-PngRgba $k.File
+        $images += @{ Output = [System.IO.Path]::Combine($infoDir, $k.Name + ".png"); Image = $img }
+        Write-Step ("device card {0}.png: {1}x{2} px from {3}, {4} board(s)" -f $k.Name, $img.Width, $img.Height, $k.File, @($k.Boards).Count)
       }
     }
     catch { Stop-WithError ("<InfoImage>: {0}" -f $_.Exception.Message) }

@@ -70,7 +70,12 @@
         firmware="Firmware: {env}"
         changeInfo="Nach einem Wechsel der Hardware die Kanäle und Werte der Applikation prüfen." />
   <Notice when="ThirdParty" title="Produkt eines Drittanbieters: OpenKNX stellt nur eine kompatible Firmware bereit. Gewährleistung, Support und Produktsicherheit liegen beim Hersteller." />
-  <InfoImage style="card" />
+  <!-- picture above the device card name: OpenKNX logo, third-party badge (DEVICE_THIRD_PARTY) or, per <Logo>, an own picture
+       or none (file=""); logo="" / badge="" on <InfoImage> switch the default off for all boards -->
+  <InfoImage style="card">
+    <Logo board="DEVICE_AB_BUT_GIR" file="" />
+    <Logo board="DEMO_RAUMCONTROLLER_PLUS" file="src/hw/logo-retro.png" />
+  </InfoImage>
 
   <!-- A GPIO role: the user picks a free pin per slot, the dropdown lists only the pins of the selected
        board. number = part of the ETS parameter ID, never change it. scan = regular expression over the
