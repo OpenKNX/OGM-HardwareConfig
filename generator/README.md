@@ -535,8 +535,8 @@ Flash-/PSRAM-Bus (Tabelle im Generator, gleiche Werte wie die ESP-IDF-Header von
 | ESP32-C5 | 16 17 18 20 21 22 | 15 | – |
 | ESP32-C6 | 24 25 26 28 29 30 | – | – |
 
-CS1 zählt mit `CONFIG_SPIRAM` und `BOARD_HAS_PSRAM` (ohne das Flag löscht `esp32-hal-psram.h` `CONFIG_SPIRAM`); der
-Generator liest `BOARD_HAS_PSRAM` aus den Build-Flags, `board_build.extra_flags` oder dem Board-Manifest. Die Oktal-Pins
+CS1 zählt in ETS mit `BOARD_HAS_PSRAM`, im Firmware-Header mit `CONFIG_SPIRAM` (setzen die Arduino-Libs immer; `esp32-hal-psram.h`
+löscht es ohne das Flag nur im Lib-Builder) – die Abweichung klärt TODO 2. Der Generator liest `BOARD_HAS_PSRAM` aus den Build-Flags, `board_build.extra_flags` oder dem Board-Manifest. Die Oktal-Pins
 zählen bei einem Speichertyp `*_opi` (wie die Plattform: `board_build.memory_type`, sonst
 `board_build.arduino.memory_type`, sonst `build.arduino.memory_type` bzw. `build.memory_type` des Board-Manifests; das
 Manifest wird auch gelesen, wenn das Env `board_build.mcu` setzt). RP2040/RP2350 haben einen eigenen QSPI-Bus, keinen GPIO. Ein ESP32-Typ ohne Tabelle gibt eine Warnung.

@@ -138,8 +138,8 @@ $AUTO_RESERVED = @("PROG_BUTTON_PIN", "PROG_LED_PIN", "INFO_LED_PIN", "INFO1_LED
 $TP_RESERVED = @("KNX_UART_RX_PIN", "KNX_UART_TX_PIN")
 $TP_MASKS = @(0x07B0, 0x091A, 0x2920)
 # flash / PSRAM bus of the chip (framework-arduinoespressif32-libs 5.5.5, soc/spi_pins.h MSPI_IOMUX_PIN_NUM_*, sdkconfig.h):
-# Base = CLK MISO MOSI HD WP CS0; Cs1 = PSRAM chip select with CONFIG_SPIRAM and BOARD_HAS_PSRAM (esp32-hal-psram.h clears
-# CONFIG_SPIRAM without it); Octal = D4..D7 DQS with CONFIG_SPIRAM_MODE_OCT / CONFIG_ESPTOOLPY_OCT_FLASH (memory type *_opi)
+# Base = CLK MISO MOSI HD WP CS0; Cs1 = PSRAM chip select, here with BOARD_HAS_PSRAM in the build flags (the firmware header
+# counts it with CONFIG_SPIRAM, which the Arduino libs always set; esp32-hal-psram.h clears it only in the lib builder); Octal = D4..D7 DQS with CONFIG_SPIRAM_MODE_OCT / CONFIG_ESPTOOLPY_OCT_FLASH (memory type *_opi)
 $CHIP_RESERVED = @{
   "ESP32"    = @{ Base = @(6, 7, 8, 9, 10, 11); Cs1 = @(); Octal = @() }
   "ESP32-S3" = @{ Base = @(27, 28, 29, 30, 31, 32); Cs1 = @(26); Octal = @(33, 34, 35, 36, 37) }
@@ -3778,7 +3778,7 @@ function New-ReservedGpioHeader($M) {
   $sb = New-Object System.Text.StringBuilder
   [void]$sb.AppendLine("")
   [void]$sb.AppendLine("// GPIOs the board uses itself: the set of the ETS conflict check (<Conflicts reserved=`"true`">). Flash / PSRAM pins from the")
-  [void]$sb.AppendLine("// ESP-IDF headers; CS1 needs CONFIG_SPIRAM and BOARD_HAS_PSRAM (esp32-hal-psram.h clears CONFIG_SPIRAM without it).")
+  [void]$sb.AppendLine("// ESP-IDF headers; CS1 with CONFIG_SPIRAM (esp32-hal-psram.h clears it without BOARD_HAS_PSRAM only in the lib builder).")
   [void]$sb.AppendLine("#if defined(ARDUINO_ARCH_ESP32) && defined(__has_include)")
   [void]$sb.AppendLine("#if __has_include(<soc/spi_pins.h>)")
   [void]$sb.AppendLine("#include <soc/spi_pins.h>")
