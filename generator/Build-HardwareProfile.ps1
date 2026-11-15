@@ -86,6 +86,9 @@ FILEPATH: OGM-HardwareConfig/generator/Build-HardwareProfile.ps1
     Full log (manifest, boards with capabilities and values, every output). Default: one line per board
     ("OK 0x1321  <name>", by HW-ID) and a summary line; warnings and errors are always shown.
 
+.PARAMETER Language
+    Language of the console output: de (default) or en. The generated files do not depend on it.
+
 .EXAMPLE
     pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1
     # reads ./HardwareProfile.xml and writes the files named in it
@@ -116,7 +119,8 @@ param(
   [switch]$Check,
   [Alias("h")][switch]$Help,
   [switch]$Detailed,
-  [switch]$SelfTest
+  [switch]$SelfTest,
+  [ValidateSet("de", "en")][string]$Language = "de"
 )
 
 $ErrorActionPreference = "Stop"
@@ -161,38 +165,41 @@ $CHIP_RESERVED = @{
 # the generator itself, one file per area (dot-sourced: same script scope, constants and $script: state above)
 $script:GeneratorDir = $PSScriptRoot
 foreach ($corePart in @("Console", "Text", "Toolchain", "BoardIds", "Manifest", "Boards", "Slots", "AppModule", "AppScript",
-                        "Conflicts", "Fixes", "Header", "Init", "Generate")) {
+                        "Conflicts", "Fixes", "Header", "Init", "Generate", "Language")) {
   . ([System.IO.Path]::Combine($PSScriptRoot, "core", $corePart + ".ps1"))
 }
 Remove-Variable corePart
+$script:WarningCount = 0
+Set-OutputLanguage $Language
 # @brief Help in the layout of the OpenKNX build scripts; Get-Help shows the full description
 function Show-Help {
   Show-OpenKNXLogo ("Build-HardwareProfile " + $SCRIPT_VERSION)
-  Write-Host "USAGE:" -ForegroundColor Yellow
-  Write-Host "  pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 [-Manifest <file>] [-Check] [-Detailed] [-DryRun]"
+  Write-Host (T "USAGE:") -ForegroundColor Yellow
+  Write-Host "  pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 [-Manifest <file>] [-Check] [-Detailed] [-DryRun] [-Language de|en]"
   Write-Host "  pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 -ListIds [-Markdown] | -NextId <group> | -Init"
   Write-Host ""
-  Write-Host "OPTIONS:" -ForegroundColor Yellow
-  Write-Host "  -Manifest <file>    Manifest of the application (default: HardwareProfile.xml in the current folder)"
-  Write-Host "  -Check              Compare every output with the file on disk, write nothing; exit 1 when one is out of date (CI)"
-  Write-Host "  -Detailed           Full log: manifest, boards with capabilities and values, every output (default: summary)"
-  Write-Host "  -DryRun             Evaluate and print, write no file"
-  Write-Host "  -ListIds            Every DEVICE_HW_ID of OGM-HardwareConfig; stops on a duplicate ID (no manifest needed)"
-  Write-Host "  -Markdown           With -ListIds: print a Markdown table"
-  Write-Host "  -NextId <group>     Next free DEVICE_HW_ID of a group (0x21 = 0x2100..0x21FF, 0x213 = 0x2130..0x213F)"
-  Write-Host "  -Init               Create the manifest for an application without one (boards of the release_* envs)"
-  Write-Host "  -Compiler <path>    C++ compiler used as preprocessor (default: PlatformIO toolchain of the board MCU)"
-  Write-Host "  -HardwareConfigInclude <dir>  Include folder of OGM-HardwareConfig (default: next to this script)"
-  Write-Host "  -SelfTest           Run the self-test (tests/Test-HardwareProfile.ps1); exit 1 when a test fails"
-  Write-Host "  -Help, -h, --help   Show this help (Get-Help Build-HardwareProfile.ps1 -Detailed: full description)"
+  Write-Host (T "OPTIONS:") -ForegroundColor Yellow
+  Write-Host (T "  -Manifest <file>    Manifest of the application (default: HardwareProfile.xml in the current folder)")
+  Write-Host (T "  -Check              Compare every output with the file on disk, write nothing; exit 1 when one is out of date (CI)")
+  Write-Host (T "  -Detailed           Full log: manifest, boards with capabilities and values, every output (default: summary)")
+  Write-Host (T "  -DryRun             Evaluate and print, write no file")
+  Write-Host (T "  -ListIds            Every DEVICE_HW_ID of OGM-HardwareConfig; stops on a duplicate ID (no manifest needed)")
+  Write-Host (T "  -Markdown           With -ListIds: print a Markdown table")
+  Write-Host (T "  -NextId <group>     Next free DEVICE_HW_ID of a group (0x21 = 0x2100..0x21FF, 0x213 = 0x2130..0x213F)")
+  Write-Host (T "  -Init               Create the manifest for an application without one (boards of the release_* envs)")
+  Write-Host (T "  -Compiler <path>    C++ compiler used as preprocessor (default: PlatformIO toolchain of the board MCU)")
+  Write-Host (T "  -HardwareConfigInclude <dir>  Include folder of OGM-HardwareConfig (default: next to this script)")
+  Write-Host (T "  -SelfTest           Run the self-test (tests/Test-HardwareProfile.ps1); exit 1 when a test fails")
+  Write-Host (T "  -Language de|en     Language of the console output (default: de)")
+  Write-Host (T "  -Help, -h, --help   Show this help (Get-Help Build-HardwareProfile.ps1 -Detailed: full description)")
   Write-Host ""
-  Write-Host "EXAMPLES:" -ForegroundColor Yellow
+  Write-Host (T "EXAMPLES:") -ForegroundColor Yellow
   $examples = @(
-    @("Build-HardwareProfile.ps1", "reads ./HardwareProfile.xml and writes the files named in it"),
-    @("Build-HardwareProfile.ps1 -Check", "CI: exit 1 when a generated file is out of date"),
-    @("Build-HardwareProfile.ps1 -Detailed", "full log"),
-    @("Build-HardwareProfile.ps1 -ListIds -Markdown", "hardware ID table of all boards"),
-    @("Build-HardwareProfile.ps1 -NextId 0x25", "next free DEVICE_HW_ID in 0x2500..0x25FF")
+    @("Build-HardwareProfile.ps1", (T "reads ./HardwareProfile.xml and writes the files named in it")),
+    @("Build-HardwareProfile.ps1 -Check", (T "CI: exit 1 when a generated file is out of date")),
+    @("Build-HardwareProfile.ps1 -Detailed", (T "full log")),
+    @("Build-HardwareProfile.ps1 -ListIds -Markdown", (T "hardware ID table of all boards")),
+    @("Build-HardwareProfile.ps1 -NextId 0x25", (T "next free DEVICE_HW_ID in 0x2500..0x25FF"))
   )
   $width = ($examples | ForEach-Object { $_[0].Length } | Measure-Object -Maximum).Maximum
   foreach ($e in $examples) {
@@ -203,7 +210,7 @@ function Show-Help {
 }
 # help: -Help, -? (PowerShell) and the usual --help / -h / /? (they arrive as the positional Manifest)
 if ($SelfTest) {
-  & ([System.IO.Path]::Combine($PSScriptRoot, "tests", "Test-HardwareProfile.ps1"))
+  & ([System.IO.Path]::Combine($PSScriptRoot, "tests", "Test-HardwareProfile.ps1")) -Language $Language
   exit $LASTEXITCODE
 }
 if ($Help -or @("--help", "-help", "-h", "/?", "/h", "help", "?") -contains $Manifest) {
@@ -217,7 +224,6 @@ $script:WrittenCount = 0
 $script:ActivityShown = $false
 $script:ActivityWidth = 79
 $script:WrittenFiles = New-Object System.Collections.Generic.List[string]
-$script:WarningCount = 0
 $script:InitMode = $false
 $script:NoBoardEnvs = @()
 
@@ -236,55 +242,55 @@ try {
     $HardwareConfigInclude = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, "..", "include"))
   }
   if (-not (Test-Path ([System.IO.Path]::Combine($HardwareConfigInclude, "HardwareConfig.h")))) {
-    Stop-WithError "HardwareConfig.h not found in $HardwareConfigInclude"
+    Stop-WithError (T "HardwareConfig.h not found in {0}" $HardwareConfigInclude)
   }
   $script:HwInclude = $HardwareConfigInclude
   # the firmware maps port values with include/HardwareConfig/Helpers/HardwarePorts.h: read the same port limit
   $portsHeader = [System.IO.Path]::Combine($HardwareConfigInclude, "HardwareConfig", "Helpers", "HardwarePorts.h")
-  if (-not (Test-Path -LiteralPath $portsHeader)) { Stop-WithError "HardwareConfig/Helpers/HardwarePorts.h not found in $HardwareConfigInclude" }
+  if (-not (Test-Path -LiteralPath $portsHeader)) { Stop-WithError (T "HardwareConfig/Helpers/HardwarePorts.h not found in {0}" $HardwareConfigInclude) }
   else {
     $pm = [regex]::Match([System.IO.File]::ReadAllText($portsHeader), '(?m)^[ \t]*#define[ \t]+HW_PORTS_MAX\b(.*)$')
     if ($pm.Success) {
       $pv = [regex]::Match($pm.Groups[1].Value, '^\s*\(?\s*(\d+)\s*\)?\s*(//.*)?\s*$')
-      if (-not $pv.Success) { Stop-WithError ("HardwareConfig/Helpers/HardwarePorts.h: HW_PORTS_MAX must be a number: {0}" -f $pm.Groups[1].Value.Trim()) }
+      if (-not $pv.Success) { Stop-WithError (T "HardwareConfig/Helpers/HardwarePorts.h: HW_PORTS_MAX must be a number: {0}" ($pm.Groups[1].Value.Trim())) }
       $MAX_PORTS = [int]$pv.Groups[1].Value
     }
   }
   $script:IncludeDirs = @($HardwareConfigInclude)
   $script:DefaultCompiler = Find-Compiler
   $script:CompilerPath = $script:DefaultCompiler
-  Write-Step "Preprocessor: $script:CompilerPath"
+  Write-Step (T "Preprocessor: {0}" $script:CompilerPath)
 
   # -Check compares the outputs of a regular run; the other modes write or list something else
-  if ($script:CheckMode -and ($ListIds -or $NextId -or $Init -or $DryRun)) { Stop-WithError "-Check cannot be combined with -ListIds, -NextId, -Init or -DryRun" }
+  if ($script:CheckMode -and ($ListIds -or $NextId -or $Init -or $DryRun)) { Stop-WithError (T "-Check cannot be combined with -ListIds, -NextId, -Init or -DryRun") }
   if ($ListIds) { Invoke-ListIds }
   if ($NextId) { Invoke-NextId }
   if ($Init) { Invoke-Init }
 
-  Start-Phase "Manifest lesen"
+  Start-Phase (T "Read the manifest")
   $m = Read-Manifest $Manifest
   $script:IncludeDirs = @($m.IncludeDirs) + @($HardwareConfigInclude)
-  Write-Step ("Manifest: {0} board(s), {1} capabilities, {2} values, {3} GPIO role(s), unselected={4}" -f $m.Boards.Count, $m.Capabilities.Count, $m.Values.Count, $m.Roles.Count, $m.Unselected)
-  Complete-Phase ("{0} F{1}higkeiten, {2} Werte" -f $m.Capabilities.Count, [char]0xE4, $m.Values.Count)
-  Start-Phase "Boards ermitteln (PlatformIO, Board-Header)"
+  Write-Step (T "Manifest: {0} board(s), {1} capabilities, {2} values, {3} GPIO role(s), unselected={4}" $m.Boards.Count $m.Capabilities.Count $m.Values.Count $m.Roles.Count $m.Unselected)
+  Complete-Phase (T "{0} capabilities, {1} values" $m.Capabilities.Count $m.Values.Count)
+  Start-Phase (T "Find the boards (PlatformIO, board headers)")
   $found = Get-ProductBoards $m
   $boards = $found.Boards; $envCount = $found.EnvCount
-  if ($envCount -gt 0) { Complete-Phase ("{0} Envs, {1} Boards" -f $envCount, $boards.Count) } else { Complete-Phase ("{0} Boards" -f $boards.Count) }
-  Start-Phase "Slot-Datei, Port-Werte, Konfliktpr$([char]0xFC)fung"
+  if ($envCount -gt 0) { Complete-Phase (T "{0} Envs, {1} Boards" $envCount $boards.Count) } else { Complete-Phase (T "{0} Boards" $boards.Count) }
+  Start-Phase (T "Slot file, port values, conflict check")
   $slotFile = Update-SlotsAndPorts $m $boards
   Complete-Phase
-  Start-Phase "Bilder der Ger$([char]0xE4)tekarte"
+  Start-Phase (T "Pictures of the device card")
   $images = (New-CardImages $m $boards).Images
-  Complete-Phase ("{0} Bild(er)" -f @($images).Count)
-  Start-Phase "Applikation und Firmware-Header erzeugen"
+  Complete-Phase (T "{0} picture(s)" (@($images).Count))
+  Start-Phase (T "Build the application and the firmware header")
   $out = New-ProductOutputs $m $boards
   $rendered = $out.Rendered; $ownOutputs = $out.OwnOutputs
-  Complete-Phase ("{0} Datei(en)" -f $rendered.Count)
-  Start-Phase "Produkt-XML und Versionswache"
+  Complete-Phase (T "{0} file(s)" $rendered.Count)
+  Start-Phase (T "Product XML and version guard")
   $guard = Test-ProductAndGuard $m $slotFile $rendered $images
   $rendered = $guard.Rendered; $products = $guard.Products
-  Complete-Phase ("{0} Produkt-XML(s)" -f @($products).Count)
-  if ($script:CheckMode) { Start-Phase "Dateien pr$([char]0xFC)fen" } elseif ($DryRun) { Start-Phase "Dateien anzeigen (-DryRun)" } else { Start-Phase "Dateien schreiben" }
+  Complete-Phase (T "{0} product XML(s)" (@($products).Count))
+  if ($script:CheckMode) { Start-Phase (T "Check the files") } elseif ($DryRun) { Start-Phase (T "Show the files (-DryRun)") } else { Start-Phase (T "Write the files") }
   $phaseState = Write-ProductOutputs $m $rendered $images $ownOutputs
   Complete-Phase $phaseState
   Write-RunSummary $m $boards $envCount

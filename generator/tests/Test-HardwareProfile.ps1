@@ -22,6 +22,7 @@ FILEPATH: OGM-HardwareConfig/generator/tests/Test-HardwareProfile.ps1
       Manifest       unknown attribute warns; invalid prefix and ids="index" stop
       Fixes          parts file with both Assigns and the read-only ParameterRef; wrong case and a ref fixed twice stop
       -Init          refuses a product XML that already includes a hardware module
+      Language       every T text of the code is in core/Messages.de.psd1 with the same placeholders; German by default
       Helpers        ordinal sort (also of a generic List); PNG written and read back gives the same pixels
       Header         HardwarePorts.h relay checks with -Wall -Wextra -Werror (needs a g++ / clang++; else SKIP)
       Demo           -Check of examples/HardwareProfileDemo (needs PlatformIO and the demo lib/ links; else SKIP)
@@ -39,6 +40,10 @@ FILEPATH: OGM-HardwareConfig/generator/tests/Test-HardwareProfile.ps1
 .PARAMETER KeepWork
     Keep the work folder (its path is printed) to look at the files of a failed test.
 
+.PARAMETER Language
+    Language of the output: de (default) or en. The generator under test always runs in English (the checks match its
+    texts); one test runs it in German.
+
 .PARAMETER Help
     Shows this help.
 
@@ -55,7 +60,8 @@ param(
   [string]$Only = "",
   [switch]$Full,
   [switch]$KeepWork,
-  [Alias("h")][switch]$Help
+  [Alias("h")][switch]$Help,
+  [ValidateSet("de", "en")][string]$Language = "de"
 )
 
 $ErrorActionPreference = "Stop"
@@ -66,12 +72,14 @@ $RepoDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($GeneratorDir
 $Generator = [System.IO.Path]::Combine($GeneratorDir, "Build-HardwareProfile.ps1")
 $PwshExe = (Get-Process -Id $PID).Path
 $Utf8 = New-Object System.Text.UTF8Encoding($false)
-$ae = [string][char]0xE4; $ue = [string][char]0xFC; $sz = [string][char]0xDF
+$ae = [string][char]0xE4
 $Work = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "oknx-hwtest-" + [System.Guid]::NewGuid().ToString("N").Substring(0, 8))
 [void][System.IO.Directory]::CreateDirectory($Work)
 
 # console helpers of the generator (logo) and the text helpers under test
 . ([System.IO.Path]::Combine($GeneratorDir, "core", "Console.ps1"))
+. ([System.IO.Path]::Combine($GeneratorDir, "core", "Language.ps1"))
+Set-OutputLanguage $Language
 . ([System.IO.Path]::Combine($GeneratorDir, "core", "Text.ps1"))
 . ([System.IO.Path]::Combine($GeneratorDir, "helpers", "PngImage.ps1"))
 $script:CheckMode = $false
@@ -86,6 +94,7 @@ function Invoke-Generator([string]$Dir, [string[]]$Arguments, [string]$Manifest 
   Push-Location $Dir
   try {
     $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $Generator, "-Manifest", [System.IO.Path]::Combine($Dir, $Manifest)) + @($Arguments)
+    if (@($Arguments) -notcontains "-Language") { $argList += @("-Language", "en") }
     $out = (& $PwshExe @argList 2>&1 | Out-String)
     $code = $LASTEXITCODE
   }
@@ -100,19 +109,19 @@ function Write-Text([string]$Path, [string]$Text) { [System.IO.File]::WriteAllTe
 function Edit-File([string]$Path, [string]$Old, [string]$New) {
   $t = Read-Text $Path
   $n = ([regex]::Matches($t, [regex]::Escape($Old))).Count
-  if ($n -ne 1) { throw ("test setup: '{0}' found {1} times in {2}" -f $Old, $n, [System.IO.Path]::GetFileName($Path)) }
+  if ($n -ne 1) { throw (T "test setup: '{0}' found {1} times in {2}" $Old $n ([System.IO.Path]::GetFileName($Path))) }
   Write-Text $Path $t.Replace($Old, $New)
 }
 
 function Assert-True([bool]$Condition, [string]$Message) { if (-not $Condition) { throw $Message } }
 function Assert-Exit($Result, [int]$Code) {
-  if ($Result.Exit -ne $Code) { throw ("exit code {0}, expected {1}`n{2}" -f $Result.Exit, $Code, (Get-Tail $Result.Out)) }
+  if ($Result.Exit -ne $Code) { throw (T "exit code {0}, expected {1}`n{2}" $Result.Exit $Code (Get-Tail $Result.Out)) }
 }
 function Assert-Out($Result, [string]$Pattern, [string]$What) {
-  if ($Result.Out -notmatch $Pattern) { throw ("{0}: output does not match '{1}'`n{2}" -f $What, $Pattern, (Get-Tail $Result.Out)) }
+  if ($Result.Out -notmatch $Pattern) { throw (T "{0}: output does not match '{1}'`n{2}" $What $Pattern (Get-Tail $Result.Out)) }
 }
 function Assert-NoOut($Result, [string]$Pattern, [string]$What) {
-  if ($Result.Out -match $Pattern) { throw ("{0}: output matches '{1}'`n{2}" -f $What, $Pattern, (Get-Tail $Result.Out)) }
+  if ($Result.Out -match $Pattern) { throw (T "{0}: output matches '{1}'`n{2}" $What $Pattern (Get-Tail $Result.Out)) }
 }
 function Get-Tail([string]$Text) { return ((@($Text -split "`r?`n" | Where-Object { $_.Trim() }) | Select-Object -Last 6) -join "`n") }
 
@@ -141,7 +150,7 @@ function New-BaseProject {
     '</KNX>'
   ) -join "`n")
   $r = Invoke-Generator $dir @()
-  if ($r.Exit -ne 0) { throw ("base project: generator failed`n{0}" -f (Get-Tail $r.Out)) }
+  if ($r.Exit -ne 0) { throw (T "base project: generator failed`n{0}" (Get-Tail $r.Out)) }
   return $dir
 }
 
@@ -190,105 +199,105 @@ function Add-Test([string]$Id, [string]$Name, [scriptblock]$Run, [string]$Need =
   $Tests.Add(@{ Id = $Id; Name = $Name; Run = $Run; Need = $Need })
 }
 
-Add-Test "outputs-stable" "Ausgaben: ein zweiter Lauf $($ae)ndert nichts (-Check)" {
+Add-Test "outputs-stable" (T "Outputs: a second run changes nothing (-Check)") {
   $d = Copy-Base "outputs-stable"
-  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: aktuell' "-Check"
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
 }
 
-Add-Test "outputs-stale" "Ausgaben: -Check meldet eine ge$($ae)nderte Datei" {
+Add-Test "outputs-stale" (T "Outputs: -Check reports a changed file") {
   $d = Copy-Base "outputs-stale"; $conf = [System.IO.Path]::Combine($d, "src", "T.conf.xml")
   Write-Text $conf ((Read-Text $conf) + "<!-- edited -->`n")
-  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 1; Assert-Out $r 'nicht aktuell: T\.conf\.xml' "-Check"
-  Assert-True ((Read-Text $conf).EndsWith("<!-- edited -->`n")) "-Check wrote the file"
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 1; Assert-Out $r 'out of date: T\.conf\.xml' "-Check"
+  Assert-True ((Read-Text $conf).EndsWith("<!-- edited -->`n")) (T "-Check wrote the file")
 }
 
-Add-Test "bits-insert" "Bit-Reihenfolge: neue F$($ae)higkeit davor, alle Bits bleiben" {
+Add-Test "bits-insert" (T "Bit order: new capability in front, every bit stays") {
   $d = Copy-Base "bits-insert"; $slots = [System.IO.Path]::Combine($d, "HardwareProfile.slots")
   $before = @((Read-Text $slots) -split "`n" | Where-Object { $_ -match '^(cap|val) ' })
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  <Capability name="OwnA"' "  <Capability name=`"NewMid`" text=`"New`" expr=`"defined(TST_NEVER_B)`" />`n  <Capability name=`"OwnA`""
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $after = @((Read-Text $slots) -split "`n" | Where-Object { $_ -match '^(cap|val) ' })
-  foreach ($l in $before) { Assert-True ($after -contains $l) ("recorded line lost or moved: " + $l) }
+  foreach ($l in $before) { Assert-True ($after -contains $l) (T "recorded line lost or moved: {0}" $l) }
   $capCount = @($before | Where-Object { $_ -match '^cap ' }).Count
-  Assert-True ($after -contains ("cap {0} = NewMid" -f $capCount)) ("NewMid did not get the next free bit {0}" -f $capCount)
+  Assert-True ($after -contains ("cap {0} = NewMid" -f $capCount)) (T "NewMid did not get the next free bit {0}" $capCount)
 }
 
-Add-Test "bits-removed" "Bit-Reihenfolge: entfernte F$($ae)higkeit bricht ab" {
+Add-Test "bits-removed" (T "Bit order: a removed capability stops") {
   $d = Copy-Base "bits-removed"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) "  <Capability name=`"OwnA`" text=`"Own A`" expr=`"defined(TST_NEVER_A)`" />`n" ""
-  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r "OwnA' is gone from the manifest" "stop message"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r "OwnA' is gone from the manifest" (T "stop message")
 }
 
-Add-Test "bits-twice" "Bit-Reihenfolge: doppeltes Bit in der Slot-Datei bricht ab" {
+Add-Test "bits-twice" (T "Bit order: a bit listed twice in the slot file stops") {
   $d = Copy-Base "bits-twice"; $slots = [System.IO.Path]::Combine($d, "HardwareProfile.slots")
   Write-Text $slots ((Read-Text $slots) + "cap 0 = Other`n")
-  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'listed twice' "stop message"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'listed twice' (T "stop message")
 }
 
-Add-Test "guard-comment" "Versionswache: Kommentar im Produkt-XML warnt nicht" {
+Add-Test "guard-comment" (T "Version guard: a comment in the product XML does not warn") {
   $d = Copy-Base "guard-comment"
   Edit-File ([System.IO.Path]::Combine($d, "src", "T.xml")) '  <op:define' "  <!-- only a comment -->`n  <op:define"
-  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-NoOut $r 'ETS content changed' "comment only"
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-NoOut $r 'ETS content changed' (T "comment only")
 }
 
-Add-Test "guard-attribute" "Versionswache: Attribut warnt, neue Version nimmt es auf" {
+Add-Test "guard-attribute" (T "Version guard: an attribute warns, a new version records it") {
   $d = Copy-Base "guard-attribute"; $prod = [System.IO.Path]::Combine($d, "src", "T.xml")
   Edit-File $prod 'ProductName="Selftest"' 'ProductName="Selftest 2"'
-  $r = Invoke-Generator $d @("-Check"); Assert-Out $r 'ETS content changed since T\.xml ApplicationVersion 1\.0' "same version"
+  $r = Invoke-Generator $d @("-Check"); Assert-Out $r 'ETS content changed since T\.xml ApplicationVersion 1\.0' (T "same version")
   Edit-File $prod 'ApplicationVersion="1.0"' 'ApplicationVersion="1.1"'
-  $r = Invoke-Generator $d @(); Assert-Exit $r 0; Assert-NoOut $r 'ETS content changed' "new version"
-  Assert-True ((Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))) -match '(?m)^ets "T\.xml" 1\.1 [0-9A-F]{16}$') "slot file has no ets line for 1.1"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0; Assert-NoOut $r 'ETS content changed' (T "new version")
+  Assert-True ((Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))) -match '(?m)^ets "T\.xml" 1\.1 [0-9A-F]{16}$') (T "slot file has no ets line for 1.1")
 }
 
-Add-Test "guard-duplicate" "Versionswache: zweite ets-Zeile bricht ab" {
+Add-Test "guard-duplicate" (T "Version guard: a second ets line stops") {
   $d = Copy-Base "guard-duplicate"; $slots = [System.IO.Path]::Combine($d, "HardwareProfile.slots")
   Write-Text $slots ((Read-Text $slots) + "ets `"T.xml`" 0.9 0123456789ABCDEF`n")
-  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'second ets line' "stop message"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'second ets line' (T "stop message")
 }
 
-Add-Test "manifest-unknown" "Manifest: unbekanntes Attribut warnt" {
+Add-Test "manifest-unknown" (T "Manifest: an unknown attribute warns") {
   $d = Copy-Base "manifest-unknown"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '<Capability name="OwnA"' '<Capability foo="1" name="OwnA"'
-  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'attribute foo is unknown' "warning"
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'attribute foo is unknown' (T "warning")
 }
 
-Add-Test "manifest-prefix" "Manifest: ung$($ue)ltiges Pr$($ae)fix bricht ab" {
+Add-Test "manifest-prefix" (T "Manifest: an invalid prefix stops") {
   $d = Copy-Base "manifest-prefix"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'prefix="TST"' 'prefix="T-1"'
-  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'must be letters and digits' "stop message"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'must be letters and digits' (T "stop message")
 }
 
-Add-Test "manifest-ids" "Manifest: entferntes ids=`"index`" bricht ab" {
+Add-Test "manifest-ids" (T "Manifest: the removed ids=`"index`" stops") {
   $d = Copy-Base "manifest-ids"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'prefix="TST"' 'prefix="TST" ids="index"'
-  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'was removed' "stop message"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'was removed' (T "stop message")
 }
 
 $FixLine = '<Fix name="W" capability="Lan" ref="%AID%_P-1401001_R-140100100" value="1" />'
-Add-Test "fixes-parts" "Fixes: Baustein mit beiden Assigns und nur lesbarer Zeile" {
+Add-Test "fixes-parts" (T "Fixes: parts file with both Assigns and the read-only row") {
   $d = Copy-Base "fixes-parts"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">$FixLine</Fixes>`n</HardwareProfile>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.fixes.gen.xml"))
-  Assert-True ($f.Contains('<ParameterRef Id="%AID%_P-1401001_R-140100199" RefId="%AID%_P-1401001" Access="Read" />')) "read-only ParameterRef missing"
-  Assert-True ($f.Contains('<Assign TargetParamRefRef="%AID%_P-1401001_R-140100100" Value="1" />')) "Assign of the setting missing"
-  Assert-True ($f.Contains('<Assign TargetParamRefRef="%AID%_P-1401001_R-140100199" Value="1" />')) "Assign of the read-only row missing"
-  Assert-True ($f.Contains('<when test="4129 4130">')) "board list is not the two REG1 LAN boards"
+  Assert-True ($f.Contains('<ParameterRef Id="%AID%_P-1401001_R-140100199" RefId="%AID%_P-1401001" Access="Read" />')) (T "read-only ParameterRef missing")
+  Assert-True ($f.Contains('<Assign TargetParamRefRef="%AID%_P-1401001_R-140100100" Value="1" />')) (T "Assign of the setting missing")
+  Assert-True ($f.Contains('<Assign TargetParamRefRef="%AID%_P-1401001_R-140100199" Value="1" />')) (T "Assign of the read-only row missing")
+  Assert-True ($f.Contains('<when test="4129 4130">')) (T "board list is not the two REG1 LAN boards")
 }
 
-Add-Test "fixes-case" "Fixes: falsche Gro$($sz)-/Kleinschreibung bricht ab" {
+Add-Test "fixes-case" (T "Fixes: wrong upper/lower case stops") {
   $d = Copy-Base "fixes-case"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine.Replace('"Lan"', '"lan"') + "</Fixes>`n</HardwareProfile>")
-  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'case-sensitive' "stop message"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'case-sensitive' (T "stop message")
 }
 
-Add-Test "fixes-twice" "Fixes: dieselbe Ref zweimal bricht ab" {
+Add-Test "fixes-twice" (T "Fixes: the same ref twice stops") {
   $d = Copy-Base "fixes-twice"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine + $FixLine.Replace('name="W"', 'name="W2"') + "</Fixes>`n</HardwareProfile>")
-  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'already fixed' "stop message"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'already fixed' (T "stop message")
 }
 
-Add-Test "init-second" "-Init: zweites Hardware-Modul wird abgelehnt" {
+Add-Test "init-second" (T "-Init: a second hardware module is refused") {
   $d = [System.IO.Path]::Combine($Work, "init-second")
   [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::Combine($d, "src"))
   [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::Combine($d, "lib"))
@@ -297,33 +306,81 @@ Add-Test "init-second" "-Init: zweites Hardware-Modul wird abgelehnt" {
   Copy-Item -LiteralPath ([System.IO.Path]::Combine($script:Base, "src", "T.share.xml")) -Destination ([System.IO.Path]::Combine($d, "src", "T.share.xml"))
   Copy-Item -LiteralPath ([System.IO.Path]::Combine($script:Base, "src", "T.xml")) -Destination ([System.IO.Path]::Combine($d, "src", "P.xml"))
   $r = Invoke-Generator $d @("-Init") "New.xml"
-  Assert-Exit $r 1; Assert-Out $r 'already includes a hardware module' "stop message"
-  Assert-NoOut $r 'ModuleTypes in use' "-Init went on after the refusal"
-  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "New.xml")))) "-Init wrote a manifest"
+  Assert-Exit $r 1; Assert-Out $r 'already includes a hardware module' (T "stop message")
+  Assert-NoOut $r 'ModuleTypes in use' (T "-Init went on after the refusal")
+  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "New.xml")))) (T "-Init wrote a manifest")
 }
 
-Add-Test "helper-sort" "Hilfen: ordinale, stabile Sortierung (auch List)" {
+Add-Test "language-table" (T "Language: German table complete, placeholders match") {
+  # T "<English text>" in every script of the generator and the demo; the table must hold each one, and nothing else
+  $files = @(Get-ChildItem -LiteralPath $GeneratorDir -Recurse -Filter "*.ps1" | ForEach-Object { $_.FullName }) +
+           @(Get-ChildItem -LiteralPath ([System.IO.Path]::Combine($RepoDir, "examples", "HardwareProfileDemo", "scripts")) -Filter "*.ps1" | ForEach-Object { $_.FullName })
+  $used = New-Object "System.Collections.Generic.HashSet[string]" ([System.StringComparer]::Ordinal)
+  $problems = New-Object System.Collections.Generic.List[string]
+  foreach ($f in $files) {
+    $tok = $null; $err = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($f, [ref]$tok, [ref]$err)
+    foreach ($c in $ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.CommandAst] -and $n.GetCommandName() -ceq "T" }, $true)) {
+      $a = $c.CommandElements[1]
+      if ($a -is [System.Management.Automation.Language.StringConstantExpressionAst] -or
+          ($a -is [System.Management.Automation.Language.ExpandableStringExpressionAst] -and $a.NestedExpressions.Count -eq 0)) {
+        [void]$used.Add($a.Value)
+        # one argument per {n} (a missing one throws, a surplus one is a lost placeholder); without arguments the text is
+        # printed as it is, so no {n} and no {{ }}
+        $argCount = $c.CommandElements.Count - 2
+        $top = -1; foreach ($mt in [regex]::Matches(($a.Value -replace '\{\{', '' -replace '\}\}', ''), '\{(\d+)')) { $top = [Math]::Max($top, [int]$mt.Groups[1].Value) }
+        if ($argCount -ne $top + 1 -or ($argCount -eq 0 -and $a.Value -match '\{\{|\}\}')) {
+          $problems.Add((T "{0}:{1}: {2} argument(s) for the placeholders of '{3}'" ([System.IO.Path]::GetFileName($f)) $c.Extent.StartLineNumber $argCount $a.Value))
+        }
+      }
+      else { $problems.Add((T "{0}:{1}: T needs a constant text" ([System.IO.Path]::GetFileName($f)) $c.Extent.StartLineNumber)) }
+    }
+  }
+  $tablePath = [System.IO.Path]::Combine($GeneratorDir, "core", "Messages.de.psd1")
+  # without the UTF-8 BOM Windows PowerShell 5.1 reads the file as ANSI and every umlaut comes out wrong
+  $head = [System.IO.File]::ReadAllBytes($tablePath)
+  if ($head.Length -lt 3 -or $head[0] -ne 0xEF -or $head[1] -ne 0xBB -or $head[2] -ne 0xBF) { $problems.Add((T "{0} has no UTF-8 BOM" $tablePath)) }
+  $table = Read-MessageTable $tablePath
+  $holes = { param($s) (@([regex]::Matches(($s -replace '\{\{', '' -replace '\}\}', ''), '\{\d+[^}]*\}') | ForEach-Object { $_.Value } | Sort-Object) -join " ") }
+  foreach ($k in $used) {
+    if (-not $table.ContainsKey($k)) { $problems.Add((T "missing in the table: {0}" $k)); continue }
+    if ((& $holes $k) -cne (& $holes $table[$k])) { $problems.Add((T "placeholders differ: {0}" $k)) }
+  }
+  foreach ($k in $table.Keys) { if (-not $used.Contains($k)) { $problems.Add((T "in the table, not in the code: {0}" $k)) } }
+  if ($problems.Count) { throw (($problems | Select-Object -First 10) -join "`n") }
+}
+
+Add-Test "language-de" (T "Language: German by default") {
+  $d = Copy-Base "language-de"
+  $r = Invoke-Generator $d @("-Check", "-Language", "en"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+  $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
+  try { $o = (& $PwshExe -NoProfile -ExecutionPolicy Bypass -File $Generator -Manifest ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) -Check 2>&1 | Out-String) }
+  finally { $ErrorActionPreference = $prev }
+  if ($o -notmatch 'Check: aktuell') { throw (T "default language is not German`n{0}" (Get-Tail $o)) }
+}
+
+Add-Test "helper-sort" (T "Helpers: ordinal, stable sort (also of a List)") {
   $l = New-Object System.Collections.Generic.List[object]
   foreach ($x in @("b", "B", "a", "ab", "a", "Z")) { $l.Add($x) }
-  Assert-True ((@(Get-OrdinalSorted $l) -join ",") -eq "B,Z,a,a,ab,b") "sort order"
-  Assert-True ((@(Get-OrdinalSorted $l -Unique) -join ",") -eq "B,Z,a,ab,b") "-Unique"
+  Assert-True ((@(Get-OrdinalSorted $l) -join ",") -eq "B,Z,a,a,ab,b") (T "sort order")
+  Assert-True ((@(Get-OrdinalSorted $l -Unique) -join ",") -eq "B,Z,a,ab,b") (T "-Unique")
   $h = @(@{ K = "x"; N = 1 }, @{ K = "a"; N = 2 }, @{ K = "x"; N = 3 })
-  Assert-True (((@(Get-OrdinalSorted $h { $_.K }) | ForEach-Object { $_.N }) -join ",") -eq "2,1,3") "stable by key"
-  Assert-True (@(Get-OrdinalSorted @()).Count -eq 0) "empty input"
+  Assert-True (((@(Get-OrdinalSorted $h { $_.K }) | ForEach-Object { $_.N }) -join ",") -eq "2,1,3") (T "stable by key")
+  Assert-True (@(Get-OrdinalSorted @()).Count -eq 0) (T "empty input")
 }
 
-Add-Test "helper-png" "Hilfen: PNG schreiben und lesen, gleiche Pixel" {
+Add-Test "helper-png" (T "Helpers: PNG written and read back, same pixels") {
   $p = [System.IO.Path]::Combine($Work, "png-test.png")
   $w = 7; $h = 5; $px = New-Object byte[] ($w * $h * 4)
   for ($i = 0; $i -lt $px.Length; $i++) { $px[$i] = [byte](($i * 37 + 11) % 256) }
-  Assert-True (Update-PngRgba $p $w $h $px) "first write"
+  Assert-True (Update-PngRgba $p $w $h $px) (T "first write")
   $img = Read-PngRgba $p
-  Assert-True ($img.Width -eq $w -and $img.Height -eq $h) "size"
-  Assert-True ([System.Convert]::ToBase64String($img.Pixels) -ceq [System.Convert]::ToBase64String($px)) "pixels"
-  Assert-True (-not (Update-PngRgba $p $w $h $px)) "unchanged picture was written again"
+  Assert-True ($img.Width -eq $w -and $img.Height -eq $h) (T "size")
+  Assert-True ([System.Convert]::ToBase64String($img.Pixels) -ceq [System.Convert]::ToBase64String($px)) (T "pixels")
+  Assert-True (-not (Update-PngRgba $p $w $h $px)) (T "unchanged picture was written again")
 }
 
-Add-Test "header-relays" "Header: HardwarePorts.h mit -Wall -Wextra -Werror" {
+Add-Test "header-relays" (T "Header: HardwarePorts.h with -Wall -Wextra -Werror") {
   $cxx = Find-CppCompiler
   $d = [System.IO.Path]::Combine($Work, "header"); [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::Combine($d, "fake"))
   Write-Text ([System.IO.Path]::Combine($d, "fake", "HardwareConfig.h")) ""
@@ -346,19 +403,19 @@ Add-Test "header-relays" "Header: HardwarePorts.h mit -Wall -Wextra -Werror" {
     foreach ($c in $cases) {
       $o = (& $cxx -std=gnu++11 -Wall -Wextra -Werror -fsyntax-only ("-I" + [System.IO.Path]::Combine($d, "fake")) ("-I" + $inc) @($c.Defs) $c.Src 2>&1 | Out-String)
       $ok = ($LASTEXITCODE -eq 0)
-      if (-not $c.Expect -and -not $ok) { throw ("{0}: compile failed`n{1}" -f $c.Name, (Get-Tail $o)) }
-      if ($c.Expect -and ($ok -or $o -notmatch [regex]::Escape($c.Expect))) { throw ("{0}: expected the header error '{1}'`n{2}" -f $c.Name, $c.Expect, (Get-Tail $o)) }
+      if (-not $c.Expect -and -not $ok) { throw (T "{0}: compile failed`n{1}" $c.Name (Get-Tail $o)) }
+      if ($c.Expect -and ($ok -or $o -notmatch [regex]::Escape($c.Expect))) { throw (T "{0}: expected the header error '{1}'`n{2}" $c.Name $c.Expect (Get-Tail $o)) }
     }
   }
   finally { $ErrorActionPreference = $prev }
 } "cxx"
 
-Add-Test "demo-check" "Demo: HardwareProfileDemo ist aktuell (-Check)" {
+Add-Test "demo-check" (T "Demo: HardwareProfileDemo is up to date (-Check)") {
   $demo = [System.IO.Path]::Combine($RepoDir, "examples", "HardwareProfileDemo")
-  $r = Invoke-Generator $demo @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: aktuell' "-Check"
+  $r = Invoke-Generator $demo @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
 } "pio"
 
-Add-Test "demo-update" "Demo-Update: N nach N+1 beh$($ae)lt die Werte, -Break scheitert" {
+Add-Test "demo-update" (T "Demo update: N to N+1 keeps the values, -Break fails") {
   $script = [System.IO.Path]::Combine($RepoDir, "examples", "HardwareProfileDemo", "scripts", "Test-DemoUpdate.ps1")
   $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
   try {
@@ -366,8 +423,8 @@ Add-Test "demo-update" "Demo-Update: N nach N+1 beh$($ae)lt die Werte, -Break sc
     $o2 = (& $PwshExe -NoProfile -ExecutionPolicy Bypass -File $script -Break -OutDir ([System.IO.Path]::Combine($Work, "update-break")) 2>&1 | Out-String); $e2 = $LASTEXITCODE
   }
   finally { $ErrorActionPreference = $prev }
-  if ($e1 -ne 0) { throw ("update test failed`n" + (Get-Tail $o1)) }
-  if ($e2 -ne 1) { throw ("-Break did not fail`n" + (Get-Tail $o2)) }
+  if ($e1 -ne 0) { throw (T "update test failed`n{0}" (Get-Tail $o1)) }
+  if ($e2 -ne 1) { throw (T "-Break did not fail`n{0}" (Get-Tail $o2)) }
 } "full"
 
 # ------------------------------------------------------------------------------------------------
@@ -377,16 +434,16 @@ Add-Test "demo-update" "Demo-Update: N nach N+1 beh$($ae)lt die Werte, -Break sc
 function Test-Need([string]$Need) {
   switch ($Need) {
     "" { return $null }
-    "cxx" { if (Find-CppCompiler) { return $null } return "kein g++ / clang++ gefunden" }
+    "cxx" { if (Find-CppCompiler) { return $null } return (T "no g++ / clang++ found") }
     "pio" {
       $demoLib = [System.IO.Path]::Combine($RepoDir, "examples", "HardwareProfileDemo", "lib", "OGM-Common")
-      if (-not (Test-Path -LiteralPath $demoLib)) { return "lib/-Links der Demo fehlen (examples/HardwareProfileDemo/README.md)" }
-      if (-not (Get-Command pio -ErrorAction SilentlyContinue) -and -not (Test-Path ([System.IO.Path]::Combine([Environment]::GetFolderPath("UserProfile"), ".platformio", "penv")))) { return "PlatformIO nicht gefunden" }
+      if (-not (Test-Path -LiteralPath $demoLib)) { return (T "the lib/ links of the demo are missing (examples/HardwareProfileDemo/README.md)") }
+      if (-not (Get-Command pio -ErrorAction SilentlyContinue) -and -not (Test-Path ([System.IO.Path]::Combine([Environment]::GetFolderPath("UserProfile"), ".platformio", "penv")))) { return (T "PlatformIO not found") }
       return $null
     }
     "full" {
-      if (-not $Full) { return "nur mit -Full" }
-      if (-not (Get-Command OpenKNXproducer -ErrorAction SilentlyContinue)) { return "OpenKNXproducer nicht gefunden" }
+      if (-not $Full) { return (T "only with -Full") }
+      if (-not (Get-Command OpenKNXproducer -ErrorAction SilentlyContinue)) { return (T "OpenKNXproducer not found") }
       return (Test-Need "pio")
     }
   }
@@ -398,8 +455,8 @@ try {
 $selected = @($Tests | Where-Object { -not $Only -or $_.Id -like $Only -or $_.Name -like $Only })
 $total = [System.Diagnostics.Stopwatch]::StartNew()
 $pass = 0; $fail = 0; $skip = 0; $failed = @()
-Write-Host ("  Arbeitsordner: {0}" -f $Work) -ForegroundColor DarkGray
-Write-Host "  Basis-Projekt anlegen ..." -ForegroundColor Cyan
+Write-Host (T "  work folder: {0}" $Work) -ForegroundColor DarkGray
+Write-Host (T "  create the base project ...") -ForegroundColor Cyan
 $script:Base = New-BaseProject
 Write-Host ""
 $width = ($selected | ForEach-Object { $_.Name.Length } | Measure-Object -Maximum).Maximum
@@ -428,13 +485,13 @@ foreach ($t in $selected) {
 
 Write-Host ""
 $color = "Green"; if ($fail -gt 0) { $color = "Red" }
-Write-Host ("  Selbsttest: {0} bestanden, {1} fehlgeschlagen, {2} {3}bersprungen - {4:N1} s" -f $pass, $fail, $skip, [char]0xFC, $total.Elapsed.TotalSeconds) -ForegroundColor $color
-if ($fail -gt 0) { Write-Host ("  fehlgeschlagen: {0}" -f ($failed -join ", ")) -ForegroundColor Red }
+Write-Host (T "  Self-test: {0} passed, {1} failed, {2} skipped - {3:N1} s" $pass $fail $skip $total.Elapsed.TotalSeconds) -ForegroundColor $color
+if ($fail -gt 0) { Write-Host (T "  failed: {0}" ($failed -join ", ")) -ForegroundColor Red }
 
 }
 finally {
   # links as links only (Test-DemoUpdate and init-second leave junctions / symbolic links to the repositories)
-  if ($KeepWork) { Write-Host ("  Arbeitsordner bleibt: {0}" -f $Work) -ForegroundColor DarkGray }
+  if ($KeepWork) { Write-Host (T "  work folder kept: {0}" $Work) -ForegroundColor DarkGray }
   else { Remove-Tree $Work }
 }
 if ($fail -gt 0) { exit 1 }

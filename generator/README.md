@@ -20,7 +20,7 @@ Beispiel-Applikation: [examples/HardwareProfileDemo](../examples/HardwareProfile
 | Pfad | Inhalt |
 |---|---|
 | `Build-HardwareProfile.ps1` | der Aufrufer (einziges Skript, das man startet): Parameter, Hilfe, Konstanten, Ablauf |
-| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `Header` (Firmware-Header), `Init`, `Generate` (die Schritte eines Laufs nach dem Manifest: Boards, Slots, Bilder, Ausgaben, Versionswache, Schreiben, Zusammenfassung) |
+| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `Header` (Firmware-Header), `Init`, `Generate` (die Schritte eines Laufs nach dem Manifest: Boards, Slots, Bilder, Ausgaben, Versionswache, Schreiben, Zusammenfassung), `Language` (Sprache der Ausgabe) mit `Messages.de.psd1` (deutsche Texte), siehe [Sprache der Ausgabe](#sprache-der-ausgabe) |
 | `QUICKSTART.md` | Schnellstart: das Hardware-Profil in fünf Schritten in ein bestehendes OAM einbinden |
 | `Anwendungsfaelle.md` | Rezepte mit Beispielen: Module, Feature-Flags, Kanalzahl, Auswahllisten, Sensoren, Netzwerk, Firmware |
 | `tests/` | `Test-HardwareProfile.ps1`: Selbsttest (auch `Build-HardwareProfile.ps1 -SelfTest`), siehe [Selbsttest](#selbsttest) |
@@ -126,7 +126,7 @@ flowchart LR
 `Build-HardwareProfile.ps1 -SelfTest` (oder `tests/Test-HardwareProfile.ps1`, dort mit `-Only <Muster>`, `-Full`,
 `-KeepWork`) lässt den Generator auf kleinen Test-Manifesten laufen, jedes in einem eigenen Wegwerf-Ordner (das Repo bleibt
 unberührt), und prüft, was er tun und was er ablehnen muss: stabile Ausgaben, Bit-Reihenfolge, Versionswache,
-Manifest-Prüfung, `<Fixes>`, `-Init`, ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
+Manifest-Prüfung, `<Fixes>`, `-Init`, Sprache (deutsche Tabelle vollständig, Standard Deutsch), ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
 `-Check` der Demo (mit PlatformIO und den `lib/`-Links der Demo) und mit `-Full` den Update-Test der Demo (mit dem
 OpenKNXproducer). Je Test eine Zeile mit ✓/✗/– und Dauer, am Ende eine Zusammenfassung; Exit-Code 1, wenn ein Test
 scheitert.
@@ -156,6 +156,33 @@ Windows PowerShell 5.1 zeigt statt ✓/✗ die Zeichen √/x (Konsolenschrift). 
 `Hardware: 44 Envs, 40 Boards, 9 Dateien geschrieben` oder `Hardware: 44 Envs, 40 Boards, unverändert`. Warnungen (`!`) und Fehler (`x`, mit
 dem letzten Schritt davor) erscheinen immer. `-Detailed` zeigt das volle Protokoll (Manifest, Boards mit Fähigkeiten und
 Werten, jede Ausgabe); `-ListIds`, `-Init` und `-DryRun` geben immer alles aus.
+
+### Sprache der Ausgabe
+
+`-Language de|en` wählt die Sprache der Konsolenausgabe, ohne Angabe Deutsch; die erzeugten Dateien hängen nicht davon ab.
+Gleiches gilt für `tests/Test-HardwareProfile.ps1` (er ruft den Generator für seine Textprüfungen auf Englisch auf) und
+`examples/HardwareProfileDemo/scripts/Test-DemoUpdate.ps1`. Die Tabellen von `-ListIds` bleiben unübersetzt (Daten für CI
+und Doku).
+
+Im Code steht der englische Text, `T` übersetzt ihn und füllt die Platzhalter wie `-f`:
+
+```powershell
+Stop-WithError (T "Import not found: {0}" $path)
+```
+
+Der deutsche Text steht in `core/Messages.de.psd1` (UTF-8 mit BOM, damit die `.ps1`-Dateien ASCII bleiben), Schlüssel ist
+der englische Text, genau wie im Code geschrieben (beim Nachschlagen zählt die Groß-/Kleinschreibung; zwei Texte, die sich nur
+darin unterscheiden, lehnt der Parser als doppelten Schlüssel ab):
+
+```powershell
+  'Import not found: {0}' = 'Import nicht gefunden: {0}'
+```
+
+Die Datei wird mit dem PowerShell-Parser gelesen, nicht ausgeführt; erlaubt sind nur `'Text' = 'Text'`-Einträge. Neue oder
+geänderte Meldung: Text im Code ändern, Eintrag in der Tabelle anlegen oder anpassen. Der Selbsttest
+(`language-table`) meldet jeden Text ohne Eintrag, jeden Eintrag ohne Text im Code, verschiedene Platzhalter und einen
+Aufruf mit zu wenigen oder zu vielen Argumenten. Fehlt ein Eintrag trotzdem, erscheint der englische Text; ist die Tabelle
+nicht lesbar, warnt der Lauf und gibt Englisch aus.
 
 ## Manifest anlegen (`-Init`)
 

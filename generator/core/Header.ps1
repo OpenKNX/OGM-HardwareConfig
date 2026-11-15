@@ -28,7 +28,7 @@ function New-Header($M, $Boards) {
   $p = $M.Prefix
   # the header evaluates expr per build; a <Set> value exists only in ETS and would differ (query="false" leaves it out)
   $qv = @($M.Values | Where-Object { $_.Query })
-  foreach ($v in $qv) { if ($v.Sets.Count -gt 0) { Stop-WithError ("Value {0}: <Set> values are ETS only - the header output needs expr or query=`"false`"" -f $v.Name) } }
+  foreach ($v in $qv) { if ($v.Sets.Count -gt 0) { Stop-WithError (T "Value {0}: <Set> values are ETS only - the header output needs expr or query=`"false`"" $v.Name) } }
   $sb = New-Object System.Text.StringBuilder
   [void]$sb.AppendLine("#pragma once")
   [void]$sb.AppendLine("/**")

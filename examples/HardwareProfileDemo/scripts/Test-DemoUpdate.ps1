@@ -54,6 +54,9 @@ FILEPATH: OGM-HardwareConfig/examples/HardwareProfileDemo/scripts/Test-DemoUpdat
     Self-test of the comparison: adds a change that loses user values (C13: board DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET offers only port
     1, the stored port values 2.. are no longer valid). The test must then fail.
 
+.PARAMETER Language
+    Language of the output: de (default) or en; also passed to the generator.
+
 .PARAMETER Help
     Shows this help.
 
@@ -69,6 +72,7 @@ param(
   [string]$OutDir = "",
   [string]$Producer = "OpenKNXproducer",
   [switch]$Break,
+  [ValidateSet("de", "en")][string]$Language = "de",
   [Alias("h")][switch]$Help
 )
 
@@ -94,6 +98,9 @@ Show-OpenKNXLogo ("Test-DemoUpdate " + $SCRIPT_VERSION)
 $Demo = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, ".."))
 $Repo = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($Demo, "..", ".."))
 $Generator = [System.IO.Path]::Combine($Repo, "generator", "Build-HardwareProfile.ps1")
+# output language: the T function and the German table of the generator
+. ([System.IO.Path]::Combine($Repo, "generator", "core", "Language.ps1"))
+Set-OutputLanguage $Language
 if (-not $OutDir) { $OutDir = [System.IO.Path]::Combine($Demo, "out", "update") }
 if (-not [System.IO.Path]::IsPathRooted($OutDir)) { $OutDir = [System.IO.Path]::Combine((Get-Location).Path, $OutDir) }   # relative to the shell folder
 $OutDir = [System.IO.Path]::GetFullPath($OutDir)
@@ -136,11 +143,11 @@ function Test-Inside([string]$Path, [string]$Dir) {
 
 function New-WorkCopy {
   # never a folder that holds the demo or the repository, never one this script did not create (marker file)
-  if ((Test-Inside $Demo $OutDir) -or (Test-Inside $Repo $OutDir)) { throw "-OutDir $OutDir contains the demo or the repository" }
-  if ((Test-Inside $OutDir $Demo) -and -not (Test-Inside $OutDir ([System.IO.Path]::Combine($Demo, "out")))) { throw "-OutDir inside the demo must be below out/ (the copy would copy itself)" }
+  if ((Test-Inside $Demo $OutDir) -or (Test-Inside $Repo $OutDir)) { throw (T "-OutDir {0} contains the demo or the repository" $OutDir) }
+  if ((Test-Inside $OutDir $Demo) -and -not (Test-Inside $OutDir ([System.IO.Path]::Combine($Demo, "out")))) { throw (T "-OutDir inside the demo must be below out/ (the copy would copy itself)") }
   $marker = [System.IO.Path]::Combine($OutDir, $MarkerName)
   if (Test-Path -LiteralPath $OutDir) {
-    if (@(Get-ChildItem -LiteralPath $OutDir -Force).Count -gt 0 -and -not (Test-Path -LiteralPath $marker)) { throw "-OutDir $OutDir is not empty and was not created by this script ($MarkerName missing) - choose another folder" }
+    if (@(Get-ChildItem -LiteralPath $OutDir -Force).Count -gt 0 -and -not (Test-Path -LiteralPath $marker)) { throw (T "-OutDir {0} is not empty and was not created by this script ({1} missing) - choose another folder" $OutDir $MarkerName) }
     # links first (Remove-Item -Recurse would follow a junction on Windows PowerShell 5.1)
     $lib = [System.IO.Path]::Combine($Work, "lib")
     if (Test-Path -LiteralPath $lib) { foreach ($l in @(Get-ChildItem -LiteralPath $lib -Force)) { [System.IO.Directory]::Delete($l.FullName, $false) } }
@@ -153,7 +160,7 @@ function New-WorkCopy {
   # the producer validates against ../../Organization/knxprod-support (relative to src/): link the Organization checkout when found
   $orgSrc = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($Repo, "..", "Organization"))
   if (Test-Path -LiteralPath ([System.IO.Path]::Combine($orgSrc, "knxprod-support"))) { New-DirLink ([System.IO.Path]::Combine($OutDir, "Organization")) $orgSrc }
-  else { Write-Note ("no Organization checkout next to the repository ({0}): the producer cannot validate against the KNX schema" -f $orgSrc) }
+  else { Write-Note (T "no Organization checkout next to the repository ({0}): the producer cannot validate against the KNX schema" $orgSrc) }
   $skip = @("lib", ".pio", "out", "release", ".vscode")
   foreach ($e in @(Get-ChildItem -LiteralPath $Demo -Force)) {
     if ($skip -contains $e.Name) { continue }
@@ -161,7 +168,7 @@ function New-WorkCopy {
   }
   foreach ($f in @(Get-ChildItem -LiteralPath $Work -Recurse -Force -File | Where-Object { $_.Name -like "*.knxprod" -or $_.Name -like "*.debug.xml" })) { Remove-Item -LiteralPath $f.FullName -Force }
   $srcLib = [System.IO.Path]::Combine($Demo, "lib")
-  if (-not (Test-Path -LiteralPath $srcLib)) { throw "No lib/ in $Demo - create the links first (README of the demo, 'Bauen')" }
+  if (-not (Test-Path -LiteralPath $srcLib)) { throw (T "No lib/ in {0} - create the links first (README of the demo, 'Bauen')" $Demo) }
   $lib = [System.IO.Path]::Combine($Work, "lib")
   [void][System.IO.Directory]::CreateDirectory($lib)
   foreach ($l in @(Get-ChildItem -LiteralPath $srcLib -Force)) { New-DirLink ([System.IO.Path]::Combine($lib, $l.Name)) (Resolve-LinkTarget $l.FullName) }
@@ -209,7 +216,7 @@ function New-Element($Xml, [string]$Name, [hashtable]$Attrs) {
 
 function Get-Capability($Root, [string]$Name) {
   $n = $Root.SelectSingleNode("Capability[@name='$Name']")
-  if (-not $n) { throw "Capability $Name not found in the manifest" }
+  if (-not $n) { throw (T "Capability {0} not found in the manifest" $Name) }
   return $n
 }
 
@@ -219,7 +226,7 @@ function Get-Capability($Root, [string]$Name) {
 
 function Get-AppVersion {
   $t = [System.IO.File]::ReadAllText([System.IO.Path]::Combine($Work, "src", "HardwareProfileDemo.xml"))
-  if ($t -notmatch '\bApplicationVersion="(\d+)\.(\d+)"') { throw "ApplicationVersion not found in HardwareProfileDemo.xml" }
+  if ($t -notmatch '\bApplicationVersion="(\d+)\.(\d+)"') { throw (T "ApplicationVersion not found in HardwareProfileDemo.xml") }
   return @{ Major = [int]$Matches[1]; Minor = [int]$Matches[2]; Text = ("{0}.{1}" -f $Matches[1], $Matches[2]) }
 }
 
@@ -233,18 +240,18 @@ function Set-AppVersion([string]$Version) {
 # @brief Generator + producer on the work copy; returns the path of the knxprod in the output folder
 function Invoke-Build([string]$Label) {
   $v = (Get-AppVersion).Text
-  Write-Step ("build {0}: version {1}" -f $Label, $v)
+  Write-Step (T "build {0}: version {1}" $Label $v)
   $log = [System.IO.Path]::Combine($OutDir, ("generator-{0}.log" -f $v))
   $ps = (Get-Process -Id $PID).Path
-  & $ps -NoProfile -ExecutionPolicy Bypass -File $Generator -Manifest ([System.IO.Path]::Combine($Work, "HardwareProfile.xml")) *> $log
-  if ($LASTEXITCODE -ne 0) { Get-Content -LiteralPath $log | Select-Object -Last 15 | ForEach-Object { Write-Note $_ }; throw "generator failed for $Label (log: $log)" }
+  & $ps -NoProfile -ExecutionPolicy Bypass -File $Generator -Manifest ([System.IO.Path]::Combine($Work, "HardwareProfile.xml")) -Language $Language *> $log
+  if ($LASTEXITCODE -ne 0) { Get-Content -LiteralPath $log | Select-Object -Last 15 | ForEach-Object { Write-Note $_ }; throw (T "generator failed for {0} (log: {1})" $Label $log) }
   foreach ($l in @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^\s*! ' })) { Write-Note $l.Trim() }
   $out = [System.IO.Path]::Combine($OutDir, ("HardwareProfileDemo-{0}.knxprod" -f $v))
   $plog = [System.IO.Path]::Combine($OutDir, ("producer-{0}.log" -f $v))
   Push-Location ([System.IO.Path]::Combine($Work, "src"))
   try { & $Producer create -h ([System.IO.Path]::Combine($Work, "include", "knxprod.h")) -o $out "HardwareProfileDemo.xml" *> $plog }
   finally { Pop-Location }
-  if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $out)) { Get-Content -LiteralPath $plog | Select-Object -Last 15 | ForEach-Object { Write-Note $_ }; throw "producer failed for $Label (log: $plog)" }
+  if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $out)) { Get-Content -LiteralPath $plog | Select-Object -Last 15 | ForEach-Object { Write-Note $_ }; throw (T "producer failed for {0} (log: {1})" $Label $plog) }
   Copy-Item -LiteralPath ([System.IO.Path]::Combine($Work, "HardwareProfile.slots")) -Destination ([System.IO.Path]::Combine($OutDir, ("HardwareProfile-{0}.slots" -f $v))) -Force
   Write-Ok ([System.IO.Path]::GetFileName($out))
   return $out
@@ -265,12 +272,12 @@ function Invoke-Changes {
   $mid = $caps[[int]($caps.Count / 2)]
   [void]$pack.DocumentElement.InsertBefore((New-Element $pack "Capability" @{ name = "UpdPack"; text = "Update-Test Paket"; expr = "defined(UPD_TEST_NEVER)" }), $mid)
   Save-XmlFile $pack $pp
-  Write-Note ("C1  capability UpdPack inserted in the pack before {0}" -f $mid.GetAttribute("name"))
+  Write-Note (T "C1  capability UpdPack inserted in the pack before {0}" $mid.GetAttribute("name"))
 
   # slot of the board removed in C7 (from the slot file of version N)
   $slots = [System.IO.File]::ReadAllLines([System.IO.Path]::Combine($Work, "HardwareProfile.slots"))
   foreach ($l in $slots) { if ($l -match '^\s*0x3F14\s*=\s*(\d+)') { $exp.RemovedSlots += [int]$Matches[1] } }
-  if ($exp.RemovedSlots.Count -ne 1) { throw "slot of 0x3F14 not found in the slot file of version N" }
+  if ($exp.RemovedSlots.Count -ne 1) { throw (T "slot of 0x3F14 not found in the slot file of version N") }
   $exp.RemovedIds = @(0x3F14)
 
   Edit-Manifest {
@@ -313,18 +320,18 @@ function Invoke-Changes {
     # C13 (-Break only): fewer ports for one board - stored port values become invalid
     if ($Break) { [void]$r.InsertAfter((New-Element $x "Ports" @{ board = "DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET"; use = "1" }), @($r.SelectNodes("Board"))[-1]) }
   }
-  Write-Note "C2  capability UpdOwn (switch) in front of the own capabilities"
-  Write-Note "C3  PowerMeter and Temperature swapped"
-  Write-Note "C4  FrontControls becomes a switch"
-  Write-Note "C5  value UpdLevel without device query"
-  Write-Note "C6  Relays max 4 -> 8"
-  Write-Note ("C7  board 0x3F14 (DEMO_SHELLY_PLUG_S, slot {0}) removed" -f $exp.RemovedSlots[0])
-  Write-Note "C8  board 0x1023 (DEVICE_REG1_LAN_SEN_MULTI) added"
-  Write-Note "C9  order=manifest, UP1 moved to the end"
-  Write-Note "C10 GPIO role Pin: count 2 -> 3"
-  Write-Note "C11 GPIO role Sensor (number 2)"
-  Write-Note "C12 texts of Lux and changeInfo"
-  if ($Break) { Write-Note "C13 (-Break) DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET offers only port 1 - the test must fail" }
+  Write-Note (T "C2  capability UpdOwn (switch) in front of the own capabilities")
+  Write-Note (T "C3  PowerMeter and Temperature swapped")
+  Write-Note (T "C4  FrontControls becomes a switch")
+  Write-Note (T "C5  value UpdLevel without device query")
+  Write-Note (T "C6  Relays max 4 -> 8")
+  Write-Note (T "C7  board 0x3F14 (DEMO_SHELLY_PLUG_S, slot {0}) removed" ($exp.RemovedSlots[0]))
+  Write-Note (T "C8  board 0x1023 (DEVICE_REG1_LAN_SEN_MULTI) added")
+  Write-Note (T "C9  order=manifest, UP1 moved to the end")
+  Write-Note (T "C10 GPIO role Pin: count 2 -> 3")
+  Write-Note (T "C11 GPIO role Sensor (number 2)")
+  Write-Note (T "C12 texts of Lux and changeInfo")
+  if ($Break) { Write-Note (T "C13 (-Break) DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET offers only port 1 - the test must fail") }
   return $exp
 }
 
@@ -338,7 +345,7 @@ function Read-KnxprodApp([string]$Path) {
   $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
   try {
     $e = @($zip.Entries | Where-Object { $_.FullName -match '/M-[0-9A-F]+_A-[^/]+\.xml$' }) | Select-Object -First 1
-    if (-not $e) { throw "no application XML in $Path" }
+    if (-not $e) { throw (T "no application XML in {0}" $Path) }
     $r = New-Object System.IO.StreamReader($e.Open(), [System.Text.Encoding]::UTF8)
     try { $text = $r.ReadToEnd() } finally { $r.Close() }
   }
@@ -380,19 +387,19 @@ function Get-AppModel($Xml) {
 
 # @brief Old values the new type rejects ($null: none)
 function Get-LostDomain($Old, $New) {
-  if ($Old.Kind -ne $New.Kind) { return ("type {0} -> {1}" -f $Old.Kind, $New.Kind) }
+  if ($Old.Kind -ne $New.Kind) { return (T "type {0} -> {1}" $Old.Kind $New.Kind) }
   switch ($Old.Kind) {
-    "enum" { $miss = @($Old.Values.Keys | Where-Object { -not $New.Values.ContainsKey($_) } | Sort-Object); if ($miss.Count -gt 0) { return ("values gone: " + (($miss | ForEach-Object { $_.TrimEnd('|') }) -join ", ")) } }
-    "number" { if ($New.Min -gt $Old.Min -or $New.Max -lt $Old.Max) { return ("range {0}..{1} -> {2}..{3}" -f $Old.Min, $Old.Max, $New.Min, $New.Max) } }
-    "text" { if ($New.Size -lt $Old.Size) { return ("text {0} -> {1} bits" -f $Old.Size, $New.Size) } }
+    "enum" { $miss = @($Old.Values.Keys | Where-Object { -not $New.Values.ContainsKey($_) } | Sort-Object); if ($miss.Count -gt 0) { return (T "values gone: {0}" (($miss | ForEach-Object { $_.TrimEnd('|') }) -join ", ")) } }
+    "number" { if ($New.Min -gt $Old.Min -or $New.Max -lt $Old.Max) { return (T "range {0}..{1} -> {2}..{3}" $Old.Min $Old.Max $New.Min $New.Max) } }
+    "text" { if ($New.Size -lt $Old.Size) { return (T "text {0} -> {1} bits" $Old.Size $New.Size) } }
     "none" { }
-    default { if ($Old.Raw -ne $New.Raw) { return "type detail changed" } }
+    default { if ($Old.Raw -ne $New.Raw) { return (T "type detail changed") } }
   }
   return $null
 }
 
 function Compare-Apps([string]$OldPath, [string]$NewPath, $Exp) {
-  Write-Step "ETS update N -> N+1: values per ParameterRef"
+  Write-Step (T "ETS update N -> N+1: values per ParameterRef")
   $o = Get-AppModel (Read-KnxprodApp $OldPath)
   $n = Get-AppModel (Read-KnxprodApp $NewPath)
   $ok = 0; $skip = 0; $expected = @(); $bad = @()
@@ -411,16 +418,16 @@ function Compare-Apps([string]$OldPath, [string]$NewPath, $Exp) {
     $label = ("{0} {1}" -f $rn, $p.Name)
     $nr = $n.Refs[$rn]
     if ($null -eq $nr) {
-      if (& $isRemoved $ref.Param $p.Name) { $expected += ("{0}: gone (removed board)" -f $label) } else { $bad += ("{0}: gone" -f $label) }
+      if (& $isRemoved $ref.Param $p.Name) { $expected += (T "{0}: gone (removed board)" $label) } else { $bad += (T "{0}: gone" $label) }
       continue
     }
     $np = $n.Params[$nr.Param]
-    if ($null -eq $np) { $bad += ("{0}: the ParameterRef of N+1 points to no parameter ({1})" -f $label, $nr.Param); continue }
+    if ($null -eq $np) { $bad += (T "{0}: the ParameterRef of N+1 points to no parameter ({1})" $label $nr.Param); continue }
     # writable in N, read-only or hidden by Access in N+1: ETS keeps the value but a download writes what N+1 shows
     $wasRw = ($ref.Access -ne "None" -and $ref.Access -ne "Read" -and $p.Access -ne "None" -and $p.Access -ne "Read")
     $isRo = ($nr.Access -eq "None" -or $nr.Access -eq "Read" -or $np.Access -eq "None" -or $np.Access -eq "Read")
-    if ($wasRw -and $isRo) { $bad += ("{0}: read-only in N+1 (Access {1})" -f $label, ("$($nr.Access) $($np.Access)").Trim()); continue }
-    if ($p.Mem -and -not $np.Mem) { $bad += ("{0}: no memory in N+1" -f $label); continue }
+    if ($wasRw -and $isRo) { $bad += (T "{0}: read-only in N+1 (Access {1})" $label ("$($nr.Access) $($np.Access)").Trim()); continue }
+    if ($p.Mem -and -not $np.Mem) { $bad += (T "{0}: no memory in N+1" $label); continue }
     $nt = $n.Types[$np.Type]; if ($null -eq $nt) { $nt = @{ Kind = "other"; Raw = "" } }
     $lost = Get-LostDomain $t $nt
     if ($null -eq $lost) { $ok++; continue }
@@ -430,16 +437,16 @@ function Compare-Apps([string]$OldPath, [string]$NewPath, $Exp) {
       $removedKeys = @($Exp.RemovedIds | ForEach-Object { "{0}|" -f $_ })
       $onlyRemoved = (@($miss | Where-Object { $removedKeys -notcontains $_ }).Count -eq 0) -and ($p.Name -cmatch 'HardwareSelect$')
     }
-    if ($onlyRemoved) { $expected += ("{0}: {1} (removed board)" -f $label, $lost) } else { $bad += ("{0}: {1}" -f $label, $lost) }
+    if ($onlyRemoved) { $expected += (T "{0}: {1} (removed board)" $label $lost) } else { $bad += ("{0}: {1}" -f $label, $lost) }
   }
-  Write-Ok ("{0} values kept, {1} parameters without memory skipped" -f $ok, $skip)
-  foreach ($e in $expected) { Write-Note ("expected: " + $e) }
+  Write-Ok (T "{0} values kept, {1} parameters without memory skipped" $ok $skip)
+  foreach ($e in $expected) { Write-Note (T "expected: {0}" $e) }
   foreach ($b in $bad) { Write-Bad $b }
   return @{ Ok = $ok; Expected = $expected.Count; Bad = $bad.Count }
 }
 
 function Compare-Slots([string]$OldSlots, [string]$NewSlots, $Exp) {
-  Write-Step "device query bits and board slots"
+  Write-Step (T "device query bits and board slots")
   $old = [System.IO.File]::ReadAllLines($OldSlots); $new = [System.IO.File]::ReadAllLines($NewSlots)
   $newSet = @{}; foreach ($l in $new) { $newSet[$l.Trim()] = $true }
   $n = 0
@@ -447,21 +454,21 @@ function Compare-Slots([string]$OldSlots, [string]$NewSlots, $Exp) {
     $t = $l.Trim()
     if ($t -match '^(cap|val)\s+\d+\s*=') {
       $n++
-      if (-not $newSet.ContainsKey($t)) { Write-Bad ("bit moved or gone: {0}" -f $t) }
+      if (-not $newSet.ContainsKey($t)) { Write-Bad (T "bit moved or gone: {0}" $t) }
     }
     elseif ($t -match '^0x([0-9A-Fa-f]{4})\s*=\s*(\d+)') {
       $n++
       $id = $Matches[1]; $slot = $Matches[2]
       $hit = @($new | Where-Object { $_.Trim() -match ('^0x' + $id + '\s*=\s*' + $slot + '(\s+removed)?$') })
-      if ($hit.Count -eq 0) { Write-Bad ("board slot changed: {0}" -f $t) }
+      if ($hit.Count -eq 0) { Write-Bad (T "board slot changed: {0}" $t) }
     }
   }
   foreach ($c in @($Exp.NewCaps + $Exp.NewValues)) {
     $hit = @($new | Where-Object { $_ -match ('^\s*(cap|val)\s+\d+\s*=\s*' + $c + '\s*$') })
-    if ($Exp.NewValues -contains $c) { if ($hit.Count -ne 0) { Write-Bad ("value {0} without query must not get a bit" -f $c) } }
-    elseif ($hit.Count -ne 1) { Write-Bad ("new capability {0} has no bit" -f $c) }
+    if ($Exp.NewValues -contains $c) { if ($hit.Count -ne 0) { Write-Bad (T "value {0} without query must not get a bit" $c) } }
+    elseif ($hit.Count -ne 1) { Write-Bad (T "new capability {0} has no bit" $c) }
   }
-  Write-Ok ("{0} recorded lines of N checked" -f $n)
+  Write-Ok (T "{0} recorded lines of N checked" $n)
 }
 
 # ------------------------------------------------------------------------------------------------
@@ -469,14 +476,14 @@ function Compare-Slots([string]$OldSlots, [string]$NewSlots, $Exp) {
 # ------------------------------------------------------------------------------------------------
 
 try {
-  Write-Step ("work copy: {0}" -f $Work)
+  Write-Step (T "work copy: {0}" $Work)
   New-WorkCopy
   $vN = Get-AppVersion
   $kN = Invoke-Build "N"
   $slotsN = [System.IO.Path]::Combine($OutDir, ("HardwareProfile-{0}.slots" -f $vN.Text))
-  Write-Step "changes of version N+1"
+  Write-Step (T "changes of version N+1")
   $exp = Invoke-Changes
-  if ($vN.Minor -ge 15) { throw ("ApplicationVersion {0}: the minor version of N+1 would leave 0..15" -f $vN.Text) }
+  if ($vN.Minor -ge 15) { throw (T "ApplicationVersion {0}: the minor version of N+1 would leave 0..15" $vN.Text) }
   $vNext = "{0}.{1}" -f $vN.Major, ($vN.Minor + 1)
   Set-AppVersion $vNext
   $kN1 = Invoke-Build "N+1"
@@ -490,8 +497,8 @@ catch {
 
 Write-Host ""
 if ($script:Failed -gt 0) {
-  Write-Host ("Update test: {0} problem(s) - see above" -f $script:Failed) -ForegroundColor Red
+  Write-Host (T "Update test: {0} problem(s) - see above" $script:Failed) -ForegroundColor Red
   exit 1
 }
-Write-Host ("Update test passed. For ETS: import {0}, insert a device, set values, import {1}, Aktualisieren." -f [System.IO.Path]::GetFileName($kN), [System.IO.Path]::GetFileName($kN1)) -ForegroundColor Green
+Write-Host (T "Update test passed. For ETS: import {0}, insert a device, set values, import {1}, Aktualisieren." ([System.IO.Path]::GetFileName($kN)) ([System.IO.Path]::GetFileName($kN1))) -ForegroundColor Green
 exit 0

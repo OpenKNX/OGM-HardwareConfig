@@ -117,5 +117,5 @@ function Stop-WithError([string]$Text) {
 # on purpose by deleting its env. -Init only lists the problem (it writes no ETS or firmware output).
 function Stop-OnSkip([string]$Text) {
   if ($script:InitMode) { Write-Warn $Text; return }
-  Stop-WithError ($Text + " - a left-out board drops its HW-ID from ETS and the firmware table; to drop a board on purpose, delete its env")
+  Stop-WithError (T "{0} - a left-out board drops its HW-ID from ETS and the firmware table; to drop a board on purpose, delete its env" $Text)
 }

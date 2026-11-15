@@ -70,7 +70,7 @@ Speicher verliert. Nicht geprüft wird die Sichtbarkeit (`choose`, `Assign`) in 
 nächsten Download seinen Standardwert; das zeigt der Test in ETS. Der Ausgabeordner wird bei jedem Lauf neu angelegt; einen
 Ordner, den das Skript nicht selbst angelegt hat (Markierung `.test-demo-update`), löscht es nicht. `-Break` fügt einen echten Bruch hinzu (ein Board bietet
 weniger Ports an): dann muss der Test scheitern. Beide knxprods bleiben in `out/update` für den Test in ETS: N
-importieren, Gerät einfügen, Werte setzen, N+1 importieren, „Aktualisieren“.
+importieren, Gerät einfügen, Werte setzen, N+1 importieren, „Aktualisieren“. `-Language en` gibt alles auf Englisch aus (Standard: Deutsch).
 
 `OpenKnxId 0xAD` / `ApplicationNumber 240` sind Platzhalter für die Demo (0xAD ist die OpenKnxId von NeoPixel; eine eigene Applikation braucht ihre eigene). Die GitHub Action des Repos
 (`.github/workflows/hardware-profile.yml`) prüft bei jedem Push und Pull Request, dass die erzeugten Dateien dieser Demo aktuell sind.

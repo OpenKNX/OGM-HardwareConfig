@@ -25,7 +25,7 @@ function Invoke-BoardTablePreprocessor($Table, [string]$Define, [string]$Source,
     $err = "$($_.Exception.Message)"
     $first = [regex]::Match($err, '\S*:\d+:\d+:\s*(fatal\s+)?error:[^|]*')
     if ($first.Success) { $err = $first.Value.Trim() }
-    Stop-WithError ("{0}: <BoardTable name=`"{1}`">: preprocessing {2} failed: {3}" -f $Define, $Table.Name, $Table.HeaderAttr, $err)
+    Stop-WithError (T "{0}: <BoardTable name=`"{1}`">: preprocessing {2} failed: {3}" $Define $Table.Name $Table.HeaderAttr $err)
   }
 }
 # @brief <BoardTable> values of one env/board: macros of HardwareConfig.h + the table header whose name matches scan,
@@ -49,8 +49,8 @@ function Get-BoardTableValues($Table, [string]$Define, [string[]]$Defines) {
     $grp = "$($Matches[1])"
     $idx = $null
     if ($grp -match '^\d{1,4}$') { $idx = [int]$grp }
-    if ($null -eq $idx -or $idx -gt 1023) { Stop-WithError ("{0}: <BoardTable name=`"{1}`">: {2} - group 1 of scan must be an index 0..1023, is '{3}'" -f $Define, $Table.Name, $names[$i], $grp) }
-    if ($vals.ContainsKey($idx)) { Stop-WithError ("{0}: <BoardTable name=`"{1}`">: two macros for index {2} ({3}, {4})" -f $Define, $Table.Name, $idx, $seen[$idx], $names[$i]) }
+    if ($null -eq $idx -or $idx -gt 1023) { Stop-WithError (T "{0}: <BoardTable name=`"{1}`">: {2} - group 1 of scan must be an index 0..1023, is '{3}'" $Define $Table.Name $names[$i] $grp) }
+    if ($vals.ContainsKey($idx)) { Stop-WithError (T "{0}: <BoardTable name=`"{1}`">: two macros for index {2} ({3}, {4})" $Define $Table.Name $idx $seen[$idx] $names[$i]) }
     $seen[$idx] = $names[$i]
     # strip outer parentheses and casts in any order, e.g. ((uint8_t)1u), (uint8_t)(3); a value outside a cast's range stops
     $vt = "$($res["BT$i"])".Trim()
@@ -62,7 +62,7 @@ function Get-BoardTableValues($Table, [string]$Define, [string[]]$Defines) {
         $ct = $Matches[1] -replace '\s+', ' '
         $vt = $Matches[3].Trim()
         # plain char is unsigned on ARM/RISC-V and signed on Xtensa: its range depends on the target
-        if ($ct -eq 'char') { Stop-WithError ("{0}: {1}: {2} = '{3}': a plain (char) cast depends on the target, use int8_t or uint8_t" -f $Define, $Table.HeaderAttr, $names[$i], $res["BT$i"]) }
+        if ($ct -eq 'char') { Stop-WithError (T "{0}: {1}: {2} = '{3}': a plain (char) cast depends on the target, use int8_t or uint8_t" $Define $Table.HeaderAttr $names[$i] $res["BT$i"]) }
         $casts.Add($ct)
         $lim = @{ 'uint8_t' = 255; 'unsigned char' = 255; 'int8_t' = 127; 'signed char' = 127; 'uint16_t' = 65535; 'unsigned short' = 65535; 'int16_t' = 32767; 'short' = 32767 }
         if ($lim.ContainsKey($ct) -and $lim[$ct] -lt $max) { $max = [long]$lim[$ct] }
@@ -72,8 +72,8 @@ function Get-BoardTableValues($Table, [string]$Define, [string[]]$Defines) {
       break
     }
     $v = ConvertFrom-CInteger $vt
-    if ($null -eq $v -or $v -lt 0) { Stop-WithError ("{0}: {1}: {2} = '{3}' does not resolve to an integer 0..2147483647" -f $Define, $Table.HeaderAttr, $names[$i], $res["BT$i"]) }
-    if ($v -gt $max) { Stop-WithError ("{0}: {1}: {2} = '{3}': {4} is outside the range of the cast ({5}, 0..{6})" -f $Define, $Table.HeaderAttr, $names[$i], $res["BT$i"], $v, ($casts -join ', '), $max) }
+    if ($null -eq $v -or $v -lt 0) { Stop-WithError (T "{0}: {1}: {2} = '{3}' does not resolve to an integer 0..2147483647" $Define $Table.HeaderAttr $names[$i] $res["BT$i"]) }
+    if ($v -gt $max) { Stop-WithError (T "{0}: {1}: {2} = '{3}': {4} is outside the range of the cast ({5}, 0..{6})" $Define $Table.HeaderAttr $names[$i] $res["BT$i"] $v ($casts -join ', ') $max) }
     $vals[[int]$idx] = [long]$v
   }
   return $vals
@@ -109,7 +109,7 @@ function Split-PioFlagLine([string]$Line) {
     if ($c -eq [char]92 -and $i + 1 -lt $Line.Length) { $i++; [void]$cur.Append($Line[$i]); continue }
     [void]$cur.Append($c)
   }
-  if ($quote -ne [char]0) { throw "unbalanced quote in build flag: $Line" }
+  if ($quote -ne [char]0) { throw (T "unbalanced quote in build flag: {0}" $Line) }
   if ($has) { $tokens.Add($cur.ToString()) }
   return ,$tokens.ToArray()
 }
@@ -125,7 +125,7 @@ function ConvertFrom-PioFlagLine([string]$Line, [string]$EnvName = "", [switch]$
       if ($Matches[2] -and $Matches[2].EndsWith([string][char]92)) {
         # legal for gcc, but as a #define line it would swallow the next line; a dropped define could change a capability
         if ($Lenient) { continue }
-        Stop-WithError ("env {0}: build flag {1} ends with a backslash and cannot be evaluated; leaving it out could change a capability (e.g. a feature flag) - change the flag or leave the env out (<Boards exclude=...>)" -f $EnvName, $t)
+        Stop-WithError (T "env {0}: build flag {1} ends with a backslash and cannot be evaluated; leaving it out could change a capability (e.g. a feature flag) - change the flag or leave the env out (<Boards exclude=...>)" $EnvName $t)
       }
       $defs += ($Matches[1] + $Matches[2])
     }
@@ -166,7 +166,7 @@ function Get-PioMcuName([string]$BoardId, [string]$Mcu, [string]$ProjectDir) {
       if ($null -eq $script:PioMcuWarned) { $script:PioMcuWarned = @{} }
       if (-not $script:PioMcuWarned.ContainsKey($BoardId)) {
         $script:PioMcuWarned[$BoardId] = $true
-        Write-Warn ("PlatformIO board {0}: no board manifest with build.mcu found - no MCU: default preprocessor, no framework defines" -f $BoardId)
+        Write-Warn (T "PlatformIO board {0}: no board manifest with build.mcu found - no MCU: default preprocessor, no framework defines" $BoardId)
       }
     }
   }
@@ -194,8 +194,8 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
       if (Test-Path -LiteralPath $pp -PathType Leaf) { $pio = Get-Command $pp -ErrorAction SilentlyContinue; break }
     }
   }
-  if (-not $pio) { Stop-WithError "<Boards platformio=...> needs PlatformIO: pio in PATH or in <PLATFORMIO_CORE_DIR or ~/.platformio>/penv" }
-  Write-Activity "PlatformIO-Envs lesen (pio project config) ..."
+  if (-not $pio) { Stop-WithError (T "<Boards platformio=...> needs PlatformIO: pio in PATH or in <PLATFORMIO_CORE_DIR or ~/.platformio>/penv") }
+  Write-Activity (T "Read the PlatformIO envs (pio project config) ...")
   $prevEap = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
   # the JSON is ASCII (json.dumps escapes every other character), so the console code page does not matter
@@ -207,7 +207,7 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
   $json = @($raw | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | ForEach-Object { "$_" })
   if ($exitCode -ne 0) {
     $why = (@($raw | ForEach-Object { "$_" }) | Where-Object { $_ } | Select-Object -Last 3) -join " | "
-    Stop-WithError ("pio project config failed in {0}: {1}" -f $ProjectDir, $why)
+    Stop-WithError (T "pio project config failed in {0}: {1}" $ProjectDir $why)
   }
   $cfg = ConvertTo-PioSections ((@($json) -join "`n") | ConvertFrom-Json)
   $result = @()
@@ -219,7 +219,7 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
     $envName = $name.Substring(4)
     if ($envName -notlike $EnvPattern) { continue }
     $envIndex++
-    Write-Activity ("Env {0}/{1}  {2}" -f $envIndex, $envTotal, $envName)
+    Write-Activity (T "Env {0}/{1}  {2}" $envIndex $envTotal $envName)
     $excluded = (@($Exclude | Where-Object { $envName -like $_ }).Count -gt 0)
     $defs = @()
     $pioBoard = ""; $pioMcu = ""; $pioMemory = ""; $pioMemoryArduino = ""; $pioVariant = ""; $pioExtra = $null; $flagText = ""
@@ -252,11 +252,11 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
               }
             }
             if ($hit.Count -gt 0) {
-              Stop-OnSkip ("env {0}: excluded by <Boards exclude=...>, but build_flags line '{1}' cannot be parsed ({2}) and names {3}" -f $envName, $fl, $parseError, ($hit -join ", "))
+              Stop-OnSkip (T "env {0}: excluded by <Boards exclude=...>, but build_flags line '{1}' cannot be parsed ({2}) and names {3}" $envName $fl $parseError ($hit -join ", "))
             }
             continue
           }
-          Stop-WithError ("env {0}: build_flags line '{1}' cannot be parsed ({2}); leaving its defines out could change a capability - fix the line or leave the env out (<Boards exclude=...>)" -f $envName, $fl, $_.Exception.Message)
+          Stop-WithError (T "env {0}: build_flags line '{1}' cannot be parsed ({2}); leaving its defines out could change a capability - fix the line or leave the env out (<Boards exclude=...>)" $envName $fl $_.Exception.Message)
         }
       }
     }
@@ -275,10 +275,10 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
           try { if ($null -ne (Get-BoardIdentity $cd (@($cd) + $rest)).HwId) { $exBoard = $cd; break } } catch { }
         }
       }
-      if ($exBoard) { Stop-OnSkip ("env {0}: excluded by <Boards exclude=...>, but it builds board {1}" -f $envName, $exBoard) }
+      if ($exBoard) { Stop-OnSkip (T "env {0}: excluded by <Boards exclude=...>, but it builds board {1}" $envName $exBoard) }
       continue
     }
-    if ($known.Count -gt 1) { Stop-OnSkip ("env {0}: two boards ({1})" -f $envName, ($known -join ", ")); continue }
+    if ($known.Count -gt 1) { Stop-OnSkip (T "env {0}: two boards ({1})" $envName ($known -join ", ")); continue }
     $board = $known | Select-Object -First 1
     if (-not $board) {
       # alias define (e.g. DEVICE_QUINLED_DIG_QUAD_V3 + KNX_IP_LAN): test each candidate on its own with the
@@ -286,11 +286,11 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
       $cands = @($plain | Where-Object { $_ -match '^(DEVICE|OKNXHW)_' })
       $rest = @($defs | Where-Object { $cands -notcontains $_ })
       $hits = @($cands | Where-Object { $null -ne (Get-BoardIdentity $_ (@($_) + $rest)).HwId })
-      if ($hits.Count -gt 1) { Stop-OnSkip ("env {0}: two boards ({1})" -f $envName, ($hits -join ", ")); continue }
+      if ($hits.Count -gt 1) { Stop-OnSkip (T "env {0}: two boards ({1})" $envName ($hits -join ", ")); continue }
       $board = $hits | Select-Object -First 1
     }
     if (-not $board) { $script:NoBoardEnvs += $envName; if ($script:InitMode) { continue } }
-    if (-not $board) { Stop-OnSkip ("env {0}: no board with DEVICE_HW_ID among its defines; an env that builds no board (e.g. a test env) is left out with <Boards platformio=`"{1}`" exclude=`"<pattern> ...`" />" -f $envName, $EnvPattern); continue }
+    if (-not $board) { Stop-OnSkip (T "env {0}: no board with DEVICE_HW_ID among its defines; an env that builds no board (e.g. a test env) is left out with <Boards platformio=`"{1}`" exclude=`"<pattern> ...`" />" $envName $EnvPattern); continue }
     # the env as a whole must resolve to this board's own ID; another board (e.g. an alias define next to a
     # known one) would give a mix of two boards
     if ($null -eq $script:BoardIdCache) { $script:BoardIdCache = @{} }
@@ -298,7 +298,7 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
     $envId = (Get-BoardIdentity $board $defs).HwId
     $ownId = $script:BoardIdCache[$board]
     if ($known.Count -eq 1 -and $envId -ne $ownId) {
-      Stop-OnSkip ("env {0}: resolves to 0x{1:X4}, but its board {2} is 0x{3:X4} - a second board define?" -f $envName, [int]$envId, $board, [int]$ownId)
+      Stop-OnSkip (T "env {0}: resolves to 0x{1:X4}, but its board {2} is 0x{3:X4} - a second board define?" $envName ([int]$envId) $board ([int]$ownId))
       continue
     }
     $flags = @($defs | Where-Object { $_ -ne $board } | ForEach-Object { "-D" + $_ })
@@ -313,7 +313,7 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
     $psram = (($pioExtra + " " + $flagText) -match '-D\s*BOARD_HAS_PSRAM\b') -and -not ($flagText -match '-U\s*BOARD_HAS_PSRAM\b')
     $result += @{ Define = $board; Flags = $flags; Env = $envName; Mcu = $mcuName; Memory = $pioMemory; Psram = $psram; Variant = $pioVariant }
   }
-  if ($result.Count -eq 0) { Stop-OnSkip ("No PlatformIO env matches {0}" -f $EnvPattern) }
+  if ($result.Count -eq 0) { Stop-OnSkip (T "No PlatformIO env matches {0}" $EnvPattern) }
   return $result
 }
 # @brief Pin constants of the Arduino variant (pins_arduino.h: static const uint8_t D8 = 7;), read once per MCU and variant;
@@ -351,8 +351,8 @@ function Resolve-Board($M, $BoardEntry) {
   $defines = @($BoardEntry.Define) + @($BoardEntry.Flags | ForEach-Object { $_ -replace '^-D', '' }) + @(Get-McuArchDefines "$($BoardEntry.Mcu)")
   $ident = Get-BoardIdentity $BoardEntry.Define $defines   # flags can select another variant (QuinLED WiFi/LAN)
   foreach ($e in $ident.Errors) { Stop-WithError ("{0}: {1}" -f $BoardEntry.Define, $e) }
-  if ($null -eq $ident.HwId) { Stop-WithError "$($BoardEntry.Define): no DEVICE_HW_ID - add one to the board header (see generator/README.md)" }
-  if ($ident.HwId -le 0 -or $ident.HwId -ge 65535) { Stop-WithError "$($BoardEntry.Define): DEVICE_HW_ID out of range" }
+  if ($null -eq $ident.HwId) { Stop-WithError (T "{0}: no DEVICE_HW_ID - add one to the board header (see generator/README.md)" $BoardEntry.Define) }
+  if ($ident.HwId -le 0 -or $ident.HwId -ge 65535) { Stop-WithError (T "{0}: DEVICE_HW_ID out of range" $BoardEntry.Define) }
 
   # pass 1: macro names of this board (for scan="" pin sources)
   $macroNames = @()
@@ -468,8 +468,8 @@ function Resolve-Board($M, $BoardEntry) {
   }
   if ($res.ContainsKey("INFOTEXT")) {
     $board.InfoText = ConvertFrom-CString $res["INFOTEXT"]
-    if (-not $board.InfoText) { Stop-WithError ("{0}: HW_INFO_TEXT is not a string: {1}" -f $BoardEntry.Define, $res["INFOTEXT"]) }
-    if ($board.InfoText.Length -gt 255) { Stop-WithError ("{0}: HW_INFO_TEXT has {1} characters, ETS shows at most 255" -f $BoardEntry.Define, $board.InfoText.Length) }
+    if (-not $board.InfoText) { Stop-WithError (T "{0}: HW_INFO_TEXT is not a string: {1}" $BoardEntry.Define $res["INFOTEXT"]) }
+    if ($board.InfoText.Length -gt 255) { Stop-WithError (T "{0}: HW_INFO_TEXT has {1} characters, ETS shows at most 255" $BoardEntry.Define $board.InfoText.Length) }
   }
   $board.InfoUrl = $null
   $board.InfoUrlOwn = $false   # $true: the URL comes from the board header, not the <InfoImage default> (empty = no QR code)
@@ -478,7 +478,7 @@ function Resolve-Board($M, $BoardEntry) {
     if ($res.ContainsKey("INFOURL")) {
       $board.InfoUrlOwn = $true
       $board.InfoUrl = ConvertFrom-CString $res["INFOURL"]
-      if (-not $board.InfoUrl) { Stop-WithError ("{0}: {1} is not a string: {2}" -f $BoardEntry.Define, $M.Info.Define, $res["INFOURL"]) }
+      if (-not $board.InfoUrl) { Stop-WithError (T "{0}: {1} is not a string: {2}" $BoardEntry.Define $M.Info.Define $res["INFOURL"]) }
     }
   }
   for ($i = 0; $i -lt $M.Capabilities.Count; $i++) {
@@ -488,19 +488,19 @@ function Resolve-Board($M, $BoardEntry) {
   }
   for ($i = 0; $i -lt $M.Values.Count; $i++) {
     $n = ConvertFrom-CInteger $res["VAL$i"]
-    if ($null -eq $n) { Stop-WithError ("{0}: value {1} is not an integer: {2}" -f $BoardEntry.Define, $M.Values[$i].Name, $res["VAL$i"]) }
+    if ($null -eq $n) { Stop-WithError (T "{0}: value {1} is not an integer: {2}" $BoardEntry.Define ($M.Values[$i].Name) $res["VAL$i"]) }
     $sets = @($M.Values[$i].Sets | Where-Object { Test-Wildcard $_.Board $BoardEntry.Define })
     if ($sets.Count -gt 0) {
       $exact = @($sets | Where-Object { -not $_.Pattern })
       if ($exact.Count -gt 0) { $sets = $exact }
-      if ($sets.Count -gt 1) { Stop-WithError ("{0}: value {1} is set by {2} <Set> entries ({3})" -f $BoardEntry.Define, $M.Values[$i].Name, $sets.Count, (($sets | ForEach-Object { $_.Board }) -join ", ")) }
+      if ($sets.Count -gt 1) { Stop-WithError (T "{0}: value {1} is set by {2} <Set> entries ({3})" $BoardEntry.Define ($M.Values[$i].Name) $sets.Count (($sets | ForEach-Object { $_.Board }) -join ", ")) }
       $n = $sets[0].Value
       $board.ValueSource += ("<Set board=`"{0}`">" -f $sets[0].Board)
     }
     else { $board.ValueSource += $M.Values[$i].Expr }
-    if ($n -lt 0 -or $n -gt 255) { Stop-WithError ("{0}: value {1} = {2} does not fit one byte" -f $BoardEntry.Define, $M.Values[$i].Name, $n) }
+    if ($n -lt 0 -or $n -gt 255) { Stop-WithError (T "{0}: value {1} = {2} does not fit one byte" $BoardEntry.Define ($M.Values[$i].Name) $n) }
     # the feature flags (_GE_n / _EQ_n) and the value lists cover 0..max only
-    if ($n -gt $M.Values[$i].Max) { Stop-WithError ("{0}: value {1} = {2} is above max=`"{3}`" of the manifest - raise max" -f $BoardEntry.Define, $M.Values[$i].Name, $n, $M.Values[$i].Max) }
+    if ($n -gt $M.Values[$i].Max) { Stop-WithError (T "{0}: value {1} = {2} is above max=`"{3}`" of the manifest - raise max" $BoardEntry.Define ($M.Values[$i].Name) $n ($M.Values[$i].Max)) }
     $board.Values += $n
   }
   # pins the platform already uses (KNX UART, prog button/LED, ...) are never offered
@@ -532,14 +532,14 @@ function Resolve-Board($M, $BoardEntry) {
       if ($TP_RESERVED -contains $autoMacros[$i]) { $board.TpGpios += $ag } else { $own += $ag }
     }
     # the header compares (int)(MACRO): a value the generator cannot read as a number would differ between ETS and firmware
-    if ($nonInt.Count -gt 0) { Stop-WithError ("{0}: <Conflicts reserved>: the reserved pin macro(s) {1} do not resolve to an integer" -f $BoardEntry.Define, ((Get-OrdinalSorted $nonInt -Unique) -join ", ")) }
+    if ($nonInt.Count -gt 0) { Stop-WithError (T "{0}: <Conflicts reserved>: the reserved pin macro(s) {1} do not resolve to an integer" $BoardEntry.Define ((Get-OrdinalSorted $nonInt -Unique) -join ", ")) }
     $chip = $null; if ($BoardEntry.Mcu -and $CHIP_RESERVED.ContainsKey("$($BoardEntry.Mcu)")) { $chip = $CHIP_RESERVED["$($BoardEntry.Mcu)"] }
     if ($chip) {
       $own += $chip.Base
       if ($BoardEntry.Psram) { $own += $chip.Cs1 }
       if ("$($BoardEntry.Memory)" -like "*_opi") { $own += $chip.Octal }
     }
-    elseif ("$($BoardEntry.Mcu)" -like "ESP32*") { Write-Warn ("{0}: <Conflicts reserved>: no flash / PSRAM GPIO table for {1} - the ETS check knows only the pin macros there" -f $BoardEntry.Define, $BoardEntry.Mcu) }
+    elseif ("$($BoardEntry.Mcu)" -like "ESP32*") { Write-Warn (T "{0}: <Conflicts reserved>: no flash / PSRAM GPIO table for {1} - the ETS check knows only the pin macros there" $BoardEntry.Define $BoardEntry.Mcu) }
     $board.ReservedGpios = @($own | ForEach-Object { [int]$_ } | Sort-Object -Unique)
     $board.TpGpios = @($board.TpGpios | ForEach-Object { [int]$_ } | Sort-Object -Unique)
     $tp = $null
@@ -551,8 +551,8 @@ function Resolve-Board($M, $BoardEntry) {
   for ($i = 0; $i -lt $pinCandidates.Count; $i++) {
     $c = $pinCandidates[$i]
     $gpio = ConvertFrom-CInteger $res["PIN$i"]
-    if ($null -eq $gpio) { Write-Warn ("{0}: pin {1} ({2}) does not resolve to a GPIO number: {3}" -f $BoardEntry.Define, $c.Label, $c.Macro, $res["PIN$i"]); continue }
-    if ($gpio -lt 0 -or $gpio -ge $PIN_UNUSED) { Write-Warn ("{0}: pin {1} = {2} skipped (no GPIO)" -f $BoardEntry.Define, $c.Label, $gpio); continue }
+    if ($null -eq $gpio) { Write-Warn (T "{0}: pin {1} ({2}) does not resolve to a GPIO number: {3}" $BoardEntry.Define $c.Label $c.Macro $res["PIN$i"]); continue }
+    if ($gpio -lt 0 -or $gpio -ge $PIN_UNUSED) { Write-Warn (T "{0}: pin {1} = {2} skipped (no GPIO)" $BoardEntry.Define $c.Label $gpio); continue }
     if ($reservedGpio.ContainsKey($gpio)) { $board.ReservedSkipped++; continue }
     $list = $board.Pins[$c.Role]
     if (@($list | Where-Object { $_.Gpio -eq $gpio }).Count -gt 0) { continue }
@@ -567,66 +567,66 @@ function Resolve-Board($M, $BoardEntry) {
   $board.Ports = New-Object System.Collections.Generic.List[object]
   if ($res.ContainsKey("PORTCOUNT")) {
     $pc = ConvertFrom-CInteger $res["PORTCOUNT"]
-    if ($null -eq $pc) { Stop-WithError ("{0}: HW_PORT_COUNT is not an integer: {1}" -f $BoardEntry.Define, $res["PORTCOUNT"]) }
-    if ($pc -gt $MAX_PORTS) { Stop-WithError ("{0}: HW_PORT_COUNT {1} is above the supported {2} ports (HW_PORTS_MAX, include/HardwareConfig/Helpers/HardwarePorts.h)" -f $BoardEntry.Define, $pc, $MAX_PORTS) }
+    if ($null -eq $pc) { Stop-WithError (T "{0}: HW_PORT_COUNT is not an integer: {1}" $BoardEntry.Define $res["PORTCOUNT"]) }
+    if ($pc -gt $MAX_PORTS) { Stop-WithError (T "{0}: HW_PORT_COUNT {1} is above the supported {2} ports (HW_PORTS_MAX, include/HardwareConfig/Helpers/HardwarePorts.h)" $BoardEntry.Define $pc $MAX_PORTS) }
     $board.PortCount = $pc
   }
   $gap = 0
   for ($n = 1; $n -le $MAX_PORTS; $n++) {
     if (-not $res.ContainsKey("PORTGPIO$n")) { if ($n -le $board.PortCount -and $gap -eq 0) { $gap = $n }; continue }
     if ($n -gt $board.PortCount) {
-      Write-Warn ("{0}: HW_PORT_{1}_GPIO is outside HW_PORT_COUNT ({2}) - not offered" -f $BoardEntry.Define, $n, $board.PortCount)
+      Write-Warn (T "{0}: HW_PORT_{1}_GPIO is outside HW_PORT_COUNT ({2}) - not offered" $BoardEntry.Define $n $board.PortCount)
       continue
     }
     # a port value is the list position and the firmware maps value k to HW_PORT_<k+1>: no gaps
-    if ($gap -gt 0) { Stop-WithError ("{0}: HW_PORT_{1}_GPIO is missing but HW_PORT_{2}_GPIO is defined - ports must be numbered without gaps" -f $BoardEntry.Define, $gap, $n) }
+    if ($gap -gt 0) { Stop-WithError (T "{0}: HW_PORT_{1}_GPIO is missing but HW_PORT_{2}_GPIO is defined - ports must be numbered without gaps" $BoardEntry.Define $gap $n) }
     $g = ConvertFrom-CInteger $res["PORTGPIO$n"]
-    if ($null -eq $g) { Stop-WithError ("{0}: HW_PORT_{1}_GPIO does not resolve to a GPIO number: {2}" -f $BoardEntry.Define, $n, $res["PORTGPIO$n"]) }
-    if ($g -lt 0 -or $g -gt 254) { Stop-WithError ("{0}: HW_PORT_{1}_GPIO is {2}, a GPIO must be 0..254 (255 = none)" -f $BoardEntry.Define, $n, $g) }
+    if ($null -eq $g) { Stop-WithError (T "{0}: HW_PORT_{1}_GPIO does not resolve to a GPIO number: {2}" $BoardEntry.Define $n $res["PORTGPIO$n"]) }
+    if ($g -lt 0 -or $g -gt 254) { Stop-WithError (T "{0}: HW_PORT_{1}_GPIO is {2}, a GPIO must be 0..254 (255 = none)" $BoardEntry.Define $n $g) }
     $label = "Port $n"
     if ($res.ContainsKey("PORTLABEL$n")) {
       $label = ConvertFrom-CString $res["PORTLABEL$n"]
-      if ($null -eq $label) { Stop-WithError ("{0}: HW_PORT_{1}_LABEL is not a string: {2}" -f $BoardEntry.Define, $n, $res["PORTLABEL$n"]) }
+      if ($null -eq $label) { Stop-WithError (T "{0}: HW_PORT_{1}_LABEL is not a string: {2}" $BoardEntry.Define $n $res["PORTLABEL$n"]) }
     }
     $board.Ports.Add(@{ N = $n; Gpio = $g; Label = $label })
   }
   if ($board.Ports.Count -gt 0 -and $board.PortCount -gt $board.Ports.Count) {
-    Write-Warn ("{0}: HW_PORT_COUNT {1}, but only ports 1..{2} are described" -f $BoardEntry.Define, $board.PortCount, $board.Ports.Count)
+    Write-Warn (T "{0}: HW_PORT_COUNT {1}, but only ports 1..{2} are described" $BoardEntry.Define $board.PortCount $board.Ports.Count)
   }
   # relays 1..HW_RELAY_COUNT, each with HW_RELAY_<n>_GPIO ($b.Relays: N, Gpio, Label); none without HW_RELAY_COUNT
   $board.Relays = New-Object System.Collections.Generic.List[object]
   $rc = 0
   if ($res.ContainsKey("RELAYCOUNT")) {
     $rc = ConvertFrom-CInteger $res["RELAYCOUNT"]
-    if ($null -eq $rc -or $rc -lt 0 -or $rc -gt $MAX_RELAYS) { Stop-WithError ("{0}: HW_RELAY_COUNT must be 0..{1}: {2}" -f $BoardEntry.Define, $MAX_RELAYS, $res["RELAYCOUNT"]) }
+    if ($null -eq $rc -or $rc -lt 0 -or $rc -gt $MAX_RELAYS) { Stop-WithError (T "{0}: HW_RELAY_COUNT must be 0..{1}: {2}" $BoardEntry.Define $MAX_RELAYS $res["RELAYCOUNT"]) }
   }
   for ($n = 1; $n -le $MAX_RELAYS; $n++) {
     if (-not $res.ContainsKey("RELAYGPIO$n")) {
-      if ($n -le $rc) { Stop-WithError ("{0}: HW_RELAY_COUNT {1}, but HW_RELAY_{2}_GPIO is missing" -f $BoardEntry.Define, $rc, $n) }
+      if ($n -le $rc) { Stop-WithError (T "{0}: HW_RELAY_COUNT {1}, but HW_RELAY_{2}_GPIO is missing" $BoardEntry.Define $rc $n) }
       continue
     }
-    if ($n -gt $rc) { Stop-WithError ("{0}: HW_RELAY_{1}_GPIO is outside HW_RELAY_COUNT ({2})" -f $BoardEntry.Define, $n, $rc) }
+    if ($n -gt $rc) { Stop-WithError (T "{0}: HW_RELAY_{1}_GPIO is outside HW_RELAY_COUNT ({2})" $BoardEntry.Define $n $rc) }
     $g = ConvertFrom-CInteger $res["RELAYGPIO$n"]
-    if ($null -eq $g -or $g -lt 0 -or $g -ge $PIN_UNUSED) { Stop-WithError ("{0}: HW_RELAY_{1}_GPIO does not resolve to a GPIO number: {2}" -f $BoardEntry.Define, $n, $res["RELAYGPIO$n"]) }
+    if ($null -eq $g -or $g -lt 0 -or $g -ge $PIN_UNUSED) { Stop-WithError (T "{0}: HW_RELAY_{1}_GPIO does not resolve to a GPIO number: {2}" $BoardEntry.Define $n $res["RELAYGPIO$n"]) }
     $label = "Relais $n"
     if ($res.ContainsKey("RELAYLABEL$n")) {
       $label = ConvertFrom-CString $res["RELAYLABEL$n"]
-      if ($null -eq $label) { Stop-WithError ("{0}: HW_RELAY_{1}_LABEL is not a string: {2}" -f $BoardEntry.Define, $n, $res["RELAYLABEL$n"]) }
+      if ($null -eq $label) { Stop-WithError (T "{0}: HW_RELAY_{1}_LABEL is not a string: {2}" $BoardEntry.Define $n $res["RELAYLABEL$n"]) }
     }
     $board.Relays.Add(@{ N = $n; Gpio = $g; Label = $label })
   }
   $board.Relays = $board.Relays.ToArray()
   # <Ports use>: offer only these hardware ports; each port keeps its number N (ETS value N-1)
   $sets = @($M.PortSets | Where-Object { Test-Wildcard $_.Board $BoardEntry.Define })
-  if ($sets.Count -gt 1) { Stop-WithError ("{0}: matched by {1} <Ports> entries ({2}) - one board, one port list" -f $BoardEntry.Define, $sets.Count, (($sets | ForEach-Object { $_.Board }) -join ", ")) }
+  if ($sets.Count -gt 1) { Stop-WithError (T "{0}: matched by {1} <Ports> entries ({2}) - one board, one port list" $BoardEntry.Define $sets.Count (($sets | ForEach-Object { $_.Board }) -join ", ")) }
   if ($sets.Count -eq 1) {
     $sets[0].Hits++
     if ($sets[0].Max -gt 0 -and $board.Ports.Count -gt $sets[0].Max) {
-      Stop-WithError ("{0}: describes {1} ports, <Ports board=`"{2}`" max=`"{3}`"> - the product stores ports 1..{3} only" -f $BoardEntry.Define, $board.Ports.Count, $sets[0].Board, $sets[0].Max)
+      Stop-WithError (T "{0}: describes {1} ports, <Ports board=`"{2}`" max=`"{3}`"> - the product stores ports 1..{3} only" $BoardEntry.Define $board.Ports.Count $sets[0].Board $sets[0].Max)
     }
     if ($sets[0].All) { $sets[0].Use = @($board.Ports | ForEach-Object { $_.N }) }
     foreach ($n in $sets[0].Use) {
-      if (@($board.Ports | Where-Object { $_.N -eq $n }).Count -eq 0) { Stop-WithError ("{0}: <Ports board=`"{1}`"> offers port {2}, the header describes ports 1..{3}" -f $BoardEntry.Define, $sets[0].Board, $n, $board.Ports.Count) }
+      if (@($board.Ports | Where-Object { $_.N -eq $n }).Count -eq 0) { Stop-WithError (T "{0}: <Ports board=`"{1}`"> offers port {2}, the header describes ports 1..{3}" $BoardEntry.Define $sets[0].Board $n $board.Ports.Count) }
     }
     $keep = $sets[0].Use
     $relayGpios = @($board.Relays | ForEach-Object { $_.Gpio })

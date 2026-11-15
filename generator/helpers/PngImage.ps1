@@ -98,7 +98,7 @@ function ConvertTo-PngZlib([byte[]]$Raw) {
 }
 
 function ConvertFrom-PngZlib([byte[]]$Data) {
-  if ($Data.Length -lt 6 -or ($Data[0] -band 0x0F) -ne 8) { throw "PNG: IDAT is no zlib deflate stream" }
+  if ($Data.Length -lt 6 -or ($Data[0] -band 0x0F) -ne 8) { throw (T "PNG: IDAT is no zlib deflate stream") }
   $in = [System.IO.MemoryStream]::new($Data, 2, $Data.Length - 2)
   $ds = New-Object System.IO.Compression.DeflateStream($in, [System.IO.Compression.CompressionMode]::Decompress)
   $out = New-Object System.IO.MemoryStream
@@ -110,15 +110,15 @@ function ConvertFrom-PngZlib([byte[]]$Data) {
 # @brief Reads the chunks of a PNG file: Width, Height, BitDepth, ColorType, Interlace, Idat (inflated)
 function Read-PngRaw([string]$Path) {
   $b = [System.IO.File]::ReadAllBytes($Path)
-  for ($i = 0; $i -lt 8; $i++) { if ($b[$i] -ne $script:PngSignature[$i]) { throw "PNG: $Path has no PNG signature" } }
+  for ($i = 0; $i -lt 8; $i++) { if ($b[$i] -ne $script:PngSignature[$i]) { throw (T "PNG: {0} has no PNG signature" $Path) } }
   $pos = 8
   $idat = New-Object System.IO.MemoryStream
   $r = @{}
   while ($pos + 8 -le $b.Length) {
     $len = [int](Get-PngUInt32BE $b $pos)
     $type = [System.Text.Encoding]::ASCII.GetString($b, $pos + 4, 4)
-    if ($pos + 12 + $len -gt $b.Length) { throw "PNG: $Path is truncated in chunk $type" }
-    if ((Get-PngCrc32 $b ($pos + 4) ($len + 4)) -ne (Get-PngUInt32BE $b ($pos + 8 + $len))) { throw "PNG: $Path CRC error in chunk $type" }
+    if ($pos + 12 + $len -gt $b.Length) { throw (T "PNG: {0} is truncated in chunk {1}" $Path $type) }
+    if ((Get-PngCrc32 $b ($pos + 4) ($len + 4)) -ne (Get-PngUInt32BE $b ($pos + 8 + $len))) { throw (T "PNG: {0} CRC error in chunk {1}" $Path $type) }
     if ($type -eq "IHDR") {
       $r.Width = [int](Get-PngUInt32BE $b ($pos + 8)); $r.Height = [int](Get-PngUInt32BE $b ($pos + 12))
       $r.BitDepth = $b[$pos + 16]; $r.ColorType = $b[$pos + 17]; $r.Interlace = $b[$pos + 20]
@@ -128,7 +128,7 @@ function Read-PngRaw([string]$Path) {
     elseif ($type -eq "IEND") { break }
     $pos += 12 + $len
   }
-  if (-not $r.Width) { throw "PNG: $Path has no IHDR" }
+  if (-not $r.Width) { throw (T "PNG: {0} has no IHDR" $Path) }
   $r.Idat = ConvertFrom-PngZlib $idat.ToArray()
   return $r
 }
@@ -137,7 +137,7 @@ function Read-PngRgba([string]$Path) {
   $r = Read-PngRaw $Path
   $chan = @{ 0 = 1; 2 = 3; 4 = 2; 6 = 4 }
   if ($r.BitDepth -ne 8 -or -not $chan.ContainsKey([int]$r.ColorType) -or $r.Interlace -ne 0) {
-    throw ("PNG: {0}: only 8-bit gray/RGB/gray+alpha/RGBA, non-interlaced (bit depth {1}, color type {2}, interlace {3})" -f $Path, $r.BitDepth, $r.ColorType, $r.Interlace)
+    throw (T "PNG: {0}: only 8-bit gray/RGB/gray+alpha/RGBA, non-interlaced (bit depth {1}, color type {2}, interlace {3})" $Path $r.BitDepth $r.ColorType $r.Interlace)
   }
   $bpp = $chan[[int]$r.ColorType]
   # tRNS of gray/RGB: one 16-bit sample per channel names the transparent color (8-bit images use the low byte)
@@ -145,12 +145,12 @@ function Read-PngRgba([string]$Path) {
   if ($r.Trns) {
     if ($bpp -eq 1 -and $r.Trns.Length -ge 2) { $key = @($r.Trns[1]) }
     elseif ($bpp -eq 3 -and $r.Trns.Length -ge 6) { $key = @($r.Trns[1], $r.Trns[3], $r.Trns[5]) }
-    else { throw "PNG: $Path has a tRNS chunk this reader does not support" }
+    else { throw (T "PNG: {0} has a tRNS chunk this reader does not support" $Path) }
   }
   $w = $r.Width; $h = $r.Height
   $stride = $w * $bpp
   $raw = $r.Idat
-  if ($raw.Length -lt ($stride + 1) * $h) { throw "PNG: $Path has too little image data" }
+  if ($raw.Length -lt ($stride + 1) * $h) { throw (T "PNG: {0} has too little image data" $Path) }
   $cur = New-Object byte[] $stride
   $prev = New-Object byte[] $stride
   $px = New-Object byte[] ($w * $h * 4)
@@ -174,7 +174,7 @@ function Read-PngRgba([string]$Path) {
             if ($pa -le $pb -and $pa -le $pc) { $pr = $a } elseif ($pb -le $pc) { $pr = $up } else { $pr = $c }
             $v = $x + $pr
           }
-          default { throw "PNG: $Path unknown filter $f in row $y" }
+          default { throw (T "PNG: {0} unknown filter {1} in row {2}" $Path $f $y) }
         }
         $cur[$i] = [byte]($v -band 0xFF)
       }
@@ -246,7 +246,7 @@ function Update-PngRgba([string]$Path, [int]$Width, [int]$Height, [byte[]]$Pixel
 function Read-GlyphFont([string]$Dir, [string]$Name) {
   $png = [System.IO.Path]::Combine($Dir, $Name + ".png")
   $txt = [System.IO.Path]::Combine($Dir, $Name + ".txt")
-  if (-not (Test-Path -LiteralPath $png) -or -not (Test-Path -LiteralPath $txt)) { throw "glyph atlas $Name not found in $Dir" }
+  if (-not (Test-Path -LiteralPath $png) -or -not (Test-Path -LiteralPath $txt)) { throw (T "glyph atlas {0} not found in {1}" $Name $Dir) }
   $img = Read-PngRgba $png
   $f = @{ Name = $Name; Width = $img.Width; Pixels = $img.Pixels; Height = 0; Baseline = 0; Glyphs = @{} }
   foreach ($l in [System.IO.File]::ReadAllLines($txt)) {
@@ -256,7 +256,7 @@ function Read-GlyphFont([string]$Dir, [string]$Name) {
       $f.Glyphs[[int]$Matches[1]] = @{ X = [int]$Matches[2]; W = [int]$Matches[3]; Lsb = [int]$Matches[4]; Adv = [int]$Matches[5] }
     }
   }
-  if ($f.Height -ne $img.Height -or $f.Glyphs.Count -eq 0) { throw "glyph atlas $Name : metrics do not match the image" }
+  if ($f.Height -ne $img.Height -or $f.Glyphs.Count -eq 0) { throw (T "glyph atlas {0} : metrics do not match the image" $Name) }
   return $f
 }
 
@@ -265,7 +265,7 @@ function Measure-GlyphText($Font, [string]$Text) {
   $pen = 0
   foreach ($ch in $Text.ToCharArray()) {
     $g = $Font.Glyphs[[int]$ch]
-    if ($null -eq $g) { throw ("no glyph for '{0}' (U+{1:X4}) in {2}" -f $ch, [int]$ch, $Font.Name) }
+    if ($null -eq $g) { throw (T "no glyph for '{0}' (U+{1:X4}) in {2}" $ch ([int]$ch) $Font.Name) }
     $pen += $g.Adv
   }
   return [int][Math]::Ceiling($pen / 64.0)
@@ -324,14 +324,14 @@ function Add-GlyphTextScaled([byte[]]$Px, [int]$ImgW, [int]$ImgH, $Font, [int]$S
 #        (atlas Font at Scale times the target size, color Rgb). Stops when the QR code or the line is wider than Width.
 # @return Width, Height, Pixels, Qr, QrPx, TextW
 function New-QrLinkImage([string]$Url, [string]$Shown, [int]$Width, [int]$Module, [int]$Version, $Font, [int]$Scale, [byte[]]$Rgb) {
-  foreach ($ch in $Url.ToCharArray()) { if ([int]$ch -lt 32 -or [int]$ch -gt 126) { throw "info URL has a character outside ASCII 32..126: $Url" } }
+  foreach ($ch in $Url.ToCharArray()) { if ([int]$ch -lt 32 -or [int]$ch -gt 126) { throw (T "info URL has a character outside ASCII 32..126: {0}" $Url) } }
   $quiet = 4
   $q = New-QrMatrix $Url "M" $Version
   $n = $q.Size; $mp = $Module
   $qrPx = ($n + 2 * $quiet) * $mp
-  if ($qrPx -gt $Width) { throw ("QR code {0} px (version {1}) is wider than the image ({2} px): {3}" -f $qrPx, $q.Version, $Width, $Url) }
+  if ($qrPx -gt $Width) { throw (T "QR code {0} px (version {1}) is wider than the image ({2} px): {3}" $qrPx $q.Version $Width $Url) }
   $textW = (Measure-GlyphText $Font $Shown) / $Scale
-  if ($textW -gt $Width) { throw ("link '{0}' is {1:N1} px wide, the image {2} px (shorter link or larger width)" -f $Shown, $textW, $Width) }
+  if ($textW -gt $Width) { throw (T "link '{0}' is {1:N1} px wide, the image {2} px (shorter link or larger width)" $Shown $textW $Width) }
   $gap = 4
   $h = $qrPx + $gap + [int][Math]::Ceiling($Font.Height / $Scale)
   $px = New-Object byte[] ($Width * $h * 4)

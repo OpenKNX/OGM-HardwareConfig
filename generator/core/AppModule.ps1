@@ -158,7 +158,7 @@ function Get-CardMarks($M, $Boards) {
     if ($hits.Count -gt 0) {
       $exact = @($hits | Where-Object { -not $_.Pattern })
       if ($exact.Count -gt 0) { $hits = $exact }
-      if ($hits.Count -gt 1) { Stop-WithError ("{0}: {1} <InfoImage><Logo> entries match ({2})" -f $b.Define, $hits.Count, (($hits | ForEach-Object { $_.Board }) -join ", ")) }
+      if ($hits.Count -gt 1) { Stop-WithError (T "{0}: {1} <InfoImage><Logo> entries match ({2})" $b.Define $hits.Count (($hits | ForEach-Object { $_.Board }) -join ", ")) }
       $file = $hits[0].File
     }
     elseif (Test-ThirdPartyBoard $M $b) { $file = $M.Info.Badge }
@@ -172,7 +172,7 @@ function Get-CardMarks($M, $Boards) {
       elseif ($M.Info.Badge -and $hash -eq (Get-FileContentHash $M.Info.Badge)) { $name = "Badge"; $num = $script:BadgeParamNum }
       else {
         $own++
-        if ($own -gt 10) { Stop-WithError "<InfoImage><Logo>: at most 10 own pictures" }
+        if ($own -gt 10) { Stop-WithError (T "<InfoImage><Logo>: at most 10 own pictures") }
         $name = "Logo$own"; $num = "{0:D5}" -f (909 + $own)
       }
       $g = @{ Name = $name; File = $file; Num = $num; Hash = $hash; Boards = @() }
@@ -180,7 +180,7 @@ function Get-CardMarks($M, $Boards) {
     }
     $g.Boards += $b
   }
-  foreach ($lg in $M.Info.Logos) { if (-not $used.ContainsKey($lg.Board)) { Write-Warn ("<InfoImage><Logo board=`"{0}`">: matches no board" -f $lg.Board) } }
+  foreach ($lg in $M.Info.Logos) { if (-not $used.ContainsKey($lg.Board)) { Write-Warn (T "<InfoImage><Logo board=`"{0}`">: matches no board" $lg.Board) } }
   return ,$marks.ToArray()
 }
 # @brief Board text: HW_INFO_TEXT, else <Page infoDefault> (empty = none)
@@ -265,7 +265,7 @@ function New-PageInfoXml($M, $Boards, [string]$SelRef, $Switches, $InfoGroups, [
     foreach ($b in $Boards) {
       if (@($b.Envs).Count -eq 0) { continue }
       $t = $M.Page.Firmware -replace '\{env\}', (@($b.Envs) -join ", ")
-      if ($t.Length -gt 255) { Stop-WithError ("<Page firmware>: the text of 0x{0:X4} has {1} characters, ETS shows at most 255" -f [int]$b.HwId, $t.Length) }
+      if ($t.Length -gt 255) { Stop-WithError (T "<Page firmware>: the text of 0x{0:X4} has {1} characters, ETS shows at most 255" ([int]$b.HwId) $t.Length) }
       $g = @($fw | Where-Object { $_.Text -ceq $t }) | Select-Object -First 1
       if (-not $g) { $g = @{ Text = $t; Boards = @() }; $fw.Add($g) }
       $g.Boards += $b
@@ -609,7 +609,7 @@ function New-DevShareXml($M, $Boards) {
   $sb = New-Object System.Text.StringBuilder
   $sep = {
     param($t, $extra)
-    if ($t.Length -gt 255) { Stop-WithError ("developer view: text longer than 255 characters (ETS limit): {0}" -f $t) }
+    if ($t.Length -gt 255) { Stop-WithError (T "developer view: text longer than 255 characters (ETS limit): {0}" $t) }
     [void]$sb.AppendLine(("                  <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`"{1} />" -f (ConvertTo-XmlText $t), $extra))
   }
   [void]$sb.AppendLine('<?xml version="1.0" encoding="utf-8"?>')
@@ -737,7 +737,7 @@ function New-DevShareXml($M, $Boards) {
       foreach ($pt in $b.Ports) {
         $cells = @([string]$pt.N, [string]$pt.Label, [string]$pt.Gpio, [string]($pt.N - 1))
         for ($k = 0; $k -lt 4; $k++) {
-          if ($cells[$k].Length -gt 255) { Stop-WithError ("developer view: text longer than 255 characters (ETS limit): {0}" -f $cells[$k]) }
+          if ($cells[$k].Length -gt 255) { Stop-WithError (T "developer view: text longer than 255 characters (ETS limit): {0}" $cells[$k]) }
           [void]$sb.AppendLine(("                    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" Cell=`"{1},{2}`" />" -f (ConvertTo-XmlText $cells[$k]), $row, ($k + 1)))
         }
         $row++

@@ -28,33 +28,33 @@ function Set-RecordedBitOrder($M) {
   foreach ($l in [System.IO.File]::ReadAllLines($path)) {
     if ($l -match '^\s*(cap|val)\s+(\d+)\s*=\s*([A-Za-z][A-Za-z0-9]*)\s*$') {
       $kind = $Matches[1]; $bi = [int]$Matches[2]
-      if ($rec[$kind].ContainsKey($bi) -and $rec[$kind][$bi] -cne $Matches[3]) { Stop-WithError ("Slot file {0}: {1} {2} is listed twice ('{3}' and '{4}')" -f $path, $kind, $bi, $rec[$kind][$bi], $Matches[3]) }
+      if ($rec[$kind].ContainsKey($bi) -and $rec[$kind][$bi] -cne $Matches[3]) { Stop-WithError (T "Slot file {0}: {1} {2} is listed twice ('{3}' and '{4}')" $path $kind $bi ($rec[$kind][$bi]) $Matches[3]) }
       $rec[$kind][$bi] = $Matches[3]
     }
   }
   foreach ($kind in @("cap", "val")) {
-    $label = @{ cap = "capability"; val = "value" }[$kind]
+    $label = @{ cap = (T "capability"); val = (T "value") }[$kind]
     if ($kind -eq "cap") { $list = $M.Capabilities } else { $list = $M.Values }
     $pos = @(); for ($j = 0; $j -lt $list.Count; $j++) { if ($kind -eq "cap" -or $list[$j].Query) { $pos += $j } }
     $byName = @{}; foreach ($j in $pos) { $byName[$list[$j].Name] = $list[$j] }
     $ordered = @(); $used = @{}
     foreach ($i in @($rec[$kind].Keys | Sort-Object)) {
       $n = $rec[$kind][$i]
-      if ($used.ContainsKey($n)) { Stop-WithError ("Slot file {0}: {1} '{2}' has two bits" -f $path, $kind, $n) }
+      if ($used.ContainsKey($n)) { Stop-WithError (T "Slot file {0}: {1} '{2}' has two bits" $path $kind $n) }
       if (-not $byName.ContainsKey($n)) {
-        $why = "is gone from the manifest"
+        $why = T "is gone from the manifest"
         $same = @($list | Where-Object { $_.Name -ceq $n })
         $case = @($list | Where-Object { $_.Name -ieq $n -and $_.Name -cne $n })
-        if ($same.Count -gt 0) { $why = "is query=`"false`" now" }
-        elseif ($case.Count -gt 0) { $why = ("is spelled '{0}' now" -f $case[0].Name); if (-not $case[0].Query -and $kind -eq "val") { $why += " and query=`"false`"" } }
-        Stop-WithError ("Device query: {0} {1} '{2}' {3} - a firmware in the field still sends it at this position; keep it in the query (it may never be true); a pure rename: change the line in {4}" -f $label, $i, $n, $why, $path)
+        if ($same.Count -gt 0) { $why = T "is query=`"false`" now" }
+        elseif ($case.Count -gt 0) { $why = T "is spelled '{0}' now" $case[0].Name; if (-not $case[0].Query -and $kind -eq "val") { $why += (T " and query=`"false`"") } }
+        Stop-WithError (T "Device query: {0} {1} '{2}' {3} - a firmware in the field still sends it at this position; keep it in the query (it may never be true); a pure rename: change the line in {4}" $label $i $n $why $path)
       }
       $ordered += $byName[$n]; $used[$n] = $true
     }
     foreach ($j in $pos) { if (-not $used.ContainsKey($list[$j].Name)) { $ordered += $list[$j] } }
     for ($k = 0; $k -lt $pos.Count; $k++) { $list[$pos[$k]] = $ordered[$k] }
   }
-  if ($M.Capabilities[0].Name -cne "ThirdParty") { Stop-WithError ("Slot file {0}: cap 0 must be ThirdParty" -f $path) }
+  if ($M.Capabilities[0].Name -cne "ThirdParty") { Stop-WithError (T "Slot file {0}: cap 0 must be ThirdParty" $path) }
 }
 function Get-PinParamNumber($RoleNumber, $Slot, $BoardSlot) {
   # 5 digits R S BBB -> role 1..9, slot 1..9, board slot 0..999 (from the slot file, never reused);
@@ -75,27 +75,27 @@ function Update-BoardSlots($M, $Boards) {
   $lines = @()
   if (Test-Path $path) { $lines = [System.IO.File]::ReadAllLines($path) }
   else {
-    Write-Warn ("No slot file {0}: fine for a new product. If this product was released before, restore the file from git - new slots would move every GPIO parameter ID" -f $path)
+    Write-Warn (T "No slot file {0}: fine for a new product. If this product was released before, restore the file from git - new slots would move every GPIO parameter ID" $path)
   }
   for ($ln = 0; $ln -lt $lines.Count; $ln++) {
     $l = $lines[$ln]
     if ($l -match '^\s*(#.*)?$') { continue }
     if ($l -match '^\s*(cap|val)\s+(\d+)\s*=\s*([A-Za-z][A-Za-z0-9]*)\s*$') {
       $kind = $Matches[1]; $bi = [int]$Matches[2]
-      if ($bitRec[$kind].ContainsKey($bi) -and $bitRec[$kind][$bi] -cne $Matches[3]) { Stop-WithError ("Slot file {0}, line {1}: {2} {3} is listed twice" -f $path, ($ln + 1), $kind, $bi) }
+      if ($bitRec[$kind].ContainsKey($bi) -and $bitRec[$kind][$bi] -cne $Matches[3]) { Stop-WithError (T "Slot file {0}, line {1}: {2} {3} is listed twice" $path ($ln + 1) $kind $bi) }
       $bitRec[$kind][$bi] = $Matches[3]
       continue
     }
     # 'ets "<product xml>" <ApplicationVersion> <fingerprint>': content of the ETS outputs recorded for that version
     if ($l -match '^\s*ets\s+"([^"]+)"\s+(\S+)\s+([0-9A-Fa-f]{16})\s*$') {
-      if ($etsRec.ContainsKey($Matches[1])) { Stop-WithError ("Slot file {0}, line {1}: a second ets line for {2} (merge?) - keep the one of the released version" -f $path, ($ln + 1), $Matches[1]) }
+      if ($etsRec.ContainsKey($Matches[1])) { Stop-WithError (T "Slot file {0}, line {1}: a second ets line for {2} (merge?) - keep the one of the released version" $path ($ln + 1) $Matches[1]) }
       $etsRec[$Matches[1]] = @{ Version = $Matches[2]; Hash = $Matches[3].ToUpperInvariant() }
       continue
     }
     if ($l -match '^\s*0x([0-9A-Fa-f]{4})\s*=\s*(\d+)(\s+removed)?\s*$') {
       $id = [Convert]::ToInt32($Matches[1], 16)
       if ($slots.ContainsKey($id) -and $slots[$id] -ne [int]$Matches[2]) {
-        Stop-WithError ("Slot file {0}: 0x{1:X4} has two slots ({2} and {3}) - keep the one that was released" -f $path, $id, $slots[$id], [int]$Matches[2])
+        Stop-WithError (T "Slot file {0}: 0x{1:X4} has two slots ({2} and {3}) - keep the one that was released" $path $id $slots[$id] ([int]$Matches[2]))
       }
       $isRemovedLine = [bool]$Matches[3]
       if ($slots.ContainsKey($id)) {
@@ -108,12 +108,12 @@ function Update-BoardSlots($M, $Boards) {
     }
     else {
       # a line that does not parse would give its board a new slot (all its IDs move)
-      Stop-WithError ("Slot file {0}, line {1}: '{2}' is no slot line (0x<HW-ID> = <slot> [removed], cap <n> = <Name>, val <n> = <Name>, ets `"<product xml>`" <version> <fingerprint>)" -f $path, ($ln + 1), $l)
+      Stop-WithError (T "Slot file {0}, line {1}: '{2}' is no slot line (0x<HW-ID> = <slot> [removed], cap <n> = <Name>, val <n> = <Name>, ets `"<product xml>`" <version> <fingerprint>)" $path ($ln + 1) $l)
     }
   }
   # a merge of two branches can give two boards the same slot -> two parameters with one ID
   foreach ($g in ($slots.Keys | Group-Object { $slots[$_] } | Where-Object { $_.Count -gt 1 })) {
-    Stop-WithError ("Slot file {0}: slot {1} is used by {2} - give the newer board the next free slot" -f $path, $g.Name, (($g.Group | ForEach-Object { "0x{0:X4}" -f $_ }) -join ", "))
+    Stop-WithError (T "Slot file {0}: slot {1} is used by {2} - give the newer board the next free slot" $path $g.Name (($g.Group | ForEach-Object { "0x{0:X4}" -f $_ }) -join ", "))
   }
   $next = 0
   foreach ($v in $slots.Values) { if ($v -ge $next) { $next = $v + 1 } }
@@ -128,28 +128,28 @@ function Update-BoardSlots($M, $Boards) {
   foreach ($k in @($slots.Keys)) {
     if (-not $current.ContainsKey($k) -and -not $removed.ContainsKey($k)) { $removed[$k] = $true; $gone += $k }
   }
-  if ($next -gt 1000) { Stop-WithError "Slot file $path holds more than 1000 boards (3-digit slot in the parameter IDs)" }
+  if ($next -gt 1000) { Stop-WithError (T "Slot file {0} holds more than 1000 boards (3-digit slot in the parameter IDs)" $path) }
   # bit order: a recorded bit keeps its name; new capabilities / values are appended (a firmware in the field reads
   # the query answer by position, an inserted or removed entry would shift every later bit)
   $cur = @{ cap = @($M.Capabilities | ForEach-Object { $_.Name }); val = @($M.Values | Where-Object { $_.Query } | ForEach-Object { $_.Name }) }
   $bitsAdded = @()
   foreach ($kind in @("cap", "val")) {
-    $label = @{ cap = "capability"; val = "value" }[$kind]
+    $label = @{ cap = (T "capability"); val = (T "value") }[$kind]
     $recCount = 0; foreach ($k in $bitRec[$kind].Keys) { if ($k + 1 -gt $recCount) { $recCount = $k + 1 } }
     for ($i = 0; $i -lt $recCount; $i++) {
-      if (-not $bitRec[$kind].ContainsKey($i)) { Stop-WithError ("Slot file {0}: {1} {2} is missing (the recorded bits must be 0..{3} without a gap)" -f $path, $kind, $i, ($recCount - 1)) }
+      if (-not $bitRec[$kind].ContainsKey($i)) { Stop-WithError (T "Slot file {0}: {1} {2} is missing (the recorded bits must be 0..{3} without a gap)" $path $kind $i ($recCount - 1)) }
       $was = $bitRec[$kind][$i]
-      if ($i -ge $cur[$kind].Count) { Stop-WithError ("Device query: {0} {1} '{2}' is gone from the manifest - a firmware in the field still sends it at this position; keep it (it may never be true)" -f $label, $i, $was) }
-      if ($cur[$kind][$i] -cne $was) { Stop-WithError ("Device query: {0} {1} was '{2}', now '{3}' - the slot file and the manifest disagree; a pure rename: change the line in {4}" -f $label, $i, $was, $cur[$kind][$i], $path) }
+      if ($i -ge $cur[$kind].Count) { Stop-WithError (T "Device query: {0} {1} '{2}' is gone from the manifest - a firmware in the field still sends it at this position; keep it (it may never be true)" $label $i $was) }
+      if ($cur[$kind][$i] -cne $was) { Stop-WithError (T "Device query: {0} {1} was '{2}', now '{3}' - the slot file and the manifest disagree; a pure rename: change the line in {4}" $label $i $was ($cur[$kind][$i]) $path) }
     }
     for ($i = $recCount; $i -lt $cur[$kind].Count; $i++) { $bitRec[$kind][$i] = $cur[$kind][$i]; $bitsAdded += ("{0} {1} = {2}" -f $kind, $i, $cur[$kind][$i]) }
   }
   # the board list of the ETS product changed (a pattern can do that without a manifest change)
   $hex = { param($list) ($list | ForEach-Object { "0x{0:X4}" -f $_ }) -join ", " }
-  if ($added.Count -gt 0) { Write-Warn ("Board(s) added: {0}" -f (& $hex $added)) }
-  if ($back.Count -gt 0) { Write-Warn ("Board(s) back: {0}" -f (& $hex $back)) }
-  if ($gone.Count -gt 0) { Write-Warn ("Board(s) removed, slot kept: {0} - the selection loses them: a device in a project with that board falls back to not selected after the app update; to keep a board selectable without its env, add <Board define=`"<its board define>`" flags=`"...`" />" -f (& $hex $gone)) }
-  if ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count)) { Write-Warn ("Device query bit(s) added: {0}" -f ($bitsAdded -join ", ")) }
+  if ($added.Count -gt 0) { Write-Warn (T "Board(s) added: {0}" (& $hex $added)) }
+  if ($back.Count -gt 0) { Write-Warn (T "Board(s) back: {0}" (& $hex $back)) }
+  if ($gone.Count -gt 0) { Write-Warn (T "Board(s) removed, slot kept: {0} - the selection loses them: a device in a project with that board falls back to not selected after the app update; to keep a board selectable without its env, add <Board define=`"<its board define>`" flags=`"...`" />" (& $hex $gone)) }
+  if ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count)) { Write-Warn (T "Device query bit(s) added: {0}" ($bitsAdded -join ", ")) }
   # a board or bit change: Add-EtsFingerprint reminds of the version (per product, or here when no product XML is found)
   $listChanged = (($added.Count + $back.Count + $gone.Count) -gt 0 -or ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count)))
   $out = New-Object System.Text.StringBuilder
@@ -212,10 +212,10 @@ function Test-ProductXmls($M, $Products) {
     foreach ($d in [regex]::Matches($x.Text, '<op:define\b' + $script:XmlAttrs + '>')) {
       if ($d.Value -match '\bshare\s*=\s*["'']([^"'']+)["'']' -and (& $isShare $Matches[1])) { $def = $d; break }
     }
-    if (-not $def) { Write-Warn ("{0}: no <op:define share=...> of the hardware module {1}" -f $x.Name, [System.IO.Path]::GetFileName($share)); continue }
+    if (-not $def) { Write-Warn (T "{0}: no <op:define share=...> of the hardware module {1}" $x.Name ([System.IO.Path]::GetFileName($share))); continue }
     $at = "{0}:{1}" -f $x.Name, (Get-LineNumber $x.Text $def.Index)
-    if ($def.Value -cnotmatch ('\bprefix\s*=\s*["'']' + $p + '["'']')) { Write-Warn ("{0}: op:define of the hardware module has another prefix than the manifest ({1})" -f $at, $M.Prefix) }
-    if ($def.Value -notmatch '\bModuleType\s*=\s*["'']\s*(\d+)\s*["'']' -or [int]$Matches[1] -ne $M.ModuleType) { Write-Warn ("{0}: op:define of the hardware module has another ModuleType than the manifest ({1})" -f $at, $M.ModuleType) }
+    if ($def.Value -cnotmatch ('\bprefix\s*=\s*["'']' + $p + '["'']')) { Write-Warn (T "{0}: op:define of the hardware module has another prefix than the manifest ({1})" $at $M.Prefix) }
+    if ($def.Value -notmatch '\bModuleType\s*=\s*["'']\s*(\d+)\s*["'']' -or [int]$Matches[1] -ne $M.ModuleType) { Write-Warn (T "{0}: op:define of the hardware module has another ModuleType than the manifest ({1})" $at $M.ModuleType) }
     foreach ($inc in [regex]::Matches($x.Text, '<op:include\b' + $script:XmlAttrs + '>')) {
       # xpath ...ParameterBlock[@Name='Profile']/* (quote ' or &quot;, blanks allowed)
       if ($inc.Value -notmatch "ParameterBlock\[\s*@Name\s*=\s*('|&quot;|`")Profile('|&quot;|`")\s*\]/\*") { continue }
@@ -233,10 +233,10 @@ function Test-ProductXmls($M, $Products) {
       $hasText = $blk.Value -cmatch ('\bText\s*=\s*["'']\{\{0:%' + $p + '_PageText%\}\}["'']')
       if ($M.Page -and $M.Page.UnselectedTitle) {
         if (-not ($hasRef -and $hasText)) {
-          Write-Warn ("{0}: page block without Text=`"{{{{0:%{1}_PageText%}}}}`" TextParameterRefId=`"%{1}_PageTextRef%`" - the tree shows no `"{2}`" (README, Applikations-XML)" -f $bat, $M.Prefix, $M.Page.UnselectedTitle)
+          Write-Warn (T "{0}: page block without Text=`"{{{{0:%{1}_PageText%}}}}`" TextParameterRefId=`"%{1}_PageTextRef%`" - the tree shows no `"{2}`" (README, Applikations-XML)" $bat $M.Prefix $M.Page.UnselectedTitle)
         }
       }
-      elseif ($hasRef) { Write-Warn ("{0}: page block uses %{1}_PageTextRef%, but <Page unselectedTitle> is off (no such config)" -f $bat, $M.Prefix) }
+      elseif ($hasRef) { Write-Warn (T "{0}: page block uses %{1}_PageTextRef%, but <Page unselectedTitle> is off (no such config)" $bat $M.Prefix) }
     }
   }
 }
@@ -284,14 +284,14 @@ function Add-EtsFingerprint($M, $SlotFile, $Rendered, $Images, $Products) {
   }
   catch {
     # e.g. a FIPS policy that blocks the hash: no check, the recorded lines stay
-    Write-Warn ("ETS fingerprint not available ({0}): the version check is skipped" -f $_.Exception.Message)
+    Write-Warn (T "ETS fingerprint not available ({0}): the version check is skipped" $_.Exception.Message)
     $hashes = $null
   }
   $next = @{}
   $versioned = @($Products | Where-Object { $_.Version })
   if ($null -eq $hashes -or ($versioned.Count -eq 0 -and $rec.Count -gt 0)) {
     # no fingerprint, or no product XML found: keep what was recorded
-    if ($null -ne $hashes) { Write-Warn "No product XML with <op:ETS ApplicationVersion> found (folder of the share, <manifest>/src): the version check is skipped, the ets lines stay" }
+    if ($null -ne $hashes) { Write-Warn (T "No product XML with <op:ETS ApplicationVersion> found (folder of the share, <manifest>/src): the version check is skipped, the ets lines stay") }
     foreach ($k in $rec.Keys) { $next[$k] = $rec[$k] }
   }
   else {
@@ -304,13 +304,13 @@ function Add-EtsFingerprint($M, $SlotFile, $Rendered, $Images, $Products) {
       else {
         $next[$x.Name] = $old
         if ($old.Hash -cne $h) {
-          Write-Warn ("The ETS content changed since {0} ApplicationVersion {1} was recorded: raise the version (ReplacesVersionsDownTo) before this content ships, or ETS gets other content under the same version (repeats until then)" -f $x.Name, $x.Version)
+          Write-Warn (T "The ETS content changed since {0} ApplicationVersion {1} was recorded: raise the version (ReplacesVersionsDownTo) before this content ships, or ETS gets other content under the same version (repeats until then)" $x.Name $x.Version)
         }
       }
     }
   }
   if ($SlotFile.ListChanged -and ($versioned.Count -eq 0 -or $null -eq $hashes)) {
-    Write-Warn "The ETS content changed: raise the ApplicationVersion (ReplacesVersionsDownTo), or ETS treats it as the same version"
+    Write-Warn (T "The ETS content changed: raise the ApplicationVersion (ReplacesVersionsDownTo), or ETS treats it as the same version")
   }
   [string[]]$keys = @($next.Keys)
   [Array]::Sort($keys, [StringComparer]::Ordinal)

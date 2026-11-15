@@ -44,14 +44,14 @@ function Resolve-Conflicts($M, $Boards) {
   $byRef = @{}
   $inputs.Add(@{ Ref = $refs.Select; Alias = "Sel" }); $byRef[$refs.Select] = "Sel"
   foreach ($pr in $cf.Params) {
-    if ($byRef.ContainsKey($pr.Ref)) { Stop-WithError ("<Conflicts><Param name=`"{0}`">: ref is the hardware selection" -f $pr.Name) }
+    if ($byRef.ContainsKey($pr.Ref)) { Stop-WithError (T "<Conflicts><Param name=`"{0}`">: ref is the hardware selection" $pr.Name) }
     $pr.Alias = "P_" + $pr.Name
     $inputs.Add(@{ Ref = $pr.Ref; Alias = $pr.Alias }); $byRef[$pr.Ref] = $pr.Alias
   }
   foreach ($u in $cf.Uses) {
     for ($k = 0; $k -lt $u.Manuals.Count; $k++) {
       $mr = $u.Manuals[$k]
-      if ($mr.Ref -ceq $refs.Select) { Stop-WithError ("<Conflicts><Use name=`"{0}`"> <Manual>: ref is the hardware selection" -f $u.Name) }
+      if ($mr.Ref -ceq $refs.Select) { Stop-WithError (T "<Conflicts><Use name=`"{0}`"> <Manual>: ref is the hardware selection" $u.Name) }
       if (-not $byRef.ContainsKey($mr.Ref)) { $byRef[$mr.Ref] = ("M{0}_{1}" -f $u.Index, $k); $inputs.Add(@{ Ref = $mr.Ref; Alias = $byRef[$mr.Ref] }) }
       $mr.Alias = $byRef[$mr.Ref]
     }
@@ -68,8 +68,8 @@ function Resolve-Conflicts($M, $Boards) {
       # a hard-wired relay of the board has no port parameter
       if ($u.Wired -gt 0 -and @($b.Relays).Count -ge $u.Wired) { continue }
       try { $r = Expand-TplLine $u.Port @{ b = $b; tt = ("{0:D2}" -f $M.ModuleType); Boards = $Boards; M = $M } $node }
-      catch { Stop-WithError ("{0}: port: {1}" -f $uw, $_.Exception.Message) }
-      if ($r -notmatch '^%AID%_\S+_R-\S+$' -and $r -notmatch '^%[A-Za-z0-9_]+%$') { Stop-WithError ("{0}: port gives '{1}' for {2}, not a ParamRefId (%AID%_..._R-...)" -f $uw, $r, $b.Define) }
+      catch { Stop-WithError (T "{0}: port: {1}" $uw $_.Exception.Message) }
+      if ($r -notmatch '^%AID%_\S+_R-\S+$' -and $r -notmatch '^%[A-Za-z0-9_]+%$') { Stop-WithError (T "{0}: port gives '{1}' for {2}, not a ParamRefId (%AID%_..._R-...)" $uw $r $b.Define) }
       $u.BoardRefs[$b.Slot] = $r
     }
     $distinct = @(Get-OrdinalSorted @($u.BoardRefs.Values) -Unique)
@@ -79,9 +79,9 @@ function Resolve-Conflicts($M, $Boards) {
     if ($distinct.Count -eq 1) { $u.Mode = 2 }
     foreach ($slot in @($u.BoardRefs.Keys | Sort-Object)) {
       $r = $u.BoardRefs[$slot]
-      if ($byRef.ContainsKey($r)) { Stop-WithError ("{0}: port parameter {1} is also the hardware selection, a <Param> or a <Manual>" -f $uw, $r) }
-      if ($u.Mode -eq 1 -and $portRefs.ContainsKey($r)) { Stop-WithError ("{0}: port parameter {1} is also used by {2} - one selection parameter per use and board" -f $uw, $r, $portRefs[$r]) }
-      if ($u.Mode -eq 2 -and $portRefs.ContainsKey($r) -and $portRefs[$r] -ne $u.Name) { Stop-WithError ("{0}: port parameter {1} is also used by {2}" -f $uw, $r, $portRefs[$r]) }
+      if ($byRef.ContainsKey($r)) { Stop-WithError (T "{0}: port parameter {1} is also the hardware selection, a <Param> or a <Manual>" $uw $r) }
+      if ($u.Mode -eq 1 -and $portRefs.ContainsKey($r)) { Stop-WithError (T "{0}: port parameter {1} is also used by {2} - one selection parameter per use and board" $uw $r $portRefs[$r]) }
+      if ($u.Mode -eq 2 -and $portRefs.ContainsKey($r) -and $portRefs[$r] -ne $u.Name) { Stop-WithError (T "{0}: port parameter {1} is also used by {2}" $uw $r $portRefs[$r]) }
       $portRefs[$r] = $u.Name
     }
     if ($u.Mode -eq 2) { $inputs.Add(@{ Ref = $distinct[0]; Alias = "U$($u.Index)" }) }
@@ -89,17 +89,17 @@ function Resolve-Conflicts($M, $Boards) {
   }
   if ($cf.Reserved) {
     foreach ($b in $Boards) {
-      if (-not $b.Mcu) { Write-Detail ("  <Conflicts reserved>: {0} has no MCU (no env) - no flash / PSRAM GPIOs, only the pin macros" -f $b.Define) }
+      if (-not $b.Mcu) { Write-Detail (T "  <Conflicts reserved>: {0} has no MCU (no env) - no flash / PSRAM GPIOs, only the pin macros" $b.Define) }
       $sets = Get-BoardReservedSets $b
       foreach ($pt in @($b.Ports)) {
-        if (@($sets.Rsv) -contains $pt.Gpio) { Write-Warn ("<Conflicts reserved>: {0} offers port {1} on GPIO {2}, which the board reserves" -f $b.Define, $pt.N, $pt.Gpio) }
-        elseif (@($sets.Tp) -contains $pt.Gpio) { Write-Warn ("<Conflicts reserved>: {0} offers port {1} on GPIO {2}, the KNX UART of its TP firmware" -f $b.Define, $pt.N, $pt.Gpio) }
+        if (@($sets.Rsv) -contains $pt.Gpio) { Write-Warn (T "<Conflicts reserved>: {0} offers port {1} on GPIO {2}, which the board reserves" $b.Define $pt.N $pt.Gpio) }
+        elseif (@($sets.Tp) -contains $pt.Gpio) { Write-Warn (T "<Conflicts reserved>: {0} offers port {1} on GPIO {2}, the KNX UART of its TP firmware" $b.Define $pt.N $pt.Gpio) }
       }
     }
   }
   if ($maxWired -gt 0) {
     foreach ($b in $Boards) {
-      if (@($b.Relays).Count -gt $maxWired) { Write-Warn ("<Conflicts>: {0} has {1} hard-wired relays, the conflict check knows relays 1..{2} (wiredRelay)" -f $b.Define, @($b.Relays).Count, $maxWired) }
+      if (@($b.Relays).Count -gt $maxWired) { Write-Warn (T "<Conflicts>: {0} has {1} hard-wired relays, the conflict check knows relays 1..{2} (wiredRelay)" $b.Define (@($b.Relays).Count) $maxWired) }
     }
   }
   $cf.Inputs = $inputs.ToArray()
@@ -371,7 +371,7 @@ function Test-ConflictNumbers($M, [string[]]$Outputs) {
       if ($kind -eq "PC" -and $num -eq $calc) { $hits["PC-%TT%" + $num + " (calculation)"] = $true }
     }
     if ($hits.Count -gt 0) {
-      Write-Warn ("<Conflicts number={0}>: {1} uses {2} - if that file is the module that includes the parts, choose another number" -f $cf.Number, $f.Name, ((Get-OrdinalSorted @($hits.Keys)) -join ", "))
+      Write-Warn (T "<Conflicts number={0}>: {1} uses {2} - if that file is the module that includes the parts, choose another number" $cf.Number $f.Name ((Get-OrdinalSorted @($hits.Keys)) -join ", "))
     }
   }
 }

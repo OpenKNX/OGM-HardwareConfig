@@ -35,7 +35,7 @@ function Get-ProductBoards($m) {
       if ($isPattern) {
         if ($null -eq $allBoards) { $allBoards = @(Get-AllHardwareIdBoards) }
         $names = @(Get-OrdinalSorted @($allBoards | Where-Object { $_ -like $be.Define }))
-        if ($names.Count -eq 0) { Stop-OnSkip ("No board with DEVICE_HW_ID matches {0}" -f $be.Define) }
+        if ($names.Count -eq 0) { Stop-OnSkip (T "No board with DEVICE_HW_ID matches {0}" $be.Define) }
       }
       foreach ($n in $names) {
         $prev = @($expanded | Where-Object { $_.Define -eq $n })
@@ -43,7 +43,7 @@ function Get-ProductBoards($m) {
         $norm = { param($f) (Get-OrdinalSorted @($f | ForEach-Object { $_ -replace '^-D', '' })) -join " " }
         $same = ((& $norm $prev[0].Flags) -eq (& $norm $be.Flags))
         if (-not $same -and (-not $isPattern -or -not $prev[0].Explicit)) {
-          Stop-WithError ("Board {0} is listed twice with different flags ('{1}' / '{2}')" -f $n, ($prev[0].Flags -join " "), ($be.Flags -join " "))
+          Stop-WithError (T "Board {0} is listed twice with different flags ('{1}' / '{2}')" $n ($prev[0].Flags -join " ") ($be.Flags -join " "))
         }
       }
     }
@@ -53,7 +53,7 @@ function Get-ProductBoards($m) {
       $expanded.Add(@{ Define = $eb.Define; Flags = $eb.Flags; Explicit = $false; Env = $eb.Env; Mcu = $eb.Mcu; Memory = $eb.Memory; Psram = $eb.Psram; Variant = $eb.Variant })
     }
   }
-  Write-Step ("Boards: {0}" -f $expanded.Count)
+  Write-Step (T "Boards: {0}" $expanded.Count)
 
   $boards = @()
   $boardIndex = 0
@@ -61,7 +61,7 @@ function Get-ProductBoards($m) {
     $boardIndex++
     $boardLabel = $be.Define
     if ($be.Env) { $boardLabel = $be.Env }
-    Write-Activity ("Board {0}/{1}  {2}" -f $boardIndex, $expanded.Count, $boardLabel)
+    Write-Activity (T "Board {0}/{1}  {2}" $boardIndex $expanded.Count $boardLabel)
     $b = Resolve-Board $m $be
     $script:CompilerPath = $script:DefaultCompiler
     $b.Explicit = $be.Explicit
@@ -79,13 +79,13 @@ function Get-ProductBoards($m) {
     $envText = ""
     if ($be.Env) { $envText = "  [env:" + $be.Env + "]" }
     Write-Ok ("0x{0:X4} {1}{2}" -f $b.HwId, $b.Name, $envText)
-    Write-Detail ("           caps: {0}" -f ($capText -join ", "))
+    Write-Detail (T "           caps: {0}" ($capText -join ", "))
     Write-Detail ("           {0}  {1}" -f ($valText -join " "), ($pinText -join " "))
     $boards += $b
   }
 
-  foreach ($ps in $m.PortSets) { if ($ps.Hits -eq 0) { Write-Warn ("<Ports board=`"{0}`"> matches no board" -f $ps.Board) } }
-  foreach ($t in $m.BoardTables) { if (-not $t.Found) { Write-Warn ("<BoardTable name=`"{0}`">: no macro matches {1} on any board" -f $t.Name, $t.Scan) } }
+  foreach ($ps in $m.PortSets) { if ($ps.Hits -eq 0) { Write-Warn (T "<Ports board=`"{0}`"> matches no board" $ps.Board) } }
+  foreach ($t in $m.BoardTables) { if (-not $t.Found) { Write-Warn (T "<BoardTable name=`"{0}`">: no macro matches {1} on any board" $t.Name $t.Scan) } }
 
   # several envs build the same board with different flags (e.g. TP and TP+WiFi): one ETS entry with the
   # union of what the builds can do; the device query reports what one device was built with
@@ -93,17 +93,17 @@ function Get-ProductBoards($m) {
     $first = $g.Group[0]
     foreach ($o in @($g.Group | Select-Object -Skip 1)) {
       # one HW-ID, two different devices: a duplicate DEVICE_HW_ID, not two builds of one board
-      if ($o.Name -ne $first.Name) { Stop-WithError ("Duplicate DEVICE_HW_ID 0x{0:X4}: {1} ({2}) and {3} ({4})" -f [int]$first.HwId, $first.Name, $first.Env, $o.Name, $o.Env) }
+      if ($o.Name -ne $first.Name) { Stop-WithError (T "Duplicate DEVICE_HW_ID 0x{0:X4}: {1} ({2}) and {3} ({4})" ([int]$first.HwId) $first.Name $first.Env $o.Name $o.Env) }
       $portsA = (@($first.Ports) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
       $portsB = (@($o.Ports) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
       $relA = (@($first.Relays) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
       $relB = (@($o.Relays) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
-      if ($relA -cne $relB) { Stop-WithError ("0x{0:X4}: env {1} has other relays than env {2}" -f [int]$first.HwId, $o.Env, $first.Env) }
-      if ($o.InfoUrl -ne $first.InfoUrl) { Stop-WithError ("0x{0:X4}: env {1} has another info URL than env {2}" -f [int]$first.HwId, $o.Env, $first.Env) }
-      if ($o.InfoText -cne $first.InfoText) { Stop-WithError ("0x{0:X4}: env {1} has another HW_INFO_TEXT than env {2}" -f [int]$first.HwId, $o.Env, $first.Env) }
-      if ($o.Mcu -cne $first.Mcu) { Stop-WithError ("0x{0:X4}: env {1} builds for MCU '{2}', env {3} for '{4}'" -f [int]$first.HwId, $o.Env, $o.Mcu, $first.Env, $first.Mcu) }
+      if ($relA -cne $relB) { Stop-WithError (T "0x{0:X4}: env {1} has other relays than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
+      if ($o.InfoUrl -ne $first.InfoUrl) { Stop-WithError (T "0x{0:X4}: env {1} has another info URL than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
+      if ($o.InfoText -cne $first.InfoText) { Stop-WithError (T "0x{0:X4}: env {1} has another HW_INFO_TEXT than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
+      if ($o.Mcu -cne $first.Mcu) { Stop-WithError (T "0x{0:X4}: env {1} builds for MCU '{2}', env {3} for '{4}'" ([int]$first.HwId) $o.Env $o.Mcu $first.Env $first.Mcu) }
       # one port list per HW-ID: ETS offers one list for every firmware of the board
-      if ($portsA -cne $portsB -or $first.PortCount -ne $o.PortCount) { Stop-WithError ("0x{0:X4}: env {1} has other ports than env {2} (HW_PORT_*) - the ports of a board must not depend on the env" -f [int]$first.HwId, $o.Env, $first.Env) }
+      if ($portsA -cne $portsB -or $first.PortCount -ne $o.PortCount) { Stop-WithError (T "0x{0:X4}: env {1} has other ports than env {2} (HW_PORT_*) - the ports of a board must not depend on the env" ([int]$first.HwId) $o.Env $first.Env) }
       for ($i = 0; $i -lt $first.Caps.Count; $i++) {
         # the firmware variants of the board differ in this capability (developer view: "je nach Firmware-Variante")
         if ([bool]$first.Caps[$i] -ne [bool]$o.Caps[$i]) { $first.CapMixed[$i] = $true }
@@ -136,7 +136,7 @@ function Get-ProductBoards($m) {
         $first.Pins[$rn] = @(Get-OrdinalSorted $merged { [regex]::Replace($_.Label, '\d+', { param($mt) $mt.Value.PadLeft(5, '0') }) })
       }
     }
-    Write-Step ("0x{0:X4} built by {1} envs ({2}) - one entry (capabilities: merge any/all, values: largest)" -f [int]$g.Name, $g.Count, (($g.Group | ForEach-Object { $_.Env }) -join ", "))
+    Write-Step (T "0x{0:X4} built by {1} envs ({2}) - one entry (capabilities: merge any/all, values: largest)" ([int]$g.Name) $g.Count (($g.Group | ForEach-Object { $_.Env }) -join ", "))
     Set-BoardMaps $m $first
     $keep = $first
     # drop only the other env members; a <Board> line or pattern board of this HW-ID goes on to the priority dedup
@@ -144,7 +144,7 @@ function Get-ProductBoards($m) {
   }
   # the "not selected" value is one more entry of the selection: it must not be a board's HW-ID
   $clash = @($boards | Where-Object { [int]$_.HwId -eq $m.UnselectedValue }) | Select-Object -First 1
-  if ($clash) { Stop-WithError ("{0} has DEVICE_HW_ID {1}, the value of not selected" -f $clash.Define, $m.UnselectedValue) }
+  if ($clash) { Stop-WithError (T "{0} has DEVICE_HW_ID {1}, the value of not selected" $clash.Define $m.UnselectedValue) }
   # an explicit entry can resolve to the same HW-ID as a pattern board (alias define + flags, e.g.
   # DEVICE_QUINLED_DIG_QUAD_V3 + -DKNX_IP_LAN = 0x2121): the explicit one wins, two explicit ones stop
   $dups = $boards | Group-Object { $_.HwId } | Where-Object { $_.Count -gt 1 }
@@ -154,17 +154,17 @@ function Get-ProductBoards($m) {
     $top = ($d.Group | ForEach-Object { & $rank $_ } | Measure-Object -Maximum).Maximum
     $winners = @($d.Group | Where-Object { (& $rank $_) -eq $top })
     $list = ($d.Group | ForEach-Object { $_.Define }) -join ", "
-    if ($winners.Count -ne 1) { Stop-WithError ("Duplicate DEVICE_HW_ID 0x{0:X4}: {1}" -f [int]$d.Name, $list) }
+    if ($winners.Count -ne 1) { Stop-WithError (T "Duplicate DEVICE_HW_ID 0x{0:X4}: {1}" ([int]$d.Name) $list) }
     $keepDup = $winners[0]
-    Write-Warn ("0x{0:X4} reached twice ({1}) - {2} wins" -f [int]$d.Name, $list, $keepDup.Define)
+    Write-Warn (T "0x{0:X4} reached twice ({1}) - {2} wins" ([int]$d.Name) $list $keepDup.Define)
     $boards = @($boards | Where-Object { $_.HwId -ne [int]$d.Name -or [object]::ReferenceEquals($_, $keepDup) })
   }
   # two boards with the same DEVICE_NAME would show two identical ETS entries
   foreach ($g in ($boards | Group-Object { $_.Name } | Where-Object { $_.Count -gt 1 })) {
     foreach ($b in $g.Group) { $b.Name = "{0} (0x{1:X4})" -f $b.Name, $b.HwId }
-    Write-Warn ("Same DEVICE_NAME for {0} boards - the ETS list adds the HW-ID: {1}" -f $g.Count, $g.Name)
+    Write-Warn (T "Same DEVICE_NAME for {0} boards - the ETS list adds the HW-ID: {1}" $g.Count $g.Name)
   }
-  if ($boards.Count -lt 2) { Stop-WithError "A hardware selection needs at least two boards" }
+  if ($boards.Count -lt 2) { Stop-WithError (T "A hardware selection needs at least two boards") }
   # order="hwid": ascending DEVICE_HW_ID; $b.Index = position in the final list
   if ($m.Order -eq "hwid") { $boards = @($boards | Sort-Object { [int]$_.HwId }) }
   for ($i = 0; $i -lt $boards.Count; $i++) { $boards[$i].Index = $i }
@@ -181,7 +181,7 @@ function Update-SlotsAndPorts($m, $boards) {
     foreach ($b in $boards) {
       foreach ($pt in @($b.Ports)) {
         foreach ($kv in @(@("portManualValue", $m.PortManual), @("portNoneValue", $m.PortNone))) {
-          if (($pt.N - 1) -eq $kv[1]) { Stop-WithError ("{0}: ETS offers port {1}, its port value {3} (port number - 1) is {2} - leave the port out with <Ports use=...> or choose other values (e.g. 254 / 255)" -f $b.Define, $pt.N, $kv[0], $kv[1]) }
+          if (($pt.N - 1) -eq $kv[1]) { Stop-WithError (T "{0}: ETS offers port {1}, its port value {3} (port number - 1) is {2} - leave the port out with <Ports use=...> or choose other values (e.g. 254 / 255)" $b.Define $pt.N $kv[0] $kv[1]) }
         }
       }
     }
@@ -203,32 +203,32 @@ function New-CardImages($m, $boards) {
       foreach ($k in $m.Marks) {
         $img = Read-PngRgba $k.File
         $images += @{ Output = [System.IO.Path]::Combine($infoDir, $k.Name + ".png"); Image = $img }
-        Write-Step ("device card {0}.png: {1}x{2} px from {3}, {4} board(s)" -f $k.Name, $img.Width, $img.Height, $k.File, @($k.Boards).Count)
+        Write-Step (T "device card {0}.png: {1}x{2} px from {3}, {4} board(s)" $k.Name $img.Width $img.Height $k.File (@($k.Boards).Count))
       }
     }
-    catch { Stop-WithError ("<InfoImage>: {0}" -f $_.Exception.Message) }
+    catch { Stop-WithError (T "<InfoImage>: {0}" $_.Exception.Message) }
     $imageIndex = 0
     foreach ($g in $m.InfoGroups) {
       # the link without scheme (the QR code holds the full URL)
       $shown = $g.Url -replace '^[A-Za-z][A-Za-z0-9+.-]*://', ''
       $imageIndex++
-      Write-Activity ("QR-Bild {0}/{1}  {2}" -f $imageIndex, @($m.InfoGroups).Count, $shown)
+      Write-Activity (T "QR picture {0}/{1}  {2}" $imageIndex (@($m.InfoGroups).Count) $shown)
       try { $img = New-QrLinkImage $g.Url $shown $m.Info.Width $m.Info.Module $m.Info.Version $urlFont $m.Info.Supersample $m.Info.UrlRgb }
-      catch { Stop-WithError ("device card {0} ({1}): {2}" -f $g.File, $g.Url, $_.Exception.Message) }
+      catch { Stop-WithError (T "device card {0} ({1}): {2}" $g.File $g.Url $_.Exception.Message) }
       $images += @{ Output = [System.IO.Path]::Combine($infoDir, $g.File); Image = $img }
-      if ($img.Qr.Version -gt $m.Info.Version) { Write-Warn ("device card {0}: the URL needs QR version {1} (manifest version {2}): {3}" -f $g.File, $img.Qr.Version, $m.Info.Version, $g.Url) }
-      Write-Step ("device card {0}: {1}x{2} px, QR version {3}-{4} {5} px, link {6:N1} px: {7}, {8} board(s)" -f $g.File, $img.Width, $img.Height, $img.Qr.Version, $img.Qr.Ec, $img.QrPx, $img.TextW, $shown, $g.Boards.Count)
+      if ($img.Qr.Version -gt $m.Info.Version) { Write-Warn (T "device card {0}: the URL needs QR version {1} (manifest version {2}): {3}" $g.File $img.Qr.Version $m.Info.Version $g.Url) }
+      Write-Step (T "device card {0}: {1}x{2} px, QR version {3}-{4} {5} px, link {6:N1} px: {7}, {8} board(s)" $g.File $img.Width $img.Height $img.Qr.Version $img.Qr.Ec $img.QrPx $img.TextW $shown $g.Boards.Count)
     }
   }
 
   # <Page queryImage>: steps picture of the device query, copied as Baggages/<prefix>Info/Steps.png (at most the page width)
   if ($m.Page -and $m.Page.ImageFile) {
     try { $img = Read-PngRgba $m.Page.ImageFile }
-    catch { Stop-WithError ("<Page> queryImage: {0}" -f $_.Exception.Message) }
-    if ($img.Width -gt $script:EtsPictureMaxWidth) { Stop-WithError ("<Page> queryImage: {0} is {1} px wide, the page is {2} px wide" -f $m.Page.ImageFile, $img.Width, $script:EtsPictureMaxWidth) }
+    catch { Stop-WithError (T "<Page> queryImage: {0}" $_.Exception.Message) }
+    if ($img.Width -gt $script:EtsPictureMaxWidth) { Stop-WithError (T "<Page> queryImage: {0} is {1} px wide, the page is {2} px wide" $m.Page.ImageFile $img.Width $script:EtsPictureMaxWidth) }
     $stepsDir = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($m.Outputs["share"]), "Baggages", ($m.Prefix + "Info"))
     $images += @{ Output = [System.IO.Path]::Combine($stepsDir, "Steps.png"); Image = $img }
-    Write-Step ("query steps Steps.png: {0}x{1} px from {2}" -f $img.Width, $img.Height, $m.Page.ImageFile)
+    Write-Step (T "query steps Steps.png: {0}x{1} px from {2}" $img.Width $img.Height $m.Page.ImageFile)
   }
   return @{ Images = $images }
 }
@@ -237,21 +237,21 @@ function New-CardImages($m, $boards) {
 function New-ProductOutputs($m, $boards) {
   # every output is rendered before the first one is written: an error leaves no half-updated set
   $rendered = @()
-  if ($m.Outputs.ContainsKey("conf")) { Write-OutputActivity "erzeugen" $m.Outputs["conf"]; $rendered += @{ Output = $m.Outputs["conf"]; Text = (New-ConfXml $m $boards) } }
-  if ($m.Outputs.ContainsKey("share")) { Write-OutputActivity "erzeugen" $m.Outputs["share"]; $rendered += @{ Output = $m.Outputs["share"]; Text = (New-ShareXml $m $boards) } }
-  if ($m.Page -and $m.Page.Dev) { Write-OutputActivity "erzeugen" $m.Page.Dev; $rendered += @{ Output = $m.Page.Dev; Text = (New-DevShareXml $m $boards) } }
-  if ($m.Outputs.ContainsKey("script")) { Write-OutputActivity "erzeugen" $m.Outputs["script"]; $rendered += @{ Output = $m.Outputs["script"]; Text = (New-ScriptJs $m $boards) } }
-  if ($m.Outputs.ContainsKey("header")) { Write-OutputActivity "erzeugen" $m.Outputs["header"]; $rendered += @{ Output = $m.Outputs["header"]; Text = (New-Header $m $boards) } }
-  if ($m.Conflicts) { Write-OutputActivity "erzeugen" $m.Conflicts.Output; $rendered += @{ Output = $m.Conflicts.Output; Text = (New-ConflictsXml $m $boards) } }
-  if ($m.Fixes) { Write-OutputActivity "erzeugen" $m.Fixes.Output; $rendered += @{ Output = $m.Fixes.Output; Text = (New-FixesXml $m $boards) } }
+  if ($m.Outputs.ContainsKey("conf")) { Write-OutputActivity (T "build") $m.Outputs["conf"]; $rendered += @{ Output = $m.Outputs["conf"]; Text = (New-ConfXml $m $boards) } }
+  if ($m.Outputs.ContainsKey("share")) { Write-OutputActivity (T "build") $m.Outputs["share"]; $rendered += @{ Output = $m.Outputs["share"]; Text = (New-ShareXml $m $boards) } }
+  if ($m.Page -and $m.Page.Dev) { Write-OutputActivity (T "build") $m.Page.Dev; $rendered += @{ Output = $m.Page.Dev; Text = (New-DevShareXml $m $boards) } }
+  if ($m.Outputs.ContainsKey("script")) { Write-OutputActivity (T "build") $m.Outputs["script"]; $rendered += @{ Output = $m.Outputs["script"]; Text = (New-ScriptJs $m $boards) } }
+  if ($m.Outputs.ContainsKey("header")) { Write-OutputActivity (T "build") $m.Outputs["header"]; $rendered += @{ Output = $m.Outputs["header"]; Text = (New-Header $m $boards) } }
+  if ($m.Conflicts) { Write-OutputActivity (T "build") $m.Conflicts.Output; $rendered += @{ Output = $m.Conflicts.Output; Text = (New-ConflictsXml $m $boards) } }
+  if ($m.Fixes) { Write-OutputActivity (T "build") $m.Fixes.Output; $rendered += @{ Output = $m.Fixes.Output; Text = (New-FixesXml $m $boards) } }
 
   # templates ("Bausteine"): whole generated files, never a splice into a hand-written file
   $vars = @{ Boards = $boards; M = $m }
   foreach ($g in $m.Generates) {
-    Write-OutputActivity "erzeugen" $g.Output
+    Write-OutputActivity (T "build") $g.Output
     $vars["P"] = $g.Params
     try { $text = Invoke-TemplateFile -FullPath $g.Template -Vars $vars -FinalNewline $g.FinalNewline }
-    catch { Stop-WithError ("Template {0}: {1}" -f $g.Template, $_.Exception.Message) }
+    catch { Stop-WithError (T "Template {0}: {1}" $g.Template $_.Exception.Message) }
     $rendered += @{ Output = $g.Output; Text = $text }
   }
   # <Conflicts>: numbers against the module files next to the parts file (hint); a parts file of an earlier run is reported
@@ -275,19 +275,19 @@ function Test-ProductAndGuard($m, $slotFile, $rendered, $images) {
 # @brief Writes (or with -Check compares, with -DryRun lists) every output, the pictures and the page icon; returns the state text of the step
 function Write-ProductOutputs($m, $rendered, $images, $ownOutputs) {
   foreach ($f in (Get-StaleConflictFiles $m $ownOutputs)) {
-    Write-Warn ("{0} is a <Conflicts> parts file of an earlier run (no <Conflicts output> names it any more) - delete it and its op:include lines" -f $f)
+    Write-Warn (T "{0} is a <Conflicts> parts file of an earlier run (no <Conflicts output> names it any more) - delete it and its op:include lines" $f)
     if ($script:CheckMode) { Add-Written $f }
   }
   foreach ($r in $rendered) {
-    Write-OutputActivity "vergleichen" $r.Output
-    if ($DryRun) { Write-Step ("would write {0}" -f $r.Output) }
-    elseif (Update-Utf8File $r.Output $r.Text) { Add-Written $r.Output; Write-Ok ("wrote {0}" -f $r.Output) }
-    else { Write-Detail ("  = unchanged {0}" -f $r.Output) }
+    Write-OutputActivity (T "compare") $r.Output
+    if ($DryRun) { Write-Step (T "would write {0}" $r.Output) }
+    elseif (Update-Utf8File $r.Output $r.Text) { Add-Written $r.Output; Write-Ok (T "wrote {0}" $r.Output) }
+    else { Write-Detail (T "  = unchanged {0}" $r.Output) }
   }
   foreach ($r in $images) {
-    if ($DryRun) { Write-Step ("would write {0}" -f $r.Output) }
-    elseif (Update-PngRgba $r.Output $r.Image.Width $r.Image.Height $r.Image.Pixels) { Add-Written $r.Output; Write-Ok ("wrote {0}" -f $r.Output) }
-    else { Write-Detail ("  = unchanged {0}" -f $r.Output) }
+    if ($DryRun) { Write-Step (T "would write {0}" $r.Output) }
+    elseif (Update-PngRgba $r.Output $r.Image.Width $r.Image.Height $r.Image.Pixels) { Add-Written $r.Output; Write-Ok (T "wrote {0}" $r.Output) }
+    else { Write-Detail (T "  = unchanged {0}" $r.Output) }
   }
   # page icon of the generator (assets/icons/<icon>.png) next to the share: Baggages/Icons/<icon>.png (producer: Icons.zip)
   if ($m.Page -and $m.Page.IconFile) {
@@ -298,14 +298,14 @@ function Write-ProductOutputs($m, $rendered, $images, $ownOutputs) {
       $old = [System.IO.File]::ReadAllBytes($iconOut)
       $same = ($old.Length -eq $iconBytes.Length) -and ([System.Convert]::ToBase64String($old) -ceq [System.Convert]::ToBase64String($iconBytes))
     }
-    if ($DryRun) { Write-Step ("would write {0}" -f $iconOut) }
-    elseif ($same) { Write-Detail ("  = unchanged {0}" -f $iconOut) }
+    if ($DryRun) { Write-Step (T "would write {0}" $iconOut) }
+    elseif ($same) { Write-Detail (T "  = unchanged {0}" $iconOut) }
     elseif ($script:CheckMode) { Add-Written $iconOut }
     else {
       [void](New-Item -ItemType Directory -Force -Path ([System.IO.Path]::GetDirectoryName($iconOut)))
       [System.IO.File]::WriteAllBytes($iconOut, $iconBytes)
       Add-Written $iconOut
-      Write-Ok ("wrote {0}" -f $iconOut)
+      Write-Ok (T "wrote {0}" $iconOut)
     }
   }
   # the generator owns the info folder: pictures it no longer writes go
@@ -315,14 +315,14 @@ function Write-ProductOutputs($m, $rendered, $images, $ownOutputs) {
     $keep = @($images | ForEach-Object { [System.IO.Path]::GetFileName($_.Output) })
     foreach ($f in (Get-ChildItem -LiteralPath $infoDir -Filter "*.png")) {
       if ($keep -notcontains $f.Name) {
-        if (-not $script:CheckMode) { Remove-Item -LiteralPath $f.FullName; Write-Ok ("removed {0}" -f $f.FullName) }
+        if (-not $script:CheckMode) { Remove-Item -LiteralPath $f.FullName; Write-Ok (T "removed {0}" $f.FullName) }
         Add-Written $f.FullName
       }
     }
   }
-  if ($script:CheckMode) { $phaseState = $(if ($script:WrittenCount -eq 0) { "aktuell" } else { "{0} nicht aktuell" -f $script:WrittenCount }) }
-  elseif ($DryRun) { $phaseState = "{0} Datei(en), nichts geschrieben" -f $rendered.Count }
-  else { $phaseState = $(if ($script:WrittenCount -eq 0) { "unver" + [string][char]0xE4 + "ndert" } else { "{0} geschrieben" -f $script:WrittenCount }) }
+  if ($script:CheckMode) { $phaseState = $(if ($script:WrittenCount -eq 0) { T "up to date" } else { T "{0} out of date" $script:WrittenCount }) }
+  elseif ($DryRun) { $phaseState = T "{0} file(s), nothing written" $rendered.Count }
+  else { $phaseState = $(if ($script:WrittenCount -eq 0) { T "unchanged" } else { T "{0} written" $script:WrittenCount }) }
   return $phaseState
 }
 
@@ -334,28 +334,28 @@ function Write-RunSummary($m, $boards, $envCount) {
     # one line per board (by HW-ID), then the summary
     foreach ($b in @($boards | Sort-Object { [int]$_.HwId })) { Write-Host ("  OK 0x{0:X4}  {1}" -f [int]$b.HwId, $b.Name) -ForegroundColor Green }
     $parts = @()
-    if ($envCount -gt 0) { $parts += ("{0} Envs" -f $envCount) }
-    $parts += ("{0} Boards" -f $boards.Count)
+    if ($envCount -gt 0) { $parts += (T "{0} Envs" $envCount) }
+    $parts += (T "{0} Boards" $boards.Count)
     if ($script:CheckMode) {
-      if ($script:WrittenCount -eq 0) { Write-Host ("Hardware: {0}, Check: aktuell" -f ($parts -join ", ")) -ForegroundColor Green; exit 0 }
-      Write-Host ("Hardware: {0}, Check: {1} Datei(en) nicht aktuell: {2} - Generator laufen lassen (veraltete <Conflicts>-Dateien von Hand l{3}schen)" -f ($parts -join ", "), $script:WrittenCount, ($script:WrittenFiles -join ", "), [char]0xF6) -ForegroundColor Red
+      if ($script:WrittenCount -eq 0) { Write-Host (T "Hardware: {0}, Check: up to date" ($parts -join ", ")) -ForegroundColor Green; exit 0 }
+      Write-Host (T "Hardware: {0}, Check: {1} file(s) out of date: {2} - run the generator (delete stale <Conflicts> files by hand)" ($parts -join ", ") $script:WrittenCount ($script:WrittenFiles -join ", ")) -ForegroundColor Red
       exit 1
     }
-    if ($script:WrittenCount -eq 0) { $state = "unver" + [string][char]0xE4 + "ndert" }
-    elseif ($script:WrittenCount -eq 1) { $state = "1 Datei geschrieben" }
-    else { $state = "{0} Dateien geschrieben" -f $script:WrittenCount }
+    if ($script:WrittenCount -eq 0) { $state = T "unchanged" }
+    elseif ($script:WrittenCount -eq 1) { $state = T "1 file written" }
+    else { $state = T "{0} files written" $script:WrittenCount }
     if ($script:WrittenCount -gt 0 -and $script:WrittenCount -le 3) { $state += " (" + ($script:WrittenFiles -join ", ") + ")" }
     Write-Host ("Hardware: {0}, {1}" -f ($parts -join ", "), $state) -ForegroundColor Green
-    if ($script:WarningCount -gt 0) { Write-Host ("  {0} warning(s)" -f $script:WarningCount) -ForegroundColor Yellow }
+    if ($script:WarningCount -gt 0) { Write-Host (T "  {0} warning(s)" $script:WarningCount) -ForegroundColor Yellow }
   }
   else {
     Write-Host ""
     if ($script:CheckMode -and $script:WrittenCount -gt 0) {
-      Write-Host ("  Check: {0} file(s) not current: {1}" -f $script:WrittenCount, ($script:WrittenFiles -join ", ")) -ForegroundColor Red
+      Write-Host (T "  Check: {0} file(s) not current: {1}" $script:WrittenCount ($script:WrittenFiles -join ", ")) -ForegroundColor Red
       exit 1
     }
-    if ($script:CheckMode) { Write-Host "  Check: current" -ForegroundColor Green }
-    elseif ($script:WarningCount -gt 0) { Write-Host ("  done with {0} warning(s)" -f $script:WarningCount) -ForegroundColor Yellow }
-    else { Write-Host "  done" -ForegroundColor Green }
+    if ($script:CheckMode) { Write-Host (T "  Check: current") -ForegroundColor Green }
+    elseif ($script:WarningCount -gt 0) { Write-Host (T "  done with {0} warning(s)" $script:WarningCount) -ForegroundColor Yellow }
+    else { Write-Host (T "  done") -ForegroundColor Green }
   }
 }

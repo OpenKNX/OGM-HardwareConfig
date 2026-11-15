@@ -136,7 +136,7 @@ function ConvertTo-TplNodes([string]$Text, [string]$Path, [int]$LineOffset = 0) 
   $script:TplLineOffset = $LineOffset
   try { $root = Read-TplBlock -Lines $lines -Pos ([ref]$pos) -Path $Path -Closers @() }
   finally { $script:TplLineOffset = 0 }
-  if ($pos -lt $lines.Length) { throw ("{0}:{1}: unexpected '{2}'" -f $Path, ($pos + 1 + $LineOffset), $lines[$pos].Trim()) }
+  if ($pos -lt $lines.Length) { throw (T "{0}:{1}: unexpected '{2}'" $Path ($pos + 1 + $LineOffset) $lines[$pos].Trim()) }
   # @@params / @@default at the top level declare the parameters of a template (name -> required)
   $declared = $null
   foreach ($nd in $root.Nodes) {
@@ -168,57 +168,57 @@ function Read-TplBlock($Lines, [ref]$Pos, [string]$Path, [string[]]$Closers) {
     switch ($d.Kw) {
       "#" { }
       "for" {
-        if ($d.Arg -notmatch '^\$([A-Za-z_][A-Za-z0-9_]*)\s+in\s+(.+)$') { throw ("{0}:{1}: @@for needs '`$var in <expr>'" -f $Path, $lineNo) }
+        if ($d.Arg -notmatch '^\$([A-Za-z_][A-Za-z0-9_]*)\s+in\s+(.+)$') { throw (T "{0}:{1}: @@for needs '`$var in <expr>'" $Path $lineNo) }
         $var = $Matches[1]; $expr = $Matches[2]
         $body = Read-TplBlock -Lines $Lines -Pos $Pos -Path $Path -Closers @("end")
-        if (-not $body.Closer) { throw ("{0}:{1}: @@for without @@end" -f $Path, $lineNo) }
+        if (-not $body.Closer) { throw (T "{0}:{1}: @@for without @@end" $Path $lineNo) }
         $Pos.Value++
         $nodes.Add(@{ T = "for"; Var = $var; Expr = $expr; Body = $body.Nodes; Line = $lineNo; Path = $Path })
       }
       "if" {
-        if (-not $d.Arg) { throw ("{0}:{1}: @@if needs an expression" -f $Path, $lineNo) }
+        if (-not $d.Arg) { throw (T "{0}:{1}: @@if needs an expression" $Path $lineNo) }
         $branches = New-Object System.Collections.Generic.List[object]
         $cond = $d.Arg
         $elseNodes = $null
         while ($true) {
           $part = Read-TplBlock -Lines $Lines -Pos $Pos -Path $Path -Closers @("elseif", "else", "end")
-          if (-not $part.Closer) { throw ("{0}:{1}: @@if without @@end" -f $Path, $lineNo) }
+          if (-not $part.Closer) { throw (T "{0}:{1}: @@if without @@end" $Path $lineNo) }
           $Pos.Value++
           if ($null -ne $cond) { $branches.Add(@{ Expr = $cond; Body = $part.Nodes }) } else { $elseNodes = $part.Nodes }
-          if ($part.Closer.Kw -eq "else" -and $part.Closer.Arg) { throw ("{0}:{1}: @@else takes no expression (@@elseif?)" -f $Path, $part.Line) }
-          if ($part.Closer.Kw -eq "elseif" -and -not $part.Closer.Arg) { throw ("{0}:{1}: @@elseif needs an expression" -f $Path, $part.Line) }
+          if ($part.Closer.Kw -eq "else" -and $part.Closer.Arg) { throw (T "{0}:{1}: @@else takes no expression (@@elseif?)" $Path $part.Line) }
+          if ($part.Closer.Kw -eq "elseif" -and -not $part.Closer.Arg) { throw (T "{0}:{1}: @@elseif needs an expression" $Path $part.Line) }
           if ($part.Closer.Kw -eq "end") { break }
-          if ($null -eq $cond) { throw ("{0}:{1}: nothing may follow @@else but @@end" -f $Path, $part.Line) }
+          if ($null -eq $cond) { throw (T "{0}:{1}: nothing may follow @@else but @@end" $Path $part.Line) }
           if ($part.Closer.Kw -eq "elseif") { $cond = $part.Closer.Arg } else { $cond = $null }
         }
         $nodes.Add(@{ T = "if"; Branches = $branches; Else = $elseNodes; Line = $lineNo; Path = $Path })
       }
       "set" {
-        if ($d.Arg -notmatch '^\$([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$') { throw ("{0}:{1}: @@set needs '`$name = <expr>'" -f $Path, $lineNo) }
+        if ($d.Arg -notmatch '^\$([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$') { throw (T "{0}:{1}: @@set needs '`$name = <expr>'" $Path $lineNo) }
         $nodes.Add(@{ T = "set"; Var = $Matches[1]; Expr = $Matches[2]; Line = $lineNo; Path = $Path })
       }
       "default" {
-        if ($d.Arg -notmatch '^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$') { throw ("{0}:{1}: @@default needs 'Name = <expr>'" -f $Path, $lineNo) }
+        if ($d.Arg -notmatch '^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$') { throw (T "{0}:{1}: @@default needs 'Name = <expr>'" $Path $lineNo) }
         $nodes.Add(@{ T = "default"; Name = $Matches[1]; Expr = $Matches[2]; Line = $lineNo; Path = $Path })
       }
       "expand" { $nodes.Add(@{ T = "expand"; Expr = $d.Arg; Line = $lineNo; Path = $Path }) }
       "params" {
         $names = @($d.Arg -split '\s+' | Where-Object { $_ })
-        foreach ($nm in $names) { if ($nm -notmatch '^[A-Za-z_][A-Za-z0-9_]*!?$') { throw ("{0}:{1}: @@params takes names, 'Name!' = required" -f $Path, $lineNo) } }
+        foreach ($nm in $names) { if ($nm -notmatch '^[A-Za-z_][A-Za-z0-9_]*!?$') { throw (T "{0}:{1}: @@params takes names, 'Name!' = required" $Path $lineNo) } }
         $nodes.Add(@{ T = "params"; Names = $names; Line = $lineNo; Path = $Path })
       }
       "use" {
-        if ($d.Arg -notmatch '^(\S+)\s*(.*)$') { throw ("{0}:{1}: @@use needs a file" -f $Path, $lineNo) }
+        if ($d.Arg -notmatch '^(\S+)\s*(.*)$') { throw (T "{0}:{1}: @@use needs a file" $Path $lineNo) }
         $node = @{ T = "use"; File = $Matches[1]; Expr = $Matches[2]; TextParams = @{}; TextOrigins = @{}; Line = $lineNo; Path = $Path }
         # text parameters follow directly; @@enduse closes them
         $next = $null
         if ($Pos.Value -lt $Lines.Length) { $next = Get-TplDirective $Lines[$Pos.Value] }
         if ($null -ne $next -and $next.Kw -eq "param") {
           while ($true) {
-            if ($Pos.Value -ge $Lines.Length) { throw ("{0}:{1}: @@use without @@enduse" -f $Path, $lineNo) }
+            if ($Pos.Value -ge $Lines.Length) { throw (T "{0}:{1}: @@use without @@enduse" $Path $lineNo) }
             $pd = Get-TplDirective $Lines[$Pos.Value]
             if ($null -ne $pd -and $pd.Kw -eq "enduse") { $Pos.Value++; break }
-            if ($null -eq $pd -or $pd.Kw -ne "param") { throw ("{0}:{1}: only @@param blocks may stand between @@use and @@enduse" -f $Path, ($Pos.Value + 1)) }
+            if ($null -eq $pd -or $pd.Kw -ne "param") { throw (T "{0}:{1}: only @@param blocks may stand between @@use and @@enduse" $Path ($Pos.Value + 1)) }
             $pname = $pd.Arg
             # file line of the @@param directive: the body starts on the next line
             $node.TextOrigins[$pname] = @{ Path = $Path; Offset = $Pos.Value + 1 + $script:TplLineOffset }
@@ -226,7 +226,7 @@ function Read-TplBlock($Lines, [ref]$Pos, [string]$Path, [string[]]$Closers) {
             $raw = New-Object System.Collections.Generic.List[string]
             $depth = 0
             while ($true) {
-              if ($Pos.Value -ge $Lines.Length) { throw ("{0}:{1}: @@param without @@endparam" -f $Path, $lineNo) }
+              if ($Pos.Value -ge $Lines.Length) { throw (T "{0}:{1}: @@param without @@endparam" $Path $lineNo) }
               $l = $Lines[$Pos.Value]
               $ld = Get-TplDirective $l
               $Pos.Value++
@@ -242,7 +242,7 @@ function Read-TplBlock($Lines, [ref]$Pos, [string]$Path, [string[]]$Closers) {
         }
         $nodes.Add($node)
       }
-      default { throw ("{0}:{1}: unknown or misplaced directive @@{2}" -f $Path, $lineNo, $d.Kw) }
+      default { throw (T "{0}:{1}: unknown or misplaced directive @@{2}" $Path $lineNo $d.Kw) }
     }
   }
   return @{ Nodes = $nodes; Closer = $null }
@@ -260,7 +260,7 @@ function Get-TplCompiled([string]$Expr, $Node) {
   if ($script:TplSbCache.ContainsKey($Expr)) { return $script:TplSbCache[$Expr] }
   $tokens = $null; $errs = $null
   $ast = [System.Management.Automation.Language.Parser]::ParseInput($Expr, [ref]$tokens, [ref]$errs)
-  if ($errs.Count -gt 0) { throw ("{0}:{1}: {2} in '{3}'" -f $Node.Path, $Node.Line, $errs[0].Message, $Expr) }
+  if ($errs.Count -gt 0) { throw (T "{0}:{1}: {2} in '{3}'" $Node.Path $Node.Line $errs[0].Message $Expr) }
   $defined = @{}
   foreach ($a in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.ParameterAst] }, $true)) { $defined[$a.Name.VariablePath.UserPath] = $true }
   foreach ($a in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.ForEachStatementAst] }, $true)) { $defined[$a.Variable.VariablePath.UserPath] = $true }
@@ -271,7 +271,7 @@ function Get-TplCompiled([string]$Expr, $Node) {
   foreach ($v in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.VariableExpressionAst] }, $true)) {
     $path = $v.VariablePath
     if ($path.DriveName -eq "env") { continue }
-    if (-not $path.IsUnqualified) { throw ("{0}:{1}: only template variables may be used, not '`${2}' in '{3}'" -f $Node.Path, $Node.Line, $path.UserPath, $Expr) }
+    if (-not $path.IsUnqualified) { throw (T "{0}:{1}: only template variables may be used, not '`${2}' in '{3}'" $Node.Path $Node.Line $path.UserPath $Expr) }
     $name = $path.UserPath
     if ($defined.ContainsKey($name) -or $script:TplAutoVars -contains $name) { continue }
     $reads[$name] = $true
@@ -282,7 +282,7 @@ function Get-TplCompiled([string]$Expr, $Node) {
   $text = $Expr
   if ($stmts.Count -eq 1 -and $stmts[0] -is [System.Management.Automation.Language.PipelineAst]) { $text = ",(" + $Expr + "`n)" }
   try { $sb = [scriptblock]::Create($text) }
-  catch { throw ("{0}:{1}: {2} in '{3}'" -f $Node.Path, $Node.Line, $_.Exception.Message, $Expr) }
+  catch { throw (T "{0}:{1}: {2} in '{3}'" $Node.Path $Node.Line $_.Exception.Message $Expr) }
   # parameter reads: $P.Name and $P['Name'] / $P["Name"]; method calls and the hashtable's own members are no reads
   $pReads = @{}
   foreach ($mx in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.MemberExpressionAst] }, $true)) {
@@ -305,12 +305,12 @@ function Get-TplCompiled([string]$Expr, $Node) {
 function Invoke-TplExpr([string]$__expr, [hashtable]$__tplctx, $__node) {
   $__c = Get-TplCompiled $__expr $__node
   foreach ($__n in $__c.Reads) {
-    if (-not $__tplctx.ContainsKey($__n)) { throw ("{0}:{1}: unknown variable `${2} in '{3}'" -f $__node.Path, $__node.Line, $__n, $__expr) }
+    if (-not $__tplctx.ContainsKey($__n)) { throw (T "{0}:{1}: unknown variable `${2} in '{3}'" $__node.Path $__node.Line $__n $__expr) }
   }
   $__decl = $__tplctx["__declared"]
   if ($null -ne $__decl) {
     foreach ($__n in $__c.PReads) {
-      if (-not $__decl.ContainsKey($__n)) { throw ("{0}:{1}: parameter {2} is not declared by @@params in '{3}'" -f $__node.Path, $__node.Line, $__n, $__expr) }
+      if (-not $__decl.ContainsKey($__n)) { throw (T "{0}:{1}: parameter {2} is not declared by @@params in '{3}'" $__node.Path $__node.Line $__n $__expr) }
     }
   }
   foreach ($__k in $__tplctx.Keys) {
@@ -318,7 +318,7 @@ function Invoke-TplExpr([string]$__expr, [hashtable]$__tplctx, $__node) {
     Set-Variable -Name $__k -Value $__tplctx[$__k]
   }
   try { $__r = & $__c.Sb }
-  catch { throw ("{0}:{1}: {2} in '{3}'" -f $__node.Path, $__node.Line, $_.Exception.Message, $__expr) }
+  catch { throw (T "{0}:{1}: {2} in '{3}'" $__node.Path $__node.Line $_.Exception.Message $__expr) }
   return , $__r
 }
 
@@ -361,7 +361,7 @@ function Expand-TplLine([string]$Text, [hashtable]$Ctx, $Node) {
       }
       $j++
     }
-    if ($end -lt 0) { throw ("{0}:{1}: '{{{{' without '}}}}'" -f $Node.Path, $Node.Line) }
+    if ($end -lt 0) { throw (T "{0}:{1}: '{{{{' without '}}}}'" $Node.Path $Node.Line) }
     $expr = $Text.Substring($start + 2, $end - $start - 2)
     [void]$sb.Append((ConvertTo-TplString (Invoke-TplExpr $expr $Ctx $Node)))
     $i = $end + 2
@@ -384,7 +384,7 @@ function Resolve-TplFile([string]$File, [string]$FromPath) {
 # @brief Parsed template of a file (cached)
 function Get-TplFile([string]$FullPath) {
   if (-not $script:TplFileCache.ContainsKey($FullPath)) {
-    if (-not (Test-Path -LiteralPath $FullPath -PathType Leaf)) { throw "Template not found: $FullPath" }
+    if (-not (Test-Path -LiteralPath $FullPath -PathType Leaf)) { throw (T "Template not found: {0}" $FullPath) }
     $text = [System.IO.File]::ReadAllText($FullPath, [System.Text.Encoding]::UTF8)
     $script:TplFileCache[$FullPath] = ConvertTo-TplNodes -Text $text -Path $FullPath
   }
@@ -440,7 +440,7 @@ function Invoke-TplNodes($Nodes, [hashtable]$Ctx, $Out) {
         $params = @{}
         if ($n.Expr) {
           $h = Invoke-TplExpr $n.Expr $Ctx $n
-          if ($h -isnot [hashtable]) { throw ("{0}:{1}: the parameters of @@use must be a hashtable" -f $n.Path, $n.Line) }
+          if ($h -isnot [hashtable]) { throw (T "{0}:{1}: the parameters of @@use must be a hashtable" $n.Path $n.Line) }
           foreach ($k in $h.Keys) { $params[$k] = $h[$k] }
         }
         foreach ($k in $n.TextParams.Keys) { $params[$k] = $n.TextParams[$k] }
@@ -463,10 +463,10 @@ function Invoke-TplNodes($Nodes, [hashtable]$Ctx, $Out) {
 function Test-TplParams($Tpl, [hashtable]$Params, [string]$Where) {
   if ($null -eq $Tpl.Declared) { return }
   foreach ($k in $Params.Keys) {
-    if (-not $Tpl.Declared.ContainsKey($k)) { throw ("{0}: unknown parameter '{1}' (declared: {2})" -f $Where, $k, (($Tpl.Declared.Keys | Sort-Object) -join ", ")) }
+    if (-not $Tpl.Declared.ContainsKey($k)) { throw (T "{0}: unknown parameter '{1}' (declared: {2})" $Where $k (($Tpl.Declared.Keys | Sort-Object) -join ", ")) }
   }
   foreach ($k in $Tpl.Declared.Keys) {
-    if ($Tpl.Declared[$k] -and (-not $Params.ContainsKey($k) -or $null -eq $Params[$k])) { throw ("{0}: parameter '{1}' is required" -f $Where, $k) }
+    if ($Tpl.Declared[$k] -and (-not $Params.ContainsKey($k) -or $null -eq $Params[$k])) { throw (T "{0}: parameter '{1}' is required" $Where $k) }
   }
 }
 

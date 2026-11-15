@@ -35,7 +35,7 @@ function New-FixesXml($M, $Boards) {
   [void]$sb.AppendLine('  </Block>')
   foreach ($f in $M.Fixes.Items) {
     $ci = -1; for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -ceq $f.Capability) { $ci = $i } }
-    if ($ci -lt 0) { Stop-WithError ("<Fix name=`"{0}`">: capability {1} not found" -f $f.Name, $f.Capability) }
+    if ($ci -lt 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} not found" $f.Name $f.Capability) }
     $ids = Get-IdList @($Boards | Where-Object { $_.Caps[$ci] })
     $attrs = ""
     if ($f.Indent) { $attrs += (" IndentLevel=`"{0}`"" -f $f.Indent) }

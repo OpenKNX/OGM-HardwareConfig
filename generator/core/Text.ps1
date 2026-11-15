@@ -100,7 +100,7 @@ function Split-SentenceText([string]$Text, [int]$MaxLen = 255) {
   $cur = ""
   foreach ($sent in ($Text -split '(?<=[.!?])\s+')) {
     if (-not $sent) { continue }
-    if ($sent.Length -gt $MaxLen) { throw "a sentence is longer than $MaxLen characters: $sent" }
+    if ($sent.Length -gt $MaxLen) { throw (T "a sentence is longer than {0} characters: {1}" $MaxLen $sent) }
     if ($cur -and ($cur.Length + 1 + $sent.Length) -gt $MaxLen) { $parts.Add($cur); $cur = "" }
     if ($cur) { $cur = $cur + " " + $sent } else { $cur = $sent }
   }

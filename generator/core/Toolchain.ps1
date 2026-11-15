@@ -39,12 +39,12 @@ function Test-CppPreprocessor([string]$Path) {
     $exitCode = $LASTEXITCODE
   }
   catch {
-    Write-Warn ("skipping unusable compiler {0}: {1}" -f $Path, $_)
+    Write-Warn (T "skipping unusable compiler {0}: {1}" $Path $_)
     return $false
   }
   finally { $ErrorActionPreference = $prevEap }
   if ($exitCode -eq 0 -and (@($out | ForEach-Object { "$_".Trim() }) -contains "OPENKNX_CPP_PROBE_OK")) { return $true }
-  Write-Warn ("skipping unusable compiler {0} (exit {1}): {2}" -f $Path, $exitCode, ((@($out) | Select-Object -First 3) -join " | "))
+  Write-Warn (T "skipping unusable compiler {0} (exit {1}): {2}" $Path $exitCode ((@($out) | Select-Object -First 3) -join " | "))
   return $false
 }
 # @brief g++ of the installed PlatformIO toolchains (<core>/packages/toolchain-*/bin/<prefix>-g++[.exe]): prefix -> path
@@ -87,8 +87,8 @@ function Find-Compiler {
   if ($Compiler) {
     $cmd = Get-Command $Compiler -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     $path = if ($cmd) { $cmd.Source } elseif (Test-Path -LiteralPath $Compiler -PathType Leaf) { $Compiler } else { $null }
-    if (-not $path) { Stop-WithError "Compiler not found: $Compiler" }
-    if (-not (Test-CppPreprocessor $path)) { Stop-WithError "Compiler cannot preprocess C++: $Compiler" }
+    if (-not $path) { Stop-WithError (T "Compiler not found: {0}" $Compiler) }
+    if (-not (Test-CppPreprocessor $path)) { Stop-WithError (T "Compiler cannot preprocess C++: {0}" $Compiler) }
     return $path
   }
   $tc = Get-PioToolchains
@@ -99,12 +99,12 @@ function Find-Compiler {
   foreach ($name in @("clang++", "g++", "cpp")) {
     foreach ($cmd in @(Get-Command $name -CommandType Application -ErrorAction SilentlyContinue)) {
       if (Test-CppPreprocessor $cmd.Source) {
-        Write-Warn ("no PlatformIO toolchain in {0} - preprocessor from PATH: {1}" -f [System.IO.Path]::Combine((Get-PioCoreDir), "packages"), $cmd.Source)
+        Write-Warn (T "no PlatformIO toolchain in {0} - preprocessor from PATH: {1}" ([System.IO.Path]::Combine((Get-PioCoreDir), "packages")) $cmd.Source)
         return $cmd.Source
       }
     }
   }
-  Stop-WithError "No working C++ preprocessor found (PlatformIO toolchain, clang++, g++ or cpp). Install PlatformIO or use -Compiler."
+  Stop-WithError (T "No working C++ preprocessor found (PlatformIO toolchain, clang++, g++ or cpp). Install PlatformIO or use -Compiler.")
 }
 # @brief Preprocessor of a board: -Compiler, else the PlatformIO toolchain of its MCU, else the default one (warning once per MCU)
 function Get-BoardCompiler([string]$Mcu) {
@@ -116,18 +116,18 @@ function Get-BoardCompiler([string]$Mcu) {
   foreach ($pfx in (Get-McuToolchainPrefixes $Mcu)) {
     if ($tc.ContainsKey($pfx) -and (Test-CppPreprocessor $tc[$pfx])) { $path = $tc[$pfx]; break }
   }
-  if ($path) { Write-Step ("Preprocessor {0}: {1}" -f $Mcu, $path) }
+  if ($path) { Write-Step (T "Preprocessor {0}: {1}" $Mcu $path) }
   else {
     $path = $script:DefaultCompiler
-    Write-Warn ("no PlatformIO toolchain for MCU {0} (pio pkg install for its platform) - preprocessor {1}" -f $Mcu, $path)
+    Write-Warn (T "no PlatformIO toolchain for MCU {0} (pio pkg install for its platform) - preprocessor {1}" $Mcu $path)
   }
   $script:McuCompiler[$Mcu] = $path
   return $path
 }
 # "NAME" or "NAME=VALUE" (as after -D) -> "#define NAME VALUE"; the same as -D, but no command-line quoting
 function ConvertTo-DefineLine([string]$Define) {
-  if ($Define -notmatch '^([A-Za-z_][A-Za-z0-9_]*)(=(.*))?$') { throw "Not a define: $Define" }
-  if ($Define.EndsWith([string][char]92)) { throw "Define ends with a backslash (would continue into the next line): $Define" }
+  if ($Define -notmatch '^([A-Za-z_][A-Za-z0-9_]*)(=(.*))?$') { throw (T "Not a define: {0}" $Define) }
+  if ($Define.EndsWith([string][char]92)) { throw (T "Define ends with a backslash (would continue into the next line): {0}" $Define) }
   if ($Matches[2]) { return "#define {0} {1}" -f $Matches[1], $Matches[3] }
   return "#define {0} 1" -f $Matches[1]
 }
@@ -154,7 +154,7 @@ function Invoke-Preprocessor([string]$Source, [string[]]$Defines, [switch]$Macro
   finally { $ErrorActionPreference = $prevEap }
   if ($exitCode -ne 0) {
     $msg = ($out | Where-Object { "$_" -match 'error' } | Select-Object -First 3) -join " | "
-    throw "Preprocessor failed for -D$($Defines -join ' -D'): $msg"
+    throw (T "Preprocessor failed for -D{0}: {1}" ($Defines -join ' -D') $msg)
   }
   $text = [System.IO.File]::ReadAllText($outFile, [System.Text.Encoding]::UTF8) -replace "`r`n", "`n"
   if ($text.EndsWith("`n")) { $text = $text.Substring(0, $text.Length - 1) }

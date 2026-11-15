@@ -103,7 +103,7 @@ function Get-QrRsRemainder([int[]]$Data, [int[]]$Divisor) {
 
 # @brief Encodes Text (UTF-8, byte mode); Ec = L/M/Q/H; MinVersion raises the version (e.g. room for a logo)
 function New-QrMatrix([string]$Text, [string]$Ec = "M", [int]$MinVersion = 1) {
-  if (-not $script:QrEcFormatBits.ContainsKey($Ec)) { throw "QR: unknown error correction level '$Ec'" }
+  if (-not $script:QrEcFormatBits.ContainsKey($Ec)) { throw (T "QR: unknown error correction level '{0}'" $Ec) }
   $bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
   $version = 0
   for ($v = [Math]::Max(1, $MinVersion); $v -le 40; $v++) {
@@ -111,7 +111,7 @@ function New-QrMatrix([string]$Text, [string]$Ec = "M", [int]$MinVersion = 1) {
     $need = 4 + $ccBits + 8 * $bytes.Length
     if ($need -le (Get-QrDataCodewords $v $Ec) * 8) { $version = $v; break }
   }
-  if ($version -eq 0) { throw "QR: text of $($bytes.Length) bytes does not fit version 40-$Ec" }
+  if ($version -eq 0) { throw (T "QR: text of {0} bytes does not fit version 40-{1}" $bytes.Length $Ec) }
   $capBits = (Get-QrDataCodewords $version $Ec) * 8
 
   # data bit stream: mode 0100, character count, bytes, terminator, padding
