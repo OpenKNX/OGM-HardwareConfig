@@ -734,7 +734,8 @@ Ein entfernter Eintrag bricht den Lauf ab, eine reine Umbenennung ändert man in
 
 Je Produkt-XML (die `*.xml` mit `<op:ETS>` im Ordner der erzeugten Share-Datei, sonst in `<Manifest-Ordner>/src`) hält eine
 Zeile `ets "<Datei>" <ApplicationVersion> <Fingerabdruck>` fest, welchen ETS-Inhalt diese Version hat: alle erzeugten Dateien
-außer C/C++-Dateien (`.h`, `.hpp`, `.c`, `.cpp`), die Bilder und das Seiten-Icon; die Entwickleransicht nur beim Produkt, das sie einbindet. Eine neue
+außer C/C++-Dateien (`.h`, `.hpp`, `.c`, `.cpp`), die Bilder und das Seiten-Icon; die Entwickleransicht nur beim Produkt, das sie einbindet; dazu das Produkt-XML selbst (ohne Kommentare; jede Folge von Leerraum zählt als ein Leerzeichen;
+eingebundene Dateien, die der Generator nicht erzeugt – Lib- und eigene Share-Dateien –, zählen nicht). Eine neue
 Version hält den aktuellen Inhalt fest (die Slot-Datei ändert sich also mit jedem Versionswechsel und gehört in denselben
 Commit). Ändert sich der Inhalt unter der festgehaltenen Version, warnt **jeder** Lauf (auch `-Check`), bis die Version steigt.
 Die Warnung bricht nichts ab, auch die CI nicht. Ein umbenanntes Produkt-XML beginnt neu (ohne Warnung); zwei `ets`-Zeilen für

@@ -2190,7 +2190,10 @@ function Get-ProductXmls($M) {
       if (-not $ets.Success) { continue }   # <op:ETS only inside a comment: no product
       $ver = $null
       if ($ets.Value -match '\bApplicationVersion\s*=\s*["'']([^"'']*)["'']') { $ver = $Matches[1].Trim() }
-      $list += @{ Path = $f; Name = [System.IO.Path]::GetFileName($f); Text = $text; Version = $ver }
+      # content for the version check: without comments (CDATA = scripts stays), white space runs as one blank
+      $content = [regex]::Replace($raw, '(?s)(<!\[CDATA\[.*?\]\]>)|<!--.*?-->', { param($x) if ($x.Groups[1].Success) { $x.Value } else { "" } })
+      $content = [regex]::Replace($content, '\s+', ' ').Trim()
+      $list += @{ Path = $f; Name = [System.IO.Path]::GetFileName($f); Text = $text; Version = $ver; Content = $content }
     }
     if ($list.Count -gt 0) { return ,$list }
   }
@@ -2259,7 +2262,8 @@ function Test-ProductXmls($M, $Products) {
 
 # @brief Appends the ets lines to the slot file text: per product XML its ApplicationVersion and a fingerprint of the ETS
 #        outputs it gets (all rendered outputs except C/C++ files, the pictures and the page icon; the developer view only
-#        for the product that includes it). The line follows the product's version: a new version records the current
+#        for the product that includes it) and of the product XML itself (without comments; included lib files do not
+#        count). The line follows the product's version: a new version records the current
 #        content; under the recorded version a content change warns on every run until the version is raised.
 function Add-EtsFingerprint($M, $SlotFile, $Rendered, $Images, $Products) {
   $base = [System.IO.Path]::GetDirectoryName($M.ManifestPath)
@@ -2291,6 +2295,10 @@ function Add-EtsFingerprint($M, $SlotFile, $Rendered, $Images, $Products) {
         $nb = [System.Text.Encoding]::UTF8.GetBytes(("{0}`n{1} {2}`n" -f $n, $it.Head, $it.Bytes.Length))
         $ms.Write($nb, 0, $nb.Length); $ms.Write($it.Bytes, 0, $it.Bytes.Length)
       }
+      # the product XML itself (e.g. an Assign or a configTransferName there): its own content counts for its own line
+      $pb = [System.Text.Encoding]::UTF8.GetBytes($x.Content)
+      $nb = [System.Text.Encoding]::UTF8.GetBytes(("product:{0}`nfile {1}`n" -f $x.Name, $pb.Length))
+      $ms.Write($nb, 0, $nb.Length); $ms.Write($pb, 0, $pb.Length)
       $hashes[$x.Name] = (Get-PngSha256 $ms.ToArray()).Replace("-", "").Substring(0, 16).ToUpperInvariant()
     }
   }
