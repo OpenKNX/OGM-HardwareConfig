@@ -5,8 +5,9 @@ Kurze Rezepte. Jedes Beispiel zeigt, wo die Angabe hingehört: **Board-Header** 
 **Firmware** (was das Gerät tut). Präfix in allen Beispielen: `HWP`. Begriffe und Attribute: [README](README.md).
 
 Grundregel: Die Applikation fragt nie nach einer HW-ID, sondern nur nach einer Fähigkeit oder einem Wert.
-Ein neues Board braucht dann nur seinen Header-Block. Alles hier läuft mit ETS-Bordmitteln, ohne Script; nur die
-GPIO-Konfliktprüfung (Fall 16) ist eine erzeugte ParameterCalculation.
+Ein neues Board braucht dann nur seinen Header-Block. Die Fälle laufen mit ETS-Bordmitteln; Script erzeugt der Generator
+nur für die Geräteabfrage (Button), die GPIO-Konfliktprüfung (Fall 16) und den Seitentitel im Baum (`<Page unselectedTitle>`,
+Standard an); die beiden letzten sind ParameterCalculations.
 
 **Einstieg:** Fall 1 und 2 reichen für die meisten Applikationen. Die übrigen Fälle sind optional.
 **Alle Fälle in einer knxprod:** [Demo](../examples/HardwareProfileDemo/README.md) (mit Kontexthilfe je Seite).

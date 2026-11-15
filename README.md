@@ -101,12 +101,13 @@ entsprechen `LevelShifterType` von OFM-NeoPixel; ein Build-Flag `-DNEOPIXEL_HW_L
 `HW_INFO_URL` im Board-Block: Info-Seite des Geräts, z. B.
 `#define HW_INFO_URL "https://go.openknx.de/kneopix"` (Kurzlink: kürzere URL, kleinerer QR-Code; der Link muss in
 eine Zeile von 150 px passen). Der [Generator](generator/README.md) zeigt sie in ETS als QR-Code mit dem Link ohne Schema
-darunter (ETS zeigt keine Links); ohne Define kein QR-Code. Die Firmware liest das Makro nicht. Gesetzt bei allen
-KNeoPix-Boards (V1, V1.5, jede MCU), beim UP1 UART Gateway (0x1220) und bei den Shelly-Geräten.
+darunter (ETS zeigt keine Links); ohne Define kein QR-Code. Die Firmware liest das Makro nicht. Welche Boards es setzen:
+`grep -rn HW_INFO_URL include/HardwareConfig` (PowerShell:
+`Get-ChildItem include/HardwareConfig -Recurse -Filter *.h | Select-String HW_INFO_URL`).
 
 `HW_INFO_TEXT` im Board-Block: kurze Beschreibung des Geräts, höchstens 255 Zeichen (ETS-Grenze, der Generator bricht
 sonst ab). Der Generator zeigt sie auf der Hardware-Seite unter dem Gerätenamen (mit Info-URL links neben dem QR-Code); ohne Define
-gilt der Standardtext der Applikation. Gesetzt bei allen KNeoPix- und Mini-Boards, QuinLED Dig-Quad V4 (Ethernet), Gledopto GL-C-017WL und den Shelly-Geräten.
+gilt der Standardtext der Applikation. Welche Boards es setzen: `grep -rn HW_INFO_TEXT include/HardwareConfig` (PowerShell: `Select-String` wie oben).
 
 Bild über dem Gerätenamen: OpenKNX-Logo, bei `#define DEVICE_THIRD_PARTY` im Board-Block das Badge „Drittanbieter“ mit
 Hinweis. Ein eigenes Bild oder keines je Board legt das Manifest der Applikation fest (`<InfoImage><Logo board file>`, siehe

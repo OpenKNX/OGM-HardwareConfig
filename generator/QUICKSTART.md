@@ -6,7 +6,7 @@ Kurzweg für ein bestehendes OAM. Details zu jedem Schritt: [README](README.md).
 **Voraussetzungen**
 
 - `lib/OGM-HardwareConfig` mit dem Generator; in der `dependencies.txt` z. B.
-  `79609cf ec/feat-hw-profile lib/OGM-HardwareConfig https://github.com/OpenKNX/OGM-HardwareConfig`.
+  `<commit> ec/feat-hw-profiler lib/OGM-HardwareConfig https://github.com/OpenKNX/OGM-HardwareConfig`.
 - Jedes Board, das das OAM baut, hat im Board-Header eine `DEVICE_HW_ID` (prüfen: `-ListIds`, neue ID: `-NextId 0x21`).
 - PlatformIO (`pio`) ist installiert; der Generator liest die `release_*`-Envs der `platformio.ini`.
 - Das OAM nutzt OFM-ConfigTransfer (UCT), wie jede knxprod mit Modulliste.
@@ -40,6 +40,9 @@ Envs ohne Board (Test, native) kommen nach `exclude`, z. B. `<Boards platformio=
 <!-- in <generate><Dynamic>: -->
 <op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWP" />
 ```
+
+Das bindet die Seite als eigenen Kanal „Hardware“ ein. Soll sie im OpenKNX-Kanal stehen:
+[README, Applikations-XML](README.md#3-applikations-xml).
 
 Hat das OAM ein Hauptmodul, bekommt `op:define` zusätzlich `isSubmoduleOf="<Präfix>"` (kein eigenes Kontrollkästchen
 unter „Module“). Hardwareabhängige Einstellungen nur über Feature-Flags ein- und ausblenden:
@@ -146,7 +149,7 @@ auch ohne `<Import>` und ohne `header`.
 | Makro | Wirkung | Ohne |
 |---|---|---|
 | `DEVICE_HW_ID` | Identität in ETS und Firmware | Pflicht (Abbruch) |
-| `DEVICE_ID`, `DEVICE_NAME` | Name in der Auswahlliste | Name = `DEVICE_ID`, sonst das Define; `-ListIds` (CI) bricht ohne beide ab |
+| `DEVICE_ID`, `DEVICE_NAME` | Name in der Auswahlliste | Pflicht (Abbruch), `DEVICE_ID` nur aus a-z A-Z 0-9 _ - |
 | `HW_INFO_TEXT`, `HW_INFO_URL` | Text und QR-Code der Gerätekarte | `<Page infoDefault>`, kein QR-Code |
 | `DEVICE_THIRD_PARTY` | Drittanbieter-Badge und `<Notice>` | OpenKNX-Logo |
 | `HW_PORT_COUNT`, `HW_PORT_<n>_GPIO`, `HW_PORT_<n>_LABEL` | Ports des Boards | keine Ports (Label ohne Angabe: „Port n“) |
