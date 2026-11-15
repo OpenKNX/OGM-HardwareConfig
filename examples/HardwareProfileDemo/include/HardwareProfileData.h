@@ -298,7 +298,7 @@ constexpr uint8_t relaySignalGpio(uint16_t selected, uint8_t relayIndex, uint8_t
 } // namespace HardwareProfile
 
 // GPIOs the board uses itself: the set of the ETS conflict check (<Conflicts reserved="true">). Flash / PSRAM pins from the
-// ESP-IDF headers; CS1 needs CONFIG_SPIRAM and BOARD_HAS_PSRAM (esp32-hal-psram.h clears CONFIG_SPIRAM without it).
+// ESP-IDF headers; CS1 with CONFIG_SPIRAM (esp32-hal-psram.h clears it without BOARD_HAS_PSRAM only in the lib builder).
 #if defined(ARDUINO_ARCH_ESP32) && defined(__has_include)
 #if __has_include(<soc/spi_pins.h>)
 #include <soc/spi_pins.h>

@@ -9,7 +9,7 @@
 <!-- unselected="showAll": "Nicht gewählt" shows everything (instead of a test device in the list);
      portManualValue / portNoneValue: port values of the port selections (0..n-1 = port n, 10 = manual GPIO, 15 = no port),
      read by the GPIO conflict check (<Conflicts>) and the firmware header (HardwareProfile::signalGpio) -->
-<HardwareProfile prefix="HWP" moduleType="45" text="Hardware" unselected="showAll" order="hwid" portManualValue="10" portNoneValue="15">
+<HardwareProfile prefix="HWP" moduleType="45" text="Gerät" unselected="showAll" order="hwid" portManualValue="10" portNoneValue="15">
 
   <!-- demo boards next to the real ones: include/HardwareConfig.h adds include/DemoBoards.h -->
   <IncludePath>include</IncludePath>

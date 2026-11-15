@@ -276,7 +276,7 @@
       </Script>
     </Static>
     <Dynamic>
-      <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="HardwareProfile" Text="Hardware" Icon="cog-outline">
+      <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="HardwareProfile" Text="Gerät" Icon="cog-outline">
         <ParameterBlock Id="%AID%_PB-nnn" Name="Profile" Text="{{0:Gerät}}" Icon="memory" HelpContext="DEMO-Hardware" TextParameterRefId="%AID%_P-%TT%00903_R-%TT%0090301">
           <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerät auswählen" UIHint="Headline" />
           <ParameterSeparator Id="%AID%_PS-nnn" Text="Diese Applikation gilt für mehrere Geräte. Wählen Sie das Gerät aus, das verbaut ist. Danach sind nur seine Anschlüsse und Einstellungen sichtbar." />
@@ -342,11 +342,11 @@
                 </when>
                 <when test="8481">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="QuinLED Dig-Quad V3 (Ethernet)" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
                 </when>
                 <when test="9216">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="AB-SmartHouse Push Buttons for Gira" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
                 </when>
                 <when test="16128">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Basic" UIHint="Headline" />
@@ -363,15 +363,15 @@
                 </when>
                 <when test="16130">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Pro" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
                 </when>
                 <when test="16144">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 1" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
                 </when>
                 <when test="16145">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 1PM" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
                 </when>
                 <when test="16146">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 2PM" UIHint="Headline" />
@@ -379,14 +379,14 @@
                 </when>
                 <when test="16147">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus i4" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
                 </when>
                 <when test="16148">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plug S" UIHint="Headline" />
                   <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
                     <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
                     <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="71%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="29%" /></Columns>
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." Cell="1,1" />
                     <ParameterRefRef RefId="%AID%_P-%TT%01015_R-%TT%0101501" Cell="1,2" />
                   </ParameterBlock>
                 </when>

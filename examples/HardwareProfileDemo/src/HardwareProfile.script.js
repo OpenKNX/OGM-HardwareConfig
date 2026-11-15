@@ -9,7 +9,7 @@ function HWP_pageTitleNone(input, output, context) {
 }
 
 // capability names in bit order of the device query
-var HWP_capNames = ["Hardware eines Drittanbieters", "KNX TP", "LAN", "WLAN", "Display", "Echtzeituhr (RTC)", "SD-Karte", "Summer / Vibration", "Gro\u00DFer Datenspeicher (mind. 8 MB Flash)", "Leistungsmessung", "Ger\u00E4tetemperatur", "Frontbedienung", "Temperatur/Feuchte", "CO2", "Helligkeit", "Pr\u00E4senz", "Steckmodul Sensor"];
+var HWP_capNames = ["Ger\u00E4t eines Drittanbieters", "KNX TP", "LAN", "WLAN", "Display", "Echtzeituhr (RTC)", "SD-Karte", "Summer / Vibration", "Gro\u00DFer Datenspeicher (mind. 8 MB Flash)", "Leistungsmessung", "Ger\u00E4tetemperatur", "Frontbedienung", "Temperatur/Feuchte", "CO2", "Helligkeit", "Pr\u00E4senz", "Steckmodul Sensor"];
 // capability bits the firmware detects at run time (runtime="true"): no build difference when they differ
 var HWP_runtimeCaps = 65536;
 var HWP_valueNames = ["Bin\u00E4reing\u00E4nge", "Status-LEDs", "Flash-Speicher", "Relais"];
@@ -45,10 +45,10 @@ function HWP_hex4(value) {
     return "0x" + s;
 }
 
-// Query button (<Page button>, default "Vom Geraet lesen"; without <Page> "Hardware vom Geraet abfragen"): reads DEVICE_HW_ID, capability bits and values from the
+// Query button (<Page button>, default "Vom Geraet lesen"; without <Page> the same text): reads DEVICE_HW_ID, capability bits and values from the
 // device (function property 158/4) and sets the hardware selection.
 function HWP_detectHardware(device, online, progress, context) {
-    progress.setText("Hardware: frage Ger\u00E4t ab ...");
+    progress.setText("Ger\u00E4t wird gelesen ...");
     progress.setProgress(10);
     online.connect();
     var resp;
@@ -59,17 +59,17 @@ function HWP_detectHardware(device, online, progress, context) {
     }
     progress.setProgress(60);
     if (!resp || resp.length < 1)
-        throw new Error("Hardware: keine Antwort vom Ger\u00E4t (leere Antwort)");
+        throw new Error("Keine Antwort vom Ger\u00E4t (leere Antwort)");
     if (resp[0] != 0)
-        throw new Error("Hardware: Ger\u00E4t meldet Fehler " + resp[0]);
+        throw new Error("Das Ger\u00E4t meldet Fehler " + resp[0]);
     if (resp.length < 7)
-        throw new Error("Hardware: Antwort zu kurz (" + resp.length + " Byte)");
+        throw new Error("Antwort des Ger\u00E4ts zu kurz (" + resp.length + " Byte)");
 
     var hwId = (resp[1] << 8) | resp[2];
     var caps = (resp[3] | (resp[4] << 8) | (resp[5] << 16) | (resp[6] << 24)) >>> 0;
     var known = HWP_boards[hwId];
     if (!known)
-        throw new Error("Hardware " + HWP_hex4(hwId) + " ist dieser Applikation unbekannt. Applikation aktualisieren.");
+        throw new Error("Ger\u00E4tetyp " + HWP_hex4(hwId) + " ist dieser Applikation unbekannt. Applikation aktualisieren.");
 
     device.getParameterByName("HWP_HardwareSelect").value = hwId;
 
@@ -114,9 +114,9 @@ function HWP_detectHardware(device, online, progress, context) {
     if (notFound.length > 0) off += " Ausgeschaltet (nicht gefunden): " + notFound.join(", ") + ".";
     if (found.length > 0) off += " Eingeschaltet (gefunden): " + found.join(", ") + ".";
     if (diff.length > 0)
-        progress.setText("Hardware: " + known.name + " erkannt. Abweichend gebaut: " + diff.join(", ") + "." + off);
+        progress.setText("Ger\u00E4t: " + known.name + " erkannt. Abweichend gebaut: " + diff.join(", ") + "." + off);
     else
-        progress.setText("Hardware: " + known.name + " (" + HWP_hex4(hwId) + ") erkannt." + off);
+        progress.setText("Ger\u00E4t: " + known.name + " (" + HWP_hex4(hwId) + ") erkannt." + off);
 }
 
 // GPIO conflict check (<Conflicts>): HWP_conflictCheck is the LR function of one ParameterCalculation. Every active

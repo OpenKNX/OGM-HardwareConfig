@@ -23,6 +23,53 @@
           <choose ParamRefId="%AID%_P-%TT%09001_R-%TT%0900101">
             <when test="1">
               <choose ParamRefId="%AID%_UP-4500001_R-450000101">
+                <when test="0">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Ohne Auswahl" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Wert der Auswahl: 0 (NOT_SELECTED)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Modus showAll: Nicht gewählt zählt als jede Fähigkeit, alles bleibt sichtbar" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Modul: Präfix HWP, ModuleType 45" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Boards (16)" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x1021  OpenKNX REG1 Basismodul LAN+TP (Board-Nummer 3, DEVICE_REG1_LAN_TP_BASE)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x1022  OpenKNX REG1 Basismodul LAN (Board-Nummer 4, DEVICE_REG1_LAN_BASE)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x1132  OpenKNX REG2 PiPico2 V1 WiFi Display RTC (Board-Nummer 2, DEVICE_REG2_PIPICO2_W_V1_DD_RTC)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x1203  OpenKNX UP1 Taster (Board-Nummer 5, DEVICE_UP1_TAS_4X)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x1310  OpenKNXiao V1 KNeoPix RP2350 (Board-Nummer 0, OKNXHW_OPENKNXIAO_KNEOPIX_RP2350_V1)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x1320  OpenKNXiao V1 KNeoPix ESP32S3 (Board-Nummer 1, OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x2121  QuinLED Dig-Quad V3 (Ethernet) (Board-Nummer 7, DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x2400  AB-SmartHouse Push Buttons for Gira (Board-Nummer 6, DEVICE_AB_BUT_GIR)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F00  Demo Raumcontroller Basic (Board-Nummer 8, DEMO_RAUMCONTROLLER_BASIC)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F01  Demo Raumcontroller Plus (Board-Nummer 9, DEMO_RAUMCONTROLLER_PLUS)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F02  Demo Raumcontroller Pro (Board-Nummer 10, DEMO_RAUMCONTROLLER_PRO)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F10  Demo Shelly Plus 1 (Board-Nummer 11, DEMO_SHELLY_PLUS_1)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F11  Demo Shelly Plus 1PM (Board-Nummer 12, DEMO_SHELLY_PLUS_1PM)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F12  Demo Shelly Plus 2PM (Board-Nummer 13, DEMO_SHELLY_PLUS_2PM)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F13  Demo Shelly Plus i4 (Board-Nummer 14, DEMO_SHELLY_PLUS_I4)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F14  Demo Shelly Plug S (Board-Nummer 15, DEMO_SHELLY_PLUG_S)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Geräteabfrage 158/4" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 0: ThirdParty - Gerät eines Drittanbieters" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 1: Tp - KNX TP" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 2: Lan - LAN" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 3: Wifi - WLAN" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 4: Display - Display" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 5: Rtc - Echtzeituhr (RTC)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 6: SdCard - SD-Karte" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 7: Buzzer - Summer / Vibration" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 8: LargeFlash - Großer Datenspeicher (mind. 8 MB Flash)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 9: PowerMeter - Leistungsmessung" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 10: Temperature - Gerätetemperatur" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 11: FrontControls - Frontbedienung" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 12: TempHum - Temperatur/Feuchte" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 13: Co2 - CO2" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 14: Lux - Helligkeit" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 15: Presence - Präsenz" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 16: SensorModule - Steckmodul Sensor" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Wert 0: BinaryInputs - Binäreingänge" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Wert 1: StatusLeds - Status-LEDs" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Wert 2: FlashMB - Flash-Speicher" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Wert 3: Relays - Relais" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Schalter (Speicher)" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="SensorModule: BitOffset 0, Maske 0x80 - Steckmodul Sensor" />
+                </when>
                 <when test="4129">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Board" UIHint="Headline" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="HW-ID: 0x1021" />

@@ -39,4 +39,4 @@ val 1 = StatusLeds
 val 2 = FlashMB
 val 3 = Relays
 # ETS content per product XML: ets "<file>" <ApplicationVersion> <fingerprint>; kept until the version changes
-ets "HardwareProfileDemo.xml" 2.1 E1902DB82E05291C
+ets "HardwareProfileDemo.xml" 2.2 5D1D8CCCFD89C136
