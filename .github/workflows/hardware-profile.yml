@@ -3,8 +3,9 @@
 #   1. -ListIds: every DEVICE_HW_ID once, DEVICE_ID / DEVICE_NAME present, HW_INFO_TEXT <= 255 characters
 #   2. -Check on the demo: the committed generated files match the headers and the generator
 #   3. job summary: board list and, when the check fails, which generated files the change affects
-# Only the PlatformIO CLI is installed (no platforms): the preprocessor is the host compiler (g++ / clang++ in PATH)
-# without ARDUINO_ARCH_* defines, see generator/README.md "Ein Ausdruck, zwei Verbraucher".
+# PlatformIO CLI plus the platforms of the demo envs without their packages: the board manifests give MCU, memory type
+# and BOARD_HAS_PSRAM (ESP32 flash / PSRAM GPIOs of <Conflicts reserved>); no toolchain, so the preprocessor is the host
+# compiler (g++ / clang++ in PATH), see generator/README.md "Ein Ausdruck, zwei Verbraucher".
 name: Hardware profile
 
 on:
@@ -40,6 +41,25 @@ jobs:
           New-Item -ItemType Directory -Force -Path $lib | Out-Null
           New-Item -ItemType Junction -Path "$lib/OGM-Common" -Target (Resolve-Path "_deps/OGM-Common") | Out-Null
           New-Item -ItemType Junction -Path "$lib/OGM-HardwareConfig" -Target (Resolve-Path ".") | Out-Null
+
+      - name: PlatformIO platforms of the demo (board manifests, no toolchains)
+        working-directory: examples/HardwareProfileDemo
+        run: |
+          # without the board manifest an env has no MCU: an ESP32 board loses its flash / PSRAM GPIOs and -Check differs
+          # pio / git write progress to stderr; exit codes decide
+          $ErrorActionPreference = "Continue"
+          $json = (pio project config -d . --json-output) -join "`n"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $specs = @()
+          foreach ($section in (ConvertFrom-Json $json)) {
+            if (-not ([string]$section[0]).StartsWith("env:")) { continue }
+            foreach ($option in $section[1]) { if ($option[0] -eq "platform") { $specs += [string]$option[1] } }
+          }
+          if ($specs.Count -eq 0) { Write-Host "no platform in the demo envs"; exit 1 }
+          foreach ($spec in @($specs | Sort-Object -Unique)) {
+            pio pkg install --global --skip-dependencies --platform $spec
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
 
       - name: Board headers (-ListIds)
         run: |

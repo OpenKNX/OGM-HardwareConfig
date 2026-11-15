@@ -507,6 +507,11 @@ Generator liest `BOARD_HAS_PSRAM` aus den Build-Flags, `board_build.extra_flags`
 zählen bei einem Speichertyp `*_opi` (wie die Plattform: `board_build.memory_type`, sonst
 `board_build.arduino.memory_type`, sonst `build.arduino.memory_type` bzw. `build.memory_type` des Board-Manifests; das
 Manifest wird auch gelesen, wenn das Env `board_build.mcu` setzt). RP2040/RP2350 haben einen eigenen QSPI-Bus, keinen GPIO. Ein ESP32-Typ ohne Tabelle gibt eine Warnung.
+Ohne Board-Manifest (Plattform nicht installiert) fehlen MCU, Speichertyp und `BOARD_HAS_PSRAM` des Manifests: ohne MCU
+keine Flash-/PSRAM-Pins (mit Warnung); mit `board_build.mcu` im Env die Pins der Spalte „immer“, CS1 und Oktal-Pins aber
+nur, wenn das Env `BOARD_HAS_PSRAM` bzw. den Speichertyp selbst setzt (ohne Warnung). Die CI installiert deshalb die
+Plattformen der Demo-Envs, ohne Toolchains und Frameworks: Variant-Konstanten aus `pins_arduino.h` (z. B. `D8`) löst sie
+nicht auf; ein reservierter Pin mit einer solchen Konstante bricht dort mit `<Conflicts reserved="true">` den Lauf ab.
 
 ETS wertet je Env aus (MCU, Speichertyp, `MASK_VERSION` des Envs); mehrere Envs eines Boards ergeben die Vereinigung. Die
 KNX-UART-Pins eines Boards, dessen Envs TP und IP mischen (z. B. KNeoPix ESP32-S3: TP, IP, TP+WLAN unter einer HW-ID),
@@ -624,7 +629,7 @@ bzw. `ARDUINO_ARCH_ESP32`), so sieht der Board-Header dieselben Zweige wie die F
 (mit Warnung); `-Compiler` geht allem vor. Jeder Kandidat muss eine C++-Probe vorverarbeiten (ein Makro wird ersetzt). Eine kaputte Installation (z. B.
 fehlendes Compiler-Frontend) wird gemeldet und übersprungen; scheitert danach ein Board, bricht der Lauf mit dem
 Board und der Meldung des Compilers ab.
-Boards ohne Env und Envs, deren MCU PlatformIO nicht kennt (z. B. ohne installierte Plattform, wie in der CI), sehen kein
+Boards ohne Env und Envs, deren MCU PlatformIO nicht kennt (z. B. ohne installierte Plattform), sehen kein
 `ARDUINO_ARCH_*`: Eine Fähigkeit darf deshalb nicht von `ARDUINO_ARCH_*` abhängen.
 
 Die Header benennen gleiche Dinge verschieden (LAN: `ETH_SPI_INTERFACE`, `ETH_CLK_MODE`,
