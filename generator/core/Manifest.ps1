@@ -11,7 +11,10 @@ FILEPATH: OGM-HardwareConfig/generator/core/Manifest.ps1
 
 .DESCRIPTION
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
-    Functions: ConvertTo-FlagList, Test-ManifestNodes, Read-Manifest, Get-ConflictInt, ConvertFrom-ConflictCondition, Read-ConflictsNode.
+    Functions: ConvertTo-FlagList, Test-ManifestNodes, Read-Manifest with its sections (Read-ManifestRoot, Read-ManifestOutputs,
+    Read-ManifestCapabilities, Read-ManifestBoards, Read-ManifestPorts, Read-ManifestRoles, Read-ManifestPage, Read-ManifestNotices,
+    Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables), Get-ConflictInt, ConvertFrom-ConflictCondition,
+    Read-ConflictsNode.
 
 .NOTES
     AUTHOR : Erkan Colak
@@ -117,6 +120,28 @@ function Read-Manifest([string]$Path) {
     Roles        = New-Object System.Collections.Generic.List[object]
     Reserved     = @()
   }
+  Read-ManifestRoot $root $m
+  Read-ManifestOutputs $root $m $baseDir
+  $idx = Read-ManifestCapabilities $root $m $baseDir
+  $capIndex = $idx.Cap; $valIndex = $idx.Val
+  Read-ManifestBoards $root $m $baseDir
+  Read-ManifestPorts $root $m
+  Read-ManifestRoles $root $m
+  Read-ManifestPage $root $m $baseDir $capIndex $valIndex
+  Read-ManifestNotices $root $m $capIndex
+  Read-ManifestInfoImage $root $m $baseDir $capIndex
+  # <Conflicts>: optional GPIO conflict check (one ParameterCalculation); absent = no output changes
+  $m.Conflicts = $null
+  $cfNodes = @($root.SelectNodes("Conflicts"))
+  if ($cfNodes.Count -gt 1) { Stop-WithError "<Conflicts> may appear only once" }
+  if ($cfNodes.Count -eq 1) { $m.Conflicts = Read-ConflictsNode $m $cfNodes[0] $baseDir }
+  Read-ManifestFixes $root $m $baseDir $capIndex
+  Read-ManifestBoardTables $root $m $baseDir
+  return $m
+}
+
+# @brief Read-Manifest: Root attributes: prefix/text defaults, unselected, port value encoding, order, removed ids/unselectedValue
+function Read-ManifestRoot($root, $m) {
   if (-not $m.Prefix) { $m.Prefix = "HWP" }
   if (-not $m.Text) { $m.Text = "Ger$([char]0xE4)t" }
   # unselected = what "not selected" (0) means for the feature flags:
@@ -148,7 +173,10 @@ function Read-Manifest([string]$Path) {
   if ($m.Order -ne "manifest" -and $m.Order -ne "hwid") { Stop-WithError "order must be manifest or hwid" }
   # board number ($b.Slot) in IDs: always the slot file (stable over the product life); ids="slot" is still accepted
   if ("$($root.ids)" -and "$($root.ids)" -ne "slot") { Stop-WithError "ids=`"$($root.ids)`" was removed: the board number in IDs always comes from the slot file" }
+}
 
+# @brief Read-Manifest: <Output>, <Generate> templates and <IncludePath>
+function Read-ManifestOutputs($root, $m, $baseDir) {
   # every output is optional; share (the ETS module) needs script and moduleType
   foreach ($o in @("conf", "share", "script", "header")) {
     $p = ""
@@ -172,7 +200,10 @@ function Read-Manifest([string]$Path) {
   foreach ($inc in $root.SelectNodes("IncludePath")) {
     $m.IncludeDirs += [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $inc.InnerText.Trim()))
   }
+}
 
+# @brief Read-Manifest: Capabilities and values (packs of <Import> first, then the manifest), bit order of the slot file, limits; returns the name indexes after the reorder
+function Read-ManifestCapabilities($root, $m, $baseDir) {
   # capability packs first, then the manifest's own entries (same name = override)
   $sources = @()
   foreach ($imp in $root.SelectNodes("Import")) {
@@ -277,6 +308,11 @@ function Read-Manifest([string]$Path) {
   }
   if (@($m.Values | Where-Object { $_.Query }).Count -gt $MAX_VALUES) { Stop-WithError "At most $MAX_VALUES values fit the device query (query=`"false`" leaves a value out)" }
 
+  return @{ Cap = $capIndex; Val = $valIndex }
+}
+
+# @brief Read-Manifest: <Board> lines and <Boards platformio> patterns
+function Read-ManifestBoards($root, $m, $baseDir) {
   foreach ($b in $root.SelectNodes("Board")) { $m.Boards.Add(@{ Define = $b.define; Flags = (ConvertTo-FlagList "$($b.flags)") }) }
   # <Boards platformio="release_*" [project="."]/>: the envs of the PlatformIO project (default: the manifest's folder)
   $m.EnvPatterns = @($root.SelectNodes("Boards") | Where-Object { "$($_.platformio)" } | ForEach-Object {
@@ -287,7 +323,10 @@ function Read-Manifest([string]$Path) {
       @{ Pattern = "$($_.platformio)"; Exclude = $ex; Project = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $proj)) }
     })
   if ($m.Boards.Count -lt 1 -and $m.EnvPatterns.Count -lt 1) { Stop-WithError "No <Board> or <Boards platformio=...> entry" }
+}
 
+# @brief Read-Manifest: <Ports board use max excludeRelayPins>: offered hardware ports per board
+function Read-ManifestPorts($root, $m) {
   # <Ports board="pattern" use="1 3 5-8"/>: the hardware port numbers offered on the matching boards
   $m.PortSets = New-Object System.Collections.Generic.List[object]
   foreach ($ps in $root.SelectNodes("Ports")) {
@@ -313,7 +352,10 @@ function Read-Manifest([string]$Path) {
     if ($mx -and @($nums | Where-Object { $_ -gt [int]$mx }).Count -gt 0) { Stop-WithError ("<Ports board=`"{0}`">: use lists a port above max {1}" -f $pat, $mx) }
     $m.PortSets.Add(@{ Board = $pat; Use = @($nums | Sort-Object); All = (-not $use); ExcludeRelayPins = ($xr -eq "true"); Max = $(if ($mx) { [int]$mx } else { 0 }); Hits = 0 })
   }
+}
 
+# @brief Read-Manifest: <GpioRole> with its <Pins> sources
+function Read-ManifestRoles($root, $m) {
   # number = part of the ETS parameter ID: fixed in the manifest, so reordering roles moves nothing
   $usedNumbers = @{}
   foreach ($r in $root.SelectNodes("GpioRole")) {
@@ -338,7 +380,10 @@ function Read-Manifest([string]$Path) {
     $m.Roles.Add($role)
   }
   if ($m.Roles.Count -gt 9) { Stop-WithError "At most 9 GPIO roles" }
+}
 
+# @brief Read-Manifest: <Page>: texts, icon, help, steps picture, developer view, features
+function Read-ManifestPage($root, $m, $baseDir, $capIndex, $valIndex) {
   # <Page text icon help title label intro queryTitle query button queryHelp queryImage unselectedTitle infoDefault unselectedInfo
   # unselectedText updateInfo features dev/>: the hardware page as an OpenKNX page (the OAM includes ParameterBlock Profile into a
   # channel of its choice): page text and icon (assets/icons/<icon>.png is copied next to the share as Baggages/Icons/<icon>.png),
@@ -423,6 +468,10 @@ function Read-Manifest([string]$Path) {
       if (-not $capIndex.ContainsKey($f) -and -not $valIndex.ContainsKey($f)) { Stop-WithError "<Page features>: $f is neither a capability nor a value" }
     }
   }
+}
+
+# @brief Read-Manifest: <Notice>: information on the page for boards with a capability
+function Read-ManifestNotices($root, $m, $capIndex) {
   # <Notice when="Capability" title="...">text</Notice>: information on the page for boards with that capability; <Text>
   # children are the parts, else the text is split at sentence ends (ETS limits a text to 255 characters)
   $m.Notices = @()
@@ -443,7 +492,10 @@ function Read-Manifest([string]$Path) {
     }
     $m.Notices += $nn
   }
+}
 
+# @brief Read-Manifest: <InfoImage>: device card (logo, badge, QR code + link)
+function Read-ManifestInfoImage($root, $m, $baseDir, $capIndex) {
   # <InfoImage define="HW_INFO_URL" default="" module="2" version="3" width="150" urlFont="NotoSans-Regular-44" supersample="4"
   #   urlColor="#0067C0" logo="..." badge="..." thirdPartyWhen="ThirdParty"/>: device card on the <Page> (ETS elements, no text in
   #   pictures except the link): OpenKNX logo, or the third-party badge on boards with capability thirdPartyWhen; DEVICE_NAME as
@@ -506,11 +558,10 @@ function Read-Manifest([string]$Path) {
     }
     elseif (-not $capIndex.ContainsKey($m.Info.ThirdWhen)) { $m.Info.ThirdWhen = "" }
   }
-  # <Conflicts>: optional GPIO conflict check (one ParameterCalculation); absent = no output changes
-  $m.Conflicts = $null
-  $cfNodes = @($root.SelectNodes("Conflicts"))
-  if ($cfNodes.Count -gt 1) { Stop-WithError "<Conflicts> may appear only once" }
-  if ($cfNodes.Count -eq 1) { $m.Conflicts = Read-ConflictsNode $m $cfNodes[0] $baseDir }
+}
+
+# @brief Read-Manifest: <Fixes>: settings of other modules fixed per capability
+function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
   # <Fixes output><Fix name capability ref value show indent help/></Fixes>: a setting of another module (ParameterRef) set to a
   # value on boards with the capability and shown read-only, hidden or editable there; absent = no output changes
   $m.Fixes = $null
@@ -549,6 +600,10 @@ function Read-Manifest([string]$Path) {
     }
     if ($m.Fixes.Items.Count -eq 0) { Stop-WithError "<Fixes> without <Fix>" }
   }
+}
+
+# @brief Read-Manifest: <BoardTable>: integer macros of an OAM header per board
+function Read-ManifestBoardTables($root, $m, $baseDir) {
   # <BoardTable name header scan>: integer macros of an OAM header per board (index = group 1 of scan); absent = no output changes
   $m.BoardTables = @()
   foreach ($bt in $root.SelectNodes("BoardTable")) {
@@ -569,7 +624,6 @@ function Read-Manifest([string]$Path) {
     $m.BoardTables += $t
   }
   if ($m.BoardTables.Count -gt 0 -and -not $m.Outputs.ContainsKey("script")) { Stop-WithError "<BoardTable> needs <Output script=...> (the table is part of the ETS script)" }
-  return $m
 }
 # @brief Integer attribute of a <Conflicts>/<Use> element: $null when absent, stop when not a number in Min..Max
 function Get-ConflictInt($Node, [string]$Attr, [int]$Min, [int]$Max, [string]$Where) {
