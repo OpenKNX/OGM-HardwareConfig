@@ -77,12 +77,14 @@ function Add-PngChunk([System.Collections.Generic.List[byte]]$List, [string]$Typ
   Add-PngUInt32BE $List (Get-PngCrc32 $body 0 $body.Length)
 }
 
-# @brief zlib stream (RFC 1950): header 78 9C, raw deflate, Adler-32 of the uncompressed data
+# @brief SHA-256 as "XX-XX-..." text; the CryptoServiceProvider class is FIPS-validated (SHA256::Create() is SHA256Managed on
+#        .NET Framework, which a FIPS policy blocks)
 function Get-PngSha256([byte[]]$Bytes) {
-  $sha = [System.Security.Cryptography.SHA256]::Create()
+  $sha = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
   try { return [System.BitConverter]::ToString($sha.ComputeHash($Bytes)) } finally { $sha.Dispose() }
 }
 
+# @brief zlib stream (RFC 1950): header 78 9C, raw deflate, Adler-32 of the uncompressed data
 function ConvertTo-PngZlib([byte[]]$Raw) {
   $ms = New-Object System.IO.MemoryStream
   $ms.WriteByte(0x78); $ms.WriteByte(0x9C)
@@ -216,7 +218,7 @@ function Update-PngRgba([string]$Path, [int]$Width, [int]$Height, [byte[]]$Pixel
       # a file this function wrote holds exactly these scanlines (filter 0 in every row)
       $old = Read-PngRaw $Path
       if ($old.Width -eq $Width -and $old.Height -eq $Height -and $old.BitDepth -eq 8 -and $old.ColorType -eq 6 -and $old.Interlace -eq 0 -and
-          (Get-PngSha256 $old.Idat) -eq (Get-PngSha256 $raw)) { return $false }
+          [System.Convert]::ToBase64String($old.Idat) -ceq [System.Convert]::ToBase64String($raw)) { return $false }
     }
     catch { }   # unreadable file: write it again
   }
