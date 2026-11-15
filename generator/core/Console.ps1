@@ -66,8 +66,48 @@ function Write-Ok([string]$Text) { if (-not $script:Compact) { Write-Host ("  + 
 # @brief Plain log line, only with -Detailed (or -ListIds / -Init / -DryRun)
 function Write-Detail([string]$Text) { if (-not $script:Compact) { Write-Host $Text } }
 function Write-Warn([string]$Text) { Clear-Activity; Write-Host ("  ! " + $Text) -ForegroundColor Yellow; $script:WarningCount++ }
+# @brief Core steps of a run: one numbered line per step with a mark and the time, in every mode; the progress line shows the
+#        running step (compact mode). Marks: Get-PhaseMark
+$script:PhaseCount = 7
+$script:PhaseNo = 0
+$script:PhaseText = ""
+$script:PhaseWatch = $null
+$script:RunWatch = [System.Diagnostics.Stopwatch]::StartNew()
+function Start-Phase([string]$Text) {
+  $script:PhaseNo++
+  $script:PhaseText = $Text
+  $script:PhaseWatch = [System.Diagnostics.Stopwatch]::StartNew()
+  if ($script:Compact) { Write-Activity ("{0}/{1}  {2} ..." -f $script:PhaseNo, $script:PhaseCount, $Text) }
+  else { Write-Host ("  [{0}/{1}] {2} ..." -f $script:PhaseNo, $script:PhaseCount, $Text) -ForegroundColor White }
+}
+function Write-PhaseLine([string]$Mark, [string]$Color, [string]$Detail) {
+  Clear-Activity
+  Write-Host ("  [{0}/{1}] " -f $script:PhaseNo, $script:PhaseCount) -NoNewline -ForegroundColor DarkGray
+  Write-Host $script:PhaseText.PadRight(46) -NoNewline
+  Write-Host (" " + $Mark) -NoNewline -ForegroundColor $Color
+  Write-Host ("{0,6:N1} s" -f $script:PhaseWatch.Elapsed.TotalSeconds) -NoNewline -ForegroundColor DarkGray
+  if ($Detail) { Write-Host ("  " + $Detail) -ForegroundColor Gray } else { Write-Host "" }
+}
+# @brief Marks of the step lines (also used by tests/Test-HardwareProfile.ps1); Windows PowerShell 5.1 gets marks its console
+#        font (e.g. Consolas) has: U+221A, x, -
+function Get-PhaseMark([string]$Kind) {
+  $old = ($PSVersionTable.PSVersion.Major -lt 6)
+  switch ($Kind) {
+    "ok" { if ($old) { return [string][char]0x221A } return [string][char]0x2713 }
+    "fail" { if ($old) { return "x" } return [string][char]0x2717 }
+    default { if ($old) { return "-" } return [string][char]0x2013 }
+  }
+}
+function Complete-Phase([string]$Detail = "") {
+  if (-not $script:PhaseWatch) { return }
+  Write-PhaseLine (Get-PhaseMark "ok") "Green" $Detail
+  $script:PhaseWatch = $null
+}
+
 function Stop-WithError([string]$Text) {
   Clear-Activity
+  # the step that stopped gets its line with a cross before the reason
+  if ($script:PhaseWatch) { Write-PhaseLine (Get-PhaseMark "fail") "Red" ""; $script:PhaseWatch = $null }
   if ($script:Compact -and $script:LastStep) { Write-Host ("  > " + $script:LastStep) -ForegroundColor Cyan }
   Write-Host ("  x " + $Text) -ForegroundColor Red
   exit 1

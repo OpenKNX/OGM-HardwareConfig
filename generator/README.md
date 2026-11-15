@@ -127,7 +127,21 @@ Build-HardwareProfile.ps1 -Detailed` die volle Beschreibung.
 
 Während des Laufs zeigt eine Fortschrittszeile, was gerade passiert (`Env 12/44`, `Board 12/44`, `QR-Bild 1/2`, `erzeugen <Datei>`, `vergleichen <Datei>`); mit `-Detailed` und bei umgeleiteter Ausgabe (CI, Log-Datei) entfällt sie.
 
-Danach: je Board eine Zeile `OK 0x<HW-ID>  <Name>` (nach HW-ID sortiert), dann eine Zusammenfassung, z. B.
+Jeder Kernschritt bekommt eine nummerierte Zeile mit Häkchen, Dauer und Kurzinfo (bei einem Abbruch ein Kreuz, darunter der
+Grund), z. B. für OAM-NeoPixel:
+
+```
+  [1/7] Manifest lesen                                 ✓   0.2 s  5 Fähigkeiten, 2 Werte
+  [2/7] Boards ermitteln (PlatformIO, Board-Header)    ✓  11.7 s  44 Envs, 40 Boards
+  [3/7] Slot-Datei, Port-Werte, Konfliktprüfung        ✓   0.3 s
+  [4/7] Bilder der Gerätekarte                         ✓   1.1 s  5 Bild(er)
+  [5/7] Applikation und Firmware-Header erzeugen       ✓   5.4 s  12 Datei(en)
+  [6/7] Produkt-XML und Versionswache                  ✓   0.0 s  2 Produkt-XML(s)
+  [7/7] Dateien schreiben                              ✓   0.0 s  unverändert
+```
+
+Windows PowerShell 5.1 zeigt statt ✓/✗ die Zeichen √/x (Konsolenschrift). Danach: je Board eine Zeile
+`OK 0x<HW-ID>  <Name>` (nach HW-ID sortiert), dann eine Zusammenfassung, z. B.
 `Hardware: 44 Envs, 40 Boards, 9 Dateien geschrieben` oder `Hardware: 44 Envs, 40 Boards, unverändert`. Warnungen (`!`) und Fehler (`x`, mit
 dem letzten Schritt davor) erscheinen immer. `-Detailed` zeigt das volle Protokoll (Manifest, Boards mit Fähigkeiten und
 Werten, jede Ausgabe); `-ListIds`, `-Init` und `-DryRun` geben immer alles aus.

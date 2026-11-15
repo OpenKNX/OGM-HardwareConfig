@@ -251,9 +251,12 @@ try {
   if ($NextId) { Invoke-NextId }
   if ($Init) { Invoke-Init }
 
+  Start-Phase "Manifest lesen"
   $m = Read-Manifest $Manifest
   $script:IncludeDirs = @($m.IncludeDirs) + @($HardwareConfigInclude)
   Write-Step ("Manifest: {0} board(s), {1} capabilities, {2} values, {3} GPIO role(s), unselected={4}" -f $m.Boards.Count, $m.Capabilities.Count, $m.Values.Count, $m.Roles.Count, $m.Unselected)
+  Complete-Phase ("{0} F{1}higkeiten, {2} Werte" -f $m.Capabilities.Count, [char]0xE4, $m.Values.Count)
+  Start-Phase "Boards ermitteln (PlatformIO, Board-Header)"
 
   # <Board define="OKNXHW_OPENKNXIAO_*"/>: every board of OGM-HardwareConfig with a DEVICE_HW_ID whose
   # define matches - a board added to the headers joins the product without touching the manifest
@@ -402,6 +405,9 @@ try {
   # order="hwid": ascending DEVICE_HW_ID; $b.Index = position in the final list
   if ($m.Order -eq "hwid") { $boards = @($boards | Sort-Object { [int]$_.HwId }) }
   for ($i = 0; $i -lt $boards.Count; $i++) { $boards[$i].Index = $i }
+  $envCount = @($expanded | Where-Object { $_.Env }).Count
+  if ($envCount -gt 0) { Complete-Phase ("{0} Envs, {1} Boards" -f $envCount, $boards.Count) } else { Complete-Phase ("{0} Boards" -f $boards.Count) }
+  Start-Phase "Slot-Datei, Port-Werte, Konfliktpr$([char]0xFC)fung"
   # board number in IDs: the slot file
   $slotFile = Update-BoardSlots $m $boards
   # port value encoding: no offered port may sit on the manual or none value (it could never be selected)
@@ -415,6 +421,8 @@ try {
     }
   }
   if ($m.Conflicts) { Resolve-Conflicts $m $boards }
+  Complete-Phase
+  Start-Phase "Bilder der Ger$([char]0xE4)tekarte"
 
   # device card pictures (logo, badge, QR code + link): rendered with the text outputs, written after them
   $m.InfoGroups = Get-InfoGroups $m $boards
@@ -455,6 +463,8 @@ try {
     Write-Step ("query steps Steps.png: {0}x{1} px from {2}" -f $img.Width, $img.Height, $m.Page.ImageFile)
   }
 
+  Complete-Phase ("{0} Bild(er)" -f @($images).Count)
+  Start-Phase "Applikation und Firmware-Header erzeugen"
   # every output is rendered before the first one is written: an error leaves no half-updated set
   $rendered = @()
   if ($m.Outputs.ContainsKey("conf")) { Write-OutputActivity "erzeugen" $m.Outputs["conf"]; $rendered += @{ Output = $m.Outputs["conf"]; Text = (New-ConfXml $m $boards) } }
@@ -477,6 +487,8 @@ try {
   # <Conflicts>: numbers against the module files next to the parts file (hint); a parts file of an earlier run is reported
   $ownOutputs = @($rendered | ForEach-Object { [System.IO.Path]::GetFullPath($_.Output) })
   if ($m.Conflicts) { Test-ConflictNumbers $m $ownOutputs }
+  Complete-Phase ("{0} Datei(en)" -f $rendered.Count)
+  Start-Phase "Produkt-XML und Versionswache"
   # product XMLs of the OAM: inclusion of the hardware module, ApplicationVersion for the ETS fingerprint
   $products = Get-ProductXmls $m
   Test-ProductXmls $m $products
@@ -484,6 +496,8 @@ try {
     Add-EtsFingerprint $m $slotFile $rendered $images $products
     $rendered += @{ Output = $slotFile.Output; Text = $slotFile.Text }
   }
+  Complete-Phase ("{0} Produkt-XML(s)" -f @($products).Count)
+  if ($script:CheckMode) { Start-Phase "Dateien pr$([char]0xFC)fen" } elseif ($DryRun) { Start-Phase "Dateien anzeigen (-DryRun)" } else { Start-Phase "Dateien schreiben" }
   foreach ($f in (Get-StaleConflictFiles $m $ownOutputs)) {
     Write-Warn ("{0} is a <Conflicts> parts file of an earlier run (no <Conflicts output> names it any more) - delete it and its op:include lines" -f $f)
     if ($script:CheckMode) { Add-Written $f }
@@ -530,11 +544,15 @@ try {
       }
     }
   }
+  if ($script:CheckMode) { $phaseState = $(if ($script:WrittenCount -eq 0) { "aktuell" } else { "{0} nicht aktuell" -f $script:WrittenCount }) }
+  elseif ($DryRun) { $phaseState = "{0} Datei(en), nichts geschrieben" -f $rendered.Count }
+  else { $phaseState = $(if ($script:WrittenCount -eq 0) { "unver" + [string][char]0xE4 + "ndert" } else { "{0} geschrieben" -f $script:WrittenCount }) }
+  Complete-Phase $phaseState
   if ($script:Compact) {
     Clear-Activity
+    Write-Host ""
     # one line per board (by HW-ID), then the summary
     foreach ($b in @($boards | Sort-Object { [int]$_.HwId })) { Write-Host ("  OK 0x{0:X4}  {1}" -f [int]$b.HwId, $b.Name) -ForegroundColor Green }
-    $envCount = @($expanded | Where-Object { $_.Env }).Count
     $parts = @()
     if ($envCount -gt 0) { $parts += ("{0} Envs" -f $envCount) }
     $parts += ("{0} Boards" -f $boards.Count)
@@ -560,6 +578,11 @@ try {
     elseif ($script:WarningCount -gt 0) { Write-Host ("  done with {0} warning(s)" -f $script:WarningCount) -ForegroundColor Yellow }
     else { Write-Host "  done" -ForegroundColor Green }
   }
+}
+catch {
+  # an unexpected error (not Stop-WithError): the running step gets its cross line, the error goes on as before
+  if ($script:PhaseWatch) { Write-PhaseLine (Get-PhaseMark "fail") "Red" ""; $script:PhaseWatch = $null }
+  throw
 }
 finally {
   Clear-Activity
