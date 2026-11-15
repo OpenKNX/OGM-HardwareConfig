@@ -11,16 +11,40 @@ FILEPATH: OGM-HardwareConfig/generator/core/Fixes.ps1
 
 .DESCRIPTION
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
-    Functions: New-FixesXml.
+    Functions: Get-FixGroups, New-FixesXml.
 
 .NOTES
     AUTHOR : Erkan Colak
     Windows PowerShell 5.1 compatible, pure ASCII.
 #>
 
+# @brief Boards and values of one <Fix>: one group per value, Ids = HW-ID list of its boards (board order)
+#        value: one group (the boards with the capability, none = the never-matching ID); valueMacro: the boards whose header
+#        defines the macro (and that have the capability, if named), grouped by the macro value; no such board = no group
+function Get-FixGroups($M, $Boards, $Fix) {
+  $ci = -1
+  if ($Fix.Capability) {
+    for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -ceq $Fix.Capability) { $ci = $i } }
+    if ($ci -lt 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} not found" $Fix.Name $Fix.Capability) }
+  }
+  $withCap = @($Boards | Where-Object { $ci -lt 0 -or $_.Caps[$ci] })
+  if (-not $Fix.ValueMacro) { return , @(@{ Ids = (Get-IdList $withCap); Value = $Fix.Value }) }
+  $groups = New-Object System.Collections.Generic.List[object]
+  foreach ($b in $withCap) {
+    if (-not $b.FixValues.ContainsKey($Fix.Name)) { continue }
+    $v = [string]$b.FixValues[$Fix.Name]
+    $g = @($groups | Where-Object { $_.Value -ceq $v }) | Select-Object -First 1
+    if (-not $g) { $g = @{ Value = $v; Boards = @() }; $groups.Add($g) }
+    $g.Boards += $b
+  }
+  foreach ($g in $groups) { $g.Ids = Get-IdList $g.Boards }
+  return , @($groups.ToArray())
+}
+
 # @brief Parts file of <Fixes>: block ParameterRefs (the read-only rows, into the ParameterRefs of any module) and per <Fix> a
-#        block Fix_<name> that replaces the row of the setting: on boards with the capability the value is assigned and the row is
-#        read-only, hidden or editable; otherwise (also not selected) the normal row
+#        block Fix_<name> that replaces the row of the setting: on boards with the capability (or the value macro) the value is
+#        assigned and the row is read-only, hidden or editable; otherwise (also not selected) the normal row. show="assign": only
+#        the Assigns, the setting keeps its own row
 function New-FixesXml($M, $Boards) {
   $refs = Get-ParamRefIds $M
   $sb = New-Object System.Text.StringBuilder
@@ -34,26 +58,34 @@ function New-FixesXml($M, $Boards) {
   }
   [void]$sb.AppendLine('  </Block>')
   foreach ($f in $M.Fixes.Items) {
-    $ci = -1; for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -ceq $f.Capability) { $ci = $i } }
-    if ($ci -lt 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} not found" $f.Name $f.Capability) }
-    $ids = Get-IdList @($Boards | Where-Object { $_.Caps[$ci] })
+    $groups = Get-FixGroups $M $Boards $f
     $attrs = ""
     if ($f.Indent) { $attrs += (" IndentLevel=`"{0}`"" -f $f.Indent) }
     if ($f.Help) { $attrs += (" HelpContext=`"{0}`"" -f $f.Help) }
     [void]$sb.AppendLine(("  <Block name=`"Fix_{0}`">" -f $f.Name))
-    [void]$sb.AppendLine(("    <choose ParamRefId=`"{0}`">" -f $refs.Select))
-    [void]$sb.AppendLine(("      <when test=`"{0}`">" -f $ids))
-    [void]$sb.AppendLine(("        <Assign TargetParamRefRef=`"{0}`" Value=`"{1}`" />" -f $f.Ref, (ConvertTo-XmlText $f.Value)))
-    # ETS keeps a value per ParameterRef: the read-only row shows its own value, so it gets the same Assign
-    if ($f.Show -eq "readonly") {
-      [void]$sb.AppendLine(("        <Assign TargetParamRefRef=`"{0}`" Value=`"{1}`" />" -f $f.ReadOnlyRef, (ConvertTo-XmlText $f.Value)))
-      [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.ReadOnlyRef, $attrs))
+    if ($groups.Count -eq 0) {
+      # valueMacro on no board: the normal row only (show="assign": nothing)
+      if ($f.Show -ne "assign") { [void]$sb.AppendLine(("    <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.Ref, $attrs)) }
+      [void]$sb.AppendLine('  </Block>')
+      continue
     }
-    elseif ($f.Show -eq "editable") { [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.Ref, $attrs)) }
-    [void]$sb.AppendLine('      </when>')
-    [void]$sb.AppendLine('      <when default="true">')
-    [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.Ref, $attrs))
-    [void]$sb.AppendLine('      </when>')
+    [void]$sb.AppendLine(("    <choose ParamRefId=`"{0}`">" -f $refs.Select))
+    foreach ($g in $groups) {
+      [void]$sb.AppendLine(("      <when test=`"{0}`">" -f $g.Ids))
+      [void]$sb.AppendLine(("        <Assign TargetParamRefRef=`"{0}`" Value=`"{1}`" />" -f $f.Ref, (ConvertTo-XmlText $g.Value)))
+      # ETS keeps a value per ParameterRef: the read-only row shows its own value, so it gets the same Assign
+      if ($f.Show -eq "readonly") {
+        [void]$sb.AppendLine(("        <Assign TargetParamRefRef=`"{0}`" Value=`"{1}`" />" -f $f.ReadOnlyRef, (ConvertTo-XmlText $g.Value)))
+        [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.ReadOnlyRef, $attrs))
+      }
+      elseif ($f.Show -eq "editable") { [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.Ref, $attrs)) }
+      [void]$sb.AppendLine('      </when>')
+    }
+    if ($f.Show -ne "assign") {
+      [void]$sb.AppendLine('      <when default="true">')
+      [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.Ref, $attrs))
+      [void]$sb.AppendLine('      </when>')
+    }
     [void]$sb.AppendLine('    </choose>')
     [void]$sb.AppendLine('  </Block>')
   }

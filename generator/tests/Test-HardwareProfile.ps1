@@ -20,7 +20,12 @@ FILEPATH: OGM-HardwareConfig/generator/tests/Test-HardwareProfile.ps1
       Version guard  a comment in the product XML does not warn, an attribute does, a new version records it, a second ets
                      line stops
       Manifest       unknown attribute warns; invalid prefix and ids="index" stop
-      Fixes          parts file with both Assigns and the read-only ParameterRef; wrong case and a ref fixed twice stop
+      Fixes          parts file with both Assigns and the read-only ParameterRef; wrong case and a ref fixed twice stop; value from
+                     a board macro per board (show="assign"), a macro on no board leaves the normal row
+      PartRows       rows of a part per board with label groups, a board without the condition has no row; a selection with no
+                     row, two rows or outside an inline block stops
+      Reserved       LED macros of the serial LED auto config are no GPIOs (ETS script and firmware header, compiled with a
+                     g++ / clang++); with LED_INIT and as GPIO LEDs they stay reserved, an expander pin is no GPIO
       -Init          refuses a product XML that already includes a hardware module
       Language       every T text of the code is in core/Messages.de.psd1 with the same placeholders; German by default
       Helpers        ordinal sort (also of a generic List); PNG written and read back gives the same pixels
@@ -295,6 +300,103 @@ Add-Test "fixes-twice" (T "Fixes: the same ref twice stops") {
   $d = Copy-Base "fixes-twice"
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine + $FixLine.Replace('name="W"', 'name="W2"') + "</Fixes>`n</HardwareProfile>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'already fixed' (T "stop message")
+}
+
+# @brief <PartRows> / <Fix valueMacro> test project: base copy with a board header on top of the real ones (labels and values per
+#        board: REG1 LAN+TP 0x1021 = 4129, REG1 LAN 0x1022 = 4130, UP1 Taster 0x1203 = 4611) and a small part file
+function Copy-BaseWithBoardMacros([string]$Name, [string]$ManifestLines) {
+  $d = Copy-Base $Name
+  $real = [System.IO.Path]::Combine($RepoDir, "include", "HardwareConfig.h") -replace '\\', '/'
+  Write-Text ([System.IO.Path]::Combine($d, "include", "HardwareConfig.h")) (@(
+    '#pragma once'
+    ('#include "' + $real + '"')
+    '#ifdef DEVICE_REG1_LAN_TP_BASE'
+    '#define TST_LBL "gruen"'
+    '#define TST_LBL2 "rot"'
+    '#define TST_FIXV 3'
+    '#endif'
+    '#ifdef DEVICE_REG1_LAN_BASE'
+    '#define TST_LBL "blau"'
+    '#define TST_LBL2 "rot"'
+    '#endif'
+    '#ifdef DEVICE_UP1_TAS_4X'
+    '#define TST_LBL "gelb"'
+    '#define TST_FIXV 7'
+    '#endif'
+  ) -join "`n")
+  $row = { param($ref, $text) @(
+    '        <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">'
+    ('          <ParameterSeparator Id="%AID%_PS-nnn" Text="' + $text + '" Cell="1,1" />')
+    ('          <ParameterRefRef RefId="' + $ref + '" Cell="1,2" />')
+    '        </ParameterBlock>') }
+  Write-Text ([System.IO.Path]::Combine($d, "src", "P.part.xml")) (@(
+    '<?xml version="1.0" encoding="utf-8"?>'
+    '<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20">'
+    '  <ManufacturerData><Manufacturer RefId="M-00FA"><ApplicationPrograms><ApplicationProgram><Dynamic><ChannelIndependentBlock>'
+    '      <ParameterBlock Id="%AID%_PB-nnn" Name="Page" Text="Page">'
+    ) + (& $row '%AID%_UP-%TT%00020_R-%TT%0002001' 'Row A%TST_X%') + (& $row '%AID%_UP-%TT%00021_R-%TT%0002101' 'Row B') +
+    (& $row '%AID%_UP-%TT%00022_R-%TT%0002201' 'Row C') + (& $row '%AID%_P-%TT%00030_R-%TT%0003001' 'Dup 1') +
+    (& $row '%AID%_P-%TT%00030_R-%TT%0003001' 'Dup 2') + @(
+    '        <ParameterRefRef RefId="%AID%_P-%TT%00040_R-%TT%0004001" />'
+    '      </ParameterBlock>'
+    '  </ChannelIndependentBlock></Dynamic></ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData>'
+    '</KNX>'
+  ) -join "`n")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <IncludePath>include</IncludePath>`n" + $ManifestLines + "`n</HardwareProfile>")
+  return $d
+}
+$RowsSrc = '<PartRows source="src/P.part.xml" output="src/T.rows.gen.xml">'
+$RowA = '<Row ref="%AID%_UP-%TT%00020_R-%TT%0002001" expr="defined(DEVICE_REG1_LAN_TP_BASE) || defined(DEVICE_REG1_LAN_BASE)" label="TST_LBL" />'
+
+Add-Test "partrows-rows" (T "PartRows: rows per board, label groups, board without the condition has no row") {
+  $d = Copy-BaseWithBoardMacros "partrows-rows" ($RowsSrc + $RowA +
+    '<Row ref="%AID%_UP-%TT%00021_R-%TT%0002101" expr="defined(DEVICE_UP1_TAS_4X)" />' +
+    '<Row ref="%AID%_UP-%TT%00022_R-%TT%0002201" expr="defined(DEVICE_REG1_LAN_TP_BASE) || defined(DEVICE_REG1_LAN_BASE)" label="TST_LBL2" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.rows.gen.xml"))
+  # one choose per row on the selection of the hardware module (ModuleType 45, explicit digits)
+  $parts = @($f -split '<choose ParamRefId="%AID%_UP-4500001_R-450000101">')
+  Assert-True ($parts.Count -eq 4) (T "expected 3 choose on the hardware selection, found {0}" ($parts.Count - 1))
+  $a = $parts[1].Substring(0, $parts[1].IndexOf('</choose>')); $b = $parts[2].Substring(0, $parts[2].IndexOf('</choose>')); $c = $parts[3].Substring(0, $parts[3].IndexOf('</choose>'))
+  Assert-True ($a.Contains('<when test="0">') -and $a.Contains('Text="Row A%TST_X%"')) (T "row A: original row for not selected missing")
+  Assert-True ($a.Contains('<when test="4129">') -and $a.Contains('Text="Row A (gruen)%TST_X%"')) (T "row A: label group gruen (4129) missing")
+  Assert-True ($a.Contains('<when test="4130">') -and $a.Contains('Text="Row A (blau)%TST_X%"')) (T "row A: label group blau (4130) missing")
+  Assert-True (-not $a.Contains('4611') -and -not $a.Contains('gelb')) (T "row A: board 4611 fails the condition and must have no row")
+  Assert-True ($b.Contains('<when test="4611">') -and ([regex]::Matches($b, 'Text="Row B"')).Count -eq 2 -and -not $b.Contains('4129')) (T "row B: only 4611, original text")
+  Assert-True ($c.Contains('<when test="4129 4130">') -and $c.Contains('Text="Row C (rot)"')) (T "row C: one group for the same label")
+  Assert-True ($f.Contains('Text="Dup 1"') -and $f.Contains('<ParameterRefRef RefId="%AID%_P-%TT%00040_R-%TT%0004001" />')) (T "rows not selected changed")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+}
+
+Add-Test "partrows-nohit" (T "PartRows: a selection without a row stops") {
+  $d = Copy-BaseWithBoardMacros "partrows-nohit" ($RowsSrc + '<Row ref="%AID%_UP-%TT%00099_R-%TT%0009901" expr="1" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'has no ParameterRefRef with this RefId' (T "stop message")
+  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "src", "T.rows.gen.xml")))) (T "a parts file was written")
+}
+
+Add-Test "partrows-twohits" (T "PartRows: a selection with two rows stops") {
+  $d = Copy-BaseWithBoardMacros "partrows-twohits" ($RowsSrc + '<Row ref="%AID%_P-%TT%00030_R-%TT%0003001" expr="1" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'has 2 ParameterRefRef with this RefId' (T "stop message")
+}
+
+Add-Test "partrows-notrow" (T "PartRows: a ParameterRefRef outside an inline block stops") {
+  $d = Copy-BaseWithBoardMacros "partrows-notrow" ($RowsSrc + '<Row ref="%AID%_P-%TT%00040_R-%TT%0004001" expr="1" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'not a direct child of an inline ParameterBlock' (T "stop message")
+}
+
+Add-Test "fixes-macro" (T "Fixes: value from a board macro, board without the macro has no fix") {
+  $d = Copy-BaseWithBoardMacros "fixes-macro" ('<Fixes output="src/T.fixes.gen.xml">' +
+    '<Fix name="M" ref="%AID%_UP-1000020_R-100002001" valueMacro="TST_FIXV" show="assign" />' +
+    '<Fix name="N" ref="%AID%_UP-1000021_R-100002101" valueMacro="TST_NONE" show="editable" /></Fixes>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.fixes.gen.xml"))
+  $m = $f.Substring($f.IndexOf('<Block name="Fix_M">')); $m = $m.Substring(0, $m.IndexOf('</Block>'))
+  $n = $f.Substring($f.IndexOf('<Block name="Fix_N">')); $n = $n.Substring(0, $n.IndexOf('</Block>'))
+  Assert-True ($m -match '<when test="4129">\s*<Assign TargetParamRefRef="%AID%_UP-1000020_R-100002001" Value="3" />\s*</when>') (T "value 3 of board 4129 missing")
+  Assert-True ($m -match '<when test="4611">\s*<Assign TargetParamRefRef="%AID%_UP-1000020_R-100002001" Value="7" />\s*</when>') (T "value 7 of board 4611 missing")
+  Assert-True (-not $m.Contains('4130') -and -not $m.Contains('default') -and -not $m.Contains('ParameterRefRef')) (T "Fix_M: board 4130 without the macro, a default or a row in the block")
+  Assert-True ($n -match '^<Block name="Fix_N">\s*<ParameterRefRef RefId="%AID%_UP-1000021_R-100002101" />\s*$') (T "Fix_N: a macro on no board must leave the normal row only")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
 }
 
 Add-Test "init-second" (T "-Init: a second hardware module is refused") {

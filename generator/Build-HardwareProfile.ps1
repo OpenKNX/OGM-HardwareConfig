@@ -139,6 +139,7 @@ $MAX_VALUES = 4                 # answer 1 status + 2 HW-ID + 4 caps + 4 values 
 $MAX_PORTS = 64                 # HW_PORT_<n>_GPIO read per board (n = 1..64); HW_PORTS_MAX of include/HardwareConfig/Helpers/HardwarePorts.h wins
 $MAX_RELAYS = 8                 # HW_RELAY_<n>_GPIO read per board (n = 1..8)
 $MAX_SWITCHES = 8               # on/off parameters of switch="true" capabilities, one bit each in one byte
+$PART_ROW_LABEL_MAX = 20        # <PartRows><Row label>: characters of the label in the row text (a grid cell of about 100 px)
 # <Conflicts reserved="true">: GPIOs every board reserves without a manifest entry, in ETS and in HardwareProfile::isReservedGpio.
 # Pins OGM-Common drives itself when the macro is defined (Hardware.cpp, Common.cpp, Led/Manager.cpp, TimerInterrupt.cpp):
 $AUTO_RESERVED = @("PROG_BUTTON_PIN", "PROG_LED_PIN", "INFO_LED_PIN", "INFO1_LED_PIN", "INFO2_LED_PIN", "INFO3_LED_PIN",
@@ -165,7 +166,7 @@ $CHIP_RESERVED = @{
 # the generator itself, one file per area (dot-sourced: same script scope, constants and $script: state above)
 $script:GeneratorDir = $PSScriptRoot
 foreach ($corePart in @("Console", "Text", "Toolchain", "BoardIds", "Manifest", "Boards", "Slots", "AppModule", "AppScript",
-                        "Conflicts", "Fixes", "Header", "Init", "Generate", "Language")) {
+                        "Conflicts", "Fixes", "PartRows", "Header", "Init", "Generate", "Language")) {
   . ([System.IO.Path]::Combine($PSScriptRoot, "core", $corePart + ".ps1"))
 }
 Remove-Variable corePart

@@ -454,6 +454,31 @@ function Resolve-Board($M, $BoardEntry) {
   [void]$sb.AppendLine("#ifdef HW_INFO_TEXT")
   [void]$sb.AppendLine("@@ `"INFOTEXT`" HW_INFO_TEXT")
   [void]$sb.AppendLine("#endif")
+  # <PartRows>: condition and label macro of each row; <Fix valueMacro>: the value of the macro
+  foreach ($pr in @($M.PartRows)) {
+    for ($j = 0; $j -lt $pr.Rows.Count; $j++) {
+      $row = $pr.Rows[$j]
+      [void]$sb.AppendLine("#if " + $row.Expr)
+      [void]$sb.AppendLine(("@@ `"PRC{0}_{1}`" 1" -f $pr.Index, $j))
+      [void]$sb.AppendLine("#else")
+      [void]$sb.AppendLine(("@@ `"PRC{0}_{1}`" 0" -f $pr.Index, $j))
+      [void]$sb.AppendLine("#endif")
+      if ($row.Label) {
+        [void]$sb.AppendLine("#ifdef " + $row.Label)
+        [void]$sb.AppendLine(("@@ `"PRL{0}_{1}`" {2}" -f $pr.Index, $j, $row.Label))
+        [void]$sb.AppendLine("#endif")
+      }
+    }
+  }
+  if ($M.Fixes) {
+    for ($i = 0; $i -lt $M.Fixes.Items.Count; $i++) {
+      $fm = $M.Fixes.Items[$i].ValueMacro
+      if (-not $fm) { continue }
+      [void]$sb.AppendLine("#ifdef " + $fm)
+      [void]$sb.AppendLine("@@ `"FXV$i`" " + $fm)
+      [void]$sb.AppendLine("#endif")
+    }
+  }
 
   $lines = Invoke-Preprocessor -Source $sb.ToString() -Defines $defines
   $res = @{}
@@ -470,6 +495,35 @@ function Resolve-Board($M, $BoardEntry) {
     $board.InfoText = ConvertFrom-CString $res["INFOTEXT"]
     if (-not $board.InfoText) { Stop-WithError (T "{0}: HW_INFO_TEXT is not a string: {1}" $BoardEntry.Define $res["INFOTEXT"]) }
     if ($board.InfoText.Length -gt 255) { Stop-WithError (T "{0}: HW_INFO_TEXT has {1} characters, ETS shows at most 255" $BoardEntry.Define $board.InfoText.Length) }
+  }
+  # <PartRows>: "<part>/<row>" -> On (the board shows the row), Label (text of the label macro, "" = none)
+  $board.PartRows = @{}
+  foreach ($pr in @($M.PartRows)) {
+    for ($j = 0; $j -lt $pr.Rows.Count; $j++) {
+      $row = $pr.Rows[$j]
+      $key = "{0}/{1}" -f $pr.Index, $j
+      $on = ($res[("PRC{0}_{1}" -f $pr.Index, $j)] -eq "1")
+      $lbl = ""
+      $lk = "PRL{0}_{1}" -f $pr.Index, $j
+      if ($on -and $res.ContainsKey($lk)) {
+        $lbl = ConvertFrom-CString $res[$lk]
+        if (-not $lbl) { Stop-WithError (T "{0}: {1} is not a string or empty: {2}" $BoardEntry.Define $row.Label $res[$lk]) }
+        if ($lbl.Length -gt $PART_ROW_LABEL_MAX) { Stop-WithError (T "{0}: {1} has {2} characters, a row label has at most {3}" $BoardEntry.Define $row.Label $lbl.Length $PART_ROW_LABEL_MAX) }
+        if ($lbl -match '[\x00-\x1F%]') { Stop-WithError (T "{0}: {1} contains a control character or %: {2}" $BoardEntry.Define $row.Label $res[$lk]) }
+      }
+      $board.PartRows[$key] = @{ On = $on; Label = $lbl }
+    }
+  }
+  # <Fix valueMacro>: fix name -> integer value of the macro on this board (absent = the macro is not defined)
+  $board.FixValues = @{}
+  if ($M.Fixes) {
+    for ($i = 0; $i -lt $M.Fixes.Items.Count; $i++) {
+      $fx = $M.Fixes.Items[$i]
+      if (-not $fx.ValueMacro -or -not $res.ContainsKey("FXV$i")) { continue }
+      $fv = ConvertFrom-CInteger $res["FXV$i"]
+      if ($null -eq $fv -or $fv -lt 0) { Stop-WithError (T "{0}: <Fix name=`"{1}`">: {2} does not resolve to an integer 0..2147483647: {3}" $BoardEntry.Define $fx.Name $fx.ValueMacro $res["FXV$i"]) }
+      $board.FixValues[$fx.Name] = [int]$fv
+    }
   }
   $board.InfoUrl = $null
   $board.InfoUrlOwn = $false   # $true: the URL comes from the board header, not the <InfoImage default> (empty = no QR code)

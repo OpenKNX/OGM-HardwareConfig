@@ -101,6 +101,14 @@ function Get-ProductBoards($m) {
       if ($relA -cne $relB) { Stop-WithError (T "0x{0:X4}: env {1} has other relays than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
       if ($o.InfoUrl -ne $first.InfoUrl) { Stop-WithError (T "0x{0:X4}: env {1} has another info URL than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
       if ($o.InfoText -cne $first.InfoText) { Stop-WithError (T "0x{0:X4}: env {1} has another HW_INFO_TEXT than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
+      # <PartRows> and <Fix valueMacro>: one row state and one value per HW-ID (ETS shows one page for every firmware of the board)
+      foreach ($rk in @($first.PartRows.Keys)) {
+        $sa = $first.PartRows[$rk]; $sb2 = $o.PartRows[$rk]
+        if ($sa.On -ne $sb2.On -or $sa.Label -cne $sb2.Label) { Stop-WithError (T "0x{0:X4}: env {1} gives another <PartRows> row state or label than env {2} - the rows of a board must not depend on the env" ([int]$first.HwId) $o.Env $first.Env) }
+      }
+      foreach ($fk in @(@($first.FixValues.Keys) + @($o.FixValues.Keys) | Sort-Object -Unique)) {
+        if ("$($first.FixValues[$fk])" -cne "$($o.FixValues[$fk])") { Stop-WithError (T "0x{0:X4}: env {1} gives <Fix name=`"{2}`"> another value macro than env {3}" ([int]$first.HwId) $o.Env $fk $first.Env) }
+      }
       if ($o.Mcu -cne $first.Mcu) { Stop-WithError (T "0x{0:X4}: env {1} builds for MCU '{2}', env {3} for '{4}'" ([int]$first.HwId) $o.Env $o.Mcu $first.Env $first.Mcu) }
       # one port list per HW-ID: ETS offers one list for every firmware of the board
       if ($portsA -cne $portsB -or $first.PortCount -ne $o.PortCount) { Stop-WithError (T "0x{0:X4}: env {1} has other ports than env {2} (HW_PORT_*) - the ports of a board must not depend on the env" ([int]$first.HwId) $o.Env $first.Env) }
@@ -233,7 +241,7 @@ function New-CardImages($m, $boards) {
   return @{ Images = $images }
 }
 
-# @brief Every output in memory (conf, share, developer view, script, header, conflicts, fixes, templates); returns Rendered and OwnOutputs
+# @brief Every output in memory (conf, share, developer view, script, header, conflicts, fixes, part rows, templates); returns Rendered and OwnOutputs
 function New-ProductOutputs($m, $boards) {
   # every output is rendered before the first one is written: an error leaves no half-updated set
   $rendered = @()
@@ -244,6 +252,7 @@ function New-ProductOutputs($m, $boards) {
   if ($m.Outputs.ContainsKey("header")) { Write-OutputActivity (T "build") $m.Outputs["header"]; $rendered += @{ Output = $m.Outputs["header"]; Text = (New-Header $m $boards) } }
   if ($m.Conflicts) { Write-OutputActivity (T "build") $m.Conflicts.Output; $rendered += @{ Output = $m.Conflicts.Output; Text = (New-ConflictsXml $m $boards) } }
   if ($m.Fixes) { Write-OutputActivity (T "build") $m.Fixes.Output; $rendered += @{ Output = $m.Fixes.Output; Text = (New-FixesXml $m $boards) } }
+  foreach ($pr in @($m.PartRows)) { Write-OutputActivity (T "build") $pr.Output; $rendered += @{ Output = $pr.Output; Text = (New-PartRowsXml $m $boards $pr) } }
 
   # templates ("Bausteine"): whole generated files, never a splice into a hand-written file
   $vars = @{ Boards = $boards; M = $m }

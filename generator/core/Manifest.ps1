@@ -13,7 +13,7 @@ FILEPATH: OGM-HardwareConfig/generator/core/Manifest.ps1
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
     Functions: ConvertTo-FlagList, Test-ManifestNodes, Read-Manifest with its sections (Read-ManifestRoot, Read-ManifestOutputs,
     Read-ManifestCapabilities, Read-ManifestBoards, Read-ManifestPorts, Read-ManifestRoles, Read-ManifestPage, Read-ManifestNotices,
-    Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables), Get-ConflictInt, ConvertFrom-ConflictCondition,
+    Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables, Read-ManifestPartRows), Get-ConflictInt, ConvertFrom-ConflictCondition,
     Read-ConflictsNode.
 
 .NOTES
@@ -47,7 +47,7 @@ function ConvertTo-FlagList([string]$Text) {
 #        to the default without a word.
 $script:ManifestNodes = @{
   HardwareProfile = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
-                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes")
+                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows")
   CapabilityPack  = @("name", "Capability Value ReservedPins")
   Output          = @("conf share script header", "")
   Generate        = @("template output finalNewline", "Param")
@@ -76,7 +76,9 @@ $script:ManifestNodes = @{
   Logo            = @("board file", "")
   BoardTable      = @("*", "")
   Fixes           = @("output", "Fix")
-  Fix             = @("name capability ref value show indent help", "")
+  Fix             = @("name capability ref value valueMacro show indent help", "")
+  PartRows        = @("source output", "Row")
+  "PartRows/Row"  = @("ref expr label", "")
 }
 function Test-ManifestNodes($Node, [string]$File) {
   $spec = $null
@@ -137,6 +139,7 @@ function Read-Manifest([string]$Path) {
   if ($cfNodes.Count -eq 1) { $m.Conflicts = Read-ConflictsNode $m $cfNodes[0] $baseDir }
   Read-ManifestFixes $root $m $baseDir $capIndex
   Read-ManifestBoardTables $root $m $baseDir
+  Read-ManifestPartRows $root $m $baseDir
   return $m
 }
 
@@ -562,8 +565,9 @@ function Read-ManifestInfoImage($root, $m, $baseDir, $capIndex) {
 
 # @brief Read-Manifest: <Fixes>: settings of other modules fixed per capability
 function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
-  # <Fixes output><Fix name capability ref value show indent help/></Fixes>: a setting of another module (ParameterRef) set to a
-  # value on boards with the capability and shown read-only, hidden or editable there; absent = no output changes
+  # <Fixes output><Fix name capability ref value valueMacro show indent help/></Fixes>: a setting of another module (ParameterRef) set
+  # to a value on boards with the capability (and/or the macro valueMacro, value = the macro per board) and shown read-only, hidden
+  # or editable there, or only assigned (show="assign"); absent = no output changes
   $m.Fixes = $null
   $fxNodes = @($root.SelectNodes("Fixes"))
   if ($fxNodes.Count -gt 1) { Stop-WithError (T "<Fixes> may appear only once") }
@@ -579,7 +583,10 @@ function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
       if ($fxNames.ContainsKey($fn)) { Stop-WithError (T "<Fix name=`"{0}`"> is listed twice" $fn) }
       $fxNames[$fn] = $true
       $fc = "$($f.GetAttribute('capability'))"
-      if (@($m.Capabilities | Where-Object { $_.Name -ceq $fc }).Count -eq 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} is not defined (names are case-sensitive)" $fn $fc) }
+      $fm = "$($f.GetAttribute('valueMacro'))"
+      if (-not $fc -and -not $fm) { Stop-WithError (T "<Fix name=`"{0}`">: needs capability=... or valueMacro=..." $fn) }
+      if ($fc -and @($m.Capabilities | Where-Object { $_.Name -ceq $fc }).Count -eq 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} is not defined (names are case-sensitive)" $fn $fc) }
+      if ($fm -and $fm -cnotmatch '^[A-Za-z_][A-Za-z0-9_]*$') { Stop-WithError (T "<Fix name=`"{0}`">: valueMacro must be a macro name: {1}" $fn $fm) }
       $fr = "$($f.GetAttribute('ref'))"
       if ($fr -notmatch '^%AID%_(UP|P)-(\d{2})(\d{5})_R-(\d{2})(\d{5})(\d{2})$' -or $Matches[2] -ne $Matches[4] -or $Matches[3] -ne $Matches[5]) {
         Stop-WithError (T "<Fix name=`"{0}`">: ref must be a ParameterRef id like %AID%_P-1401001_R-140100100 (module digits instead of %TT%), got {1}" $fn $fr)
@@ -589,14 +596,16 @@ function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
       $fParam = "%AID%_{0}-{1}{2}" -f $Matches[1], $Matches[2], $Matches[3]
       $fRo = "{0}_R-{1}{2}99" -f $fParam, $Matches[2], $Matches[3]
       $fv = "$($f.GetAttribute('value'))"
-      if ($fv -eq "") { Stop-WithError (T "<Fix name=`"{0}`">: value is missing" $fn) }
+      # value: one raw value for every board; valueMacro: the integer value of the macro per board (boards without it: no fix)
+      if ($fm -and $f.HasAttribute('value')) { Stop-WithError (T "<Fix name=`"{0}`">: value and valueMacro exclude each other" $fn) }
+      if (-not $fm -and $fv -eq "") { Stop-WithError (T "<Fix name=`"{0}`">: value or valueMacro is missing" $fn) }
       $fs = "$($f.GetAttribute('show'))"; if (-not $fs) { $fs = "readonly" }
-      if (@("readonly", "hidden", "editable") -cnotcontains $fs) { Stop-WithError (T "<Fix name=`"{0}`">: show must be readonly, hidden or editable" $fn) }
+      if (@("readonly", "hidden", "editable", "assign") -cnotcontains $fs) { Stop-WithError (T "<Fix name=`"{0}`">: show must be readonly, hidden, editable or assign" $fn) }
       $fi = "$($f.GetAttribute('indent'))"
       if ($fi -and ($fi -notmatch '^\d{1,2}$')) { Stop-WithError (T "<Fix name=`"{0}`">: indent must be a number" $fn) }
       $fh = "$($f.GetAttribute('help'))"
       if ($fh -and $fh -notmatch '^[A-Za-z0-9_-]+$') { Stop-WithError (T "<Fix name=`"{0}`">: help must be a help context name" $fn) }
-      $m.Fixes.Items += @{ Name = $fn; Capability = $fc; Ref = $fr; Param = $fParam; ReadOnlyRef = $fRo; Value = $fv; Show = $fs; Indent = $fi; Help = $fh }
+      $m.Fixes.Items += @{ Name = $fn; Capability = $fc; Ref = $fr; Param = $fParam; ReadOnlyRef = $fRo; Value = $fv; ValueMacro = $fm; Show = $fs; Indent = $fi; Help = $fh }
     }
     if ($m.Fixes.Items.Count -eq 0) { Stop-WithError (T "<Fixes> without <Fix>") }
   }
@@ -624,6 +633,35 @@ function Read-ManifestBoardTables($root, $m, $baseDir) {
     $m.BoardTables += $t
   }
   if ($m.BoardTables.Count -gt 0 -and -not $m.Outputs.ContainsKey("script")) { Stop-WithError (T "<BoardTable> needs <Output script=...> (the table is part of the ETS script)") }
+}
+# @brief Read-Manifest: <PartRows>: rows of a part of another module shown per board
+function Read-ManifestPartRows($root, $m, $baseDir) {
+  # <PartRows source output><Row ref expr label/></PartRows>: a copy of the part file source in which each selected row (the inline
+  # ParameterBlock that holds the ParameterRefRef ref) appears only on boards whose header makes expr true; absent = no output changes
+  $m.PartRows = @()
+  $prIndex = 0
+  foreach ($pn in $root.SelectNodes("PartRows")) {
+    $src = "$($pn.GetAttribute('source'))"; $out = "$($pn.GetAttribute('output'))"
+    if (-not $src -or -not $out) { Stop-WithError (T "<PartRows> needs source=... and output=...") }
+    if (-not $m.Outputs.ContainsKey("share")) { Stop-WithError (T "<PartRows> needs <Output share=...> (the hardware selection)") }
+    $pr = @{ Index = $prIndex; SourceAttr = $src; Source = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $src))
+             Output = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $out)); Rows = @() }
+    $prIndex++
+    if (-not (Test-Path -LiteralPath $pr.Source -PathType Leaf)) { Stop-WithError (T "<PartRows source=`"{0}`">: file not found: {1}" $src $pr.Source) }
+    foreach ($o in $m.PartRows) { if ([string]::Equals($o.Output, $pr.Output, [StringComparison]::OrdinalIgnoreCase)) { Stop-WithError (T "<PartRows output=`"{0}`"> is used twice" $out) } }
+    if ([string]::Equals($pr.Output, $pr.Source, [StringComparison]::OrdinalIgnoreCase)) { Stop-WithError (T "<PartRows output=`"{0}`"> would overwrite its source" $out) }
+    foreach ($rn in $pn.SelectNodes("Row")) {
+      $w = "<PartRows source=`"$src`"><Row ref=`"$($rn.GetAttribute('ref'))`">"
+      $row = @{ Ref = "$($rn.GetAttribute('ref'))"; Expr = "$($rn.GetAttribute('expr'))"; Label = "$($rn.GetAttribute('label'))" }
+      if ($row.Ref -notmatch '^%AID%_\S+$') { Stop-WithError (T "{0}: ref must be the RefId of a ParameterRefRef of the part (e.g. %AID%_UP-%TT%00020_R-%TT%0002001)" $w) }
+      if (-not $row.Expr) { Stop-WithError (T "{0}: expr=... is missing (a preprocessor condition like defined(MACRO))" $w) }
+      if ($row.Label -and $row.Label -cnotmatch '^[A-Za-z_][A-Za-z0-9_]*$') { Stop-WithError (T "{0}: label must be a macro name: {1}" $w $row.Label) }
+      if (@($pr.Rows | Where-Object { $_.Ref -ceq $row.Ref }).Count -gt 0) { Stop-WithError (T "{0}: the same ref is selected twice" $w) }
+      $pr.Rows += $row
+    }
+    if ($pr.Rows.Count -eq 0) { Stop-WithError (T "<PartRows source=`"{0}`"> without <Row>" $src) }
+    $m.PartRows += $pr
+  }
 }
 # @brief Integer attribute of a <Conflicts>/<Use> element: $null when absent, stop when not a number in Min..Max
 function Get-ConflictInt($Node, [string]$Attr, [int]$Min, [int]$Max, [string]$Where) {

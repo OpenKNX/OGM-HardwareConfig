@@ -105,6 +105,14 @@ darunter (ETS zeigt keine Links); ohne Define kein QR-Code. Die Firmware liest d
 `grep -rn HW_INFO_URL include/HardwareConfig` (PowerShell:
 `Get-ChildItem include/HardwareConfig -Recurse -Filter *.h | Select-String HW_INFO_URL`).
 
+Info-LEDs (OGM-Common): `INFO<n>_LED_PIN` (n = 1..3, `INFO_LED_PIN` ist der alte Name von Info 1) und, nur für ETS, `INFO<n>_LED_LABEL`
+im Board-Block: kurzer Text zur LED (z. B. die Farbe `"grün"`, höchstens 20 Zeichen), den eine Applikation per
+[`<PartRows>`](generator/README.md#zeilen-je-gerät-partrows) in die Zeile „Info <n>“ der Seite „Info LEDs“ setzt.
+Ein Board, das seine LEDs in `LED_INIT` anlegt, setzt kein `INFO<n>_LED_PIN` (kein GPIO), nur `INFO<n>_LED_LABEL`; die
+Zeile erscheint dann über die Bedingung `defined(INFO<n>_LED_PIN) || defined(INFO<n>_LED_LABEL)` des Manifests.
+`OPENKNX_INFOLED<n>_DEFAULT` (Funktion der LED mit „Geräteabhängige Vorbelegung“) kann eine Applikation per
+`<Fix valueMacro>` in ETS vorbelegen; der Generator liest dafür nur Zahlen.
+
 `HW_INFO_TEXT` im Board-Block: kurze Beschreibung des Geräts, höchstens 255 Zeichen (ETS-Grenze, der Generator bricht
 sonst ab). Der Generator zeigt sie auf der Hardware-Seite unter dem Gerätenamen (mit Info-URL links neben dem QR-Code); ohne Define
 gilt der Standardtext der Applikation. Welche Boards es setzen: `grep -rn HW_INFO_TEXT include/HardwareConfig` (PowerShell: `Select-String` wie oben).

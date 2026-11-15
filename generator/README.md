@@ -20,7 +20,7 @@ Beispiel-Applikation: [examples/HardwareProfileDemo](../examples/HardwareProfile
 | Pfad | Inhalt |
 |---|---|
 | `Build-HardwareProfile.ps1` | der Aufrufer (einziges Skript, das man startet): Parameter, Hilfe, Konstanten, Ablauf |
-| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `Header` (Firmware-Header), `Init`, `Generate` (die Schritte eines Laufs nach dem Manifest: Boards, Slots, Bilder, Ausgaben, Versionswache, Schreiben, Zusammenfassung), `Language` (Sprache der Ausgabe) mit `Messages.de.psd1` (deutsche Texte), siehe [Sprache der Ausgabe](#sprache-der-ausgabe) |
+| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `PartRows` (Zeilen eines Bausteins je Gerät), `Header` (Firmware-Header), `Init`, `Generate` (die Schritte eines Laufs nach dem Manifest: Boards, Slots, Bilder, Ausgaben, Versionswache, Schreiben, Zusammenfassung), `Language` (Sprache der Ausgabe) mit `Messages.de.psd1` (deutsche Texte), siehe [Sprache der Ausgabe](#sprache-der-ausgabe) |
 | `QUICKSTART.md` | Schnellstart: das Hardware-Profil in fünf Schritten in ein bestehendes OAM einbinden |
 | `Anwendungsfaelle.md` | Rezepte mit Beispielen: Module, Feature-Flags, Kanalzahl, Auswahllisten, Sensoren, Netzwerk, Firmware |
 | `tests/` | `Test-HardwareProfile.ps1`: Selbsttest (auch `Build-HardwareProfile.ps1 -SelfTest`), siehe [Selbsttest](#selbsttest) |
@@ -126,7 +126,7 @@ flowchart LR
 `Build-HardwareProfile.ps1 -SelfTest` (oder `tests/Test-HardwareProfile.ps1`, dort mit `-Only <Muster>`, `-Full`,
 `-KeepWork`) lässt den Generator auf kleinen Test-Manifesten laufen, jedes in einem eigenen Wegwerf-Ordner (das Repo bleibt
 unberührt), und prüft, was er tun und was er ablehnen muss: stabile Ausgaben, Bit-Reihenfolge, Versionswache,
-Manifest-Prüfung, `<Fixes>`, `-Init`, Sprache (deutsche Tabelle vollständig, Standard Deutsch), ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
+Manifest-Prüfung, `<Fixes>` (auch Wert aus einem Board-Makro), `<PartRows>` (Zeilen je Board, Label-Gruppen, Abbruch bei keiner Zeile, zwei Zeilen oder ohne Inline-Block), `-Init`, Sprache (deutsche Tabelle vollständig, Standard Deutsch), ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
 `-Check` der Demo (mit PlatformIO und den `lib/`-Links der Demo) und mit `-Full` den Update-Test der Demo (mit dem
 OpenKNXproducer). Je Test eine Zeile mit ✓/✗/– und Dauer, am Ende eine Zusammenfassung; Exit-Code 1, wenn ein Test
 scheitert.
@@ -258,7 +258,8 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 | `portManualValue`, `portNoneValue` (Wurzel) | Werte der Port-Auswahlen der Applikation: 0..n-1 = Port n des Boards, `portManualValue` (0..254) = manueller GPIO, `portNoneValue` (0..255) = kein Port, jeder andere Wert (z. B. nie geschrieben 255) = kein GPIO. Nur zusammen, verschieden. Einmal angegeben, gilt es für die Konfliktprüfung (`<Conflicts>`) und den Firmware-Header (`signalGpio`, siehe [Port-Auswahl in der Firmware](#port-auswahl-in-der-firmware)). Ein angebotener Port auf einem der beiden Werte bricht den Lauf ab |
 | `<Conflicts output number value error reserved reservedError tpError>` | GPIO-Konfliktprüfung in ETS, siehe [GPIO-Konflikte](#gpio-konflikte-conflicts) und [Reservierte GPIOs](#reservierte-gpios-conflicts-reservedtrue) |
 | `<BoardTable name header scan>` | Zahlen-Tabelle je Board im ETS-Skript aus einem Header der OAM, siehe [Board-Tabellen](#board-tabellen-boardtable) |
-| `<Fixes output>` mit `<Fix name capability ref value show indent help>` | Einstellung eines anderen Moduls je Fähigkeit festlegen, siehe [Einstellungen festlegen](#einstellungen-festlegen-fixes) |
+| `<Fixes output>` mit `<Fix name capability ref value valueMacro show indent help>` | Einstellung eines anderen Moduls je Fähigkeit oder mit dem Wert eines Board-Makros festlegen, siehe [Einstellungen festlegen](#einstellungen-festlegen-fixes) |
+| `<PartRows source output>` mit `<Row ref expr label>` | Zeilen eines Bausteins (Part) eines anderen Moduls nur auf den Geräten zeigen, die sie haben, mit Label aus dem Board-Header, siehe [Zeilen je Gerät](#zeilen-je-gerät-partrows) |
 
 ### Board-Tabellen (`<BoardTable>`)
 
@@ -296,6 +297,23 @@ Target abschaltet), stehen damit auch im ETS-Skript.
 - Abbruch: `name` nicht nur Buchstaben und Ziffern oder doppelt, `header` fehlt, `scan` ohne genau eine unbenannte
   Gruppe, zwei Makros für einen Index. Warnung: kein Makro auf irgendeinem Board. Ohne `<BoardTable>` bleiben alle Ausgaben gleich.
 
+### Einstellungen anderer Module je Gerät: `<Fixes>` oder `<PartRows>`
+
+`<Fixes>` bestimmt den **Wert** einer Einstellung, `<PartRows>` bestimmt, ob und mit welchem Text **Zeilen sichtbar** sind.
+
+| | [`<Fixes>`](#einstellungen-festlegen-fixes) | [`<PartRows>`](#zeilen-je-gerät-partrows) |
+|---|---|---|
+| Wirkt auf | den Wert genau eines Parameters | Sichtbarkeit und Text ganzer Zeilen |
+| Je Board | Wert fest (nur lesbar), versteckt, vorbelegt (änderbar) oder nur zugewiesen; Wert fest oder aus einem Board-Makro | Zeile zeigen oder weglassen (C-Ausdruck über den Board-Header), Text um ein Board-Makro ergänzen |
+| Ändert Werte | ja | nein |
+| Einbindung | das Produkt nimmt die Originalzeile aus dem Include des Moduls und setzt den Block `Fix_<name>` an ihre Stelle | das Produkt zeigt per Token auf eine erzeugte Kopie des ganzen Bausteins |
+| Passt für | einzelne Einstellungen, die das Produkt selbst einbindet | Zeilen in einem fremden Baustein, die das Produkt nicht einzeln herausnehmen kann |
+| Beispiel | „WiFi-Schnittstelle“ = Ja, nur lesbar, auf WLAN-Boards | Zeile „Info 3“ nur auf Boards mit `INFO3_LED_PIN` |
+
+Faustregel: Soll man etwas **nicht sehen**, `<PartRows>`; soll man etwas **nicht ändern** oder einen **passenden Startwert**
+bekommen, `<Fixes>`. Beide zusammen: Info-LEDs der Demo und von NeoPixel (`<PartRows>` für die Zeilen, `<Fix valueMacro
+show="assign">` für die Vorbelegung, ohne eigene Zeile).
+
 ### Einstellungen festlegen (`<Fixes>`)
 
 Eine Einstellung eines anderen Moduls (z. B. „WiFi-Schnittstelle“ von OFM-Network) bekommt auf Boards mit einer Fähigkeit
@@ -308,16 +326,91 @@ einen festen Wert:
 ```
 
 - `ref`: ParameterRef der Einstellung mit den Ziffern des Moduls statt `%TT%`; `value`: der Rohwert.
+- `valueMacro` statt `value`: der Wert kommt je Board aus diesem Makro des Board-Headers (Präprozessor wie `<Capability expr>`,
+  eine ganze Zahl 0..2147483647; ein Name, den nur die Firmware kennt, z. B. `OPENKNX_LEDFUNC_BASE_KNX` aus OGM-Common, bricht
+  ab: im Header die Zahl schreiben). Boards ohne das Makro bekommen keinen Fix, Boards mit demselben Wert ein gemeinsames
+  `<when>`. `capability` ist dann optional (mit ihr: nur Boards, die beides haben); ohne ein solches Board steht im Block nur
+  die normale Zeile (`show="assign"`: nichts). Die Envs eines Boards müssen denselben Wert ergeben, sonst Abbruch.
 - `show`: `readonly` (Standard, Zeile sichtbar, nicht änderbar; in ETS6 gemessen), `hidden` (keine Zeile; nur für
   Einstellungen ohne Speicher: für einen unsichtbaren Parameter mit Speicher schreibt ETS beim Download den Standardwert,
   laut ETS-DLLs, nicht gemessen), `editable` (Zeile änderbar, der Wert wird beim Wählen des Boards nur gesetzt; nicht
-  gemessen). Ohne Auswahl und auf Boards ohne die Fähigkeit: die normale Zeile. Zwei `<Fix>` auf dieselbe `ref` brechen ab.
+  gemessen), `assign` (nur das `<Assign>`, keine Zeile im Block: die Einstellung behält ihre eigene Zeile in ihrem Modul,
+  z. B. in einem Baustein, den der Block nicht ersetzen kann; nicht gemessen). Ohne Auswahl und auf Boards ohne die
+  Fähigkeit: die normale Zeile. Zwei `<Fix>` auf dieselbe `ref` brechen ab.
+- Ein `<Assign>` darf laut ETS-Schema nur in einem `<when>` innerhalb eines `ParameterBlock` stehen (direkt unter `Channel`
+  lehnt der OpenKNXproducer es ab): den Block also in eine Seite einbinden, z. B. in die Hardware-Seite.
+- Ob ETS einen geänderten Wert einer änderbaren Zeile (`editable`, `assign`) behält oder beim nächsten Auswerten wieder auf
+  den `<Assign>`-Wert setzt, ist nicht gemessen: vor dem Ausliefern in ETS prüfen (Board wählen, Wert ändern, andere Seite,
+  zurück, Download).
 - Der Generator schreibt eine Bausteindatei: Block `ParameterRefs` (für `readonly` eine zweite ParameterRef derselben
   Einstellung mit `Access="Read"`, Index 99: `…_R-<TT><nnnnn>99`) in die ParameterRefs eines Moduls einbinden, Block
   `Fix_<name>` an der Stelle der Zeile. Die Applikation nimmt die Originalzeile aus dem Include des Moduls heraus, z. B.
   `xpath="…/ParameterBlock[@Name='NetworkInject']/*[not(contains(@RefId, '%TT%01001_R-'))]"`.
 - Gemessen in ETS6: ein `<Assign>` allein sperrt die Zeile nicht. ETS hält den Wert je ParameterRef, deshalb bekommt die
   nur lesbare Zeile ein eigenes `<Assign>`; die änderbare Zeile ist auf diesen Boards nicht sichtbar.
+
+Wert aus dem Board-Header, Beispiel der [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml): die Funktion der Info-LEDs
+von OGM-Common (`Info1LedFunc`, BASE = ModuleType 10) wird beim Wählen eines Boards mit `OPENKNX_INFOLED1_DEFAULT` auf diesen
+Wert gesetzt, die Zeile bleibt auf der Seite „Info LEDs“ änderbar:
+
+```xml
+<Fixes output="src/HardwareProfile.fixes.gen.xml">
+  <Fix name="InfoLed1" ref="%AID%_UP-1000020_R-100002001" valueMacro="OPENKNX_INFOLED1_DEFAULT" show="assign" />
+</Fixes>
+```
+
+```xml
+<!-- src/HardwareProfileDemo.xml, in der Hardware-Seite (ParameterBlock) -->
+<op:include href="HardwareProfile.fixes.gen.xml" xpath="//Block[@name='Fix_InfoLed1' or @name='Fix_InfoLed2']/*" />
+```
+
+Ergebnis (`src/HardwareProfile.fixes.gen.xml`): je Wert ein `<when test="<HW-IDs>">` mit
+`<Assign TargetParamRefRef="%AID%_UP-1000020_R-100002001" Value="3" />`, die Boards ohne das Makro fehlen.
+
+### Zeilen je Gerät (`<PartRows>`)
+
+Eine Seite eines anderen Moduls, die als Baustein (`op:part`) eingebunden ist, zeigt einzelne Zeilen nur auf den Geräten, die
+sie haben, mit einem Label aus dem Board-Header im Zeilentext. Der Generator schreibt eine Kopie des Bausteins; die
+Applikation lässt das Modul diese Kopie statt seines eigenen Bausteins laden (bei OGM-Common über `%BASE_InfoLedPart%`).
+
+```xml
+<PartRows source="lib/OGM-Common/src/InfoLed.part.xml" output="src/HardwareProfile.infoled.gen.xml">
+  <Row ref="%AID%_UP-%TT%00020_R-%TT%0002001" expr="defined(INFO1_LED_PIN) || defined(INFO_LED_PIN) || defined(INFO1_LED_LABEL)" label="INFO1_LED_LABEL" />
+  <Row ref="%AID%_UP-%TT%00021_R-%TT%0002101" expr="defined(INFO2_LED_PIN) || defined(INFO2_LED_LABEL)" label="INFO2_LED_LABEL" />
+  <Row ref="%AID%_UP-%TT%00022_R-%TT%0002201" expr="defined(INFO3_LED_PIN) || defined(INFO3_LED_LABEL)" label="INFO3_LED_LABEL" />
+</PartRows>
+```
+
+```xml
+<!-- Applikations-XML, vor dem op:define von BASE (href relativ zu lib/OGM-Common/src) -->
+<op:config name="%BASE_InfoLedPart%" value="../../../src/HardwareProfile.infoled.gen.xml" />
+```
+
+- `source`: der Baustein, relativ zum Manifest; `output`: die Kopie (nicht die Quelle, nicht zweimal). Mehrere `<PartRows>`
+  sind erlaubt.
+- `<Row ref>`: wählt eine Zeile über die RefId einer `ParameterRefRef` des Bausteins, so wie sie dort steht (mit `%TT%`).
+  Die Zeile ist der `ParameterBlock` mit `Inline="true"`, in dem diese `ParameterRefRef` direkt steht. Abbruch, wenn der
+  Baustein keine oder mehr als eine solche `ParameterRefRef` hat, wenn sie nicht direkt in einem Inline-Block steht oder
+  wenn zwei `<Row>` dieselbe Zeile treffen: ein geänderter Baustein ergibt so nie still eine falsche Seite.
+- `expr`: Präprozessor-Bedingung wie `<Capability expr>`; Boards, für die sie nicht gilt, bekommen die Zeile nicht.
+- Info-LEDs: Ein Board, das seine LEDs selbst in `LED_INIT` anlegt (z. B. REG2-ESP-S3-Pico mit Display: INFO1/INFO2 am
+  IO-Expander, INFO3 = WS2812), definiert kein `INFO<n>_LED_PIN`, denn diese Werte wären keine GPIOs. Es meldet die LED mit
+  `INFO<n>_LED_LABEL`; die Bedingung der Zeile prüft deshalb auch das Label (`defined(INFO<n>_LED_PIN) ||
+  defined(INFO<n>_LED_LABEL)`, siehe oben).
+- `label` (optional): Makro des Board-Headers mit einem String (höchstens 20 Zeichen, kein `%`, keine Steuerzeichen). Der
+  Text des einen `ParameterSeparator` der Zeile bekommt ` (<label>)` vor dem ersten `%TOKEN%`, sonst am Ende:
+  `Info 1%BASE_Info1LedLabel%` wird `Info 1 (links)%BASE_Info1LedLabel%`. Ein Label der Applikation in diesem Token
+  (z. B. ` (IP)`) folgt dem des Boards: `Info 1 (links) (IP)`. Mit `label` braucht die Zeile genau einen
+  `ParameterSeparator` mit `Text`, sonst Abbruch.
+- Erzeugt wird je gewählter Zeile ein `<choose>` auf die Hardware-Auswahl (Ziffern des Hardware-Moduls, gilt auch im
+  Baustein eines anderen Moduls): `when test="0"` (nicht gewählt) = die Originalzeile, je Gruppe von Boards mit demselben
+  Label ein `when` mit der Zeile und dem Label (ohne Label: Originaltext); Boards ohne die Bedingung haben kein `when`, also
+  keine Zeile. Alles andere des Bausteins bleibt, wie es ist.
+- Die Envs eines Boards müssen dieselbe Bedingung und dasselbe Label ergeben, sonst Abbruch (ETS zeigt eine Seite je Board).
+- Die Kopie hängt vom Stand des Bausteins ab: ändert sich die Quelle (anderer Stand von OGM-Common), ändert sich die Ausgabe
+  und `-Check` meldet sie.
+- Beispiel: die [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml) (Raumcontroller Plus: „Info 1 (links)“,
+  „Info 2 (rechts)“; REG1: drei Zeilen ohne Label; Shelly: keine Zeile; Ausgabe `src/HardwareProfile.infoled.gen.xml`).
 
 ## Hardware-Seite (Gerätekarte)
 
