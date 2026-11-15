@@ -12,7 +12,7 @@
   <op:ETS
     OpenKnxId="0xAD"
     ApplicationNumber="240"
-    ApplicationVersion="0.4"
+    ApplicationVersion="1.9"
     ReplacesVersionsDownTo="0.1"
     ApplicationRevision="0"
     ProductName="OpenKNX Hardware-Profil Demo"
@@ -46,9 +46,16 @@
 
   <generate>
     <Dynamic>
-      <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="BASE" />
+      <!-- OpenKNX channel rebuilt so the hardware page sits directly after "Allgemein"; the tree text follows the selection
+           ("<page> (nicht gewählt)" until a board is selected): {{0:...}} + TextParameterRefId of the generated module -->
+      <Channel Id="%AID%_CH-BASE" Number="BASE" Name="Main" Text="OpenKNX" Icon="openknx" HelpContext="BASE-OpenKNX">
+        <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/Channel/ParameterBlock[@Name='Basic']" prefix="BASE" />
+        <ParameterBlock Id="%AID%_PB-nnn" Name="Hardware" Text="{{0:%HWP_PageText%}}" TextParameterRefId="%HWP_PageTextRef%" Icon="%HWP_PageIcon%" HelpContext="%HWP_PageHelp%">
+          <op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/Channel/ParameterBlock[@Name='Profile']/*" IsInner="true" prefix="HWP" />
+        </ParameterBlock>
+        <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/Channel/*[not(self::ParameterBlock[@Name='Basic'])]" prefix="BASE" />
+      </Channel>
       <op:include href="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="UCT" />
-      <op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWP" />
       <op:include href="HardwareProfileDemo.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="DEMO" />
       <op:include href="HardwareProfile.dev.gen.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWPDEV" />
     </Dynamic>

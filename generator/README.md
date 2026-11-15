@@ -5,7 +5,7 @@
 Der Generator liest die Board-Header dieses Repos und erzeugt daraus für eine Applikation:
 
 - das Auswahlfeld „Hardware“ (gespeichert wird die `DEVICE_HW_ID`),
-- einen Button „Hardware vom Gerät abfragen“ (ETS liest ID, Fähigkeiten und Werte vom Gerät),
+- einen Button „Vom Gerät lesen“ (ETS liest ID, Fähigkeiten und Werte vom Gerät; ohne `<Page>`: „Hardware vom Gerät abfragen“),
 - eine Übersicht „Fähigkeiten dieser Hardware“ (mit `<Page>`: eine Hardware-Seite mit Gerätekarte aus Logo, Name, Board-Text
   und QR-Code, Hinweisen und Entwickleransicht),
 - GPIO-Auswahlfelder mit den Pins der gewählten Hardware, ohne die Pins aus den `<ReservedPins>` des Manifests (z. B.
@@ -201,7 +201,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 | `<Ports board use excludeRelayPins max>` | angebotene Hardware-Ports der passenden Boards (siehe „Ports“) |
 | `<Generate template output [finalNewline]>` | ganze Datei aus einer Vorlage (siehe „Vorlagen“); `<Param name value>` → `$P.<name>`; `@hw/` = Ordner `templates` |
 | `<InfoImage style define default module version width urlFont supersample urlColor logo badge thirdPartyWhen>` | Gerätekarte der Hardware-Seite, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
-| `<Page text icon help intro queryTitle query infoDefault unselectedInfo unselectedText updateInfo firmware changeInfo features dev>` | Hardware-Seite als OpenKNX-Seite, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
+| `<Page text icon help title label intro queryTitle query button queryHelp queryImage unselectedTitle infoDefault unselectedInfo unselectedText updateInfo firmware changeInfo features dev>` | Hardware-Seite als OpenKNX-Seite, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
 | `<Notice when title><Text>…</Text>…</Notice>` | Hinweis-Kasten für Boards mit der Fähigkeit `when`, siehe [Hardware-Seite](#hardware-seite-gerätekarte) |
 | `portManualValue`, `portNoneValue` (Wurzel) | Werte der Port-Auswahlen der Applikation: 0..n-1 = Port n des Boards, `portManualValue` (0..254) = manueller GPIO, `portNoneValue` (0..255) = kein Port, jeder andere Wert (z. B. nie geschrieben 255) = kein GPIO. Nur zusammen, verschieden. Einmal angegeben, gilt es für die Konfliktprüfung (`<Conflicts>`) und den Firmware-Header (`signalGpio`, siehe [Port-Auswahl in der Firmware](#port-auswahl-in-der-firmware)). Ein angebotener Port auf einem der beiden Werte bricht den Lauf ab |
 | `<Conflicts output number value error reserved reservedError tpError>` | GPIO-Konfliktprüfung in ETS, siehe [GPIO-Konflikte](#gpio-konflikte-conflicts) und [Reservierte GPIOs](#reservierte-gpios-conflicts-reservedtrue) |
@@ -245,24 +245,27 @@ Target abschaltet), stehen damit auch im ETS-Skript.
 
 ## Hardware-Seite (Gerätekarte)
 
-Eine OpenKNX-Seite „Hardware“ mit Auswahl, Geräteabfrage und Gerätekarte. Alles ist ETS-Text, nur Logo, Badge und
-QR-Code sind Bilder (ETS skaliert Bilder mit der Windows-Skalierung, Bildtext wird dabei weich).
+Eine OpenKNX-Seite „Gerät“ mit Auswahl, Geräteabfrage und Gerätekarte. Alles ist ETS-Text, nur Logo, Badge, QR-Code und
+das Schritt-Bild sind Bilder (ETS skaliert Bilder mit der Windows-Skalierung, Bildtext wird dabei weich).
 
 ```
-Nicht gewählt                                   Hardware gewählt
+Nicht gewählt (Baum: „Gerät (nicht gewählt)“)   Gerät gewählt (Baum: „Gerät“)
 -------------------------------------------     -------------------------------------------
-Hardware                                        Hardware
+Gerät auswählen                                 Gerät auswählen
 <intro>                                         <intro>
-Hardware   [Nicht gewählt          v]           Hardware   [OpenKNXiao V1 KNeoPix   v]
+Gerätetyp  [Nicht gewählt          v]           Gerätetyp  [OpenKNXiao V1 KNeoPix   v]
 ─────────────────────────────────────           [OpenKNX-Logo] bzw. [Drittanbieter-Badge]
-Abgleich mit dem Gerät                          OpenKNXiao V1 KNeoPix RP2350   (Überschrift)
-<query>                                         <HW_INFO_TEXT>                 [QR-Code]
-           [Hardware vom Gerät abfragen]                                       go.openknx.de/kneopix
-(Leerzeile)                                     (i) <Notice>   nur Drittanbieter
-(i) <unselectedInfo>
+Oder automatisch erkennen                       OpenKNXiao V1 KNeoPix RP2350   (Überschrift)
+           [Vom Gerät lesen]                    <HW_INFO_TEXT>                 [QR-Code]
+(i) <queryHelp>: „Vom Gerät lesen“ ist                                         go.openknx.de/kneopix
+    grau/inaktiv? 1. … 2. … 3. …                (i) <Notice>   nur Drittanbieter
+[Schritt-Bild <queryImage>]
 ```
 
 Der Abfrage-Knopf steht nur bei „Nicht gewählt“. Ohne Info-URL entfällt der QR-Code, der Text nutzt die volle Breite.
+Den Baumtext setzt eine Berechnung (`PC-<TT>00903`) aus der Auswahl in einen Text ohne Gerätespeicher (`P-<TT>00903`); das
+Schritt-Bild ist `P-<TT>00902`. Das Schritt-Bild hat einen transparenten Hintergrund und den Inhalt mittig: die Seitenbreite
+folgt dem Fenster (ETS5 und ETS6), eine eigene Bildkante wäre nie bündig mit dem Info-Kasten.
 
 ### 1. Board-Header
 
@@ -282,7 +285,7 @@ Der Abfrage-Knopf steht nur bei „Nicht gewählt“. Ohne Info-URL entfällt de
 <HardwareProfile prefix="XYZHW" moduleType="45" text="Hardware" order="hwid" ids="slot">
   <Output conf="src/MyApp.hw.conf.xml" share="src/MyApp.hw.module.gen.xml" script="src/MyApp.hw.module.gen.js" />
 
-  <Page text="Hardware" icon="memory" help="XYZ-Hardware" /> <!-- alle Texte mit Standard, siehe Tabelle unten; help = Help_de/XYZ-Hardware.md -->
+  <Page text="Gerät" icon="memory" help="XYZ-Hardware" /> <!-- alle Texte mit Standard, siehe Tabelle unten; help = Help_de/XYZ-Hardware.md -->
   <Notice when="ThirdParty" title="Produkt eines Drittanbieters: ... (höchstens 255 Zeichen)" />
   <InfoImage style="card" />
 
@@ -296,8 +299,9 @@ Der Abfrage-Knopf steht nur bei „Nicht gewählt“. Ohne Info-URL entfällt de
 <op:config href="MyApp.hw.conf.xml" />
 <op:define prefix="XYZHW" ModuleType="45" isSubmoduleOf="XYZ" configTransferName="Hardware" share="MyApp.hw.module.gen.xml" />
 ...
-<!-- im OpenKNX-Kanal, nach "Allgemein"; %XYZHW_PageHelp% gibt es nur mit <Page help> -->
-<ParameterBlock Id="%AID%_PB-nnn" Name="Hardware" Text="%XYZHW_PageText%" Icon="%XYZHW_PageIcon%" HelpContext="%XYZHW_PageHelp%">
+<!-- im OpenKNX-Kanal, nach "Allgemein"; %XYZHW_PageHelp% gibt es nur mit <Page help>, %XYZHW_PageTextRef% nur mit
+     <Page unselectedTitle> (Standard: an); ohne die beiden Attribute Text und TextParameterRefId steht nur der Seitentext im Baum -->
+<ParameterBlock Id="%AID%_PB-nnn" Name="Hardware" Text="{{0:%XYZHW_PageText%}}" TextParameterRefId="%XYZHW_PageTextRef%" Icon="%XYZHW_PageIcon%" HelpContext="%XYZHW_PageHelp%">
   <op:include href="MyApp.hw.module.gen.xml" xpath="//ApplicationProgram/Dynamic/Channel/ParameterBlock[@Name='Profile']/*" IsInner="true" prefix="XYZHW" />
 </ParameterBlock>
 ```
@@ -307,15 +311,23 @@ ausnehmen (der Build erzeugt sie); wer `-Check` in der CI laufen lässt (wie die
 
 ### Texte (`<Page>`)
 
-Fehlt ein Attribut, gilt der Standard; ein leeres Attribut lässt den Text weg. Jeder Text höchstens 255 Zeichen.
+Fehlt ein Attribut, gilt der Standard; ein leeres Attribut lässt den Text weg. Jeder Text höchstens 255 Zeichen; `&#10;`
+ist ein Zeilenumbruch (nicht in `text`, `title`, `label`, `queryTitle`, `button`, `unselectedTitle`: einzeilig, sonst Abbruch), `{page}` der Seitentext, `{button}` der Knopftext. Die Texte nennen die ETS nicht beim Namen und
+nutzen ihre Begriffe (Gerät, physikalische Adresse, Programmiertaste).
 
 | Attribut | Wo | Standard |
 |---|---|---|
-| `intro` | unter der Überschrift | „Wählen Sie die Hardware, auf der diese Applikation läuft. Danach zeigt die ETS nur die Einstellungen, die diese Hardware unterstützt.“ |
-| `queryTitle` | nicht gewählt | „Abgleich mit dem Gerät“ |
-| `query` | nicht gewählt, über dem Knopf | „Nachdem das Gerät programmiert wurde (PA + Applikation) ist ein Abgleich mit den Fähigkeiten der Hardware möglich:“ |
-| `unselectedInfo` | nicht gewählt, Info-Kasten | „Hardwareabhängige Einstellungen sind ausgeblendet, bis eine Hardware gewählt ist.“ (`unselected="showAll"`: „… zeigt die Applikation alle Einstellungen …“) |
-| `unselectedText`, `updateInfo` | nicht gewählt, Text / Info-Kasten | keiner |
+| `text` | Baum (Seitentext) | `text` der Wurzel |
+| `unselectedTitle` | Baum, solange nichts gewählt ist | „{page} (nicht gewählt)“; leer = immer der Seitentext |
+| `title` | Überschrift der Seite | „Gerät auswählen“ |
+| `intro` | unter der Überschrift | „Diese Applikation gilt für mehrere Geräte. Wählen Sie das Gerät aus, das verbaut ist. Erst dann sind seine Anschlüsse und Einstellungen sichtbar.“ (`unselected="showAll"`: „… Danach sind nur seine Anschlüsse und Einstellungen sichtbar.“) |
+| `label` | Text der Auswahl | „Gerätetyp“ |
+| `queryTitle` | nicht gewählt, Überschrift | „Oder automatisch erkennen“ |
+| `query` | nicht gewählt, Text über dem Knopf | keiner |
+| `button` | Abfrage-Knopf | „Vom Gerät lesen“ |
+| `queryHelp` | nicht gewählt, Info-Kasten unter dem Knopf | „„{button}“ ist grau/inaktiv?“ und drei Schritte, je eine Zeile (243 Zeichen); länger als 255 Zeichen = je 255 Zeichen ein Kasten, an Zeilen geteilt |
+| `queryImage` | nicht gewählt, Bild unter dem Info-Kasten (Raster mit einer Spalte) | `assets/query-steps.png`; leer = kein Bild; höchstens 532 px breit |
+| `unselectedInfo`, `unselectedText`, `updateInfo` | nicht gewählt, Info-Kasten / Text / Info-Kasten | keiner |
 | `firmware` | gewählt, unter der Karte: z. B. `"Firmware: {env}"` (`{env}` = `release_*`-Env(s) des Boards; Boards ohne Env ohne Zeile) | aus |
 | `changeInfo` | gewählt, Info-Kasten, z. B. „Nach einem Wechsel der Hardware … prüfen“ | aus |
 | `infoDefault` | Board ohne `HW_INFO_TEXT` | „Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt.“ |
@@ -335,12 +347,14 @@ Fehlt ein Attribut, gilt der Standard; ein leeres Attribut lässt den Text weg. 
 | `logo`, `badge` | `assets/card-badge.png`, `assets/third-party-badge.png` | eigene PNGs, Pfad relativ zum Manifest |
 | `thirdPartyWhen` | `ThirdParty` | Fähigkeit, die Badge und `<Notice>` auslöst |
 
-Bilder: `Baggages/<prefix>Info/Logo.png`, `Badge.png`, je URL `Info<n>.png` (n = kleinste Board-Nummer der Gruppe;
-Parameter ohne Speicher: Logo 900, Badge 901, QR 1000 + n). Ungenutzte Bilder löscht der Generator.
+Bilder: `Baggages/<prefix>Info/Logo.png`, `Badge.png`, je URL `Info<n>.png` (n = kleinste Board-Nummer der Gruppe),
+`Steps.png` (`<Page queryImage>`). Parameter ohne Speicher: Logo 900, Badge 901, Schritt-Bild 902, Baumtext 903, QR 1000 + n.
+Bilder im Ordner, die der Lauf nicht schreibt, löscht der Generator (mit `<Page>` oder `<InfoImage>`).
 
 ### Regeln aus der ETS5-Messung
 
-- Nutzbare Seitenbreite etwa 525 px: breitere Bilder schneidet ETS5 rechts ab (nicht skaliert).
+- Nutzbare Seitenbreite etwa 525–538 px, sie folgt dem Fenster (ETS5 und ETS6); breitere Bilder schneidet ETS5 rechts ab
+  (nicht skaliert). `HorizontalAlignment="Stretch"` zieht ein Bild in ETS5 nicht auf die Breite.
 - Raster: je Zelle genau ein Element. Ein eingebetteter Block in einer Zelle bekommt eine Scrollleiste.
 - Text in einer Rasterzelle steht mittig zum QR: kurzer Text neben dem QR lässt oben eine Lücke.
 - Ein Bild ohne Raster steht in der Wertespalte; Logo und Badge stehen deshalb in einem Raster mit einer Spalte 100 %.

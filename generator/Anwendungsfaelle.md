@@ -205,7 +205,7 @@ uint16_t selected = ParamHWP_HardwareSelect;
 if (selected != HardwareProfile::OWN_HW_ID)
     return;                                  // fremde Auswahl: keine hardwareabhängigen Parameter lesen
 
-// Geräteabfrage (Knopf „Hardware vom Gerät abfragen“, Function Property 158/4): eine Zeile im Modul
+// Geräteabfrage (Knopf „Vom Gerät lesen“, Function Property 158/4): eine Zeile im Modul
 bool MyModule::processFunctionProperty(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t* data,
                                        uint8_t* resultData, uint8_t& resultLength)
 {

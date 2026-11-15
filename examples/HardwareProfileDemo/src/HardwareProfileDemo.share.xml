@@ -269,7 +269,7 @@
             <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="Demo" Text="Demo-Funktionen" Icon="puzzle-outline">
               <ParameterBlock Id="%AID%_PB-nnn" Name="Overview" Text="Übersicht" Icon="puzzle-outline" HelpContext="DEMO-Uebersicht">
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Hardware-Profil Demo" UIHint="Headline" />
-                <ParameterSeparator Id="%AID%_PS-nnn" Text="Wählen Sie unter Hardware → Hardware ein Gerät. Jede Seite hier zeigt einen Anwendungsfall; die Kontexthilfe (F1) erklärt, was Sie sehen und wie es entsteht." />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Wählen Sie unter OpenKNX → Gerät ein Gerät. Jede Seite hier zeigt einen Anwendungsfall; die Kontexthilfe (F1) erklärt, wie er entsteht." />
                 <choose ParamRefId="%HWP_SelectRef%"><when test="0"><ParameterSeparator Id="%AID%_PS-nnn" Text="Nicht gewählt: Die Demo zeigt alles (unselected=&quot;showAll&quot;). Wählen Sie eine Hardware, damit die Seiten auf sie schrumpfen." UIHint="Information" /></when></choose>
               </ParameterBlock>
               <ParameterBlock Id="%AID%_PB-nnn" Name="Modules" Text="1 Module und Kanäle" Icon="puzzle-outline" HelpContext="DEMO-Module">
@@ -306,7 +306,7 @@
                 <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Co2%"><ParameterSeparator Id="%AID%_PS-nnn" Text="CO2" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00014_R-%TT%0001401" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00004_R-%TT%0000401" /></when></choose>
                 <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Lux%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00015_R-%TT%0001501" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00005_R-%TT%0000501" /></when></choose>
                 <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_Presence%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00016_R-%TT%0001601" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00006_R-%TT%0000601" /></when></choose>
-                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_SensorModule%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00017_R-%TT%0001701" IndentLevel="1" /><ParameterSeparator Id="%AID%_PS-nnn" Text="Ob ein Modul steckt, meldet das Gerät bei der Abfrage; Schalter auf der Seite Hardware." UIHint="Information" /></when></choose>
+                <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_SensorModule%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00017_R-%TT%0001701" IndentLevel="1" /><ParameterSeparator Id="%AID%_PS-nnn" Text="Ob ein Modul steckt, meldet das Gerät bei der Abfrage; Schalter auf der Seite Gerät." UIHint="Information" /></when></choose>
                 <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_NOCAP_TempHum%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Diese Hardware hat keine fest eingebauten Raumsensoren." UIHint="Information" /></when></choose>
               </ParameterBlock>
               <ParameterBlock Id="%AID%_PB-nnn" Name="Network" Text="5 Netzwerk" Icon="puzzle-outline" HelpContext="DEMO-Netzwerk">
@@ -317,7 +317,7 @@
               </ParameterBlock>
               <ParameterBlock Id="%AID%_PB-nnn" Name="Firmware" Text="6 Firmware" Icon="puzzle-outline" HelpContext="DEMO-Firmware">
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Geräteabfrage und Firmware" UIHint="Headline" />
-                <ParameterSeparator Id="%AID%_PS-nnn" Text="Hardware → Hardware: Knopf „Hardware vom Gerät abfragen“ (nur bei „Nicht gewählt“). Die Firmware antwortet mit HardwareProfile::answerQuery()." />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX → Gerät: Knopf „Vom Gerät lesen“ (nur bei „Nicht gewählt“). Die Firmware antwortet mit HardwareProfile::answerQuery()." />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Firmware prüft die Auswahl mit HardwareProfile::checkSelection(): nur bei „Match“ liest sie hardwareabhängige Parameter." />
               </ParameterBlock>
               <ParameterBlock Id="%AID%_PB-nnn" Name="Conflicts" Text="7 GPIO-Konflikte" Icon="puzzle-outline" HelpContext="DEMO-Konflikte">
@@ -358,8 +358,8 @@
                     </choose>
                   </when>
                 </choose>
-                <ParameterSeparator Id="%AID%_PS-nnn" Text="Freie Anschlüsse (Seite Hardware)" UIHint="Headline" />
-                <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Pins wählt man auf der Seite Hardware; ihr Fehlerblock steht hier." />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Freie Anschlüsse (Seite Gerät)" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Pins wählt man auf der Seite Gerät; ihr Fehlerblock steht hier." />
                 <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Pin1']/*" />
                 <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Conflict_Pin2']/*" />
                 <choose ParamRefId="%HWP_SelectRef%">

@@ -101,9 +101,10 @@ if (HardwareProfile::checkSelection(ParamHWP_HardwareSelect) == HardwareProfile:
 ## 5. Prüfen
 
 1. Generator zweimal laufen lassen: der zweite Lauf meldet „unverändert“ (`-Check` prüft ohne zu schreiben).
-2. knxprod bauen und im [knxprodviewer](https://tools.openknx.de/knxprodviewer/) die Seite „Hardware“ ansehen: Auswahl,
+2. knxprod bauen und im [knxprodviewer](https://tools.openknx.de/knxprodviewer/) die Seite „Gerät“ ansehen: Auswahl,
    ein- und ausgeblendete Einstellungen je Board.
-3. In ETS: App-Update aus der alten Version, Hardware wählen, Download, „Hardware vom Gerät abfragen“.
+3. In ETS: App-Update aus der alten Version, physikalische Adresse programmieren, andere Seite und zurück, „Vom Gerät lesen“
+   (oder den Gerätetyp von Hand wählen), Download.
 
 ## Was man setzen kann
 
@@ -132,7 +133,7 @@ auch ohne `<Import>` und ohne `header`.
 | `<Import href="…/Common.caps.xml">` | Standard-Fähigkeiten: TP, LAN, WLAN, Display, RTC, SD, … | nur `ThirdParty` und die eigenen |
 | `<Capability>`, `<Value>` | eigene Fähigkeit (`#if`-Ausdruck) / Zahl, als Feature-Flag nutzbar | keine eigenen |
 | `<Boards platformio exclude>`, `<Board define flags>` | welche Boards in der Auswahl stehen | Pflicht (mindestens zwei Boards) |
-| `<Page>`, `<InfoImage>`, `<Notice>` | eigene Seite „Hardware“ mit Gerätekarte, QR-Code, Hinweisen | Auswahl, Abfrage-Knopf und Fähigkeiten-Übersicht ohne eigene Seite |
+| `<Page>`, `<InfoImage>`, `<Notice>` | eigene Seite „Gerät“ mit Gerätekarte, QR-Code, Hinweisen, Schritt-Bild | Auswahl, Abfrage-Knopf und Fähigkeiten-Übersicht ohne eigene Seite |
 | `<GpioRole>` | GPIO-Auswahlfelder aus den Pin-Makros der Boards | keine |
 | `<Ports board use excludeRelayPins max>` | Teilmenge der `HW_PORT_*` je Board | alle beschriebenen Ports |
 | `<ReservedPins macros>` | Pins, die die Applikation nie anbietet / als reserviert meldet | jeder Pin erlaubt |
@@ -159,8 +160,8 @@ Details zu jeder Zeile: [README](README.md#manifest), [Hardware-Seite](README.md
 ### Erzeugt, aber nicht verwendet
 
 - **Feature-Flags nicht in der Applikations-XML benutzt:** ETS zeigt die Auswahl, blendet aber nichts aus.
-- **Header nicht in der Firmware eingebunden** (kein `answerQuery`): die Firmware läuft wie bisher; „Hardware vom Gerät
-  abfragen“ endet in ETS mit einem Zeitüberlauf.
+- **Header nicht in der Firmware eingebunden** (kein `answerQuery`): die Firmware läuft wie bisher; „Vom Gerät lesen“
+  endet in ETS mit einem Zeitüberlauf.
 - **`checkSelection` nicht aufgerufen:** keine Prüfung, ob ETS die passende Hardware gewählt hat. `signalGpio` und
   `relaySignalGpio` prüfen die Auswahl selbst.
 

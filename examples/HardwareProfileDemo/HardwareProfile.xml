@@ -65,7 +65,7 @@
 
   <!-- the hardware page: device card (logo or third-party badge, name, board text, QR code only with HW_INFO_URL),
        optional texts firmware / changeInfo, third-party notice, developer view (dev, features), help = context help -->
-  <Page text="Hardware" icon="memory" help="DEMO-Hardware" dev="src/HardwareProfile.dev.gen.xml"
+  <Page text="Gerät" icon="memory" help="DEMO-Hardware" dev="src/HardwareProfile.dev.gen.xml"
         features="Tp Lan Wifi PowerMeter Temperature FrontControls TempHum Co2 Lux Presence SensorModule Relays BinaryInputs StatusLeds"
         firmware="Firmware: {env}"
         changeInfo="Nach einem Wechsel der Hardware die Kanäle und Werte der Applikation prüfen." />

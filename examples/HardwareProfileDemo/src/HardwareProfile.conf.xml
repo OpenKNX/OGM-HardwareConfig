@@ -10,9 +10,10 @@
   <op:nowarn id="10" regex="HWP_.*B\d+" />
   <op:config name="%HWP_SelectRef%" value="%AID%_UP-4500001_R-450000101" />
   <op:config name="%HWP_ALL%" value="4129 4130 4402 4611 4880 4896 8481 9216 16128 16129 16130 16144 16145 16146 16147 16148" />
-  <op:config name="%HWP_PageText%" value="Hardware" />
+  <op:config name="%HWP_PageText%" value="Gerät" />
   <op:config name="%HWP_PageIcon%" value="memory" />
   <op:config name="%HWP_PageHelp%" value="DEMO-Hardware" />
+  <op:config name="%HWP_PageTextRef%" value="%AID%_P-4500903_R-450090301" />
   <op:config name="%HWP_CAP_ThirdParty%" value="0 8481 16144 16145 16146 16147 16148" />
   <op:config name="%HWP_NOCAP_ThirdParty%" value="4129 4130 4402 4611 4880 4896 9216 16128 16129 16130" />
   <op:config name="%HWP_CAP_ThirdParty_OR_NONE%" value="0 8481 16144 16145 16146 16147 16148" />

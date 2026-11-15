@@ -218,7 +218,7 @@ static inline Selection checkSelection(uint16_t selected)
     return selected == NOT_SELECTED ? Selection::NotSelected : (selected == OWN_HW_ID ? Selection::Match : Selection::Other);
 }
 
-/// @brief Device query (ETS button "Hardware vom Geraet abfragen", function property FP_OBJECT_INDEX / FP_PROPERTY_ID):
+/// @brief Device query (ETS query button, <Page button>, function property FP_OBJECT_INDEX / FP_PROPERTY_ID):
 ///        [0] status 0, [1..2] OWN_HW_ID big endian, [3..6] OWN_CAPS | (runtimeCaps & RUNTIME_CAPS) little endian, [7..] OWN_VALUES.
 /// @param runtimeCaps bits of the runtime="true" capabilities the firmware found (e.g. a plug-in sensor module), other bits are ignored
 /// @return true when objectIndex / propertyId are the device query (answer written), false otherwise.

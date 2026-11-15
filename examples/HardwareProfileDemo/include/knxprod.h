@@ -17,7 +17,7 @@
 #define MAIN_FirmwareName "OpenKNX Hardware-Profil Demo"
 #define MAIN_OpenKnxId 0xAD
 #define MAIN_ApplicationNumber 240
-#define MAIN_ApplicationVersion 4
+#define MAIN_ApplicationVersion 25
 #define MAIN_ApplicationEncoding iso-8859-15
 #define MAIN_ParameterSize 189
 #define MAIN_MaxKoNumber 106
@@ -226,7 +226,7 @@
 #define     HWP_SensorModuleOnMask 0x80
 #define     HWP_SensorModuleOnShift 7
 
-// Hardware
+// Gerätetyp
 #define ParamHWP_HardwareSelect                      (knx.paramWord(HWP_HardwareSelect))
 // Freier Anschluss 1
 #define ParamHWP_Pin1B3                              (knx.paramByte(HWP_Pin1B3))

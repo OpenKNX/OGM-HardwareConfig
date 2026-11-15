@@ -1,7 +1,5 @@
 # 7 GPIO-Konflikte
 
-**Was Sie sehen:** Unter einer Auswahl erscheint eine rote Meldung, sobald zwei Einstellungen denselben GPIO der gewählten Hardware belegen. Beide Beteiligten zeigen ihre Meldung. Ohne gewählte Hardware wird nicht geprüft.
-
 **Zum Ausprobieren:**
 
 - KNeoPix wählen, „Genutzte Ausgänge“ = 2, bei beiden Ausgängen denselben Daten-Port: beide melden einen Konflikt.

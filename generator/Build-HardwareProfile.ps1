@@ -288,11 +288,12 @@ function Update-Utf8File([string]$Path, [string]$Text) {
 }
 
 function ConvertTo-XmlText([string]$Text) {
-  return [System.Security.SecurityElement]::Escape($Text)
+  # a line break as character reference: a literal one in an attribute would be read back as a space
+  return ([System.Security.SecurityElement]::Escape($Text) -replace "`r", '' -replace "`n", '&#10;')
 }
 
 function ConvertTo-JsString([string]$Text) {
-  $t = $Text -replace '\\', '\\' -replace '"', '\"'
+  $t = $Text -replace '\\', '\\' -replace '"', '\"' -replace "`r", '\r' -replace "`n", '\n'
   # JScript (ETS) reads the script as UTF-8; escape non-ASCII so the file stays readable everywhere
   $sb = New-Object System.Text.StringBuilder
   foreach ($c in $t.ToCharArray()) {
@@ -870,41 +871,78 @@ function Read-Manifest([string]$Path) {
   }
   if ($m.Roles.Count -gt 9) { Stop-WithError "At most 9 GPIO roles" }
 
-  # <Page text icon help intro queryTitle query infoDefault unselectedInfo unselectedText updateInfo features dev/>: the hardware page as an
-  # OpenKNX page (the OAM includes ParameterBlock Profile into a channel of its choice): page text and icon (assets/icons/<icon>.png
-  # is copied next to the share as Baggages/Icons/<icon>.png), the page texts (an attribute that is absent takes the default
-  # below, an empty one leaves the text out): intro under the headline; queryTitle, query, the query button and the unselected*
-  # / updateInfo texts only while no board is selected; infoDefault = board text of boards without HW_INFO_TEXT. features =
-  # capability and value names of the developer view section "Module und Funktionen"; dev = file of the developer view module
-  # (own op:define, only in the OAM's development product); help = HelpContext of the page (the OAM ships Help_<lang>/<help>.md)
+  # <Page text icon help title label intro queryTitle query button queryHelp queryImage unselectedTitle infoDefault unselectedInfo
+  # unselectedText updateInfo features dev/>: the hardware page as an OpenKNX page (the OAM includes ParameterBlock Profile into a
+  # channel of its choice): page text and icon (assets/icons/<icon>.png is copied next to the share as Baggages/Icons/<icon>.png),
+  # the page texts (an attribute that is absent takes the default below, an empty one leaves the text out; &#10; = line break;
+  # {page} = page text, {button} = button text): title = headline, label = text of the selection, intro under the headline;
+  # queryTitle, query, the query button, queryHelp, queryImage and the unselected* / updateInfo texts only while no board is
+  # selected; unselectedTitle = page text in the tree while no board is selected (empty = always the page text); infoDefault =
+  # board text of boards without HW_INFO_TEXT. features = capability and value names of the developer view section "Module und
+  # Funktionen"; dev = file of the developer view module (own op:define, only in the OAM's development product); help =
+  # HelpContext of the page (the OAM ships Help_<lang>/<help>.md)
   $m.Page = $null
   $pg = $root.SelectSingleNode("Page")
   if ($pg) {
     $pageText = {
       param([string]$Attr, [string]$Default)
-      if ($pg.HasAttribute($Attr)) { return ("$($pg.GetAttribute($Attr))" -replace '\s+', ' ').Trim() }
+      # a literal line break in an attribute is a space (XML attribute normalization), &#10; stays a line break
+      if ($pg.HasAttribute($Attr)) { return (("$($pg.GetAttribute($Attr))" -replace "`r", '' -replace '[ \t]+', ' ' -replace ' ?\n ?', "`n").Trim()) }
       return [regex]::Unescape($Default)
     }
     foreach ($a in @("more", "summary", "portsText", "portsTextOne")) {
       if ($pg.HasAttribute($a)) { Stop-WithError "<Page>: attribute $a is no longer used (the device card shows name and board text) - remove it" }
     }
-    $unselDefault = 'Hardwareabh\u00E4ngige Einstellungen sind ausgeblendet, bis eine Hardware gew\u00E4hlt ist.'
-    if ($m.Unselected -eq "showAll") { $unselDefault = 'Bis eine Hardware gew\u00E4hlt ist, zeigt die Applikation alle Einstellungen, auch solche, die das Ger\u00E4t nicht hat.' }
+    $introDefault = 'Diese Applikation gilt f\u00FCr mehrere Ger\u00E4te. W\u00E4hlen Sie das Ger\u00E4t aus, das verbaut ist. Erst dann sind seine Anschl\u00FCsse und Einstellungen sichtbar.'
+    if ($m.Unselected -eq "showAll") { $introDefault = 'Diese Applikation gilt f\u00FCr mehrere Ger\u00E4te. W\u00E4hlen Sie das Ger\u00E4t aus, das verbaut ist. Danach sind nur seine Anschl\u00FCsse und Einstellungen sichtbar.' }
     $m.Page = @{ Text = "$($pg.text)"; Icon = "$($pg.icon)"; Help = "$($pg.help)"; Features = @("$($pg.features)" -split '\s+' | Where-Object { $_ }); Dev = $null; IconFile = $null
-      Intro          = (& $pageText "intro" 'W\u00E4hlen Sie die Hardware, auf der diese Applikation l\u00E4uft. Danach zeigt die ETS nur die Einstellungen, die diese Hardware unterst\u00FCtzt.')
-      QueryTitle     = (& $pageText "queryTitle" 'Abgleich mit dem Ger\u00E4t')
-      Query          = (& $pageText "query" 'Nachdem das Ger\u00E4t programmiert wurde (PA + Applikation) ist ein Abgleich mit den F\u00E4higkeiten der Hardware m\u00F6glich:')
-      InfoDefault    = (& $pageText "infoDefault" 'Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt.')
-      UnselectedInfo = (& $pageText "unselectedInfo" $unselDefault)
-      UnselectedText = (& $pageText "unselectedText" '')
-      UpdateInfo     = (& $pageText "updateInfo" '')
-      ChangeInfo     = (& $pageText "changeInfo" '')
-      Firmware       = (& $pageText "firmware" '')
-    }
-    foreach ($k in @("Intro", "QueryTitle", "Query", "InfoDefault", "UnselectedInfo", "UnselectedText", "UpdateInfo", "ChangeInfo")) {
-      if ($m.Page[$k].Length -gt 255) { Stop-WithError ("<Page>: {0} has {1} characters, ETS shows at most 255" -f ($k.Substring(0, 1).ToLower() + $k.Substring(1)), $m.Page[$k].Length) }
+      Title           = (& $pageText "title" 'Ger\u00E4t ausw\u00E4hlen')
+      Label           = (& $pageText "label" 'Ger\u00E4tetyp')
+      Intro           = (& $pageText "intro" $introDefault)
+      QueryTitle      = (& $pageText "queryTitle" 'Oder automatisch erkennen')
+      Query           = (& $pageText "query" '')
+      Button          = (& $pageText "button" 'Vom Ger\u00E4t lesen')
+      QueryHelp       = (& $pageText "queryHelp" '\u201E{button}\u201C ist grau/inaktiv?\n1. Physikalische Adresse programmieren (wenn n\u00F6tig: Programmiertaste dr\u00FCcken).\n2. Links eine andere Seite anklicken, dann zur\u00FCck auf diese Seite.\n3. Button klicken: Ger\u00E4tetyp wird ausgelesen und eingestellt.')
+      UnselectedTitle = (& $pageText "unselectedTitle" '{page} (nicht gew\u00E4hlt)')
+      InfoDefault     = (& $pageText "infoDefault" 'Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt.')
+      UnselectedInfo  = (& $pageText "unselectedInfo" '')
+      UnselectedText  = (& $pageText "unselectedText" '')
+      UpdateInfo      = (& $pageText "updateInfo" '')
+      ChangeInfo      = (& $pageText "changeInfo" '')
+      Firmware        = (& $pageText "firmware" '')
+      ImageFile       = $null
     }
     if (-not $m.Page.Text) { $m.Page.Text = $m.Text }
+    # with unselectedTitle the tree text is "{{0:<text>}}", 6 characters more
+    $textMax = 255; if ($m.Page.UnselectedTitle) { $textMax = 249 }
+    if ($m.Page.Text.Length -gt $textMax) { Stop-WithError ("<Page>: text has {0} characters, at most {1} (ETS shows 255; unselectedTitle adds {{{{0:...}}}})" -f $m.Page.Text.Length, $textMax) }
+    # one-line texts (tree, headlines, selection, button): a line break there is an error, not a layout
+    foreach ($k in @("Text", "Title", "Label", "QueryTitle", "Button", "UnselectedTitle")) {
+      if ($m.Page[$k] -match "[`r`n]") { Stop-WithError ("<Page>: {0} must be one line (no &#10;)" -f ($k.Substring(0, 1).ToLower() + $k.Substring(1))) }
+    }
+    if (-not $m.Page.Button) { Stop-WithError "<Page>: button must not be empty (text of the query button)" }
+    if (-not $m.Page.Label) { Stop-WithError "<Page>: label must not be empty (text of the selection)" }
+    foreach ($k in @("Title", "Label", "Intro", "QueryTitle", "Query", "Button", "QueryHelp", "UnselectedTitle", "InfoDefault", "UnselectedInfo", "UnselectedText", "UpdateInfo", "ChangeInfo")) {
+      $m.Page[$k] = $m.Page[$k].Replace("{button}", $m.Page.Button).Replace("{page}", $m.Page.Text)
+      if ($k -eq "QueryHelp") { continue }
+      if ($m.Page[$k].Length -gt 255) { Stop-WithError ("<Page>: {0} has {1} characters, ETS shows at most 255" -f ($k.Substring(0, 1).ToLower() + $k.Substring(1)), $m.Page[$k].Length) }
+    }
+    # queryHelp: one information box per part of at most 255 characters, split at line breaks (ETS: 255 characters per text)
+    $m.Page.QueryHelpParts = @()
+    $cur = ""
+    foreach ($line in ($m.Page.QueryHelp -split "`n")) {
+      if ($line.Length -gt 255) { Stop-WithError ("<Page>: a line of queryHelp has {0} characters, ETS shows at most 255: {1}" -f $line.Length, $line) }
+      if ($cur -and ($cur.Length + 1 + $line.Length) -gt 255) { $m.Page.QueryHelpParts += $cur; $cur = "" }
+      if ($cur) { $cur = $cur + "`n" + $line } else { $cur = $line }
+    }
+    if ($cur) { $m.Page.QueryHelpParts += $cur }
+    # queryImage: picture under queryHelp (one-column grid); absent = the generator's steps picture, empty = none
+    $imgAttr = [System.IO.Path]::Combine($PSScriptRoot, "assets", "query-steps.png")
+    if ($pg.HasAttribute("queryImage")) { $imgAttr = "$($pg.queryImage)"; if ($imgAttr) { $imgAttr = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $imgAttr)) } }
+    if ($imgAttr) {
+      if (-not (Test-Path -LiteralPath $imgAttr -PathType Leaf)) { Stop-WithError ("<Page>: queryImage file not found: {0}" -f $imgAttr) }
+      $m.Page.ImageFile = $imgAttr
+    }
     if (-not $m.Page.Icon) { $m.Page.Icon = "cog-outline" }
     if ($m.Page.Icon -notmatch '^[a-z0-9][a-z0-9-]*$') { Stop-WithError "<Page>: icon must be an icon name (a-z, 0-9, -)" }
     if ($m.Page.Help -and $m.Page.Help -notmatch '^[A-Za-z0-9_-]+$') { Stop-WithError "<Page>: help must be a help context name (A-Z, a-z, 0-9, _, -)" }
@@ -1863,6 +1901,9 @@ function Get-ParamRefIds($M) {
   return @{
     Select    = "%AID%_UP-${tt}00001_R-${tt}0000101"
     SelectTT  = "%AID%_UP-%TT%00001_R-%TT%0000101"
+    # <Page unselectedTitle>: page text of the tree (memoryless text, set by a calculation from the selection)
+    Title     = "%AID%_P-${tt}${script:PageTitleParamNum}_R-${tt}${script:PageTitleParamNum}01"
+    TitleTT   = "%AID%_P-%TT%${script:PageTitleParamNum}_R-%TT%${script:PageTitleParamNum}01"
   }
 }
 
@@ -2015,6 +2056,9 @@ function New-ConfXml($M, $Boards) {
     [void]$sb.AppendLine(("  <op:config name=`"%{0}_PageText%`" value=`"{1}`" />" -f $p, (ConvertTo-XmlText $M.Page.Text)))
     [void]$sb.AppendLine(("  <op:config name=`"%{0}_PageIcon%`" value=`"{1}`" />" -f $p, $M.Page.Icon))
     if ($M.Page.Help) { [void]$sb.AppendLine(("  <op:config name=`"%{0}_PageHelp%`" value=`"{1}`" />" -f $p, $M.Page.Help)) }
+    # tree text "<page> (nicht gewaehlt)" while no board is selected: the OAM's page block takes
+    # Text="{{0:%<prefix>_PageText%}}" TextParameterRefId="%<prefix>_PageTextRef%"
+    if ($M.Page.UnselectedTitle) { [void]$sb.AppendLine(("  <op:config name=`"%{0}_PageTextRef%`" value=`"{1}`" />" -f $p, $refs.Title)) }
   }
   for ($i = 0; $i -lt $M.Capabilities.Count; $i++) {
     $c = $M.Capabilities[$i]
@@ -2048,8 +2092,15 @@ function New-ConfXml($M, $Boards) {
 
 # usable page width of ETS5 in picture px (measured: a wider picture is cut at about 525 px); sets the grid column of the QR picture
 $script:EtsPageWidth = 520
+# widest picture of a one-column grid row: the page width follows the window (ETS5: ~525 px cut on 2026-11-13, 532 px shown
+# uncut and an information box ~538 px wide on 2026-11-15; ETS6: 532 px), so a picture of this row has a transparent
+# background and its content left of 525 px
+$script:EtsPictureMaxWidth = 532
 # parameter numbers of the device card pictures without memory: OpenKNX logo, third-party badge; QR pictures 1000 + board slot
 $script:LogoParamNum = "00900"
+# <Page>: steps picture of the device query (queryImage) and the page text of the tree (unselectedTitle); calculation PC-<same number>
+$script:StepsParamNum = "00902"
+$script:PageTitleParamNum = "00903"
 $script:BadgeParamNum = "00901"
 
 # @brief QR pictures of the device card: boards with an info URL grouped by URL; Num = smallest board slot of the group
@@ -2206,20 +2257,30 @@ function New-PageInfoXml($M, $Boards, [string]$SelRef, $Switches, $InfoGroups, [
 }
 
 # @brief <Page> below the hardware selection. No board selected: separator line, headline queryTitle, query text, the query
-#        button, a blank line, the unselected* / updateInfo texts. A board selected: New-PageInfoXml (device card, switches,
-#        notices). The query button exists only in the first case: a selected board needs no query (back to "Nicht gewaehlt").
+#        button, queryHelp (information box), the queryImage picture (one-column grid, the full page width), then the
+#        unselected* / updateInfo texts. A board selected: New-PageInfoXml (device card, switches, notices). The query button
+#        exists only in the first case: a selected board needs no query (back to "Nicht gewaehlt").
 function New-PageBodyXml($M, $Boards, [string]$SelRef, $Switches, $InfoGroups, [string]$Ind) {
   $sb = New-Object System.Text.StringBuilder
   $p = $M.Prefix
-  $ae = [System.Char]::ConvertFromUtf32(0xE4)
   [void]$sb.AppendLine("$Ind<choose ParamRefId=`"$SelRef`">")
   [void]$sb.AppendLine("$Ind  <when test=`"$($M.UnselectedValue)`">")
   [void]$sb.AppendLine("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"`" UIHint=`"HorizontalRuler`" />")
   if ($M.Page.QueryTitle) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Headline`" />" -f (ConvertTo-XmlText $M.Page.QueryTitle))) }
   if ($M.Page.Query) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $M.Page.Query))) }
-  [void]$sb.AppendLine("$Ind    <Button Id=`"%AID%_B-%TT%00001`" Text=`"Hardware vom Ger${ae}t abfragen`" EventHandler=`"${p}_detectHardware`" EventHandlerOnline=`"ConnectionOriented`" />")
-  # blank line between the button and the texts below (the OGM-Common pattern after its module sync buttons)
-  [void]$sb.AppendLine("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"&#10;`" />")
+  [void]$sb.AppendLine(("$Ind    <Button Id=`"%AID%_B-%TT%00001`" Text=`"{0}`" EventHandler=`"{1}_detectHardware`" EventHandlerOnline=`"ConnectionOriented`" />" -f (ConvertTo-XmlText $M.Page.Button), $p))
+  foreach ($part in $M.Page.QueryHelpParts) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Information`" />" -f (ConvertTo-XmlText $part))) }
+  if ($M.Page.ImageFile) {
+    # one-column grid: the picture takes the page width instead of the value column (the pattern of the OGM-Common logo)
+    [void]$sb.AppendLine("$Ind    <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"ProfileSteps`" Inline=`"true`" Layout=`"Grid`">")
+    [void]$sb.AppendLine("$Ind      <Rows><Row Id=`"%AID%_PB-nnn_R-1`" Name=`"Row1`" /></Rows>")
+    [void]$sb.AppendLine("$Ind      <Columns><Column Id=`"%AID%_PB-nnn_C-1`" Name=`"Col1`" Width=`"100%`" /></Columns>")
+    [void]$sb.AppendLine(("$Ind      <ParameterRefRef RefId=`"%AID%_P-%TT%{0}_R-%TT%{0}01`" Cell=`"1,1`" />" -f $script:StepsParamNum))
+    [void]$sb.AppendLine("$Ind    </ParameterBlock>")
+  }
+  $more = @($M.Page.UnselectedInfo, $M.Page.UnselectedText, $M.Page.UpdateInfo | Where-Object { $_ })
+  # blank line between the button block and the texts below (the OGM-Common pattern after its module sync buttons)
+  if ($more.Count -gt 0) { [void]$sb.AppendLine("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"&#10;`" />") }
   if ($M.Page.UnselectedInfo) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Information`" />" -f (ConvertTo-XmlText $M.Page.UnselectedInfo))) }
   if ($M.Page.UnselectedText) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $M.Page.UnselectedText))) }
   if ($M.Page.UpdateInfo) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Information`" />" -f (ConvertTo-XmlText $M.Page.UpdateInfo))) }
@@ -2285,6 +2346,10 @@ function New-ShareXml($M, $Boards) {
   foreach ($g in $infoGroups) {
     [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}Info{1}`" Name=`"{0}Info{1}`"><TypePicture RefId=`"%FILE-{0}Info{1}%`" HorizontalAlignment=`"Right`" /></ParameterType>" -f $p, $g.Num))
   }
+  $steps = [bool]($M.Page -and $M.Page.ImageFile)
+  $treeTitle = [bool]($M.Page -and $M.Page.UnselectedTitle)
+  if ($steps) { [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}Steps`" Name=`"{0}Steps`"><TypePicture RefId=`"%FILE-{0}Steps%`" HorizontalAlignment=`"Left`" /></ParameterType>" -f $p)) }
+  if ($treeTitle) { [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}PageTitle`" Name=`"{0}PageTitle`"><TypeText SizeInBit=`"2040`" /></ParameterType>" -f $p)) }
   for ($bi = 0; $bi -lt $Boards.Count; $bi++) {
     $b = $Boards[$bi]
     foreach ($role in $M.Roles) {
@@ -2300,9 +2365,10 @@ function New-ShareXml($M, $Boards) {
   }
   [void]$sb.AppendLine('      </ParameterTypes>')
   [void]$sb.AppendLine('      <Parameters>')
+  $selLabel = "Hardware"; if ($M.Page) { $selLabel = ConvertTo-XmlText $M.Page.Label }
   [void]$sb.AppendLine("        <Union SizeInBit=`"16`">")
   [void]$sb.AppendLine('          <Memory CodeSegment="%MID%" Offset="0" BitOffset="0" />')
-  [void]$sb.AppendLine("          <Parameter Id=`"%AID%_UP-%TT%00001`" Name=`"HardwareSelect`" ParameterType=`"%AID%_PT-${p}HardwareSelect`" Offset=`"0`" BitOffset=`"0`" Text=`"Hardware`" Value=`"$($M.UnselectedValue)`" />")
+  [void]$sb.AppendLine("          <Parameter Id=`"%AID%_UP-%TT%00001`" Name=`"HardwareSelect`" ParameterType=`"%AID%_PT-${p}HardwareSelect`" Offset=`"0`" BitOffset=`"0`" Text=`"$selLabel`" Value=`"$($M.UnselectedValue)`" />")
   [void]$sb.AppendLine('        </Union>')
   $offset = 2
   foreach ($role in $M.Roles) {
@@ -2333,6 +2399,9 @@ function New-ShareXml($M, $Boards) {
   foreach ($g in $infoGroups) {
     [void]$sb.AppendLine(("        <Parameter Id=`"%AID%_P-%TT%{0}`" Name=`"Info{1}`" ParameterType=`"%AID%_PT-{2}Info{1}`" Text=`"`" Access=`"Read`" Value=`"`" />" -f $g.ParamNum, $g.Num, $p))
   }
+  if ($steps) { [void]$sb.AppendLine(("        <Parameter Id=`"%AID%_P-%TT%{0}`" Name=`"Steps`" ParameterType=`"%AID%_PT-{1}Steps`" Text=`"`" Access=`"Read`" Value=`"`" />" -f $script:StepsParamNum, $p)) }
+  # page text of the tree: no memory, Access None; the calculation sets it from the selection, the default fits "not selected"
+  if ($treeTitle) { [void]$sb.AppendLine(("        <Parameter Id=`"%AID%_P-%TT%{0}`" Name=`"PageTitle`" ParameterType=`"%AID%_PT-{1}PageTitle`" Text=`"`" Access=`"None`" Value=`"{2}`" />" -f $script:PageTitleParamNum, $p, (ConvertTo-XmlText $M.Page.UnselectedTitle))) }
   [void]$sb.AppendLine('      </Parameters>')
   [void]$sb.AppendLine('      <ParameterRefs>')
   [void]$sb.AppendLine("        <ParameterRef Id=`"$selRef`" RefId=`"%AID%_UP-%TT%00001`" />")
@@ -2354,7 +2423,18 @@ function New-ShareXml($M, $Boards) {
   foreach ($g in $infoGroups) {
     [void]$sb.AppendLine(("        <ParameterRef Id=`"%AID%_P-%TT%{0}_R-%TT%{0}01`" RefId=`"%AID%_P-%TT%{0}`" />" -f $g.ParamNum))
   }
+  if ($steps) { [void]$sb.AppendLine(("        <ParameterRef Id=`"%AID%_P-%TT%{0}_R-%TT%{0}01`" RefId=`"%AID%_P-%TT%{0}`" />" -f $script:StepsParamNum)) }
+  if ($treeTitle) { [void]$sb.AppendLine(("        <ParameterRef Id=`"{0}`" RefId=`"%AID%_P-%TT%{1}`" />" -f $refs.TitleTT, $script:PageTitleParamNum)) }
   [void]$sb.AppendLine('      </ParameterRefs>')
+  if ($treeTitle) {
+    # tree text: <page> while a board is selected, unselectedTitle while not (runs on every change of the selection)
+    [void]$sb.AppendLine('      <ParameterCalculations>')
+    [void]$sb.AppendLine(("        <ParameterCalculation Id=`"%AID%_PC-%TT%{0}`" Language=`"JavaScript`" Name=`"{1}PageTitle`" LRTransformationFunc=`"{1}_pageTitle`" RLTransformationFunc=`"{1}_pageTitleNone`">" -f $script:PageTitleParamNum, $p))
+    [void]$sb.AppendLine(("          <LParameters><ParameterRefRef RefId=`"{0}`" AliasName=`"Select`" /></LParameters>" -f $selRef))
+    [void]$sb.AppendLine(("          <RParameters><ParameterRefRef RefId=`"{0}`" AliasName=`"Title`" /></RParameters>" -f $refs.TitleTT))
+    [void]$sb.AppendLine('        </ParameterCalculation>')
+    [void]$sb.AppendLine('      </ParameterCalculations>')
+  }
   [void]$sb.AppendLine('      <Script>')
   [void]$sb.AppendLine(("        <op:include href=`"{0}`" type=`"script`" />" -f [System.IO.Path]::GetFileName($M.Outputs.script)))
   [void]$sb.AppendLine('      </Script>')
@@ -2364,10 +2444,14 @@ function New-ShareXml($M, $Boards) {
   if ($M.Page) {
     $helpAttr = ""
     if ($M.Page.Help) { $helpAttr = " HelpContext=`"$($M.Page.Help)`"" }
-    [void]$sb.AppendLine(("        <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"Profile`" Text=`"{0}`" Icon=`"{1}`"{2}>" -f (ConvertTo-XmlText $M.Page.Text), $M.Page.Icon, $helpAttr))
+    $blockText = ConvertTo-XmlText $M.Page.Text
+    # unselectedTitle: the tree shows the memoryless page text the calculation sets ({{0:...}} = text until it is set)
+    if ($treeTitle) { $blockText = "{{0:" + $blockText + "}}"; $helpAttr += " TextParameterRefId=`"$($refs.TitleTT)`"" }
+    [void]$sb.AppendLine(("        <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"Profile`" Text=`"{0}`" Icon=`"{1}`"{2}>" -f $blockText, $M.Page.Icon, $helpAttr))
   }
   else { [void]$sb.AppendLine("        <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"Profile`" Text=`"Ger$([System.Char]::ConvertFromUtf32(0xE4))teprofil`" Icon=`"cog-outline`">") }
-  [void]$sb.AppendLine("          <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"Hardware`" UIHint=`"Headline`" />")
+  $headline = "Hardware"; if ($M.Page) { $headline = ConvertTo-XmlText $M.Page.Title }
+  if ($headline) { [void]$sb.AppendLine("          <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"$headline`" UIHint=`"Headline`" />") }
   if ($M.Page -and $M.Page.Intro) { [void]$sb.AppendLine(("          <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $M.Page.Intro))) }
   [void]$sb.AppendLine("          <ParameterRefRef RefId=`"$selRef`" IndentLevel=`"1`" />")
   if ($M.Page) { [void]$sb.Append((New-PageBodyXml $M $Boards $selRef $switches $infoGroups "          ")) }
@@ -2449,8 +2533,8 @@ function New-ShareXml($M, $Boards) {
   [void]$sb.AppendLine('        </ParameterBlock>')
   [void]$sb.AppendLine('      </Channel>')
   [void]$sb.AppendLine('    </Dynamic>')
-  if ($infoGroups.Count -gt 0 -or $marks.Count -gt 0) {
-    # baggages: Baggages/<prefix>Info/Logo.png, Badge.png, Info<n>.png next to this file (written by the generator)
+  if ($infoGroups.Count -gt 0 -or $marks.Count -gt 0 -or $steps) {
+    # baggages: Baggages/<prefix>Info/Logo.png, Badge.png, Info<n>.png, Steps.png next to this file (written by the generator)
     [void]$sb.AppendLine('  </ApplicationProgram></ApplicationPrograms>')
     [void]$sb.AppendLine('  <Baggages>')
     foreach ($k in $marks) {
@@ -2459,6 +2543,7 @@ function New-ShareXml($M, $Boards) {
     foreach ($g in $infoGroups) {
       [void]$sb.AppendLine(("    <Baggage TargetPath=`"{0}Info`" Name=`"{1}`" Id=`"%FILE-{0}Info{2}%`"><FileInfo TimeInfo=`"%DATETIME%`" /></Baggage>" -f $p, $g.File, $g.Num))
     }
+    if ($steps) { [void]$sb.AppendLine(("    <Baggage TargetPath=`"{0}Info`" Name=`"Steps.png`" Id=`"%FILE-{0}Steps%`"><FileInfo TimeInfo=`"%DATETIME%`" /></Baggage>" -f $p)) }
     [void]$sb.AppendLine('  </Baggages>')
     [void]$sb.AppendLine('  </Manufacturer></ManufacturerData>')
   }
@@ -2627,6 +2712,16 @@ function New-ScriptJs($M, $Boards) {
   [void]$sb.AppendLine("// Generated by OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 - do not edit")
   [void]$sb.AppendLine("// ETS runs Windows JScript (ES3): no let/const, no arrow functions, no JSON object.")
   [void]$sb.AppendLine("")
+  if ($M.Page -and $M.Page.UnselectedTitle) {
+    # <Page unselectedTitle>: ParameterCalculation PageTitle (selection -> page text of the tree)
+    [void]$sb.AppendLine("// page text of the tree: <Page unselectedTitle> while no board is selected, else the page text")
+    [void]$sb.AppendLine("function ${p}_pageTitle(input, output, context) {")
+    [void]$sb.AppendLine(("    output.Title = (Number(input.Select) == {0}) ? {1} : {2};" -f $M.UnselectedValue, (ConvertTo-JsString $M.Page.UnselectedTitle), (ConvertTo-JsString $M.Page.Text)))
+    [void]$sb.AppendLine("}")
+    [void]$sb.AppendLine("function ${p}_pageTitleNone(input, output, context) {")
+    [void]$sb.AppendLine("}")
+    [void]$sb.AppendLine("")
+  }
   [void]$sb.AppendLine("// capability names in bit order of the device query")
   $capNames = @($M.Capabilities | ForEach-Object { ConvertTo-JsString $_.Text })
   [void]$sb.AppendLine("var ${p}_capNames = [" + ($capNames -join ", ") + "];")
@@ -2723,7 +2818,7 @@ function ${p}_hex4(value) {
     return "0x" + s;
 }
 
-// Button "Hardware vom Geraet abfragen": reads DEVICE_HW_ID, capability bits and values from the
+// Query button (<Page button>, default "Vom Geraet lesen"; without <Page> "Hardware vom Geraet abfragen"): reads DEVICE_HW_ID, capability bits and values from the
 // device (function property $FP_OBJECT_INDEX/$FP_PROPERTY_ID) and sets the hardware selection.
 function ${p}_detectHardware(device, online, progress, context) {
     progress.setText("Hardware: frage Ger${JSAE}t ab ...");
@@ -3255,7 +3350,7 @@ function New-Header($M, $Boards) {
   [void]$sb.AppendLine("    return selected == NOT_SELECTED ? Selection::NotSelected : (selected == OWN_HW_ID ? Selection::Match : Selection::Other);")
   [void]$sb.AppendLine("}")
   [void]$sb.AppendLine("")
-  [void]$sb.AppendLine("/// @brief Device query (ETS button `"Hardware vom Geraet abfragen`", function property FP_OBJECT_INDEX / FP_PROPERTY_ID):")
+  [void]$sb.AppendLine("/// @brief Device query (ETS query button, <Page button>, function property FP_OBJECT_INDEX / FP_PROPERTY_ID):")
   [void]$sb.AppendLine("///        [0] status 0, [1..2] OWN_HW_ID big endian, [3..6] OWN_CAPS | (runtimeCaps & RUNTIME_CAPS) little endian, [7..] OWN_VALUES.")
   [void]$sb.AppendLine("/// @param runtimeCaps bits of the runtime=`"true`" capabilities the firmware found (e.g. a plug-in sensor module), other bits are ignored")
   [void]$sb.AppendLine("/// @return true when objectIndex / propertyId are the device query (answer written), false otherwise.")
@@ -3752,6 +3847,16 @@ try {
     }
   }
 
+  # <Page queryImage>: steps picture of the device query, copied as Baggages/<prefix>Info/Steps.png (at most the page width)
+  if ($m.Page -and $m.Page.ImageFile) {
+    try { $img = Read-PngRgba $m.Page.ImageFile }
+    catch { Stop-WithError ("<Page> queryImage: {0}" -f $_.Exception.Message) }
+    if ($img.Width -gt $script:EtsPictureMaxWidth) { Stop-WithError ("<Page> queryImage: {0} is {1} px wide, the page is {2} px wide" -f $m.Page.ImageFile, $img.Width, $script:EtsPictureMaxWidth) }
+    $stepsDir = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($m.Outputs["share"]), "Baggages", ($m.Prefix + "Info"))
+    $images += @{ Output = [System.IO.Path]::Combine($stepsDir, "Steps.png"); Image = $img }
+    Write-Step ("query steps Steps.png: {0}x{1} px from {2}" -f $img.Width, $img.Height, $m.Page.ImageFile)
+  }
+
   # every output is rendered before the first one is written: an error leaves no half-updated set
   $rendered = @()
   if ($m.Outputs.ContainsKey("conf")) { Write-OutputActivity "erzeugen" $m.Outputs["conf"]; $rendered += @{ Output = $m.Outputs["conf"]; Text = (New-ConfXml $m $boards) } }
@@ -3808,9 +3913,11 @@ try {
     }
   }
   # the generator owns the info folder: pictures it no longer writes go
-  if ($m.Info -and -not $DryRun -and (Test-Path $infoDir)) {
+  # <InfoImage> and <Page> both need <Output share>; without either the folder is not the generator's
+  if ($m.Info -or $m.Page) { $infoDir = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($m.Outputs["share"]), "Baggages", ($m.Prefix + "Info")) }
+  if (($m.Info -or $m.Page) -and -not $DryRun -and (Test-Path -LiteralPath $infoDir)) {
     $keep = @($images | ForEach-Object { [System.IO.Path]::GetFileName($_.Output) })
-    foreach ($f in (Get-ChildItem -Path $infoDir -Filter "*.png")) {
+    foreach ($f in (Get-ChildItem -LiteralPath $infoDir -Filter "*.png")) {
       if ($keep -notcontains $f.Name) {
         if (-not $script:CheckMode) { Remove-Item -LiteralPath $f.FullName; Write-Ok ("removed {0}" -f $f.FullName) }
         Add-Written $f.FullName

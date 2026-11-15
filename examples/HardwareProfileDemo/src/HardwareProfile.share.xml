@@ -44,6 +44,8 @@
         <ParameterType Id="%AID%_PT-HWPInfo0" Name="HWPInfo0"><TypePicture RefId="%FILE-HWPInfo0%" HorizontalAlignment="Right" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo9" Name="HWPInfo9"><TypePicture RefId="%FILE-HWPInfo9%" HorizontalAlignment="Right" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo15" Name="HWPInfo15"><TypePicture RefId="%FILE-HWPInfo15%" HorizontalAlignment="Right" /></ParameterType>
+        <ParameterType Id="%AID%_PT-HWPSteps" Name="HWPSteps"><TypePicture RefId="%FILE-HWPSteps%" HorizontalAlignment="Left" /></ParameterType>
+        <ParameterType Id="%AID%_PT-HWPPageTitle" Name="HWPPageTitle"><TypeText SizeInBit="2040" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPPin1B3" Name="HWPPin1B3">
           <TypeRestriction Base="Value" SizeInBit="8">
             <Enumeration Text="nicht verwendet" Value="255" Id="%ENID%" />
@@ -164,7 +166,7 @@
       <Parameters>
         <Union SizeInBit="16">
           <Memory CodeSegment="%MID%" Offset="0" BitOffset="0" />
-          <Parameter Id="%AID%_UP-%TT%00001" Name="HardwareSelect" ParameterType="%AID%_PT-HWPHardwareSelect" Offset="0" BitOffset="0" Text="Hardware" Value="0" />
+          <Parameter Id="%AID%_UP-%TT%00001" Name="HardwareSelect" ParameterType="%AID%_PT-HWPHardwareSelect" Offset="0" BitOffset="0" Text="Gerätetyp" Value="0" />
         </Union>
         <Union SizeInBit="8">
           <Memory CodeSegment="%MID%" Offset="2" BitOffset="0" />
@@ -213,6 +215,8 @@
         <Parameter Id="%AID%_P-%TT%01000" Name="Info0" ParameterType="%AID%_PT-HWPInfo0" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01009" Name="Info9" ParameterType="%AID%_PT-HWPInfo9" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01015" Name="Info15" ParameterType="%AID%_PT-HWPInfo15" Text="" Access="Read" Value="" />
+        <Parameter Id="%AID%_P-%TT%00902" Name="Steps" ParameterType="%AID%_PT-HWPSteps" Text="" Access="Read" Value="" />
+        <Parameter Id="%AID%_P-%TT%00903" Name="PageTitle" ParameterType="%AID%_PT-HWPPageTitle" Text="" Access="None" Value="Gerät (nicht gewählt)" />
       </Parameters>
       <ParameterRefs>
         <ParameterRef Id="%AID%_UP-%TT%00001_R-%TT%0000101" RefId="%AID%_UP-%TT%00001" />
@@ -255,25 +259,36 @@
         <ParameterRef Id="%AID%_P-%TT%01000_R-%TT%0100001" RefId="%AID%_P-%TT%01000" />
         <ParameterRef Id="%AID%_P-%TT%01009_R-%TT%0100901" RefId="%AID%_P-%TT%01009" />
         <ParameterRef Id="%AID%_P-%TT%01015_R-%TT%0101501" RefId="%AID%_P-%TT%01015" />
+        <ParameterRef Id="%AID%_P-%TT%00902_R-%TT%0090201" RefId="%AID%_P-%TT%00902" />
+        <ParameterRef Id="%AID%_P-%TT%00903_R-%TT%0090301" RefId="%AID%_P-%TT%00903" />
       </ParameterRefs>
+      <ParameterCalculations>
+        <ParameterCalculation Id="%AID%_PC-%TT%00903" Language="JavaScript" Name="HWPPageTitle" LRTransformationFunc="HWP_pageTitle" RLTransformationFunc="HWP_pageTitleNone">
+          <LParameters><ParameterRefRef RefId="%AID%_UP-%TT%00001_R-%TT%0000101" AliasName="Select" /></LParameters>
+          <RParameters><ParameterRefRef RefId="%AID%_P-%TT%00903_R-%TT%0090301" AliasName="Title" /></RParameters>
+        </ParameterCalculation>
+      </ParameterCalculations>
       <Script>
         <op:include href="HardwareProfile.script.js" type="script" />
       </Script>
     </Static>
     <Dynamic>
       <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="HardwareProfile" Text="Hardware" Icon="cog-outline">
-        <ParameterBlock Id="%AID%_PB-nnn" Name="Profile" Text="Hardware" Icon="memory" HelpContext="DEMO-Hardware">
-          <ParameterSeparator Id="%AID%_PS-nnn" Text="Hardware" UIHint="Headline" />
-          <ParameterSeparator Id="%AID%_PS-nnn" Text="Wählen Sie die Hardware, auf der diese Applikation läuft. Danach zeigt die ETS nur die Einstellungen, die diese Hardware unterstützt." />
+        <ParameterBlock Id="%AID%_PB-nnn" Name="Profile" Text="{{0:Gerät}}" Icon="memory" HelpContext="DEMO-Hardware" TextParameterRefId="%AID%_P-%TT%00903_R-%TT%0090301">
+          <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerät auswählen" UIHint="Headline" />
+          <ParameterSeparator Id="%AID%_PS-nnn" Text="Diese Applikation gilt für mehrere Geräte. Wählen Sie das Gerät aus, das verbaut ist. Danach sind nur seine Anschlüsse und Einstellungen sichtbar." />
           <ParameterRefRef RefId="%AID%_UP-%TT%00001_R-%TT%0000101" IndentLevel="1" />
           <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
             <when test="0">
               <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
-              <ParameterSeparator Id="%AID%_PS-nnn" Text="Abgleich mit dem Gerät" UIHint="Headline" />
-              <ParameterSeparator Id="%AID%_PS-nnn" Text="Nachdem das Gerät programmiert wurde (PA + Applikation) ist ein Abgleich mit den Fähigkeiten der Hardware möglich:" />
-              <Button Id="%AID%_B-%TT%00001" Text="Hardware vom Gerät abfragen" EventHandler="HWP_detectHardware" EventHandlerOnline="ConnectionOriented" />
-              <ParameterSeparator Id="%AID%_PS-nnn" Text="&#10;" />
-              <ParameterSeparator Id="%AID%_PS-nnn" Text="Bis eine Hardware gewählt ist, zeigt die Applikation alle Einstellungen, auch solche, die das Gerät nicht hat." UIHint="Information" />
+              <ParameterSeparator Id="%AID%_PS-nnn" Text="Oder automatisch erkennen" UIHint="Headline" />
+              <Button Id="%AID%_B-%TT%00001" Text="Vom Gerät lesen" EventHandler="HWP_detectHardware" EventHandlerOnline="ConnectionOriented" />
+              <ParameterSeparator Id="%AID%_PS-nnn" Text="„Vom Gerät lesen“ ist grau/inaktiv?&#10;1. Physikalische Adresse programmieren (wenn nötig: Programmiertaste drücken).&#10;2. Links eine andere Seite anklicken, dann zurück auf diese Seite.&#10;3. Button klicken: Gerätetyp wird ausgelesen und eingestellt." UIHint="Information" />
+              <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileSteps" Inline="true" Layout="Grid">
+                <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="100%" /></Columns>
+                <ParameterRefRef RefId="%AID%_P-%TT%00902_R-%TT%0090201" Cell="1,1" />
+              </ParameterBlock>
             </when>
             <when default="true">
               <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileMark" Inline="true" Layout="Grid">
@@ -417,6 +432,7 @@
     <Baggage TargetPath="HWPInfo" Name="Info0.png" Id="%FILE-HWPInfo0%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info9.png" Id="%FILE-HWPInfo9%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info15.png" Id="%FILE-HWPInfo15%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+    <Baggage TargetPath="HWPInfo" Name="Steps.png" Id="%FILE-HWPSteps%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
   </Baggages>
   </Manufacturer></ManufacturerData>
 </KNX>
