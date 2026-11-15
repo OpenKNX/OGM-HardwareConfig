@@ -3,6 +3,7 @@
 #   1. -ListIds: every DEVICE_HW_ID once, DEVICE_ID / DEVICE_NAME present, HW_INFO_TEXT <= 255 characters
 #   2. -Check on the demo: the committed generated files match the headers and the generator
 #   3. job summary: board list and, when the check fails, which generated files the change affects
+#   4. -SelfTest: generator/tests/Test-HardwareProfile.ps1 (also proves the generator on Windows PowerShell 5.1)
 # PlatformIO CLI plus the platforms of the demo envs without their packages: the board manifests give MCU, memory type
 # and BOARD_HAS_PSRAM (ESP32 flash / PSRAM GPIOs of <Conflicts reserved>); no toolchain, so the preprocessor is the host
 # compiler (g++ / clang++ in PATH), see generator/README.md "Ein Ausdruck, zwei Verbraucher".
@@ -90,3 +91,9 @@ jobs:
           [System.IO.File]::AppendAllText($env:GITHUB_STEP_SUMMARY, $text, $utf8)
           $changed
           exit 1
+
+      - name: Self-test of the generator (-SelfTest)
+        run: |
+          # small test manifests: bit order, version guard, manifest check, <Fixes>, -Init, helpers, HardwarePorts.h, demo -Check
+          powershell -NoProfile -File generator/Build-HardwareProfile.ps1 -SelfTest
+          exit $LASTEXITCODE

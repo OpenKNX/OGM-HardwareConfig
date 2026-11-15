@@ -78,6 +78,10 @@ FILEPATH: OGM-HardwareConfig/generator/Build-HardwareProfile.ps1
 .PARAMETER DryRun
     Evaluate and print, write no file.
 
+.PARAMETER SelfTest
+    Run the self-test (tests/Test-HardwareProfile.ps1): the generator on small test manifests, what it must do and refuse.
+    Exit code 1 when a test fails. For the slow demo update test call the test script with -Full.
+
 .PARAMETER Detailed
     Full log (manifest, boards with capabilities and values, every output). Default: one line per board
     ("OK 0x1321  <name>", by HW-ID) and a summary line; warnings and errors are always shown.
@@ -111,7 +115,8 @@ param(
   [switch]$DryRun,
   [switch]$Check,
   [Alias("h")][switch]$Help,
-  [switch]$Detailed
+  [switch]$Detailed,
+  [switch]$SelfTest
 )
 
 $ErrorActionPreference = "Stop"
@@ -178,6 +183,7 @@ function Show-Help {
   Write-Host "  -Init               Create the manifest for an application without one (boards of the release_* envs)"
   Write-Host "  -Compiler <path>    C++ compiler used as preprocessor (default: PlatformIO toolchain of the board MCU)"
   Write-Host "  -HardwareConfigInclude <dir>  Include folder of OGM-HardwareConfig (default: next to this script)"
+  Write-Host "  -SelfTest           Run the self-test (tests/Test-HardwareProfile.ps1); exit 1 when a test fails"
   Write-Host "  -Help, -h, --help   Show this help (Get-Help Build-HardwareProfile.ps1 -Detailed: full description)"
   Write-Host ""
   Write-Host "EXAMPLES:" -ForegroundColor Yellow
@@ -196,6 +202,10 @@ function Show-Help {
   Write-Host ""
 }
 # help: -Help, -? (PowerShell) and the usual --help / -h / /? (they arrive as the positional Manifest)
+if ($SelfTest) {
+  & ([System.IO.Path]::Combine($PSScriptRoot, "tests", "Test-HardwareProfile.ps1"))
+  exit $LASTEXITCODE
+}
 if ($Help -or @("--help", "-help", "-h", "/?", "/h", "help", "?") -contains $Manifest) {
   Show-Help
   exit 0

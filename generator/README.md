@@ -23,6 +23,7 @@ Beispiel-Applikation: [examples/HardwareProfileDemo](../examples/HardwareProfile
 | `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `Header` (Firmware-Header), `Init` |
 | `QUICKSTART.md` | Schnellstart: das Hardware-Profil in fünf Schritten in ein bestehendes OAM einbinden |
 | `Anwendungsfaelle.md` | Rezepte mit Beispielen: Module, Feature-Flags, Kanalzahl, Auswahllisten, Sensoren, Netzwerk, Firmware |
+| `tests/` | `Test-HardwareProfile.ps1`: Selbsttest (auch `Build-HardwareProfile.ps1 -SelfTest`), siehe [Selbsttest](#selbsttest) |
 | `helpers/` | vom Aufrufer per Dot-Source geladen: `TemplateEngine.ps1` (Vorlagen), `QrCode.ps1` (QR-Kodierer), `PngImage.ps1` (PNG lesen/schreiben, QR-Code + Link) |
 | `capabilities/` | `Common.caps.xml`: Fähigkeiten-Paket zum Einbinden per `<Import href>` (LAN, WLAN, Display, … aus den Board-Headern, dazu die gesperrten Plattform-Pins); optional, aber empfohlen, `-Init` bindet es ein. Eigene Fähigkeiten definiert jedes OAM in seinem Manifest; `ThirdParty` ist fest eingebaut |
 | `templates/` | Standard-Vorlagen für `<Generate template="@hw/…">` |
@@ -119,6 +120,16 @@ flowchart LR
   Bilder breiter als 532 px (geprüft nur für `queryImage`), mehr als ein Element oder einen eingebetteten Block in einer Rasterzelle (siehe „Regeln aus der
   ETS5-Messung“).
 - In der Firmware Port-Parameter lesen, solange die Auswahl nicht die eigene `DEVICE_HW_ID` ist.
+
+## Selbsttest
+
+`Build-HardwareProfile.ps1 -SelfTest` (oder `tests/Test-HardwareProfile.ps1`, dort mit `-Only <Muster>`, `-Full`,
+`-KeepWork`) lässt den Generator auf kleinen Test-Manifesten laufen, jedes in einem eigenen Wegwerf-Ordner (das Repo bleibt
+unberührt), und prüft, was er tun und was er ablehnen muss: stabile Ausgaben, Bit-Reihenfolge, Versionswache,
+Manifest-Prüfung, `<Fixes>`, `-Init`, ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
+`-Check` der Demo (mit PlatformIO und den `lib/`-Links der Demo) und mit `-Full` den Update-Test der Demo (mit dem
+OpenKNXproducer). Je Test eine Zeile mit ✓/✗/– und Dauer, am Ende eine Zusammenfassung; Exit-Code 1, wenn ein Test
+scheitert.
 
 ## Ausgabe
 

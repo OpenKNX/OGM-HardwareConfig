@@ -38,5 +38,6 @@ GPIO 16 zu sperren nähme Gledopto und QuinLED den ersten LED-Port.
 
 Der Stand lief nur unter PowerShell 7.6 (macOS). Unter 5.1 nicht belegt sind unter anderem: `Get-OrdinalSorted`
 (`foreach` statt `@()` auf einer generischen List, die unter 7.6 wirft), `SHA256CryptoServiceProvider`, die Attributprüfung.
-Danach die CI ausbauen: XSD-Prüfung, Producer-Lauf, Kompilieren von `HardwareProfileData.h` und `HardwarePorts.h` mit
-`-Wextra -Werror`, ES3-Prüfung der Scripts, Tests für Vorlagen, QR, PNG und Konfliktprüfung im Repo.
+Die CI ruft dafür den Selbsttest auf (`-SelfTest`: Bit-Reihenfolge, Versionswache, Manifest, `<Fixes>`, `-Init`, Sortierung,
+PNG, `HardwarePorts.h` mit `-Wextra -Werror`, Demo `-Check`). Danach noch: XSD-Prüfung und Producer-Lauf, Kompilieren von
+`HardwareProfileData.h`, ES3-Prüfung der Scripts.
