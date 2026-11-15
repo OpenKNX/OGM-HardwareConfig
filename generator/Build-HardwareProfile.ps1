@@ -1999,6 +1999,7 @@ function Update-BoardSlots($M, $Boards) {
   $removed = @{}
   # bit order of the device query: "cap <n> = <Name>" / "val <n> = <Name>" (an old firmware reads the bits by position)
   $bitRec = @{ cap = @{}; val = @{} }
+  $etsRec = @{}
   $lines = @()
   if (Test-Path $path) { $lines = [System.IO.File]::ReadAllLines($path) }
   else {
@@ -2011,6 +2012,12 @@ function Update-BoardSlots($M, $Boards) {
       $kind = $Matches[1]; $bi = [int]$Matches[2]
       if ($bitRec[$kind].ContainsKey($bi) -and $bitRec[$kind][$bi] -cne $Matches[3]) { Stop-WithError ("Slot file {0}, line {1}: {2} {3} is listed twice" -f $path, ($ln + 1), $kind, $bi) }
       $bitRec[$kind][$bi] = $Matches[3]
+      continue
+    }
+    # 'ets "<product xml>" <ApplicationVersion> <fingerprint>': content of the ETS outputs recorded for that version
+    if ($l -match '^\s*ets\s+"([^"]+)"\s+(\S+)\s+([0-9A-Fa-f]{16})\s*$') {
+      if ($etsRec.ContainsKey($Matches[1])) { Stop-WithError ("Slot file {0}, line {1}: a second ets line for {2} (merge?) - keep the one of the released version" -f $path, ($ln + 1), $Matches[1]) }
+      $etsRec[$Matches[1]] = @{ Version = $Matches[2]; Hash = $Matches[3].ToUpperInvariant() }
       continue
     }
     if ($l -match '^\s*0x([0-9A-Fa-f]{4})\s*=\s*(\d+)(\s+removed)?\s*$') {
@@ -2029,7 +2036,7 @@ function Update-BoardSlots($M, $Boards) {
     }
     else {
       # a line that does not parse would give its board a new slot (all its IDs move)
-      Stop-WithError ("Slot file {0}, line {1}: '{2}' is no slot line (0x<HW-ID> = <slot> [removed], cap <n> = <Name>, val <n> = <Name>)" -f $path, ($ln + 1), $l)
+      Stop-WithError ("Slot file {0}, line {1}: '{2}' is no slot line (0x<HW-ID> = <slot> [removed], cap <n> = <Name>, val <n> = <Name>, ets `"<product xml>`" <version> <fingerprint>)" -f $path, ($ln + 1), $l)
     }
   }
   # a merge of two branches can give two boards the same slot -> two parameters with one ID
@@ -2065,16 +2072,14 @@ function Update-BoardSlots($M, $Boards) {
     }
     for ($i = $recCount; $i -lt $cur[$kind].Count; $i++) { $bitRec[$kind][$i] = $cur[$kind][$i]; $bitsAdded += ("{0} {1} = {2}" -f $kind, $i, $cur[$kind][$i]) }
   }
-  if (($added.Count + $back.Count + $gone.Count + $bitsAdded.Count) -eq 0) { return }
   # the board list of the ETS product changed (a pattern can do that without a manifest change)
   $hex = { param($list) ($list | ForEach-Object { "0x{0:X4}" -f $_ }) -join ", " }
   if ($added.Count -gt 0) { Write-Warn ("Board(s) added: {0}" -f (& $hex $added)) }
   if ($back.Count -gt 0) { Write-Warn ("Board(s) back: {0}" -f (& $hex $back)) }
   if ($gone.Count -gt 0) { Write-Warn ("Board(s) removed, slot kept: {0}" -f (& $hex $gone)) }
   if ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count)) { Write-Warn ("Device query bit(s) added: {0}" -f ($bitsAdded -join ", ")) }
-  if (($added.Count + $back.Count + $gone.Count) -gt 0 -or ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count))) {
-    Write-Warn "The ETS content changed: raise the ApplicationVersion (ReplacesVersionsDownTo), or ETS treats it as the same version"
-  }
+  # a board or bit change: Add-EtsFingerprint reminds of the version (per product, or here when no product XML is found)
+  $listChanged = (($added.Count + $back.Count + $gone.Count) -gt 0 -or ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count)))
   $out = New-Object System.Text.StringBuilder
   [void]$out.AppendLine("# Board slots of the GPIO role parameters (Build-HardwareProfile.ps1). Commit this file.")
   [void]$out.AppendLine("# Never edit or reuse a number: it is part of the ETS parameter ID of every GPIO role.")
@@ -2087,8 +2092,169 @@ function Update-BoardSlots($M, $Boards) {
   foreach ($kind in @("cap", "val")) {
     foreach ($i in @($bitRec[$kind].Keys | Sort-Object)) { [void]$out.AppendLine(("{0} {1} = {2}" -f $kind, $i, $bitRec[$kind][$i])) }
   }
-  # written with the other outputs, after all of them rendered (an error before that leaves the old slot file)
-  return @{ Output = $path; Text = $out.ToString() }
+  # written with the other outputs, after all of them rendered (an error before that leaves the old slot file);
+  # the ets line is added there (Add-EtsFingerprint), it needs the rendered outputs
+  return @{ Output = $path; Text = $out.ToString(); Ets = $etsRec; ListChanged = $listChanged }
+}
+
+# @brief Product XMLs of the OAM: *.xml with an <op:ETS element (not *.debug.xml) in the folder of the generated share (else
+#        <manifest dir>/src); comments and CDATA blanked with the line breaks kept, so positions still give the line number
+function Get-ProductXmls($M) {
+  $dirs = @()
+  if ($M.Outputs.ContainsKey("share")) { $dirs += [System.IO.Path]::GetDirectoryName([System.IO.Path]::GetFullPath($M.Outputs["share"])) }
+  $dirs += [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($M.ManifestPath), "src")
+  foreach ($dir in $dirs) {
+    $list = @()
+    if (-not (Test-Path -LiteralPath $dir -PathType Container)) { continue }
+    [string[]]$files = @(Get-ChildItem -LiteralPath $dir -Filter "*.xml" -File | Where-Object { $_.Name -notlike "*.debug.xml" } | ForEach-Object { $_.FullName })
+    [Array]::Sort($files, [StringComparer]::Ordinal)
+    foreach ($f in $files) {
+      $raw = [System.IO.File]::ReadAllText($f)
+      if (-not $raw.Contains("<op:ETS")) { continue }
+      $text = [regex]::Replace($raw, '(?s)<!\[CDATA\[.*?\]\]>|<!--.*?-->', { param($x) [regex]::Replace($x.Value, '[^\n]', ' ') })
+      $ets = [regex]::Match($text, '<op:ETS\b' + $script:XmlAttrs + '>')
+      if (-not $ets.Success) { continue }   # <op:ETS only inside a comment: no product
+      $ver = $null
+      if ($ets.Value -match '\bApplicationVersion\s*=\s*["'']([^"'']*)["'']') { $ver = $Matches[1].Trim() }
+      $list += @{ Path = $f; Name = [System.IO.Path]::GetFileName($f); Text = $text; Version = $ver }
+    }
+    if ($list.Count -gt 0) { return ,$list }
+  }
+  return ,@()
+}
+
+# attributes of a start tag: quoted values may hold ">" (valid XML)
+$script:XmlAttrs = '(?:[^>"'']|"[^"]*"|''[^'']*'')*'
+
+function Get-LineNumber([string]$Text, [int]$Index) { return ([regex]::Matches($Text.Substring(0, $Index), "`n")).Count + 1 }
+
+# @brief Path of $Path relative to $BaseDir with / separators ("../" when outside), independent of the checkout location
+function Get-RelativeOutputPath([string]$BaseDir, [string]$Path) {
+  $b = @([System.IO.Path]::GetFullPath($BaseDir).TrimEnd('\', '/') -split '[\\/]')
+  $p = @([System.IO.Path]::GetFullPath($Path) -split '[\\/]')
+  $i = 0
+  while ($i -lt $b.Count -and $i -lt $p.Count -and [string]::Equals($b[$i], $p[$i], [StringComparison]::OrdinalIgnoreCase)) { $i++ }
+  $parts = @()
+  for ($k = $i; $k -lt $b.Count; $k++) { $parts += ".." }
+  for ($k = $i; $k -lt $p.Count; $k++) { $parts += $p[$k] }
+  return ($parts -join "/")
+}
+
+# @brief Warns when a product XML does not include the hardware module as the manifest describes it: op:define of the share
+#        with prefix and ModuleType, and a page block of the application (include of the Profile block children) without
+#        the tree text of <Page unselectedTitle>. Warnings only: an OAM may compose the page in its own way.
+function Test-ProductXmls($M, $Products) {
+  if (-not $M.Outputs.ContainsKey("share") -or $Products.Count -eq 0) { return }
+  $share = [System.IO.Path]::GetFullPath($M.Outputs["share"])
+  $p = [regex]::Escape($M.Prefix)
+  foreach ($x in $Products) {
+    $dir = [System.IO.Path]::GetDirectoryName($x.Path)
+    $isShare = { param($href) [string]::Equals([System.IO.Path]::GetFullPath([System.IO.Path]::Combine($dir, ($href -replace '\\', '/'))), $share, [StringComparison]::OrdinalIgnoreCase) }
+    $def = $null
+    foreach ($d in [regex]::Matches($x.Text, '<op:define\b' + $script:XmlAttrs + '>')) {
+      if ($d.Value -match '\bshare\s*=\s*["'']([^"'']+)["'']' -and (& $isShare $Matches[1])) { $def = $d; break }
+    }
+    if (-not $def) { Write-Warn ("{0}: no <op:define share=...> of the hardware module {1}" -f $x.Name, [System.IO.Path]::GetFileName($share)); continue }
+    $at = "{0}:{1}" -f $x.Name, (Get-LineNumber $x.Text $def.Index)
+    if ($def.Value -cnotmatch ('\bprefix\s*=\s*["'']' + $p + '["'']')) { Write-Warn ("{0}: op:define of the hardware module has another prefix than the manifest ({1})" -f $at, $M.Prefix) }
+    if ($def.Value -notmatch '\bModuleType\s*=\s*["'']\s*(\d+)\s*["'']' -or [int]$Matches[1] -ne $M.ModuleType) { Write-Warn ("{0}: op:define of the hardware module has another ModuleType than the manifest ({1})" -f $at, $M.ModuleType) }
+    foreach ($inc in [regex]::Matches($x.Text, '<op:include\b' + $script:XmlAttrs + '>')) {
+      # xpath ...ParameterBlock[@Name='Profile']/* (quote ' or &quot;, blanks allowed)
+      if ($inc.Value -notmatch "ParameterBlock\[\s*@Name\s*=\s*('|&quot;|`")Profile('|&quot;|`")\s*\]/\*") { continue }
+      if ($inc.Value -notmatch '\bhref\s*=\s*["'']([^"'']+)["'']' -or -not (& $isShare $Matches[1])) { continue }
+      # the enclosing block: the ParameterBlock still open at the include (stack over open / self-closing / close tags)
+      $stack = New-Object System.Collections.Generic.List[object]
+      foreach ($t in [regex]::Matches($x.Text.Substring(0, $inc.Index), ('<ParameterBlock\b' + $script:XmlAttrs + '>|</ParameterBlock\s*>'))) {
+        if ($t.Value.StartsWith("</")) { if ($stack.Count -gt 0) { $stack.RemoveAt($stack.Count - 1) } }
+        elseif (-not $t.Value.EndsWith("/>")) { $stack.Add($t) }
+      }
+      if ($stack.Count -eq 0) { continue }
+      $blk = $stack[$stack.Count - 1]
+      $bat = "{0}:{1}" -f $x.Name, (Get-LineNumber $x.Text $blk.Index)
+      $hasRef = $blk.Value -cmatch ('\bTextParameterRefId\s*=\s*["'']%' + $p + '_PageTextRef%["'']')
+      $hasText = $blk.Value -cmatch ('\bText\s*=\s*["'']\{\{0:%' + $p + '_PageText%\}\}["'']')
+      if ($M.Page -and $M.Page.UnselectedTitle) {
+        if (-not ($hasRef -and $hasText)) {
+          Write-Warn ("{0}: page block without Text=`"{{{{0:%{1}_PageText%}}}}`" TextParameterRefId=`"%{1}_PageTextRef%`" - the tree shows no `"{2}`" (README, Applikations-XML)" -f $bat, $M.Prefix, $M.Page.UnselectedTitle)
+        }
+      }
+      elseif ($hasRef) { Write-Warn ("{0}: page block uses %{1}_PageTextRef%, but <Page unselectedTitle> is off (no such config)" -f $bat, $M.Prefix) }
+    }
+  }
+}
+
+# @brief Appends the ets lines to the slot file text: per product XML its ApplicationVersion and a fingerprint of the ETS
+#        outputs it gets (all rendered outputs except C/C++ files, the pictures and the page icon; the developer view only
+#        for the product that includes it). The line follows the product's version: a new version records the current
+#        content; under the recorded version a content change warns on every run until the version is raised.
+function Add-EtsFingerprint($M, $SlotFile, $Rendered, $Images, $Products) {
+  $base = [System.IO.Path]::GetDirectoryName($M.ManifestPath)
+  $rec = $SlotFile.Ets
+  $devFull = $null
+  if ($M.Page -and $M.Page.Dev) { $devFull = [System.IO.Path]::GetFullPath($M.Page.Dev) }
+  $hashes = @{}
+  try {
+    $items = @{}; $devKey = $null
+    foreach ($r in $Rendered) {
+      if (@(".h", ".hpp", ".c", ".cpp") -contains [System.IO.Path]::GetExtension($r.Output).ToLowerInvariant()) { continue }
+      $key = Get-RelativeOutputPath $base $r.Output
+      if ($devFull -and [string]::Equals([System.IO.Path]::GetFullPath($r.Output), $devFull, [StringComparison]::OrdinalIgnoreCase)) { $devKey = $key }
+      $items[$key] = @{ Head = ""; Bytes = [System.Text.Encoding]::UTF8.GetBytes(($r.Text -replace "`r`n", "`n")) }
+    }
+    foreach ($r in $Images) { $items[(Get-RelativeOutputPath $base $r.Output)] = @{ Head = ("{0}x{1}" -f $r.Image.Width, $r.Image.Height); Bytes = $r.Image.Pixels } }
+    if ($M.Page -and $M.Page.IconFile) {
+      $iconOut = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($M.Outputs["share"]), "Baggages", "Icons", $M.Page.Icon + ".png")
+      $items[(Get-RelativeOutputPath $base $iconOut)] = @{ Head = "file"; Bytes = [System.IO.File]::ReadAllBytes($M.Page.IconFile) }
+    }
+    foreach ($x in $Products) {
+      if (-not $x.Version) { continue }
+      $withDev = $devKey -and $x.Text.Contains([System.IO.Path]::GetFileName($devFull))
+      [string[]]$names = @($items.Keys | Where-Object { $withDev -or $_ -ne $devKey })
+      [Array]::Sort($names, [StringComparer]::Ordinal)
+      $ms = New-Object System.IO.MemoryStream
+      foreach ($n in $names) {
+        $it = $items[$n]
+        $nb = [System.Text.Encoding]::UTF8.GetBytes(("{0}`n{1} {2}`n" -f $n, $it.Head, $it.Bytes.Length))
+        $ms.Write($nb, 0, $nb.Length); $ms.Write($it.Bytes, 0, $it.Bytes.Length)
+      }
+      $hashes[$x.Name] = (Get-PngSha256 $ms.ToArray()).Replace("-", "").Substring(0, 16).ToUpperInvariant()
+    }
+  }
+  catch {
+    # e.g. a FIPS policy that blocks the hash: no check, the recorded lines stay
+    Write-Warn ("ETS fingerprint not available ({0}): the version check is skipped" -f $_.Exception.Message)
+    $hashes = $null
+  }
+  $next = @{}
+  $versioned = @($Products | Where-Object { $_.Version })
+  if ($null -eq $hashes -or ($versioned.Count -eq 0 -and $rec.Count -gt 0)) {
+    # no fingerprint, or no product XML found: keep what was recorded
+    if ($null -ne $hashes) { Write-Warn "No product XML with <op:ETS ApplicationVersion> found (folder of the share, <manifest>/src): the version check is skipped, the ets lines stay" }
+    foreach ($k in $rec.Keys) { $next[$k] = $rec[$k] }
+  }
+  else {
+    foreach ($x in $versioned) {
+      $h = $hashes[$x.Name]
+      $old = $rec[$x.Name]
+      # a new version (or a product seen for the first time) takes the current content; under the recorded version the
+      # recorded content stays and a change warns on every run until the version is raised
+      if (-not $old -or $old.Version -cne $x.Version) { $next[$x.Name] = @{ Version = $x.Version; Hash = $h } }
+      else {
+        $next[$x.Name] = $old
+        if ($old.Hash -cne $h) {
+          Write-Warn ("The ETS content changed since {0} ApplicationVersion {1} was recorded: raise the version (ReplacesVersionsDownTo) before this content ships, or ETS gets other content under the same version (repeats until then)" -f $x.Name, $x.Version)
+        }
+      }
+    }
+  }
+  if ($SlotFile.ListChanged -and ($versioned.Count -eq 0 -or $null -eq $hashes)) {
+    Write-Warn "The ETS content changed: raise the ApplicationVersion (ReplacesVersionsDownTo), or ETS treats it as the same version"
+  }
+  [string[]]$keys = @($next.Keys)
+  [Array]::Sort($keys, [StringComparer]::Ordinal)
+  if ($keys.Count -eq 0) { return }
+  $SlotFile.Text += "# ETS content per product XML: ets `"<file>`" <ApplicationVersion> <fingerprint>; kept until the version changes`n"
+  foreach ($k in $keys) { $SlotFile.Text += ("ets `"{0}`" {1} {2}`n" -f $k, $next[$k].Version, $next[$k].Hash) }
 }
 
 function New-ConfXml($M, $Boards) {
@@ -3985,7 +4151,13 @@ try {
   # <Conflicts>: numbers against the module files next to the parts file (hint); a parts file of an earlier run is reported
   $ownOutputs = @($rendered | ForEach-Object { [System.IO.Path]::GetFullPath($_.Output) })
   if ($m.Conflicts) { Test-ConflictNumbers $m $ownOutputs }
-  if ($null -ne $slotFile) { $rendered += $slotFile }
+  # product XMLs of the OAM: inclusion of the hardware module, ApplicationVersion for the ETS fingerprint
+  $products = Get-ProductXmls $m
+  Test-ProductXmls $m $products
+  if ($null -ne $slotFile) {
+    Add-EtsFingerprint $m $slotFile $rendered $images $products
+    $rendered += @{ Output = $slotFile.Output; Text = $slotFile.Text }
+  }
   foreach ($f in (Get-StaleConflictFiles $m $ownOutputs)) {
     Write-Warn ("{0} is a <Conflicts> parts file of an earlier run (no <Conflicts output> names it any more) - delete it and its op:include lines" -f $f)
     if ($script:CheckMode) { Add-Written $f }

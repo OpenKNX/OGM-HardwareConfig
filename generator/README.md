@@ -724,14 +724,25 @@ Das App-Update selbst übernimmt die Werte über die ParameterRef-Nummer; eingep
 Die GPIO-Parameter haben pro Board eine eigene ETS-ID. Damit ein App-Update die Pinauswahl nicht
 verliert, hängt diese ID nicht am Listenplatz, sondern an einem Slot pro `DEVICE_HW_ID`. Der Generator
 legt neue Slots selbst an und vergibt nie eine Nummer neu. **Die Datei gehört ins Repo.** Erlaubt sind Zeilen
-`0x<HW-ID> = <Slot>` (optional `removed`), Kommentare (`#`) und Leerzeilen; jede andere Zeile bricht den Lauf mit
-Datei, Zeilennummer und Zeile ab (sonst bekäme ihr Board einen neuen Slot und alle seine IDs).
+`0x<HW-ID> = <Slot>` (optional `removed`), `cap <n> = <Name>`, `val <n> = <Name>`, `ets "<Produkt-XML>" <Version> <Fingerabdruck>`,
+Kommentare (`#`) und Leerzeilen; jede andere Zeile bricht den Lauf mit Datei, Zeilennummer und Zeile ab (sonst bekäme ihr
+Board einen neuen Slot und alle seine IDs). Der Generator schreibt die Datei in seiner eigenen Form (eigene Kommentare gehen verloren).
 
 Die Datei hält auch die **Bit-Reihenfolge der Geräteabfrage** fest (`cap <n> = <Name>`, `val <n> = <Name>`): Eine Firmware im
 Feld liest die Antwort nach Position. Ein Name behält sein Bit; eine neue Fähigkeit oder ein neuer Wert bekommt das nächste
 freie Bit, egal an welcher Stelle im Paket (`Common.caps.xml`) oder im Manifest er steht (Warnung, neue Applikationsversion).
 Ein entfernter Eintrag bricht den Lauf ab, eine reine Umbenennung ändert man in dieser Zeile. Mit `ids="index"` gibt es keine
 Slot-Datei und damit keinen Schutz der Bit-Reihenfolge.
+
+Je Produkt-XML (die `*.xml` mit `<op:ETS>` im Ordner der erzeugten Share-Datei, sonst in `<Manifest-Ordner>/src`) hält eine
+Zeile `ets "<Datei>" <ApplicationVersion> <Fingerabdruck>` fest, welchen ETS-Inhalt diese Version hat: alle erzeugten Dateien
+außer C/C++-Dateien (`.h`, `.hpp`, `.c`, `.cpp`), die Bilder und das Seiten-Icon; die Entwickleransicht nur beim Produkt, das sie einbindet. Eine neue
+Version hält den aktuellen Inhalt fest (die Slot-Datei ändert sich also mit jedem Versionswechsel und gehört in denselben
+Commit). Ändert sich der Inhalt unter der festgehaltenen Version, warnt **jeder** Lauf (auch `-Check`), bis die Version steigt.
+Die Warnung bricht nichts ab, auch die CI nicht. Ein umbenanntes Produkt-XML beginnt neu (ohne Warnung); zwei `ets`-Zeilen für
+dasselbe Produkt (Merge) brechen den Lauf ab.
+Der Lauf prüft außerdem, ob die Produkt-XMLs das Modul mit Präfix und ModuleType des Manifests einbinden und ob ein eigener
+Seitenblock den Baumtext (`TextParameterRefId`) hat; beides sind Warnungen.
 
 ## Lebenszyklus (gemessen an der Demo)
 
