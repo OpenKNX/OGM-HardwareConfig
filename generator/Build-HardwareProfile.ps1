@@ -2150,7 +2150,7 @@ function Update-BoardSlots($M, $Boards) {
   $hex = { param($list) ($list | ForEach-Object { "0x{0:X4}" -f $_ }) -join ", " }
   if ($added.Count -gt 0) { Write-Warn ("Board(s) added: {0}" -f (& $hex $added)) }
   if ($back.Count -gt 0) { Write-Warn ("Board(s) back: {0}" -f (& $hex $back)) }
-  if ($gone.Count -gt 0) { Write-Warn ("Board(s) removed, slot kept: {0}" -f (& $hex $gone)) }
+  if ($gone.Count -gt 0) { Write-Warn ("Board(s) removed, slot kept: {0} - the selection loses them: a device in a project with that board falls back to not selected after the app update; to keep a board selectable without its env, add <Board define=`"<its board define>`" flags=`"...`" />" -f (& $hex $gone)) }
   if ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count)) { Write-Warn ("Device query bit(s) added: {0}" -f ($bitsAdded -join ", ")) }
   # a board or bit change: Add-EtsFingerprint reminds of the version (per product, or here when no product XML is found)
   $listChanged = (($added.Count + $back.Count + $gone.Count) -gt 0 -or ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count)))

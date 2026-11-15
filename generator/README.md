@@ -774,11 +774,17 @@ Gruppen mit Unterbereichen (z. B. 0x135x = OpenKNXiao ESP32-C3) mit drei Ziffern
 
 ## Grenzen (Stand Demo)
 
-- Max. 32 Fähigkeiten, 4 Werte, 9 GPIO-Rollen × 9 Slots, 64 Ports je Board (`HW_PORTS_MAX`, GPIO 0..254),
-  1000 Board-Slots über die Lebensdauer einer knxprod (entfernte Boards behalten ihren Slot).
+- Max. 32 Fähigkeiten, 4 abgefragte Werte (`Common.caps.xml` belegt 3; ein neues OAM gibt einen frei, indem es den Paket-Wert
+  mit `query="false"` überschreibt, solange seine Slot-Datei ihn nicht führt), 9 GPIO-Rollen × 9 Slots, 64 Ports je Board (`HW_PORTS_MAX`, GPIO 0..254),
+  1000 Board-Slots über die Lebensdauer einer knxprod (entfernte Boards behalten ihren Slot). Baut eine eigene Vorlage IDs
+  aus Basis + Slot (z. B. 900 + Slot und 950 + Slot), prüft sie ihre engere Grenze selbst: `@@if (MaxOf $Boards { $_.Slot } 0) -ge 50`
+  mit `{{ throw "..." }}` (NeoPixel `src/hw/NeoPixel.hw.share.xml`).
 - Wechselt der Anwender die Hardware, gilt für die neue Hardware deren eigener Pin-Parameter (Standard
   „nicht verwendet“); ein Rücksetzen per ParameterCalculation ist nicht nötig.
 - Gleichnamige Boards bekommen in der Auswahlliste die HW-ID angehängt, z. B. „… Ethernet (0x1105)“.
 - Ändert sich die Board-Liste (auch über ein Muster), meldet der Generator das und erinnert an die neue
-  Applikationsversion; entfernte Boards bleiben in der Slot-Datei als `removed` stehen.
+  Applikationsversion; entfernte Boards bleiben in der Slot-Datei als `removed` stehen. Ein entferntes Board fehlt in der
+  Auswahl: ein Gerät mit diesem Board steht nach dem App-Update auf „Nicht gewählt“. Soll es wählbar bleiben, hält eine Zeile
+  `<Board define="…" flags="…" />` es ohne Env in der Liste (gleicher Slot, gleiche IDs). Ohne Env fehlt die MCU: die
+  Konfliktprüfung kennt dann keine Flash-/PSRAM-Pins; ein Board aus mehreren Envs lässt sich nur mit einem Flag-Satz nachbilden.
 - Später könnte der OpenKNXproducer das Manifest direkt lesen; Format und Feature-Flags blieben gleich.
