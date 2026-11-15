@@ -131,7 +131,7 @@ Jedes Gerät bekommt zusätzlich eine eindeutige 16-Bit-Hardware-ID:
 `<when test="...">` vergleichen; das geht nur mit Zahlen. Die Hardware-ID ist die Zahl, unter der ein
 Gerät überall gleich heißt:
 
-- **ETS:** Das Auswahlfeld „Hardware“ speichert die Hardware-ID, nicht einen Listenplatz. Kommen Geräte
+- **ETS:** Das Auswahlfeld „Gerätetyp“ speichert die Hardware-ID, nicht einen Listenplatz. Kommen Geräte
   hinzu oder ändert sich die Reihenfolge, bleibt die Auswahl im Projekt gültig.
 - **ETS-Sichtbarkeit:** `<when test="4129 4130 8481">` blendet Einstellungen genau für diese Geräte ein.
 - **Firmware:** Sie kennt ihre eigene ID zur Compile-Zeit und kann sie mit der ETS-Auswahl vergleichen.

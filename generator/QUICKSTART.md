@@ -20,7 +20,7 @@ pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 -Init
 Schreibt `HardwareProfile.xml` neben die `platformio.ini`, mit freiem `moduleType` und Präfix (Standard `45` / `HWP`):
 
 ```xml
-<HardwareProfile prefix="HWP" moduleType="45" text="Hardware" unselected="showAll" ids="slot">
+<HardwareProfile prefix="HWP" moduleType="45" text="Gerät" unselected="showAll">
   <Output conf="src/HardwareProfile.conf.xml" share="src/HardwareProfile.share.xml" script="src/HardwareProfile.script.js" header="include/HardwareProfileData.h" />
   <Import href="lib/OGM-HardwareConfig/generator/capabilities/Common.caps.xml" />
   <Boards platformio="release_*" />
@@ -36,12 +36,12 @@ Envs ohne Board (Test, native) kommen nach `exclude`, z. B. `<Boards platformio=
 
 ```xml
 <op:config href="HardwareProfile.conf.xml" />
-<op:define prefix="HWP" ModuleType="45" configTransferName="Hardware" share="HardwareProfile.share.xml" />
+<op:define prefix="HWP" ModuleType="45" configTransferName="Gerät" share="HardwareProfile.share.xml" />
 <!-- in <generate><Dynamic>: -->
 <op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWP" />
 ```
 
-Das bindet die Seite als eigenen Kanal „Hardware“ ein. Soll sie im OpenKNX-Kanal stehen:
+Das bindet die Seite als eigenen Kanal „Gerät“ (`text`) ein. Soll sie im OpenKNX-Kanal stehen:
 [README, Applikations-XML](README.md#3-applikations-xml).
 
 Hat das OAM ein Hauptmodul, bekommt `op:define` zusätzlich `isSubmoduleOf="<Präfix>"` (kein eigenes Kontrollkästchen

@@ -4,9 +4,9 @@
 
 Der Generator liest die Board-Header dieses Repos und erzeugt daraus für eine Applikation:
 
-- das Auswahlfeld „Hardware“ (gespeichert wird die `DEVICE_HW_ID`),
-- einen Button „Vom Gerät lesen“ (ETS liest ID, Fähigkeiten und Werte vom Gerät; ohne `<Page>`: „Hardware vom Gerät abfragen“),
-- eine Übersicht „Fähigkeiten dieser Hardware“ (mit `<Page>`: eine Hardware-Seite mit Gerätekarte aus Logo, Name, Board-Text
+- das Auswahlfeld „Gerätetyp“ (gespeichert wird die `DEVICE_HW_ID`),
+- einen Button „Vom Gerät lesen“ (ETS liest ID, Fähigkeiten und Werte vom Gerät),
+- eine Übersicht „Fähigkeiten dieses Geräts“ (mit `<Page>`: eine Geräteseite mit Gerätekarte aus Logo, Name, Board-Text
   und QR-Code, Hinweisen und Entwickleransicht),
 - GPIO-Auswahlfelder mit den Pins der gewählten Hardware, ohne die Pins aus den `<ReservedPins>` des Manifests (z. B.
   KNX-UART, Prog, Ethernet, SD, I2C; die Liste führt jede Applikation selbst),
@@ -44,7 +44,7 @@ Kurzfassung mit allen Zeilen zum Kopieren: [QUICKSTART.md](QUICKSTART.md).
 4. **In der Applikations-XML** die erzeugten Dateien einbinden und nur noch Feature-Flags benutzen:
    ```xml
    <op:config href="HardwareProfile.conf.xml" />
-   <op:define prefix="HWP" ModuleType="45" configTransferName="Hardware" share="HardwareProfile.share.xml" />
+   <op:define prefix="HWP" ModuleType="45" configTransferName="Gerät" share="HardwareProfile.share.xml" />
    ...
    <choose ParamRefId="%HWP_SelectRef%">
      <when test="%HWP_CAP_Wifi%"> ... nur auf Geräten mit WLAN ... </when>
@@ -155,7 +155,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 ## Manifest
 
 ```xml
-<HardwareProfile prefix="HWP" moduleType="45" text="Hardware">
+<HardwareProfile prefix="HWP" moduleType="45" text="Gerät">
   <Output conf="src/HardwareProfile.conf.xml" share="src/HardwareProfile.share.xml"
           script="src/HardwareProfile.script.js" header="include/HardwareProfileData.h" />
 
@@ -296,7 +296,7 @@ folgt dem Fenster (ETS5 und ETS6), eine eigene Bildkante wäre nie bündig mit d
 
 ```xml
 <op:config href="MyApp.hw.conf.xml" />
-<op:define prefix="XYZHW" ModuleType="45" isSubmoduleOf="XYZ" configTransferName="Hardware" share="MyApp.hw.module.gen.xml" />
+<op:define prefix="XYZHW" ModuleType="45" isSubmoduleOf="XYZ" configTransferName="Gerät" share="MyApp.hw.module.gen.xml" />
 ...
 <!-- im OpenKNX-Kanal, nach "Allgemein"; %XYZHW_PageHelp% gibt es nur mit <Page help>, %XYZHW_PageTextRef% nur mit
      <Page unselectedTitle> (Standard: an); ohne die beiden Attribute Text und TextParameterRefId steht nur der Seitentext im Baum -->
@@ -309,7 +309,7 @@ Zwei Arten der Einbindung:
 
 | Einbindung | xpath | Ergebnis im Baum |
 |---|---|---|
-| ganzer Kanal (QUICKSTART, einfachster Weg) | `//ApplicationProgram/Dynamic/*` | eigener Kanal „Hardware“ mit der Seite; Baumtext bereits gesetzt |
+| ganzer Kanal (QUICKSTART, einfachster Weg) | `//ApplicationProgram/Dynamic/*` | eigener Kanal „Gerät“ (`text`) mit der Seite; Baumtext bereits gesetzt |
 | Seite im OpenKNX-Kanal (oben, Demo, NeoPixel) | `…/ParameterBlock[@Name='Profile']/*` mit `IsInner="true"` | die Seite steht im OpenKNX-Kanal; den Block schreibt die Applikation, also auch `Text` und `TextParameterRefId` |
 
 `src/Baggages/<prefix>Info/` und `src/Baggages/Icons/<icon>.png` sind Generator-Ausgabe: ein OAM kann sie per `.gitignore`
@@ -336,7 +336,7 @@ nutzen ihre Begriffe (Gerät, physikalische Adresse, Programmiertaste).
 | `unselectedInfo`, `unselectedText`, `updateInfo` | nicht gewählt, Info-Kasten / Text / Info-Kasten | keiner |
 | `firmware` | gewählt, unter der Karte: z. B. `"Firmware: {env}"` (`{env}` = `release_*`-Env(s) des Boards; Boards ohne Env ohne Zeile) | aus |
 | `changeInfo` | gewählt, Info-Kasten, z. B. „Nach einem Wechsel der Hardware … prüfen“ | aus |
-| `infoDefault` | Board ohne `HW_INFO_TEXT` | „Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt.“ |
+| `infoDefault` | Board ohne `HW_INFO_TEXT` | „Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt.“ |
 | `features`, `dev` | Entwickleransicht (nur Dev-knxprod) | – |
 | `help` | Kontexthilfe der Seite (`HelpContext`, als `%<prefix>_PageHelp%` auch für einen eigenen Seitenblock der OAM); die OAM liefert `Help_de/<help>.md` wie für ihre anderen Seiten | keine |
 

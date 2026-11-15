@@ -729,7 +729,7 @@ function Read-Manifest([string]$Path) {
     Reserved     = @()
   }
   if (-not $m.Prefix) { $m.Prefix = "HWP" }
-  if (-not $m.Text) { $m.Text = "Hardware" }
+  if (-not $m.Text) { $m.Text = "Ger$([char]0xE4)t" }
   # unselected = what "not selected" (0) means for the feature flags:
   #   showAll (default) - 0 counts as every capability: an OAM that wraps existing pages in feature flags keeps them
   #                       visible after the app update; ETS writes the default of every INVISIBLE parameter
@@ -798,7 +798,7 @@ function Read-Manifest([string]$Path) {
   $capIndex = @{}; $valIndex = @{}
   # built in: ThirdParty = the board header defines DEVICE_THIRD_PARTY (board identity, like DEVICE_HW_ID); always bit 0 of
   # the device query; the device card (badge) and <Notice when="ThirdParty"> rely on it
-  $m.Capabilities.Add(@{ Name = "ThirdParty"; Text = "Hardware eines Drittanbieters"; Expr = "defined(DEVICE_THIRD_PARTY)"; Merge = "any"; Switch = $false
+  $m.Capabilities.Add(@{ Name = "ThirdParty"; Text = "Ger$([char]0xE4)t eines Drittanbieters"; Expr = "defined(DEVICE_THIRD_PARTY)"; Merge = "any"; Switch = $false
     FixedBy = ""; ReportedBy = ""; Feature = ""; FeatureOn = ""; FeatureOff = ""; FeatureInvert = $false; FeatureNote = ""; FeatureNoteWhen = "" })
   $capIndex["ThirdParty"] = 0
   foreach ($src in $sources) {
@@ -983,7 +983,7 @@ function Read-Manifest([string]$Path) {
       Button          = (& $pageText "button" 'Vom Ger\u00E4t lesen')
       QueryHelp       = (& $pageText "queryHelp" '\u201E{button}\u201C ist grau/inaktiv?\n1. Physikalische Adresse programmieren (wenn n\u00F6tig: Programmiertaste dr\u00FCcken).\n2. Links eine andere Seite anklicken, dann zur\u00FCck auf diese Seite.\n3. Button klicken: Ger\u00E4tetyp wird ausgelesen und eingestellt.')
       UnselectedTitle = (& $pageText "unselectedTitle" '{page} (nicht gew\u00E4hlt)')
-      InfoDefault     = (& $pageText "infoDefault" 'Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt.')
+      InfoDefault     = (& $pageText "infoDefault" 'Die Einstellungen dieser Applikation sind auf dieses Ger\u00E4t abgestimmt.')
       UnselectedInfo  = (& $pageText "unselectedInfo" '')
       UnselectedText  = (& $pageText "unselectedText" '')
       UpdateInfo      = (& $pageText "updateInfo" '')
@@ -2711,7 +2711,7 @@ function New-ShareXml($M, $Boards) {
   }
   [void]$sb.AppendLine('      </ParameterTypes>')
   [void]$sb.AppendLine('      <Parameters>')
-  $selLabel = "Hardware"; if ($M.Page) { $selLabel = ConvertTo-XmlText $M.Page.Label }
+  $selLabel = "Ger$([char]0xE4)tetyp"; if ($M.Page) { $selLabel = ConvertTo-XmlText $M.Page.Label }
   [void]$sb.AppendLine("        <Union SizeInBit=`"16`">")
   [void]$sb.AppendLine('          <Memory CodeSegment="%MID%" Offset="0" BitOffset="0" />')
   [void]$sb.AppendLine("          <Parameter Id=`"%AID%_UP-%TT%00001`" Name=`"HardwareSelect`" ParameterType=`"%AID%_PT-${p}HardwareSelect`" Offset=`"0`" BitOffset=`"0`" Text=`"$selLabel`" Value=`"$($M.UnselectedValue)`" />")
@@ -2796,22 +2796,22 @@ function New-ShareXml($M, $Boards) {
     [void]$sb.AppendLine(("        <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"Profile`" Text=`"{0}`" Icon=`"{1}`"{2}>" -f $blockText, $M.Page.Icon, $helpAttr))
   }
   else { [void]$sb.AppendLine("        <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"Profile`" Text=`"Ger$([System.Char]::ConvertFromUtf32(0xE4))teprofil`" Icon=`"cog-outline`">") }
-  $headline = "Hardware"; if ($M.Page) { $headline = ConvertTo-XmlText $M.Page.Title }
+  $headline = "Ger$([char]0xE4)t ausw$([char]0xE4)hlen"; if ($M.Page) { $headline = ConvertTo-XmlText $M.Page.Title }
   if ($headline) { [void]$sb.AppendLine("          <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"$headline`" UIHint=`"Headline`" />") }
   if ($M.Page -and $M.Page.Intro) { [void]$sb.AppendLine(("          <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $M.Page.Intro))) }
   [void]$sb.AppendLine("          <ParameterRefRef RefId=`"$selRef`" IndentLevel=`"1`" />")
   if ($M.Page) { [void]$sb.Append((New-PageBodyXml $M $Boards $selRef $switches $infoGroups "          ")) }
   else {
-    [void]$sb.AppendLine("          <Button Id=`"%AID%_B-%TT%00001`" Text=`"Hardware vom Ger$([System.Char]::ConvertFromUtf32(0xE4))t abfragen`" EventHandler=`"${p}_detectHardware`" EventHandlerOnline=`"ConnectionOriented`" />")
+    [void]$sb.AppendLine("          <Button Id=`"%AID%_B-%TT%00001`" Text=`"Vom Ger$([System.Char]::ConvertFromUtf32(0xE4))t lesen`" EventHandler=`"${p}_detectHardware`" EventHandlerOnline=`"ConnectionOriented`" />")
     [void]$sb.AppendLine("          <choose ParamRefId=`"$selRef`">")
     [void]$sb.AppendLine("            <when test=`"$($M.UnselectedValue)`">")
     $ae = [System.Char]::ConvertFromUtf32(0xE4)
-    $unselText = "Bitte die Hardware w${ae}hlen oder vom Ger${ae}t abfragen. Ohne Auswahl blendet die Applikation alle hardwareabh${ae}ngigen Einstellungen aus."
-    if ($M.Unselected -eq "showAll") { $unselText = "Bitte die Hardware w${ae}hlen oder vom Ger${ae}t abfragen. Ohne Auswahl zeigt die Applikation alle Einstellungen, auch solche, die das Ger${ae}t nicht hat." }
+    $unselText = "Bitte das Ger${ae}t w${ae}hlen oder vom Ger${ae}t lesen. Ohne Auswahl blendet die Applikation alle ger${ae}teabh${ae}ngigen Einstellungen aus."
+    if ($M.Unselected -eq "showAll") { $unselText = "Bitte das Ger${ae}t w${ae}hlen oder vom Ger${ae}t lesen. Ohne Auswahl zeigt die Applikation alle Einstellungen, auch solche, die das Ger${ae}t nicht hat." }
     [void]$sb.AppendLine(("              <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Information`" />" -f $unselText))
     [void]$sb.AppendLine("            </when>")
     [void]$sb.AppendLine("            <when default=`"true`">")
-    [void]$sb.AppendLine("              <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"F$([System.Char]::ConvertFromUtf32(0xE4))higkeiten dieser Hardware`" UIHint=`"Headline`" />")
+    [void]$sb.AppendLine("              <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"F$([System.Char]::ConvertFromUtf32(0xE4))higkeiten dieses Ger$([System.Char]::ConvertFromUtf32(0xE4))ts`" UIHint=`"Headline`" />")
     for ($i = 0; $i -lt $M.Capabilities.Count; $i++) {
       $c = $M.Capabilities[$i]
       $with = @($Boards | Where-Object { $_.Caps[$i] })
@@ -2940,6 +2940,25 @@ function New-DevShareXml($M, $Boards) {
   [void]$sb.AppendLine("          <choose ParamRefId=`"$devRef`">")
   [void]$sb.AppendLine("            <when test=`"1`">")
   [void]$sb.AppendLine("              <choose ParamRefId=`"$selRef`">")
+  # not selected: module, behaviour without selection, all boards and the bit order of the device query
+  $ae = [char]0xE4
+  [void]$sb.AppendLine(("                <when test=`"{0}`">" -f $M.UnselectedValue))
+  & $sep "Ohne Auswahl" ' UIHint="Headline"'
+  & $sep ("Wert der Auswahl: {0} (NOT_SELECTED)" -f $M.UnselectedValue) ""
+  if ($M.Unselected -eq "hide") { & $sep ("Modus hide: alles Ger${ae}teabh${ae}ngige ist ausgeblendet") "" }
+  else { & $sep ("Modus showAll: Nicht gew${ae}hlt z${ae}hlt als jede F${ae}higkeit, alles bleibt sichtbar") "" }
+  & $sep ("Modul: Pr${ae}fix {0}, ModuleType {1}" -f $p, $M.ModuleType) ""
+  & $sep ("Boards ({0})" -f @($Boards).Count) ' UIHint="Headline"'
+  foreach ($b in $Boards) { & $sep ("0x{0:X4}  {1} (Board-Nummer {2}, {3})" -f [int]$b.HwId, $b.Name, $b.Slot, $b.Define) "" }
+  & $sep "Ger${ae}teabfrage 158/4" ' UIHint="Headline"'
+  for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { & $sep (("F${ae}higkeit Bit {0}: {1}" -f $i, $M.Capabilities[$i].Name) + $(if ($M.Capabilities[$i].Text) { " - " + $M.Capabilities[$i].Text })) "" }
+  $k = 0
+  foreach ($v in $M.Values) { if ($v.Query) { & $sep (("Wert {0}: {1}" -f $k, $v.Name) + $(if ($v.Text) { " - " + $v.Text })) ""; $k++ } }
+  if ($switches.Count -gt 0) {
+    & $sep "Schalter (Speicher)" ' UIHint="Headline"'
+    foreach ($sw in $switches) { & $sep (("{0}: BitOffset {1}, Maske 0x{2:X2}" -f $sw.Cap.Name, $sw.Bit, (0x80 -shr $sw.Bit)) + $(if ($sw.Cap.Text) { " - " + $sw.Cap.Text })) "" }
+  }
+  [void]$sb.AppendLine("                </when>")
   foreach ($b in $Boards) {
     [void]$sb.AppendLine(("                <when test=`"{0}`">" -f $b.HwId))
     & $sep "Board" ' UIHint="Headline"'
@@ -3072,7 +3091,7 @@ function New-ScriptJs($M, $Boards) {
   $capNames = @($M.Capabilities | ForEach-Object { ConvertTo-JsString $_.Text })
   [void]$sb.AppendLine("var ${p}_capNames = [" + ($capNames -join ", ") + "];")
   [void]$sb.AppendLine(("// capability bits the firmware detects at run time (runtime=`"true`"): no build difference when they differ`nvar {0}_runtimeCaps = {1};" -f $p, (Get-RuntimeCapMask $M)))
-  # the device query answers the values without query="false", in manifest order
+  # the device query answers the values without query="false", in the bit order of the slot file
   $qIdx = @(for ($i = 0; $i -lt $M.Values.Count; $i++) { if ($M.Values[$i].Query) { $i } })
   $valNames = @($qIdx | ForEach-Object { ConvertTo-JsString $M.Values[$_].Text })
   [void]$sb.AppendLine("var ${p}_valueNames = [" + ($valNames -join ", ") + "];")
@@ -3116,9 +3135,9 @@ function New-ScriptJs($M, $Boards) {
   $swLoop = ""
   $swDone = @"
     if (diff.length > 0)
-        progress.setText("Hardware: " + known.name + " erkannt. Abweichend gebaut: " + diff.join(", "));
+        progress.setText("Ger${JSAE}t: " + known.name + " erkannt. Abweichend gebaut: " + diff.join(", "));
     else
-        progress.setText("Hardware: " + known.name + " (" + ${p}_hex4(hwId) + ") erkannt.");
+        progress.setText("Ger${JSAE}t: " + known.name + " (" + ${p}_hex4(hwId) + ") erkannt.");
 "@.TrimEnd()
   if ($swRows.Count -gt 0) {
     $swLoop = @"
@@ -3151,9 +3170,9 @@ function New-ScriptJs($M, $Boards) {
     if (notFound.length > 0) off += " Ausgeschaltet (nicht gefunden): " + notFound.join(", ") + ".";
     if (found.length > 0) off += " Eingeschaltet (gefunden): " + found.join(", ") + ".";
     if (diff.length > 0)
-        progress.setText("Hardware: " + known.name + " erkannt. Abweichend gebaut: " + diff.join(", ") + "." + off);
+        progress.setText("Ger${JSAE}t: " + known.name + " erkannt. Abweichend gebaut: " + diff.join(", ") + "." + off);
     else
-        progress.setText("Hardware: " + known.name + " (" + ${p}_hex4(hwId) + ") erkannt." + off);
+        progress.setText("Ger${JSAE}t: " + known.name + " (" + ${p}_hex4(hwId) + ") erkannt." + off);
 "@.TrimEnd()
   }
   [void]$sb.AppendLine(@"
@@ -3164,10 +3183,10 @@ function ${p}_hex4(value) {
     return "0x" + s;
 }
 
-// Query button (<Page button>, default "Vom Geraet lesen"; without <Page> "Hardware vom Geraet abfragen"): reads DEVICE_HW_ID, capability bits and values from the
+// Query button (<Page button>, default "Vom Geraet lesen"; without <Page> the same text): reads DEVICE_HW_ID, capability bits and values from the
 // device (function property $FP_OBJECT_INDEX/$FP_PROPERTY_ID) and sets the hardware selection.
 function ${p}_detectHardware(device, online, progress, context) {
-    progress.setText("Hardware: frage Ger${JSAE}t ab ...");
+    progress.setText("Ger${JSAE}t wird gelesen ...");
     progress.setProgress(10);
     online.connect();
     var resp;
@@ -3178,17 +3197,17 @@ function ${p}_detectHardware(device, online, progress, context) {
     }
     progress.setProgress(60);
     if (!resp || resp.length < 1)
-        throw new Error("Hardware: keine Antwort vom Ger${JSAE}t (leere Antwort)");
+        throw new Error("Keine Antwort vom Ger${JSAE}t (leere Antwort)");
     if (resp[0] != 0)
-        throw new Error("Hardware: Ger${JSAE}t meldet Fehler " + resp[0]);
+        throw new Error("Das Ger${JSAE}t meldet Fehler " + resp[0]);
     if (resp.length < 7)
-        throw new Error("Hardware: Antwort zu kurz (" + resp.length + " Byte)");
+        throw new Error("Antwort des Ger${JSAE}ts zu kurz (" + resp.length + " Byte)");
 
     var hwId = (resp[1] << 8) | resp[2];
     var caps = (resp[3] | (resp[4] << 8) | (resp[5] << 16) | (resp[6] << 24)) >>> 0;
     var known = ${p}_boards[hwId];
     if (!known)
-        throw new Error("Hardware " + ${p}_hex4(hwId) + " ist dieser Applikation unbekannt. Applikation aktualisieren.");
+        throw new Error("Ger${JSAE}tetyp " + ${p}_hex4(hwId) + " ist dieser Applikation unbekannt. Applikation aktualisieren.");
 
     device.getParameterByName("${p}_HardwareSelect").value = hwId;
 $swLoop
@@ -3896,6 +3915,16 @@ function Invoke-Init {
     foreach ($d in [regex]::Matches($text, '<op:define\b[^>]*>')) {
       if ($d.Value -match '\bModuleType\s*=\s*["'']\s*(\d+)\s*["'']') { $usedTypes[[int]$Matches[1]] = $true }
       if ($d.Value -match '\bprefix\s*=\s*["'']([^"'']+)["'']') { $usedPrefixes[$Matches[1]] = $true }
+      # a module this generator wrote: a second one would answer the device query (158/4) as well, only the first one is heard
+      if ($d.Value -match '\bshare\s*=\s*["'']([^"'']+)["'']') {
+        $sf = [System.IO.Path]::Combine($f.DirectoryName, ($Matches[1] -replace '\\', '/'))
+        if ((Test-Path -LiteralPath $sf -PathType Leaf)) {
+          $st = [System.IO.File]::ReadAllText($sf)
+          if ($st.Contains("<!-- Generated by OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 - do not edit -->") -and $st.Contains('Name="HardwareSelect"')) {
+            Stop-WithError ("{0} already includes a hardware module ({1}): one per product, a second one would answer the device query 158/4 too" -f $f.Name, [System.IO.Path]::GetFileName($sf))
+          }
+        }
+      }
     }
   }
   $moduleType = 0
@@ -3931,7 +3960,7 @@ function Invoke-Init {
   [void]$sb.AppendLine('  Review and commit it; the generator reads it on every build. Boards found in the release_* envs:')
   foreach ($b in $boards) { [void]$sb.AppendLine((ConvertTo-XmlComment ("    0x{0:X4}  {1}  {2}" -f $b.HwId, $b.Define, $b.Name))) }
   [void]$sb.AppendLine('-->')
-  [void]$sb.AppendLine(('<HardwareProfile prefix="{0}" moduleType="{1}" text="Hardware" unselected="showAll" ids="slot">' -f $prefix, $moduleType))
+  [void]$sb.AppendLine(('<HardwareProfile prefix="{0}" moduleType="{1}" text="{2}" unselected="showAll">' -f $prefix, $moduleType, ("Ger" + [char]0xE4 + "t")))
   [void]$sb.AppendLine('  <!-- showAll: in an existing product the ETS download writes the default of every invisible parameter; hide only for new products -->')
   [void]$sb.AppendLine(('  <Output conf="{0}" share="{1}" script="{2}" header="{3}" />' -f $outputs.conf, $outputs.share, $outputs.script, $outputs.header))
   [void]$sb.AppendLine(('  <Import href="{0}" />' -f $caps))
@@ -3951,7 +3980,7 @@ function Invoke-Init {
   Write-Host ""
   Write-Host ("  Add to {0}:" -f (($products | ForEach-Object { $_.Name }) -join " and "))
   Write-Host ("    <op:config href=`"{0}`" />" -f $rel.conf)
-  Write-Host ("    <op:define prefix=`"{0}`" ModuleType=`"{1}`" configTransferName=`"Hardware`" share=`"{2}`" />" -f $prefix, $moduleType, $rel.share)
+  Write-Host ("    <op:define prefix=`"{0}`" ModuleType=`"{1}`" configTransferName=`"Ger$([char]0xE4)t`" share=`"{2}`" />" -f $prefix, $moduleType, $rel.share)
   Write-Host "  and inside <generate><Dynamic>:"
   Write-Host ("    <op:include href=`"{0}`" xpath=`"//ApplicationProgram/Dynamic/*`" prefix=`"{1}`" />" -f $rel.share, $prefix)
   if (-not $usedPrefixes.ContainsKey("UCT")) { Write-Warn "No ConfigTransfer (UCT) module: a product with a module list needs OFM-ConfigTransfer" }
