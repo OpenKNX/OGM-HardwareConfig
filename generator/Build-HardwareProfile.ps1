@@ -2031,7 +2031,6 @@ function Update-BoardSlots($M, $Boards) {
   if (($added.Count + $back.Count + $gone.Count) -gt 0 -or ($bitsAdded.Count -gt 0 -and $bitsAdded.Count -lt ($cur.cap.Count + $cur.val.Count))) {
     Write-Warn "The ETS content changed: raise the ApplicationVersion (ReplacesVersionsDownTo), or ETS treats it as the same version"
   }
-  if ($DryRun) { return }
   $out = New-Object System.Text.StringBuilder
   [void]$out.AppendLine("# Board slots of the GPIO role parameters (Build-HardwareProfile.ps1). Commit this file.")
   [void]$out.AppendLine("# Never edit or reuse a number: it is part of the ETS parameter ID of every GPIO role.")
@@ -2044,8 +2043,8 @@ function Update-BoardSlots($M, $Boards) {
   foreach ($kind in @("cap", "val")) {
     foreach ($i in @($bitRec[$kind].Keys | Sort-Object)) { [void]$out.AppendLine(("{0} {1} = {2}" -f $kind, $i, $bitRec[$kind][$i])) }
   }
-  if (Update-Utf8File $path $out.ToString()) { Add-Written $path; Write-Ok ("Slot file updated: {0}" -f $path) }
-  else { Write-Detail ("  = unchanged {0}" -f $path) }
+  # written with the other outputs, after all of them rendered (an error before that leaves the old slot file)
+  return @{ Output = $path; Text = $out.ToString() }
 }
 
 function New-ConfXml($M, $Boards) {
@@ -3868,7 +3867,8 @@ try {
   for ($i = 0; $i -lt $boards.Count; $i++) { $boards[$i].Index = $i }
   # ids="index": the board number in IDs is the list position (no slot file); else the slot file
   if ($m.Ids -eq "index") { foreach ($b in $boards) { $b.Slot = $b.Index } }
-  else { Update-BoardSlots $m $boards }
+  $slotFile = $null
+  if ($m.Ids -ne "index") { $slotFile = Update-BoardSlots $m $boards }
   # port value encoding: no offered port may sit on the manual or none value (it could never be selected)
   if ($null -ne $m.PortManual) {
     foreach ($b in $boards) {
@@ -3941,6 +3941,7 @@ try {
   # <Conflicts>: numbers against the module files next to the parts file (hint); a parts file of an earlier run is reported
   $ownOutputs = @($rendered | ForEach-Object { [System.IO.Path]::GetFullPath($_.Output) })
   if ($m.Conflicts) { Test-ConflictNumbers $m $ownOutputs }
+  if ($null -ne $slotFile) { $rendered += $slotFile }
   foreach ($f in (Get-StaleConflictFiles $m $ownOutputs)) {
     Write-Warn ("{0} is a <Conflicts> parts file of an earlier run (no <Conflicts output> names it any more) - delete it and its op:include lines" -f $f)
     if ($script:CheckMode) { Add-Written $f }
