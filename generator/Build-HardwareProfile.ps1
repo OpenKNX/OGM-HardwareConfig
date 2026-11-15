@@ -655,7 +655,7 @@ function ConvertTo-FlagList([string]$Text) {
 #        to the default without a word.
 $script:ManifestNodes = @{
   HardwareProfile = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
-                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable")
+                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes")
   CapabilityPack  = @("name", "Capability Value ReservedPins")
   Output          = @("conf share script header", "")
   Generate        = @("template output finalNewline", "Param")
@@ -683,6 +683,8 @@ $script:ManifestNodes = @{
   InfoImage       = @("*", "Logo")
   Logo            = @("board file", "")
   BoardTable      = @("*", "")
+  Fixes           = @("output", "Fix")
+  Fix             = @("name capability ref value show indent help", "")
 }
 
 function Test-ManifestNodes($Node, [string]$File) {
@@ -1122,6 +1124,44 @@ function Read-Manifest([string]$Path) {
   $cfNodes = @($root.SelectNodes("Conflicts"))
   if ($cfNodes.Count -gt 1) { Stop-WithError "<Conflicts> may appear only once" }
   if ($cfNodes.Count -eq 1) { $m.Conflicts = Read-ConflictsNode $m $cfNodes[0] $baseDir }
+  # <Fixes output><Fix name capability ref value show indent help/></Fixes>: a setting of another module (ParameterRef) set to a
+  # value on boards with the capability and shown read-only, hidden or editable there; absent = no output changes
+  $m.Fixes = $null
+  $fxNodes = @($root.SelectNodes("Fixes"))
+  if ($fxNodes.Count -gt 1) { Stop-WithError "<Fixes> may appear only once" }
+  if ($fxNodes.Count -eq 1) {
+    $fxOut = "$($fxNodes[0].GetAttribute('output'))"
+    if (-not $fxOut) { Stop-WithError "<Fixes> needs output=... (the parts file the application includes)" }
+    if (-not $m.Outputs.ContainsKey("share")) { Stop-WithError "<Fixes> needs <Output share=...> (the hardware selection)" }
+    $m.Fixes = @{ Output = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $fxOut)); Items = @() }
+    $fxNames = @{}
+    foreach ($f in $fxNodes[0].SelectNodes("Fix")) {
+      $fn = "$($f.GetAttribute('name'))"
+      if ($fn -cnotmatch '^[A-Za-z][A-Za-z0-9]*$') { Stop-WithError ("<Fix name=`"{0}`">: name must be letters and digits (it names the block Fix_<name>)" -f $fn) }
+      if ($fxNames.ContainsKey($fn)) { Stop-WithError "<Fix name=`"$fn`"> is listed twice" }
+      $fxNames[$fn] = $true
+      $fc = "$($f.GetAttribute('capability'))"
+      if (@($m.Capabilities | Where-Object { $_.Name -ceq $fc }).Count -eq 0) { Stop-WithError ("<Fix name=`"{0}`">: capability {1} is not defined (names are case-sensitive)" -f $fn, $fc) }
+      $fr = "$($f.GetAttribute('ref'))"
+      if ($fr -notmatch '^%AID%_(UP|P)-(\d{2})(\d{5})_R-(\d{2})(\d{5})(\d{2})$' -or $Matches[2] -ne $Matches[4] -or $Matches[3] -ne $Matches[5]) {
+        Stop-WithError ("<Fix name=`"{0}`">: ref must be a ParameterRef id like %AID%_P-1401001_R-140100100 (module digits instead of %TT%), got {1}" -f $fn, $fr)
+      }
+      if ($Matches[6] -eq "99") { Stop-WithError ("<Fix name=`"{0}`">: ref index 99 is used for the read-only row - take the ParameterRef of the setting" -f $fn) }
+      if (@($m.Fixes.Items | Where-Object { $_.Ref -ceq $fr }).Count -gt 0) { Stop-WithError ("<Fix name=`"{0}`">: ref {1} is already fixed by another <Fix>" -f $fn, $fr) }
+      $fParam = "%AID%_{0}-{1}{2}" -f $Matches[1], $Matches[2], $Matches[3]
+      $fRo = "{0}_R-{1}{2}99" -f $fParam, $Matches[2], $Matches[3]
+      $fv = "$($f.GetAttribute('value'))"
+      if ($fv -eq "") { Stop-WithError ("<Fix name=`"{0}`">: value is missing" -f $fn) }
+      $fs = "$($f.GetAttribute('show'))"; if (-not $fs) { $fs = "readonly" }
+      if (@("readonly", "hidden", "editable") -cnotcontains $fs) { Stop-WithError ("<Fix name=`"{0}`">: show must be readonly, hidden or editable" -f $fn) }
+      $fi = "$($f.GetAttribute('indent'))"
+      if ($fi -and ($fi -notmatch '^\d{1,2}$')) { Stop-WithError ("<Fix name=`"{0}`">: indent must be a number" -f $fn) }
+      $fh = "$($f.GetAttribute('help'))"
+      if ($fh -and $fh -notmatch '^[A-Za-z0-9_-]+$') { Stop-WithError ("<Fix name=`"{0}`">: help must be a help context name" -f $fn) }
+      $m.Fixes.Items += @{ Name = $fn; Capability = $fc; Ref = $fr; Param = $fParam; ReadOnlyRef = $fRo; Value = $fv; Show = $fs; Indent = $fi; Help = $fh }
+    }
+    if ($m.Fixes.Items.Count -eq 0) { Stop-WithError "<Fixes> without <Fix>" }
+  }
   # <BoardTable name header scan>: integer macros of an OAM header per board (index = group 1 of scan); absent = no output changes
   $m.BoardTables = @()
   foreach ($bt in $root.SelectNodes("BoardTable")) {
@@ -3493,6 +3533,49 @@ function ${p}_conflictCheck(input, output, context) {
 
 # @brief Parts file of <Conflicts output>: ParameterType, flag Parameters (no memory) and ParameterRefs, the calculation,
 #        one UI block Conflict_<Name> per use; the application includes each part into its own module (%TT%)
+# @brief Parts file of <Fixes>: block ParameterRefs (the read-only rows, into the ParameterRefs of any module) and per <Fix> a
+#        block Fix_<name> that replaces the row of the setting: on boards with the capability the value is assigned and the row is
+#        read-only, hidden or editable; otherwise (also not selected) the normal row
+function New-FixesXml($M, $Boards) {
+  $refs = Get-ParamRefIds $M
+  $sb = New-Object System.Text.StringBuilder
+  [void]$sb.AppendLine('<?xml version="1.0" encoding="utf-8"?>')
+  [void]$sb.AppendLine('<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">')
+  [void]$sb.AppendLine("  <!-- Generated by OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 (<Fixes>) - do not edit -->")
+  [void]$sb.AppendLine("  <!-- include: block ParameterRefs into the ParameterRefs of a module, block Fix_<name> in place of the row of the setting -->")
+  [void]$sb.AppendLine('  <Block name="ParameterRefs">')
+  foreach ($f in $M.Fixes.Items) {
+    if ($f.Show -eq "readonly") { [void]$sb.AppendLine(("    <ParameterRef Id=`"{0}`" RefId=`"{1}`" Access=`"Read`" />" -f $f.ReadOnlyRef, $f.Param)) }
+  }
+  [void]$sb.AppendLine('  </Block>')
+  foreach ($f in $M.Fixes.Items) {
+    $ci = -1; for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -ceq $f.Capability) { $ci = $i } }
+    if ($ci -lt 0) { Stop-WithError ("<Fix name=`"{0}`">: capability {1} not found" -f $f.Name, $f.Capability) }
+    $ids = Get-IdList @($Boards | Where-Object { $_.Caps[$ci] })
+    $attrs = ""
+    if ($f.Indent) { $attrs += (" IndentLevel=`"{0}`"" -f $f.Indent) }
+    if ($f.Help) { $attrs += (" HelpContext=`"{0}`"" -f $f.Help) }
+    [void]$sb.AppendLine(("  <Block name=`"Fix_{0}`">" -f $f.Name))
+    [void]$sb.AppendLine(("    <choose ParamRefId=`"{0}`">" -f $refs.Select))
+    [void]$sb.AppendLine(("      <when test=`"{0}`">" -f $ids))
+    [void]$sb.AppendLine(("        <Assign TargetParamRefRef=`"{0}`" Value=`"{1}`" />" -f $f.Ref, (ConvertTo-XmlText $f.Value)))
+    # ETS keeps a value per ParameterRef: the read-only row shows its own value, so it gets the same Assign
+    if ($f.Show -eq "readonly") {
+      [void]$sb.AppendLine(("        <Assign TargetParamRefRef=`"{0}`" Value=`"{1}`" />" -f $f.ReadOnlyRef, (ConvertTo-XmlText $f.Value)))
+      [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.ReadOnlyRef, $attrs))
+    }
+    elseif ($f.Show -eq "editable") { [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.Ref, $attrs)) }
+    [void]$sb.AppendLine('      </when>')
+    [void]$sb.AppendLine('      <when default="true">')
+    [void]$sb.AppendLine(("        <ParameterRefRef RefId=`"{0}`"{1} />" -f $f.Ref, $attrs))
+    [void]$sb.AppendLine('      </when>')
+    [void]$sb.AppendLine('    </choose>')
+    [void]$sb.AppendLine('  </Block>')
+  }
+  [void]$sb.AppendLine('</KNX>')
+  return $sb.ToString()
+}
+
 function New-ConflictsXml($M, $Boards) {
   $p = $M.Prefix
   $cf = $M.Conflicts
@@ -4247,6 +4330,7 @@ try {
   if ($m.Outputs.ContainsKey("script")) { Write-OutputActivity "erzeugen" $m.Outputs["script"]; $rendered += @{ Output = $m.Outputs["script"]; Text = (New-ScriptJs $m $boards) } }
   if ($m.Outputs.ContainsKey("header")) { Write-OutputActivity "erzeugen" $m.Outputs["header"]; $rendered += @{ Output = $m.Outputs["header"]; Text = (New-Header $m $boards) } }
   if ($m.Conflicts) { Write-OutputActivity "erzeugen" $m.Conflicts.Output; $rendered += @{ Output = $m.Conflicts.Output; Text = (New-ConflictsXml $m $boards) } }
+  if ($m.Fixes) { Write-OutputActivity "erzeugen" $m.Fixes.Output; $rendered += @{ Output = $m.Fixes.Output; Text = (New-FixesXml $m $boards) } }
 
   # templates ("Bausteine"): whole generated files, never a splice into a hand-written file
   $vars = @{ Boards = $boards; M = $m }

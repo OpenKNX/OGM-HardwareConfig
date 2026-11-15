@@ -140,6 +140,7 @@ auch ohne `<Import>` und ohne `header`.
 | `<ReservedPins macros>` | Pins, die die Applikation nie anbietet / als reserviert meldet | jeder Pin erlaubt |
 | `<Conflicts>` (`reserved="true"`) | GPIO-Konfliktprüfung in ETS (+ reservierte Pins, `isReservedGpio`) | keine Prüfung, Ausgaben unverändert |
 | `<BoardTable name header scan>` | Zahlen-Tabelle je Board im ETS-Skript (`<Prefix>_table_<name>`) aus Makros eines OAM-Headers mit den Build-Flags der Envs | keine Tabelle, Ausgaben unverändert |
+| `<Fixes output>`, `<Fix name capability ref value show>` | Einstellung eines anderen Moduls je Fähigkeit fest setzen: nur lesbar, ausgeblendet oder änderbar | keine Datei, Ausgaben unverändert |
 | `<Generate template output>` | eigene Dateien aus Vorlagen (z. B. Port-Parameter je Board) | keine |
 
 ### Board-Header

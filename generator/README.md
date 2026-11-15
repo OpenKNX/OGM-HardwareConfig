@@ -205,6 +205,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 | `portManualValue`, `portNoneValue` (Wurzel) | Werte der Port-Auswahlen der Applikation: 0..n-1 = Port n des Boards, `portManualValue` (0..254) = manueller GPIO, `portNoneValue` (0..255) = kein Port, jeder andere Wert (z. B. nie geschrieben 255) = kein GPIO. Nur zusammen, verschieden. Einmal angegeben, gilt es für die Konfliktprüfung (`<Conflicts>`) und den Firmware-Header (`signalGpio`, siehe [Port-Auswahl in der Firmware](#port-auswahl-in-der-firmware)). Ein angebotener Port auf einem der beiden Werte bricht den Lauf ab |
 | `<Conflicts output number value error reserved reservedError tpError>` | GPIO-Konfliktprüfung in ETS, siehe [GPIO-Konflikte](#gpio-konflikte-conflicts) und [Reservierte GPIOs](#reservierte-gpios-conflicts-reservedtrue) |
 | `<BoardTable name header scan>` | Zahlen-Tabelle je Board im ETS-Skript aus einem Header der OAM, siehe [Board-Tabellen](#board-tabellen-boardtable) |
+| `<Fixes output>` mit `<Fix name capability ref value show indent help>` | Einstellung eines anderen Moduls je Fähigkeit festlegen, siehe [Einstellungen festlegen](#einstellungen-festlegen-fixes) |
 
 ### Board-Tabellen (`<BoardTable>`)
 
@@ -241,6 +242,29 @@ Target abschaltet), stehen damit auch im ETS-Skript.
   ```
 - Abbruch: `name` nicht nur Buchstaben und Ziffern oder doppelt, `header` fehlt, `scan` ohne genau eine unbenannte
   Gruppe, zwei Makros für einen Index. Warnung: kein Makro auf irgendeinem Board. Ohne `<BoardTable>` bleiben alle Ausgaben gleich.
+
+### Einstellungen festlegen (`<Fixes>`)
+
+Eine Einstellung eines anderen Moduls (z. B. „WiFi-Schnittstelle“ von OFM-Network) bekommt auf Boards mit einer Fähigkeit
+einen festen Wert:
+
+```xml
+<Fixes output="src/MyApp.hw.fixes.gen.xml">
+  <Fix name="HasWifi" capability="Wifi" ref="%AID%_P-1401001_R-140100100" value="1" show="readonly" indent="1" help="NETW-WiFi" />
+</Fixes>
+```
+
+- `ref`: ParameterRef der Einstellung mit den Ziffern des Moduls statt `%TT%`; `value`: der Rohwert.
+- `show`: `readonly` (Standard, Zeile sichtbar, nicht änderbar; in ETS6 gemessen), `hidden` (keine Zeile; nur für
+  Einstellungen ohne Speicher: für einen unsichtbaren Parameter mit Speicher schreibt ETS beim Download den Standardwert,
+  laut ETS-DLLs, nicht gemessen), `editable` (Zeile änderbar, der Wert wird beim Wählen des Boards nur gesetzt; nicht
+  gemessen). Ohne Auswahl und auf Boards ohne die Fähigkeit: die normale Zeile. Zwei `<Fix>` auf dieselbe `ref` brechen ab.
+- Der Generator schreibt eine Bausteindatei: Block `ParameterRefs` (für `readonly` eine zweite ParameterRef derselben
+  Einstellung mit `Access="Read"`, Index 99: `…_R-<TT><nnnnn>99`) in die ParameterRefs eines Moduls einbinden, Block
+  `Fix_<name>` an der Stelle der Zeile. Die Applikation nimmt die Originalzeile aus dem Include des Moduls heraus, z. B.
+  `xpath="…/ParameterBlock[@Name='NetworkInject']/*[not(contains(@RefId, '%TT%01001_R-'))]"`.
+- Gemessen in ETS6: ein `<Assign>` allein sperrt die Zeile nicht. ETS hält den Wert je ParameterRef, deshalb bekommt die
+  nur lesbare Zeile ein eigenes `<Assign>`; die änderbare Zeile ist auf diesen Boards nicht sichtbar.
 
 ## Hardware-Seite (Gerätekarte)
 
