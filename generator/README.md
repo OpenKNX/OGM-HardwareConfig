@@ -20,7 +20,7 @@ Beispiel-Applikation: [examples/HardwareProfileDemo](../examples/HardwareProfile
 | Pfad | Inhalt |
 |---|---|
 | `Build-HardwareProfile.ps1` | der Aufrufer (einziges Skript, das man startet): Parameter, Hilfe, Konstanten, Ablauf |
-| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `Header` (Firmware-Header), `Init` |
+| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `Header` (Firmware-Header), `Init`, `Generate` (die Schritte eines Laufs nach dem Manifest: Boards, Slots, Bilder, Ausgaben, Versionswache, Schreiben, Zusammenfassung) |
 | `QUICKSTART.md` | Schnellstart: das Hardware-Profil in fünf Schritten in ein bestehendes OAM einbinden |
 | `Anwendungsfaelle.md` | Rezepte mit Beispielen: Module, Feature-Flags, Kanalzahl, Auswahllisten, Sensoren, Netzwerk, Firmware |
 | `tests/` | `Test-HardwareProfile.ps1`: Selbsttest (auch `Build-HardwareProfile.ps1 -SelfTest`), siehe [Selbsttest](#selbsttest) |
