@@ -170,12 +170,11 @@ Details zu jeder Zeile: [README](README.md#manifest), [Hardware-Seite](README.md
 
 ### Später ändern
 
-- **Hinzufügen** (Board, Fähigkeit, Wert, Port) geht jederzeit: neue Einträge werden angehängt, dann neue
-  Applikationsversion.
+- **Hinzufügen** (Board, Fähigkeit, Wert, Port) geht jederzeit, auch im Paket `Common.caps.xml`: neue Einträge bekommen
+  das nächste freie Bit bzw. den nächsten Slot, dann neue Applikationsversion.
 - **Eine Fähigkeit oder einen Wert entfernen,** nachdem die Slot-Datei ihn kennt, bricht den Lauf ab: ausgelieferte
   Firmware sendet die Bits der Geräteabfrage nach Position. Den Eintrag stehen lassen (er darf nie wahr sein). Das gilt
   auch für das Weglassen von `<Import>` nach dem ersten Lauf.
-- Mit `<Import>` **und** eigenen Fähigkeiten verschiebt ein neuer Eintrag im Paket die eigenen Bits: der Lauf bricht ab.
 - Ein entferntes Board behält seinen Slot (`removed` in der Slot-Datei), die übrigen IDs bleiben.
 
 ## Nicht tun

@@ -790,6 +790,13 @@ function Read-Manifest([string]$Path) {
       foreach ($mac in ("$($rp.macros)" -split '\s+')) { if ($mac -and -not ($m.Reserved -contains $mac)) { $m.Reserved += $mac } }
     }
   }
+  # bit order of the device query from the slot file: a recorded name keeps its bit, the rest follows in manifest order,
+  # so a pack (Common.caps.xml) or the manifest can grow anywhere without moving a bit of a firmware in the field
+  if ($m.Ids -ne "index") {
+    Set-RecordedBitOrder $m
+    $capIndex = @{}; for ($i = 0; $i -lt $m.Capabilities.Count; $i++) { $capIndex[$m.Capabilities[$i].Name] = $i }
+    $valIndex = @{}; for ($i = 0; $i -lt $m.Values.Count; $i++) { $valIndex[$m.Values[$i].Name] = $i }
+  }
   if ($m.Capabilities.Count -gt $MAX_CAPABILITIES) { Stop-WithError "At most $MAX_CAPABILITIES capabilities fit the device query" }
   $switchCount = 0
   foreach ($c in $m.Capabilities) {
@@ -1937,6 +1944,45 @@ function Get-Switches($M) {
   return ,$list
 }
 
+# @brief Device query bit order from the slot file (cap / val lines): the recorded names take their recorded bits, every other
+#        capability / queried value follows in manifest order. Reorders $M.Capabilities and the queried entries of $M.Values
+#        in place (a value with query="false" keeps its place). A recorded name the manifest no longer has stops the run.
+function Set-RecordedBitOrder($M) {
+  $path = [System.IO.Path]::ChangeExtension($M.ManifestPath, ".slots")
+  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return }
+  $rec = @{ cap = @{}; val = @{} }
+  foreach ($l in [System.IO.File]::ReadAllLines($path)) {
+    if ($l -match '^\s*(cap|val)\s+(\d+)\s*=\s*([A-Za-z][A-Za-z0-9]*)\s*$') {
+      $kind = $Matches[1]; $bi = [int]$Matches[2]
+      if ($rec[$kind].ContainsKey($bi) -and $rec[$kind][$bi] -cne $Matches[3]) { Stop-WithError ("Slot file {0}: {1} {2} is listed twice ('{3}' and '{4}')" -f $path, $kind, $bi, $rec[$kind][$bi], $Matches[3]) }
+      $rec[$kind][$bi] = $Matches[3]
+    }
+  }
+  foreach ($kind in @("cap", "val")) {
+    $label = @{ cap = "capability"; val = "value" }[$kind]
+    if ($kind -eq "cap") { $list = $M.Capabilities } else { $list = $M.Values }
+    $pos = @(); for ($j = 0; $j -lt $list.Count; $j++) { if ($kind -eq "cap" -or $list[$j].Query) { $pos += $j } }
+    $byName = @{}; foreach ($j in $pos) { $byName[$list[$j].Name] = $list[$j] }
+    $ordered = @(); $used = @{}
+    foreach ($i in @($rec[$kind].Keys | Sort-Object)) {
+      $n = $rec[$kind][$i]
+      if ($used.ContainsKey($n)) { Stop-WithError ("Slot file {0}: {1} '{2}' has two bits" -f $path, $kind, $n) }
+      if (-not $byName.ContainsKey($n)) {
+        $why = "is gone from the manifest"
+        $same = @($list | Where-Object { $_.Name -ceq $n })
+        $case = @($list | Where-Object { $_.Name -ieq $n -and $_.Name -cne $n })
+        if ($same.Count -gt 0) { $why = "is query=`"false`" now" }
+        elseif ($case.Count -gt 0) { $why = ("is spelled '{0}' now" -f $case[0].Name); if (-not $case[0].Query -and $kind -eq "val") { $why += " and query=`"false`"" } }
+        Stop-WithError ("Device query: {0} {1} '{2}' {3} - a firmware in the field still sends it at this position; keep it in the query (it may never be true); a pure rename: change the line in {4}" -f $label, $i, $n, $why, $path)
+      }
+      $ordered += $byName[$n]; $used[$n] = $true
+    }
+    foreach ($j in $pos) { if (-not $used.ContainsKey($list[$j].Name)) { $ordered += $list[$j] } }
+    for ($k = 0; $k -lt $pos.Count; $k++) { $list[$pos[$k]] = $ordered[$k] }
+  }
+  if ($M.Capabilities[0].Name -cne "ThirdParty") { Stop-WithError ("Slot file {0}: cap 0 must be ThirdParty" -f $path) }
+}
+
 function Get-PinParamNumber($RoleNumber, $Slot, $BoardSlot) {
   # 5 digits R S BBB -> role 1..9, slot 1..9, board slot 0..999 (from the slot file, never reused);
   # 11000..99999, never 00001 (hardware selection)
@@ -2015,7 +2061,7 @@ function Update-BoardSlots($M, $Boards) {
       if (-not $bitRec[$kind].ContainsKey($i)) { Stop-WithError ("Slot file {0}: {1} {2} is missing (the recorded bits must be 0..{3} without a gap)" -f $path, $kind, $i, ($recCount - 1)) }
       $was = $bitRec[$kind][$i]
       if ($i -ge $cur[$kind].Count) { Stop-WithError ("Device query: {0} {1} '{2}' is gone from the manifest - a firmware in the field still sends it at this position; keep it (it may never be true)" -f $label, $i, $was) }
-      if ($cur[$kind][$i] -cne $was) { Stop-WithError ("Device query: {0} {1} was '{2}', now '{3}' - append new entries at the end of the manifest (packs first, then own entries); a pure rename: change the line in {4}" -f $label, $i, $was, $cur[$kind][$i], $path) }
+      if ($cur[$kind][$i] -cne $was) { Stop-WithError ("Device query: {0} {1} was '{2}', now '{3}' - the slot file and the manifest disagree; a pure rename: change the line in {4}" -f $label, $i, $was, $cur[$kind][$i], $path) }
     }
     for ($i = $recCount; $i -lt $cur[$kind].Count; $i++) { $bitRec[$kind][$i] = $cur[$kind][$i]; $bitsAdded += ("{0} {1} = {2}" -f $kind, $i, $cur[$kind][$i]) }
   }
@@ -2037,7 +2083,7 @@ function Update-BoardSlots($M, $Boards) {
     if ($removed.ContainsKey($k)) { $mark = " removed" }
     [void]$out.AppendLine(("0x{0:X4} = {1}{2}" -f $k, $slots[$k], $mark))
   }
-  [void]$out.AppendLine("# Bit order of the device query (firmware in the field reads by position): append only, never insert or remove.")
+  [void]$out.AppendLine("# Bit order of the device query (firmware in the field reads by position): a name keeps its bit, new names are appended; never remove a line.")
   foreach ($kind in @("cap", "val")) {
     foreach ($i in @($bitRec[$kind].Keys | Sort-Object)) { [void]$out.AppendLine(("{0} {1} = {2}" -f $kind, $i, $bitRec[$kind][$i])) }
   }

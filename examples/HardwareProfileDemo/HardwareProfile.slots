@@ -16,7 +16,7 @@
 0x3F12 = 13
 0x3F13 = 14
 0x3F14 = 15
-# Bit order of the device query (firmware in the field reads by position): append only, never insert or remove.
+# Bit order of the device query (firmware in the field reads by position): a name keeps its bit, new names are appended; never remove a line.
 cap 0 = ThirdParty
 cap 1 = Tp
 cap 2 = Lan

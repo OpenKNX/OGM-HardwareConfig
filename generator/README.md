@@ -728,11 +728,10 @@ legt neue Slots selbst an und vergibt nie eine Nummer neu. **Die Datei gehört i
 Datei, Zeilennummer und Zeile ab (sonst bekäme ihr Board einen neuen Slot und alle seine IDs).
 
 Die Datei hält auch die **Bit-Reihenfolge der Geräteabfrage** fest (`cap <n> = <Name>`, `val <n> = <Name>`): Eine Firmware im
-Feld liest die Antwort nach Position. Neue Fähigkeiten und Werte werden angehängt (Warnung, neue Applikationsversion);
-ein eingefügter oder entfernter Eintrag bricht den Lauf ab, eine reine Umbenennung ändert man in dieser Zeile.
-Ein neuer Eintrag im Paket (`Common.caps.xml`) steht vor den eigenen Einträgen eines Manifests und verschiebt deren Bits: Bei
-einem OAM mit eigenen Fähigkeiten oder Werten bricht der Lauf dann ab. Mit `ids="index"` gibt es keine Slot-Datei und damit
-keinen Schutz der Bit-Reihenfolge.
+Feld liest die Antwort nach Position. Ein Name behält sein Bit; eine neue Fähigkeit oder ein neuer Wert bekommt das nächste
+freie Bit, egal an welcher Stelle im Paket (`Common.caps.xml`) oder im Manifest er steht (Warnung, neue Applikationsversion).
+Ein entfernter Eintrag bricht den Lauf ab, eine reine Umbenennung ändert man in dieser Zeile. Mit `ids="index"` gibt es keine
+Slot-Datei und damit keinen Schutz der Bit-Reihenfolge.
 
 ## Lebenszyklus (gemessen an der Demo)
 

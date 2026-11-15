@@ -10,9 +10,9 @@
   The board headers name the same feature in different ways (LAN: ETH_SPI_INTERFACE, ETH_CLK_MODE,
   ETH_PHY_SPI_HOST, ETH_PHY_RST, KNX_IP_LAN). This pack maps them once, so an application does not have to.
 
-  Bit order = order in this file, then the manifest's own entries. An entry added here moves the bits of
-  every application's own capabilities and values; the slot file of such an application then stops its run.
-  Inserting or removing an entry changes the device query layout of every application.
+  Bit order: the slot file of each application keeps the bit of every name it has seen; a new entry here (anywhere in
+  the file) gets the next free bit in each application (with ids="slot", the default; ids="index" has no slot file). Removing an entry stops the run of every application that
+  recorded it (a firmware in the field still sends that bit).
 
   Known header gaps (fix in the header, not here): UP1-WLAN-2xUART has no WiFi define;
   REG2 PiPico W DD-Meter (0x1113/0x1133) has no OKNXHW_REG2_DEVICE_RTC.
