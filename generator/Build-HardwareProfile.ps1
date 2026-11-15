@@ -2728,7 +2728,7 @@ function New-DevShareXml($M, $Boards) {
       [void]$sb.AppendLine("</Rows>")
       [void]$sb.AppendLine("                    <Columns><Column Id=`"%AID%_PB-nnn_C-1`" Name=`"Col1`" Width=`"10%`" /><Column Id=`"%AID%_PB-nnn_C-2`" Name=`"Col2`" Width=`"40%`" /><Column Id=`"%AID%_PB-nnn_C-3`" Name=`"Col3`" Width=`"15%`" /><Column Id=`"%AID%_PB-nnn_C-4`" Name=`"Col4`" Width=`"15%`" /></Columns>")
       $col = 1
-      foreach ($h in @("Nr.", "Beschriftung", "GPIO", "ETS")) {
+      foreach ($h in @("Nr.", "Beschriftung", "GPIO", "Wert")) {
         [void]$sb.AppendLine(("                    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" Cell=`"1,{1}`" UIHint=`"Headline`" />" -f $h, $col)); $col++
       }
       $row = 2
