@@ -423,6 +423,88 @@ Add-Test "fixes-macro" (T "Fixes: value from a board macro, board without the ma
   $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
 }
 
+# @brief <Filters> test project: a dropdown 0..6 (carrier UP-%TT%00060 in a union of src/F.share.xml) and the given <Filters>
+function Copy-BaseWithFilter([string]$Name, [string]$Filters, [switch]$NoUnion) {
+  $d = Copy-Base $Name
+  $items = @(0..6 | ForEach-Object { '          <Enumeration Text="M{0}" Value="{0}" Id="%ENID%" />' -f $_ })
+  $par = '<Parameter Id="%AID%_UP-%TT%00060" Name="Mode" ParameterType="%AID%_PT-Mode" Offset="0" BitOffset="0" Text="Modus" Value="4" />'
+  if ($NoUnion) { $mem = @(('      ' + $par)) } else { $mem = @('      <Union SizeInBit="8">', '        <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />', ('        ' + $par), '      </Union>') }
+  # a second parameter of the same type and a parameter without memory (P-%TT%00070) of another type
+  $mem += @('      <Parameter Id="%AID%_P-%TT%00061" Name="Mode2" ParameterType="%AID%_PT-Mode" Text="Modus 2" Value="0" />',
+            '      <Parameter Id="%AID%_P-%TT%00070" Name="Other" ParameterType="%AID%_PT-Other" Text="Andere" Value="0" />')
+  $items += @('        </TypeRestriction>', '      </ParameterType>', '      <ParameterType Id="%AID%_PT-Other" Name="Other">', '        <TypeRestriction Base="Value" SizeInBit="8">',
+              '          <Enumeration Text="O0" Value="0" Id="%ENID%" />', '          <Enumeration Text="O1" Value="1" Id="%ENID%" />', '          <Enumeration Text="O2" Value="2" Id="%ENID%" />')
+  Write-Text ([System.IO.Path]::Combine($d, "src", "F.share.xml")) ((@(
+    '<?xml version="1.0" encoding="utf-8"?>'
+    '<KNX xmlns="http://knx.org/xml/project/20"><ManufacturerData><Manufacturer><ApplicationPrograms><ApplicationProgram><Static>'
+    '  <ParameterTypes>'
+    '    <ParameterType Id="%AID%_PT-Mode" Name="Mode">'
+    '      <TypeRestriction Base="Value" SizeInBit="8" UIHint="DropDown">') + $items + @(
+    '      </TypeRestriction>'
+    '    </ParameterType>'
+    '  </ParameterTypes>'
+    '  <Parameters>') + $mem + @(
+    '  </Parameters>'
+    '</Static></ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData></KNX>')) -join "`n")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ($Filters + "`n</HardwareProfile>")
+  return $d
+}
+$FilterRef = '<Filter name="Mode" ref="%AID%_UP-%TT%00060_R-%TT%0006001" source="src/F.share.xml" number="700">'
+
+Add-Test "filters-sets" (T "Filters: value set per board (first matching define, pattern, capability), item texts, carrier, stable slots") {
+  $d = Copy-BaseWithFilter "filters-sets" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef +
+    '<Allow board="DEVICE_REG1_LAN_TP_BASE" values="2 4" /><Allow board="DEVICE_REG1_LAN_*" values="1 5-6" /><Allow capability="Tp" values="0-6" /><Allow board="*" values="3" /></Filter></Filters>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.filters.gen.xml"))
+  $t0 = $f.Substring($f.IndexOf('<ParameterType Id="%AID%_PT-ModeF0"')); $t0 = $t0.Substring(0, $t0.IndexOf('</ParameterType>'))
+  $t1 = $f.Substring($f.IndexOf('<ParameterType Id="%AID%_PT-ModeF1"')); $t1 = $t1.Substring(0, $t1.IndexOf('</ParameterType>'))
+  Assert-True (([regex]::Matches($t0, '<Enumeration ')).Count -eq 2 -and $t0.Contains('Text="M2" Value="2"') -and $t0.Contains('Text="M4" Value="4"')) (T "set 2 4 of board 4129 (exact define) missing")
+  Assert-True (([regex]::Matches($t1, '<Enumeration ')).Count -eq 3 -and $t1.Contains('Text="M1"') -and $t1.Contains('Text="M5"') -and $t1.Contains('Text="M6"')) (T "set 1 5 6 of board 4130 (pattern) missing")
+  Assert-True (-not $f.Contains('PT-ModeF2')) (T "board 4611 (capability, every value) must show the carrier, not an own list")
+  Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%00700" Name="ModeF0" ParameterType="%AID%_PT-ModeF0" Text="Modus" Value="4" />')) (T "parameter of slot 0 (number 700, no memory, carrier default 4) missing")
+  Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%00701" Name="ModeF1" ParameterType="%AID%_PT-ModeF1" Text="Modus" Value="1" />')) (T "parameter of slot 1 must default to its first value 1")
+  Assert-True ($f -match '<when test="0 4611">\s*<ParameterRefRef RefId="%AID%_UP-%TT%00060_R-%TT%0006001" IndentLevel="1" />') (T "not selected and board 4611: the carrier row missing")
+  Assert-True ($f -match '<when test="4129">\s*<ParameterRefRef RefId="%AID%_P-%TT%00700_R-%TT%0070001" IndentLevel="1" />\s*<Assign TargetParamRefRef="%AID%_UP-%TT%00060_R-%TT%0006001" SourceParamRefRef="%AID%_P-%TT%00700_R-%TT%0070001" />') (T "board 4129: own list with copy into the carrier missing")
+  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))
+  Assert-True ($slots.Contains("filter Mode 2,4 = 0") -and $slots.Contains("filter Mode 1,5,6 = 1")) (T "slot lines of the value sets missing")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+  # another set for board 4130: a new slot, the recorded sets keep theirs
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'values="1 5-6"' 'values="1 5"'
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))
+  Assert-True ($slots.Contains("filter Mode 2,4 = 0") -and $slots.Contains("filter Mode 1,5,6 = 1") -and $slots.Contains("filter Mode 1,5 = 2")) (T "a new value set must take the next slot and keep the recorded ones")
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.filters.gen.xml"))
+  Assert-True ($f.Contains('%AID%_P-%TT%00702"') -and -not $f.Contains('%AID%_P-%TT%00701"') -and $f.Contains('%AID%_P-%TT%00700"')) (T "parameter numbers must follow the recorded slots (700 kept, 701 unused, 702 new)")
+}
+
+Add-Test "filters-single" (T "Filters: a set with one value is read-only and assigned") {
+  $d = Copy-BaseWithFilter "filters-single" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef + '<Allow board="DEVICE_UP1_TAS_4X" values="3" /></Filter></Filters>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.filters.gen.xml"))
+  Assert-True ($f.Contains('<ParameterRef Id="%AID%_P-%TT%00700_R-%TT%0070001" RefId="%AID%_P-%TT%00700" Access="Read" />')) (T "the one-value list must be read-only")
+  Assert-True ($f -match '<when test="4611">\s*<ParameterRefRef RefId="%AID%_P-%TT%00700_R-%TT%0070001" IndentLevel="1" />\s*<Assign TargetParamRefRef="%AID%_P-%TT%00700_R-%TT%0070001" Value="3" />\s*<Assign TargetParamRefRef="%AID%_UP-%TT%00060_R-%TT%0006001" SourceParamRefRef="%AID%_P-%TT%00700_R-%TT%0070001" />') (T "board 4611: value 3 assigned and copied into the carrier")
+}
+
+Add-Test "filters-ids" (T "Filters: same type, overlapping numbers, a number of the source or a name twice stops") {
+  $two = '<Filter name="Mode2" ref="%AID%_P-%TT%00061_R-%TT%0006101" source="src/F.share.xml" number="701"><Allow board="DEVICE_UP1_TAS_4X" values="1" /></Filter>'
+  $d = Copy-BaseWithFilter "filters-sametype" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef + '<Allow board="DEVICE_UP1_TAS_4X" values="2" /></Filter>' + $two + '</Filters>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'give each filtered parameter its own ParameterType' (T "stop message")
+  $other = '<Filter name="Other" ref="%AID%_P-%TT%00070_R-%TT%0007001" source="src/F.share.xml" number="701"><Allow board="DEVICE_UP1_TAS_4X" values="1" /></Filter>'
+  $d = Copy-BaseWithFilter "filters-overlap" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef + '<Allow board="DEVICE_UP1_TAS_4X" values="2" /><Allow board="DEVICE_REG1_LAN_BASE" values="3" /></Filter>' + $other + '</Filters>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'move number so the ranges do not overlap' (T "stop message")
+  $d = Copy-BaseWithFilter "filters-srcid" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef.Replace('number="700"', 'number="70"') + '<Allow board="DEVICE_UP1_TAS_4X" values="2" /></Filter></Filters>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'choose a free number' (T "stop message")
+  $d = Copy-BaseWithFilter "filters-case" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef + '<Allow board="DEVICE_UP1_TAS_4X" values="2" /></Filter>' + $other.Replace('name="Other"', 'name="mode"') + '</Filters>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'is listed twice' (T "stop message")
+}
+
+Add-Test "filters-errors" (T "Filters: a value outside the list or a ref without parameter in the source stops") {
+  $d = Copy-BaseWithFilter "filters-badvalue" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef + '<Allow board="DEVICE_UP1_TAS_4X" values="2 9" /></Filter></Filters>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'names value 9' (T "stop message")
+  $d = Copy-BaseWithFilter "filters-noparam" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef.Replace('00060', '00061') + '<Allow board="DEVICE_UP1_TAS_4X" values="2" /></Filter></Filters>') -NoUnion
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'has 0 Parameter with Id' (T "stop message")
+}
+
 # @brief <Conflicts reserved="true"> test project: three boards of a test header (0x3F70 = 16240 serial LED auto config: PROG/INFO
 #        are chain indices; 0x3F71 = 16241 serial LED with LED_INIT: PROG/INFO stay GPIOs; 0x3F72 = 16242 GPIO LEDs, INFO1 on an
 #        IO expander pin), the LED macros also in <ReservedPins>

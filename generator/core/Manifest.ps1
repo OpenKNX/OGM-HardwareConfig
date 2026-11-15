@@ -13,7 +13,7 @@ FILEPATH: OGM-HardwareConfig/generator/core/Manifest.ps1
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
     Functions: ConvertTo-FlagList, Test-ManifestNodes, Read-Manifest with its sections (Read-ManifestRoot, Read-ManifestOutputs,
     Read-ManifestCapabilities, Read-ManifestBoards, Read-ManifestPorts, Read-ManifestRoles, Read-ManifestPage, Read-ManifestNotices,
-    Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables, Read-ManifestPartRows), Get-ConflictInt, ConvertFrom-ConflictCondition,
+    Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables, Read-ManifestPartRows, Read-ManifestFilters), Get-ConflictInt, ConvertFrom-ConflictCondition,
     Read-ConflictsNode.
 
 .NOTES
@@ -47,7 +47,7 @@ function ConvertTo-FlagList([string]$Text) {
 #        to the default without a word.
 $script:ManifestNodes = @{
   HardwareProfile = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
-                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows")
+                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows Filters")
   CapabilityPack  = @("name", "Capability Value ReservedPins")
   Output          = @("conf share script header", "")
   Generate        = @("template output finalNewline", "Param")
@@ -79,6 +79,9 @@ $script:ManifestNodes = @{
   Fix             = @("name capability ref value valueMacro show indent help", "")
   PartRows        = @("source output", "Row")
   "PartRows/Row"  = @("ref expr label", "")
+  Filters         = @("output", "Filter")
+  Filter          = @("name ref source value number indent", "Allow")
+  "Filter/Allow"  = @("board capability values", "")
 }
 function Test-ManifestNodes($Node, [string]$File) {
   $spec = $null
@@ -140,6 +143,7 @@ function Read-Manifest([string]$Path) {
   Read-ManifestFixes $root $m $baseDir $capIndex
   Read-ManifestBoardTables $root $m $baseDir
   Read-ManifestPartRows $root $m $baseDir
+  Read-ManifestFilters $root $m $baseDir
   return $m
 }
 
@@ -662,6 +666,71 @@ function Read-ManifestPartRows($root, $m, $baseDir) {
     if ($pr.Rows.Count -eq 0) { Stop-WithError (T "<PartRows source=`"{0}`"> without <Row>" $src) }
     $m.PartRows += $pr
   }
+}
+# @brief Read-Manifest: <Filters>: selection lists that offer only the values the selected board allows
+function Read-ManifestFilters($root, $m, $baseDir) {
+  # <Filters output><Filter name ref source value number indent><Allow board|capability values/></Filter></Filters>: the dropdown
+  # of the parameter ref (the carrier, defined in source) offers per board the values of the first matching <Allow> (manifest
+  # order: board define/pattern or capability), else the items up to the manifest <Value> value; absent = no output changes
+  $m.Filters = $null
+  $flNodes = @($root.SelectNodes("Filters"))
+  if ($flNodes.Count -gt 1) { Stop-WithError (T "<Filters> may appear only once") }
+  if ($flNodes.Count -eq 0) { return }
+  $flOut = "$($flNodes[0].GetAttribute('output'))"
+  if (-not $flOut) { Stop-WithError (T "<Filters> needs output=... (the parts file the application includes)") }
+  if (-not $m.Outputs.ContainsKey("share")) { Stop-WithError (T "<Filters> needs <Output share=...> (the hardware selection)") }
+  $m.Filters = @{ Output = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $flOut)); Items = @() }
+  foreach ($f in $flNodes[0].SelectNodes("Filter")) {
+    $fn = "$($f.GetAttribute('name'))"
+    if ($fn -cnotmatch '^[A-Za-z][A-Za-z0-9]*$') { Stop-WithError (T "<Filter name=`"{0}`">: name must be letters and digits (it names the blocks Filter_<name>)" $fn) }
+    if (@($m.Filters.Items | Where-Object { $_.Name -eq $fn }).Count -gt 0) { Stop-WithError (T "<Filter name=`"{0}`"> is listed twice (names are compared without case)" $fn) }
+    $w = "<Filter name=`"$fn`">"
+    $fr = "$($f.GetAttribute('ref'))"
+    if ($fr -cnotmatch '^%AID%_(UP|P)-(%TT%|\d{2})(\d{5})_R-(%TT%|\d{2})(\d{5})\d{2}$' -or $Matches[2] -cne $Matches[4] -or $Matches[3] -ne $Matches[5]) {
+      Stop-WithError (T "{0}: ref must be a ParameterRef id like %AID%_UP-%TT%00130_R-%TT%0013001, got {1}" $w $fr)
+    }
+    $kind = $Matches[1]; $tt = $Matches[2]; $pnum = $Matches[3]
+    if (@($m.Filters.Items | Where-Object { $_.Ref -ceq $fr }).Count -gt 0) { Stop-WithError (T "{0}: ref {1} is already filtered by another <Filter>" $w $fr) }
+    $src = "$($f.GetAttribute('source'))"
+    if (-not $src) { Stop-WithError (T "{0}: source=... is missing (the XML file that defines the parameter and its type)" $w) }
+    $srcFull = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $src))
+    if (-not (Test-Path -LiteralPath $srcFull -PathType Leaf)) { Stop-WithError (T "{0}: source not found: {1}" $w $srcFull) }
+    $fv = "$($f.GetAttribute('value'))"
+    if ($fv -and @($m.Values | Where-Object { $_.Name -ceq $fv }).Count -eq 0) { Stop-WithError (T "{0}: value {1} is no <Value> of the manifest (names are case-sensitive)" $w $fv) }
+    $fnum = "$($f.GetAttribute('number'))"
+    if ($fnum -notmatch '^\d{1,5}$' -or [int]$fnum -lt 2) { Stop-WithError (T "{0}: number=... must be the first free parameter number 2..99999 of the module (one per value set)" $w) }
+    $fi = "$($f.GetAttribute('indent'))"; if (-not $fi) { $fi = "1" }
+    if ($fi -notmatch '^\d{1,2}$') { Stop-WithError (T "{0}: indent must be a number" $w) }
+    $allows = @()
+    foreach ($a in $f.SelectNodes("Allow")) {
+      $ab = "$($a.GetAttribute('board'))"; $ac = "$($a.GetAttribute('capability'))"; $avt = "$($a.GetAttribute('values'))".Trim()
+      if ([bool]$ab -eq [bool]$ac) { Stop-WithError (T "{0}: <Allow> needs either board=... (board define, * and ? allowed) or capability=..." $w) }
+      $aci = -1
+      if ($ac) {
+        for ($i = 0; $i -lt $m.Capabilities.Count; $i++) { if ($m.Capabilities[$i].Name -ceq $ac) { $aci = $i } }
+        if ($aci -lt 0) { Stop-WithError (T "{0}: <Allow capability=`"{1}`">: no such capability (names are case-sensitive)" $w $ac) }
+        $ab = "capability " + $ac
+      }
+      $vals = @()
+      foreach ($tok in ($avt -split '\s+' | Where-Object { $_ })) {
+        if ($tok -match '^(\d+)-(\d+)$' -and [int]$Matches[1] -le [int]$Matches[2]) { $vals += @([int]$Matches[1]..[int]$Matches[2]) }
+        elseif ($tok -match '^\d+$') { $vals += [int]$tok }
+        else { Stop-WithError (T "{0}: <Allow board=`"{1}`">: values must be numbers or ranges a-b separated by blanks, got '{2}'" $w $ab $tok) }
+      }
+      if ($vals.Count -eq 0) { Stop-WithError (T "{0}: <Allow board=`"{1}`"> without values" $w $ab) }
+      if (@($allows | Where-Object { $_.Board -ceq $ab }).Count -gt 0) { Stop-WithError (T "{0}: <Allow board=`"{1}`"> is listed twice" $w $ab) }
+      $allows += @{ Board = $ab; Capability = $ac; CapIndex = $aci; Values = @($vals | Sort-Object -Unique); Pattern = ($ab -match '[\*\?]') }
+    }
+    if (-not $fv -and $allows.Count -eq 0) { Stop-WithError (T "{0}: needs value=... or <Allow> entries (else every board has the full list)" $w) }
+    $item = @{ Name = $fn; Ref = $fr; Kind = $kind; TT = $tt; Param = ("%AID%_{0}-{1}{2}" -f $kind, $tt, $pnum); SourceAttr = $src; Source = $srcFull
+               Value = $fv; Number = [int]$fnum; Indent = $fi; Allows = $allows; SetSlots = @{} }
+    Read-FilterSource $item
+    # the generated type ids are <carrier type name>F<slot>: two filters on one type would give the same id
+    $same = @($m.Filters.Items | Where-Object { $_.Carrier.TypeName -ceq $item.Carrier.TypeName })
+    if ($same.Count -gt 0) { Stop-WithError (T "{0}: its parameter has the type {1} like <Filter name=`"{2}`"> - give each filtered parameter its own ParameterType" $w $item.Carrier.TypeName $same[0].Name) }
+    $m.Filters.Items += $item
+  }
+  if ($m.Filters.Items.Count -eq 0) { Stop-WithError (T "<Filters> without <Filter>") }
 }
 # @brief Integer attribute of a <Conflicts>/<Use> element: $null when absent, stop when not a number in Min..Max
 function Get-ConflictInt($Node, [string]$Attr, [int]$Min, [int]$Max, [string]$Where) {

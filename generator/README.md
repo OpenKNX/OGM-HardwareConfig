@@ -20,7 +20,7 @@ Beispiel-Applikation: [examples/HardwareProfileDemo](../examples/HardwareProfile
 | Pfad | Inhalt |
 |---|---|
 | `Build-HardwareProfile.ps1` | der Aufrufer (einziges Skript, das man startet): Parameter, Hilfe, Konstanten, Ablauf |
-| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `PartRows` (Zeilen eines Bausteins je Gerät), `Header` (Firmware-Header), `Init`, `Generate` (die Schritte eines Laufs nach dem Manifest: Boards, Slots, Bilder, Ausgaben, Versionswache, Schreiben, Zusammenfassung), `Language` (Sprache der Ausgabe) mit `Messages.de.psd1` (deutsche Texte), siehe [Sprache der Ausgabe](#sprache-der-ausgabe) |
+| `core/` | der Generator nach Bereichen, vom Aufrufer per Dot-Source geladen: `Console` (Ausgabe), `Text` (Dateien, Escaping, Sortierung), `Toolchain` (C-Präprozessor), `BoardIds` (Identität, `-ListIds`, `-NextId`), `Manifest`, `Boards` (Envs, Fähigkeiten, Pins, Ports), `Slots` (Slot-Datei, Bit-Reihenfolge, Versionswache), `AppModule` (Teile der Applikation: Feature-Flags, Auswahl, Geräteseite, Entwickleransicht), `AppScript` (Skript der Applikation), `Conflicts`, `Fixes`, `PartRows` (Zeilen eines Bausteins je Gerät), `Filters` (Auswahllisten je Gerät), `Header` (Firmware-Header), `Init`, `Generate` (die Schritte eines Laufs nach dem Manifest: Boards, Slots, Bilder, Ausgaben, Versionswache, Schreiben, Zusammenfassung), `Language` (Sprache der Ausgabe) mit `Messages.de.psd1` (deutsche Texte), siehe [Sprache der Ausgabe](#sprache-der-ausgabe) |
 | `QUICKSTART.md` | Schnellstart: das Hardware-Profil in fünf Schritten in ein bestehendes OAM einbinden |
 | `Anwendungsfaelle.md` | Rezepte mit Beispielen: Module, Feature-Flags, Kanalzahl, Auswahllisten, Sensoren, Netzwerk, Firmware |
 | `tests/` | `Test-HardwareProfile.ps1`: Selbsttest (auch `Build-HardwareProfile.ps1 -SelfTest`), siehe [Selbsttest](#selbsttest) |
@@ -126,7 +126,7 @@ flowchart LR
 `Build-HardwareProfile.ps1 -SelfTest` (oder `tests/Test-HardwareProfile.ps1`, dort mit `-Only <Muster>`, `-Full`,
 `-KeepWork`) lässt den Generator auf kleinen Test-Manifesten laufen, jedes in einem eigenen Wegwerf-Ordner (das Repo bleibt
 unberührt), und prüft, was er tun und was er ablehnen muss: stabile Ausgaben, Bit-Reihenfolge, Versionswache,
-Manifest-Prüfung, `<Fixes>` (auch Wert aus einem Board-Makro), `<PartRows>` (Zeilen je Board, Label-Gruppen, Abbruch bei keiner Zeile, zwei Zeilen oder ohne Inline-Block), `-Init`, Sprache (deutsche Tabelle vollständig, Standard Deutsch), ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
+Manifest-Prüfung, `<Fixes>` (auch Wert aus einem Board-Makro), `<PartRows>` (Zeilen je Board, Label-Gruppen, Abbruch bei keiner Zeile, zwei Zeilen oder ohne Inline-Block), `<Filters>` (Menge je Board aus Define, Muster, Fähigkeit; Texte, Träger, feste Slots; Abbruch bei Wert außerhalb der Liste oder fehlendem Parameter), `-Init`, Sprache (deutsche Tabelle vollständig, Standard Deutsch), ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
 `-Check` der Demo (mit PlatformIO und den `lib/`-Links der Demo) und mit `-Full` den Update-Test der Demo (mit dem
 OpenKNXproducer). Je Test eine Zeile mit ✓/✗/– und Dauer, am Ende eine Zusammenfassung; Exit-Code 1, wenn ein Test
 scheitert.
@@ -260,6 +260,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 | `<BoardTable name header scan>` | Zahlen-Tabelle je Board im ETS-Skript aus einem Header der OAM, siehe [Board-Tabellen](#board-tabellen-boardtable) |
 | `<Fixes output>` mit `<Fix name capability ref value valueMacro show indent help>` | Einstellung eines anderen Moduls je Fähigkeit oder mit dem Wert eines Board-Makros festlegen, siehe [Einstellungen festlegen](#einstellungen-festlegen-fixes) |
 | `<PartRows source output>` mit `<Row ref expr label>` | Zeilen eines Bausteins (Part) eines anderen Moduls nur auf den Geräten zeigen, die sie haben, mit Label aus dem Board-Header, siehe [Zeilen je Gerät](#zeilen-je-gerät-partrows) |
+| `<Filters output>` mit `<Filter name ref source value number indent>` und `<Allow board capability values>` | eine Auswahlliste je Gerät auf eine beliebige Teilmenge ihrer Einträge beschränken, siehe [Auswahl je Gerät filtern](#auswahl-je-gerät-filtern-filters) |
 
 ### Board-Tabellen (`<BoardTable>`)
 
@@ -297,21 +298,22 @@ Target abschaltet), stehen damit auch im ETS-Skript.
 - Abbruch: `name` nicht nur Buchstaben und Ziffern oder doppelt, `header` fehlt, `scan` ohne genau eine unbenannte
   Gruppe, zwei Makros für einen Index. Warnung: kein Makro auf irgendeinem Board. Ohne `<BoardTable>` bleiben alle Ausgaben gleich.
 
-### Einstellungen anderer Module je Gerät: `<Fixes>` oder `<PartRows>`
+### Einstellungen anderer Module je Gerät: `<Fixes>`, `<PartRows>` oder `<Filters>`
 
-`<Fixes>` bestimmt den **Wert** einer Einstellung, `<PartRows>` bestimmt, ob und mit welchem Text **Zeilen sichtbar** sind.
+`<Fixes>` bestimmt den **Wert** einer Einstellung, `<PartRows>` bestimmt, ob und mit welchem Text **Zeilen sichtbar** sind,
+`<Filters>` bestimmt, **welche Einträge** eine Auswahlliste anbietet.
 
-| | [`<Fixes>`](#einstellungen-festlegen-fixes) | [`<PartRows>`](#zeilen-je-gerät-partrows) |
-|---|---|---|
-| Wirkt auf | den Wert genau eines Parameters | Sichtbarkeit und Text ganzer Zeilen |
-| Je Board | Wert fest (nur lesbar), versteckt, vorbelegt (änderbar) oder nur zugewiesen; Wert fest oder aus einem Board-Makro | Zeile zeigen oder weglassen (C-Ausdruck über den Board-Header), Text um ein Board-Makro ergänzen |
-| Ändert Werte | ja | nein |
-| Einbindung | das Produkt nimmt die Originalzeile aus dem Include des Moduls und setzt den Block `Fix_<name>` an ihre Stelle | das Produkt zeigt per Token auf eine erzeugte Kopie des ganzen Bausteins |
-| Passt für | einzelne Einstellungen, die das Produkt selbst einbindet | Zeilen in einem fremden Baustein, die das Produkt nicht einzeln herausnehmen kann |
-| Beispiel | „WiFi-Schnittstelle“ = Ja, nur lesbar, auf WLAN-Boards | Zeile „Info 3“ nur auf Boards mit `INFO3_LED_PIN` |
+| | [`<Fixes>`](#einstellungen-festlegen-fixes) | [`<PartRows>`](#zeilen-je-gerät-partrows) | [`<Filters>`](#auswahl-je-gerät-filtern-filters) |
+|---|---|---|---|
+| Wirkt auf | den Wert genau eines Parameters | Sichtbarkeit und Text ganzer Zeilen | die Einträge einer Auswahlliste (Dropdown) |
+| Je Board | Wert fest (nur lesbar), versteckt, vorbelegt (änderbar) oder nur zugewiesen; Wert fest oder aus einem Board-Makro | Zeile zeigen oder weglassen (C-Ausdruck über den Board-Header), Text um ein Board-Makro ergänzen | beliebige Teilmenge der Einträge: erste passende `<Allow>` (Board, Muster, Fähigkeit), sonst 0..Manifest-Wert, sonst alle |
+| Ändert Werte | ja | nein | nur über die Wahl des Nutzers (der Träger übernimmt sie) |
+| Einbindung | das Produkt nimmt die Originalzeile aus dem Include des Moduls und setzt den Block `Fix_<name>` an ihre Stelle | das Produkt zeigt per Token auf eine erzeugte Kopie des ganzen Bausteins | Typen, Parameter, ParameterRefs und der Block `Filter_<name>` an die Stelle der Zeile des Trägers |
+| Passt für | einzelne Einstellungen, die das Produkt selbst einbindet | Zeilen in einem fremden Baustein, die das Produkt nicht einzeln herausnehmen kann | Listen, deren Einträge nicht jede Hardware kann (Anzahl Relais, Betriebsarten, Quellen) |
+| Beispiel | „WiFi-Schnittstelle“ = Ja, nur lesbar, auf WLAN-Boards | Zeile „Info 3“ nur auf Boards mit `INFO3_LED_PIN` | NeoPixel „Externe Relais“ 0..n je Board; Demo „Schaltfunktion“, „Zeitquelle“ |
 
 Faustregel: Soll man etwas **nicht sehen**, `<PartRows>`; soll man etwas **nicht ändern** oder einen **passenden Startwert**
-bekommen, `<Fixes>`. Beide zusammen: Info-LEDs der Demo und von NeoPixel (`<PartRows>` für die Zeilen, `<Fix valueMacro
+bekommen, `<Fixes>`; soll man **nur passende Einträge** wählen können, `<Filters>`. Beide zusammen: Info-LEDs der Demo und von NeoPixel (`<PartRows>` für die Zeilen, `<Fix valueMacro
 show="assign">` für die Vorbelegung, ohne eigene Zeile).
 
 ### Einstellungen festlegen (`<Fixes>`)
@@ -411,6 +413,46 @@ Applikation lässt das Modul diese Kopie statt seines eigenen Bausteins laden (b
   und `-Check` meldet sie.
 - Beispiel: die [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml) (Raumcontroller Plus: „Info 1 (links)“,
   „Info 2 (rechts)“; REG1: drei Zeilen ohne Label; Shelly: keine Zeile; Ausgabe `src/HardwareProfile.infoled.gen.xml`).
+
+### Auswahl je Gerät filtern (`<Filters>`)
+
+Eine vorhandene Auswahlliste bietet je Gerät nur die Einträge an, die diese Hardware kann. ETS kann einzelne Einträge einer
+Liste nicht ausblenden; der Generator legt darum je verschiedener Teilmenge einen eigenen Typ und einen Parameter **ohne
+Speicher** an, der seinen Wert per `<Assign … SourceParamRefRef>` in den vorhandenen Parameter (den **Träger**) kopiert. Nur der
+Träger hat Speicher: Firmware, `choose` auf dem Träger und die Konfliktprüfung bleiben, wie sie sind.
+
+```xml
+<Filters output="src/HardwareProfile.filters.gen.xml">
+  <Filter name="Function" ref="%AID%_P-%TT%00032_R-%TT%0003201" source="src/HardwareProfileDemo.share.xml" number="600">
+    <Allow board="DEMO_SHELLY_PLUS_I4" values="0 5" />        <!-- genaues Board -->
+    <Allow board="DEMO_SHELLY_*" values="0-2" />              <!-- Muster -->
+  </Filter>
+  <Filter name="TimeSource" ref="%AID%_P-%TT%00033_R-%TT%0003301" source="src/HardwareProfileDemo.share.xml" number="650">
+    <Allow capability="Rtc" values="0-3" />                   <!-- Fähigkeit -->
+    <Allow capability="Lan" values="0 1 3" />
+    <Allow board="*" values="0 1" />                          <!-- alle übrigen -->
+  </Filter>
+  <!-- NeoPixel: 0..Relays je Board -->
+  <Filter name="RelayCount" ref="%AID%_UP-%TT%00130_R-%TT%0013001" source="src/NeoPixel.share.xml" value="Relays" number="950" />
+</Filters>
+```
+
+- `ref`: ParameterRef des Trägers; `source`: die XML-Datei, die den Parameter **und** seinen Typ (`TypeRestriction Base="Value"`
+  mit `<Enumeration>`) definiert. Die Einträge und Texte übernimmt der Generator von dort.
+- Menge je Board: die **erste passende** `<Allow>` in Manifest-Reihenfolge (`board` = Define, `*`/`?` erlaubt, oder `capability`);
+  ohne Treffer mit `value="<Value>"` die Einträge bis zum Wert des Boards, sonst alle. Genaues vor allgemeinem eintragen,
+  `board="*"` zuletzt. `values`: Zahlen und Bereiche (`"0-2 4"`), nur Werte der Trägerliste.
+- Boards mit allen Einträgen und „nicht gewählt“ zeigen den Träger selbst; jede andere Menge ihre Liste (Vorgabe: die des
+  Trägers, wenn enthalten, sonst ihr erster Wert); eine Menge mit einem Wert ist schreibgeschützt.
+- Parameter-IDs: `%AID%_P-<TT><number + Slot>`; der Slot jeder Menge steht als `filter <name> <v,v,...> = <Slot>` in der
+  [Slot-Datei](#slot-datei-hardwareprofileslots) und wird nie neu vergeben. `number` = erste freie Nummer des Moduls, Platz für
+  so viele Mengen, wie es geben kann.
+- Einbinden (Ausgabe `output`): `//ApplicationProgram/Static/ParameterTypes/ParameterType` in die ParameterTypes (der Producer
+  nimmt Typen nur über diesen Pfad), `//Block[@name='Filter_<name>_Parameters']/*` zu den Parametern,
+  `Filter_<name>_ParameterRefs` zu den ParameterRefs, `Filter_<name>` an die Stelle der `ParameterRefRef` des Trägers.
+- App-Update: der Träger behält seinen Wert (gleiche ParameterRef); ein Board mit eigener Liste steht danach auf deren Vorgabe
+  (neue ParameterRef) - in der CHANGELOG des Produkts nennen.
+- Beispiele: [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml) Seite „3 Listen je Hardware“, NeoPixel „Externe Relais“.
 
 ## Hardware-Seite (Gerätekarte)
 
@@ -895,7 +937,7 @@ Das App-Update selbst übernimmt die Werte über die ParameterRef-Nummer; eingep
 Die GPIO-Parameter haben pro Board eine eigene ETS-ID. Damit ein App-Update die Pinauswahl nicht
 verliert, hängt diese ID nicht am Listenplatz, sondern an einem Slot pro `DEVICE_HW_ID`. Der Generator
 legt neue Slots selbst an und vergibt nie eine Nummer neu. **Die Datei gehört ins Repo.** Erlaubt sind Zeilen
-`0x<HW-ID> = <Slot>` (optional `removed`), `cap <n> = <Name>`, `val <n> = <Name>`, `ets "<Produkt-XML>" <Version> <Fingerabdruck>`,
+`0x<HW-ID> = <Slot>` (optional `removed`), `cap <n> = <Name>`, `val <n> = <Name>`, `filter <Name> <v,v,...> = <Slot>` (Mengen von `<Filters>`), `ets "<Produkt-XML>" <Version> <Fingerabdruck>`,
 Kommentare (`#`) und Leerzeilen; jede andere Zeile bricht den Lauf mit Datei, Zeilennummer und Zeile ab (sonst bekäme ihr
 Board einen neuen Slot und alle seine IDs). Der Generator schreibt die Datei in seiner eigenen Form (eigene Kommentare gehen verloren).
 

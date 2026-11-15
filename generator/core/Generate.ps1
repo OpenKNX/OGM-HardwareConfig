@@ -253,6 +253,7 @@ function New-ProductOutputs($m, $boards) {
   if ($m.Conflicts) { Write-OutputActivity (T "build") $m.Conflicts.Output; $rendered += @{ Output = $m.Conflicts.Output; Text = (New-ConflictsXml $m $boards) } }
   if ($m.Fixes) { Write-OutputActivity (T "build") $m.Fixes.Output; $rendered += @{ Output = $m.Fixes.Output; Text = (New-FixesXml $m $boards) } }
   foreach ($pr in @($m.PartRows)) { Write-OutputActivity (T "build") $pr.Output; $rendered += @{ Output = $pr.Output; Text = (New-PartRowsXml $m $boards $pr) } }
+  if ($m.Filters) { Write-OutputActivity (T "build") $m.Filters.Output; $rendered += @{ Output = $m.Filters.Output; Text = (New-FiltersXml $m $boards) } }
 
   # templates ("Bausteine"): whole generated files, never a splice into a hand-written file
   $vars = @{ Boards = $boards; M = $m }
