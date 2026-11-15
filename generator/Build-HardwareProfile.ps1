@@ -1703,8 +1703,6 @@ function Resolve-Board($M, $BoardEntry) {
     if (-not $board.InfoText) { Stop-WithError ("{0}: HW_INFO_TEXT is not a string: {1}" -f $BoardEntry.Define, $res["INFOTEXT"]) }
     if ($board.InfoText.Length -gt 255) { Stop-WithError ("{0}: HW_INFO_TEXT has {1} characters, ETS shows at most 255" -f $BoardEntry.Define, $board.InfoText.Length) }
   }
-  if (-not $board.Name) { $board.Name = $ident.Id }
-  if (-not $board.Name) { $board.Name = $BoardEntry.Define }
   $board.InfoUrl = $null
   $board.InfoUrlOwn = $false   # $true: the URL comes from the board header, not the <InfoImage default> (empty = no QR code)
   if ($M.Info) {
