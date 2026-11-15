@@ -36,7 +36,7 @@ FILEPATH: OGM-HardwareConfig/generator/Build-HardwareProfile.ps1
     Every output is optional. <Generate template=... output=...> writes further whole files from templates
     ("Bausteine", helpers/TemplateEngine.ps1; standard ones in generator/templates): ETS XML parts for op:include,
     the ETS script, C headers. Boards carry their ports (HW_PORT_* of the board header), capabilities and
-    values; order="hwid" sorts them by DEVICE_HW_ID, ids="index" numbers them by position instead of slots.
+    values; order="hwid" sorts them by DEVICE_HW_ID; the slot file next to the manifest keeps the board numbers.
     <BoardTable name=... header=... scan=...> adds var <Prefix>_table_<name> to the script: per board the integer macros of an
     OAM header (index = group 1 of scan) with the env flags, merged over the envs (any = OR, all = AND).
 
@@ -255,7 +255,6 @@ function Stop-WithError([string]$Text) {
   exit 1
 }
 $script:WarningCount = 0
-$script:IdsIndex = $false
 $script:InitMode = $false
 $script:NoBoardEnvs = @()
 
@@ -651,6 +650,60 @@ function ConvertTo-FlagList([string]$Text) {
   }
   return ,$list
 }
+# @brief Attributes and child elements the generator reads per manifest element ("*": the element checks its attributes itself
+#        and stops: Conflicts, Use, InfoImage, BoardTable). Test-ManifestNodes warns about anything else: a typo would fall back
+#        to the default without a word.
+$script:ManifestNodes = @{
+  HardwareProfile = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
+                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable")
+  CapabilityPack  = @("name", "Capability Value ReservedPins")
+  Output          = @("conf share script header", "")
+  Generate        = @("template output finalNewline", "Param")
+  "Generate/Param" = @("name value", "")
+  "Conflicts/Param" = @("name ref", "")
+  Import          = @("href", "")
+  IncludePath     = @("", "")
+  Capability      = @("name text expr merge switch fixedBy reportedBy runtime feature featureOn featureOff featureInvert featureNote featureNoteWhen", "")
+  Value           = @("name text expr ifdef default max unit names query relays", "Set")
+  Set             = @("board value", "")
+  ReservedPins    = @("macros", "")
+  Board           = @("define flags", "")
+  Boards          = @("platformio exclude project", "")
+  Ports           = @("board use max excludeRelayPins", "")
+  GpioRole        = @("name number text count", "Pins")
+  Pins            = @("board label scan", "Pin")
+  Pin             = @("gpio label", "")
+  Page            = @("text icon help features dev title label intro queryTitle query button queryHelp queryImage unselectedTitle infoDefault unselectedInfo unselectedText updateInfo changeInfo firmware more summary portsText portsTextOne", "")
+  Notice          = @("when title", "Text")
+  Text            = @("", "")
+  Conflicts       = @("*", "Param Use ChannelBlock")
+  Use             = @("*", "Manual")
+  Manual          = @("ref when", "")
+  ChannelBlock    = @("name text uses", "")
+  InfoImage       = @("*", "Logo")
+  Logo            = @("board file", "")
+  BoardTable      = @("*", "")
+}
+
+function Test-ManifestNodes($Node, [string]$File) {
+  $spec = $null
+  if ($Node.ParentNode -and $Node.ParentNode.NodeType -eq [System.Xml.XmlNodeType]::Element) { $spec = $script:ManifestNodes[$Node.ParentNode.LocalName + "/" + $Node.LocalName] }
+  if ($null -eq $spec) { $spec = $script:ManifestNodes[$Node.LocalName] }
+  if ($null -eq $spec) { return }
+  $attrs = @($spec[0] -split ' ' | Where-Object { $_ })
+  foreach ($at in $Node.Attributes) {
+    if ($spec[0] -eq "*") { break }
+    if ($at.Name -eq "xmlns" -or $at.Name.Contains(":")) { continue }
+    if ($attrs -cnotcontains $at.Name) { Write-Warn ("{0}: <{1}> attribute {2} is unknown and ignored (known: {3})" -f $File, $Node.LocalName, $at.Name, ($attrs -join ", ")) }
+  }
+  $kids = @($spec[1] -split ' ' | Where-Object { $_ })
+  foreach ($c in $Node.ChildNodes) {
+    if ($c.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+    if ($kids -cnotcontains $c.LocalName) { Write-Warn ("{0}: <{1}> inside <{2}> is unknown and ignored" -f $File, $c.LocalName, $Node.LocalName); continue }
+    Test-ManifestNodes $c $File
+  }
+}
+
 function Read-Manifest([string]$Path) {
   if (-not (Test-Path $Path)) { Stop-WithError "Manifest not found: $Path" }
   $full = (Resolve-Path $Path).Path
@@ -658,6 +711,8 @@ function Read-Manifest([string]$Path) {
   [xml]$doc = [System.IO.File]::ReadAllText($full, [System.Text.Encoding]::UTF8)
   $root = $doc.HardwareProfile
   if (-not $root) { Stop-WithError "Manifest root element must be <HardwareProfile>" }
+  Test-ManifestNodes $root ([System.IO.Path]::GetFileName($full))
+  if ("$($root.prefix)" -and "$($root.prefix)" -cnotmatch '^[A-Za-z][A-Za-z0-9]*$') { Stop-WithError ("prefix `"{0}`" must be letters and digits (it is part of ETS, JavaScript and C names)" -f $root.prefix) }
 
   $m = @{
     ManifestPath = $full
@@ -683,10 +738,9 @@ function Read-Manifest([string]$Path) {
   $m.Unselected = "$($root.unselected)"
   if (-not $m.Unselected) { $m.Unselected = "showAll" }
   if ($m.Unselected -ne "showAll" -and $m.Unselected -ne "hide") { Stop-WithError "unselected must be showAll or hide" }
-  # value of "not selected" in the hardware selection (feature flags with unselected=showAll, generated module)
+  # value of "not selected" in the hardware selection: always 0 (NOT_SELECTED; no HW-ID is 0)
   $m.UnselectedValue = 0
-  if ("$($root.unselectedValue)") { $m.UnselectedValue = [int]"$($root.unselectedValue)" }
-  if ($m.UnselectedValue -lt 0 -or $m.UnselectedValue -ge 65535) { Stop-WithError "unselectedValue must be 0..65534 (65535 marks an empty test list)" }
+  if ("$($root.unselectedValue)" -and "$($root.unselectedValue)" -ne "0") { Stop-WithError "unselectedValue was removed: not selected is always 0" }
   # port value encoding of the application's port selections (one declaration for the ETS conflict check and the firmware
   # header): 0..n-1 = port n of the board, portManualValue = manual GPIO, portNoneValue = no port, any other value = no GPIO
   $m.PortManual = $null; $m.PortNone = $null
@@ -699,14 +753,12 @@ function Read-Manifest([string]$Path) {
   if (($null -eq $m.PortManual) -ne ($null -eq $m.PortNone)) { Stop-WithError "portManualValue and portNoneValue go together" }
   if ($null -ne $m.PortManual -and $m.PortManual -eq $m.PortNone) { Stop-WithError "portManualValue and portNoneValue must differ" }
 
-  # board order: manifest (default, order of the entries) or hwid (ascending DEVICE_HW_ID)
+  # board order: hwid (default, ascending DEVICE_HW_ID) or manifest (order of the entries)
   $m.Order = "$($root.order)"
-  if (-not $m.Order) { $m.Order = "manifest" }
+  if (-not $m.Order) { $m.Order = "hwid" }
   if ($m.Order -ne "manifest" -and $m.Order -ne "hwid") { Stop-WithError "order must be manifest or hwid" }
-  # board number ($b.Slot) in IDs: slot (default, slot file, stable over the product life) or index (position)
-  $m.Ids = "$($root.ids)"
-  if (-not $m.Ids) { $m.Ids = "slot" }
-  if ($m.Ids -ne "slot" -and $m.Ids -ne "index") { Stop-WithError "ids must be slot or index" }
+  # board number ($b.Slot) in IDs: always the slot file (stable over the product life); ids="slot" is still accepted
+  if ("$($root.ids)" -and "$($root.ids)" -ne "slot") { Stop-WithError "ids=`"$($root.ids)`" was removed: the board number in IDs always comes from the slot file" }
 
   # every output is optional; share (the ETS module) needs script and moduleType
   foreach ($o in @("conf", "share", "script", "header")) {
@@ -738,6 +790,7 @@ function Read-Manifest([string]$Path) {
     $ip = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $imp.href))
     if (-not (Test-Path $ip)) { Stop-WithError "Import not found: $ip" }
     [xml]$pack = [System.IO.File]::ReadAllText($ip, [System.Text.Encoding]::UTF8)
+    Test-ManifestNodes $pack.DocumentElement ([System.IO.Path]::GetFileName($ip))
     $sources += $pack.DocumentElement
   }
   $sources += $root
@@ -813,11 +866,9 @@ function Read-Manifest([string]$Path) {
   }
   # bit order of the device query from the slot file: a recorded name keeps its bit, the rest follows in manifest order,
   # so a pack (Common.caps.xml) or the manifest can grow anywhere without moving a bit of a firmware in the field
-  if ($m.Ids -ne "index") {
-    Set-RecordedBitOrder $m
-    $capIndex = @{}; for ($i = 0; $i -lt $m.Capabilities.Count; $i++) { $capIndex[$m.Capabilities[$i].Name] = $i }
-    $valIndex = @{}; for ($i = 0; $i -lt $m.Values.Count; $i++) { $valIndex[$m.Values[$i].Name] = $i }
-  }
+  Set-RecordedBitOrder $m
+  $capIndex = @{}; for ($i = 0; $i -lt $m.Capabilities.Count; $i++) { $capIndex[$m.Capabilities[$i].Name] = $i }
+  $valIndex = @{}; for ($i = 0; $i -lt $m.Values.Count; $i++) { $valIndex[$m.Values[$i].Name] = $i }
   if ($m.Capabilities.Count -gt $MAX_CAPABILITIES) { Stop-WithError "At most $MAX_CAPABILITIES capabilities fit the device query" }
   $switchCount = 0
   foreach ($c in $m.Capabilities) {
@@ -3948,7 +3999,6 @@ try {
   if ($Init) { Invoke-Init }
 
   $m = Read-Manifest $Manifest
-  $script:IdsIndex = ($m.Ids -eq "index")
   $script:IncludeDirs = @($m.IncludeDirs) + @($HardwareConfigInclude)
   Write-Step ("Manifest: {0} board(s), {1} capabilities, {2} values, {3} GPIO role(s), unselected={4}" -f $m.Boards.Count, $m.Capabilities.Count, $m.Values.Count, $m.Roles.Count, $m.Unselected)
 
@@ -4029,11 +4079,12 @@ try {
       $portsB = (@($o.Ports) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
       $relA = (@($first.Relays) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
       $relB = (@($o.Relays) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
-      if ($relA -ne $relB) { Stop-WithError ("0x{0:X4}: env {1} has other relays than env {2}" -f [int]$first.HwId, $o.Env, $first.Env) }
+      if ($relA -cne $relB) { Stop-WithError ("0x{0:X4}: env {1} has other relays than env {2}" -f [int]$first.HwId, $o.Env, $first.Env) }
       if ($o.InfoUrl -ne $first.InfoUrl) { Stop-WithError ("0x{0:X4}: env {1} has another info URL than env {2}" -f [int]$first.HwId, $o.Env, $first.Env) }
       if ($o.InfoText -cne $first.InfoText) { Stop-WithError ("0x{0:X4}: env {1} has another HW_INFO_TEXT than env {2}" -f [int]$first.HwId, $o.Env, $first.Env) }
       if ($o.Mcu -cne $first.Mcu) { Stop-WithError ("0x{0:X4}: env {1} builds for MCU '{2}', env {3} for '{4}'" -f [int]$first.HwId, $o.Env, $o.Mcu, $first.Env, $first.Mcu) }
-      if ($portsA -ne $portsB -or $first.PortCount -ne $o.PortCount) { Write-Warn ("0x{0:X4}: env {1} has other ports than env {2} - the ports of {2} are used" -f [int]$first.HwId, $o.Env, $first.Env) }
+      # one port list per HW-ID: ETS offers one list for every firmware of the board
+      if ($portsA -cne $portsB -or $first.PortCount -ne $o.PortCount) { Stop-WithError ("0x{0:X4}: env {1} has other ports than env {2} (HW_PORT_*) - the ports of a board must not depend on the env" -f [int]$first.HwId, $o.Env, $first.Env) }
       for ($i = 0; $i -lt $first.Caps.Count; $i++) {
         # the firmware variants of the board differ in this capability (developer view: "je nach Firmware-Variante")
         if ([bool]$first.Caps[$i] -ne [bool]$o.Caps[$i]) { $first.CapMixed[$i] = $true }
@@ -4074,7 +4125,7 @@ try {
   }
   # the "not selected" value is one more entry of the selection: it must not be a board's HW-ID
   $clash = @($boards | Where-Object { [int]$_.HwId -eq $m.UnselectedValue }) | Select-Object -First 1
-  if ($clash) { Stop-WithError ("unselectedValue {0} is the DEVICE_HW_ID of {1}" -f $m.UnselectedValue, $clash.Define) }
+  if ($clash) { Stop-WithError ("{0} has DEVICE_HW_ID {1}, the value of not selected" -f $clash.Define, $m.UnselectedValue) }
   # an explicit entry can resolve to the same HW-ID as a pattern board (alias define + flags, e.g.
   # DEVICE_QUINLED_DIG_QUAD_V3 + -DKNX_IP_LAN = 0x2121): the explicit one wins, two explicit ones stop
   $dups = $boards | Group-Object { $_.HwId } | Where-Object { $_.Count -gt 1 }
@@ -4098,10 +4149,8 @@ try {
   # order="hwid": ascending DEVICE_HW_ID; $b.Index = position in the final list
   if ($m.Order -eq "hwid") { $boards = @($boards | Sort-Object { [int]$_.HwId }) }
   for ($i = 0; $i -lt $boards.Count; $i++) { $boards[$i].Index = $i }
-  # ids="index": the board number in IDs is the list position (no slot file); else the slot file
-  if ($m.Ids -eq "index") { foreach ($b in $boards) { $b.Slot = $b.Index } }
-  $slotFile = $null
-  if ($m.Ids -ne "index") { $slotFile = Update-BoardSlots $m $boards }
+  # board number in IDs: the slot file
+  $slotFile = Update-BoardSlots $m $boards
   # port value encoding: no offered port may sit on the manual or none value (it could never be selected)
   if ($null -ne $m.PortManual) {
     foreach ($b in $boards) {

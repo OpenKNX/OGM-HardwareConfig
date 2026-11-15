@@ -11,7 +11,7 @@
   ETH_PHY_SPI_HOST, ETH_PHY_RST, KNX_IP_LAN). This pack maps them once, so an application does not have to.
 
   Bit order: the slot file of each application keeps the bit of every name it has seen; a new entry here (anywhere in
-  the file) gets the next free bit in each application (with ids="slot", the default; ids="index" has no slot file). Removing an entry stops the run of every application that
+  the file) gets the next free bit in each application. Removing an entry stops the run of every application that
   recorded it (a firmware in the field still sends that bit).
 
   Known header gaps (fix in the header, not here): UP1-WLAN-2xUART has no WiFi define;

@@ -1,11 +1,10 @@
 @@# ParameterType of a hardware selection: one entry per board, stored value = DEVICE_HW_ID.
-@@# Params: Name, UnselectedText, UnselectedValue, SizeInBit
+@@# Params: Name, UnselectedText, SizeInBit; not selected is always 0 (NOT_SELECTED of the header)
 @@params Name! UnselectedText!
 @@default SizeInBit = 16
-@@default UnselectedValue = 0
 <ParameterType Id="%AID%_PT-{{$P.Name}}" Name="{{$P.Name}}">
   <TypeRestriction Base="Value" SizeInBit="{{$P.SizeInBit}}">
-    <Enumeration Text="{{Xml $P.UnselectedText}}" Value="{{$P.UnselectedValue}}" Id="%ENID%" />
+    <Enumeration Text="{{Xml $P.UnselectedText}}" Value="0" Id="%ENID%" />
 @@for $b in $Boards
     <Enumeration Text="{{Xml $b.Name}}" Value="{{$b.HwId}}" Id="%ENID%" />
 @@end

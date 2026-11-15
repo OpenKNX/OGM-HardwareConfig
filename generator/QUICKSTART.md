@@ -121,11 +121,9 @@ auch ohne `<Import>` und ohne `header`.
 |---|---|---|
 | `prefix` | Modulpräfix (`%HWP_…%`, `ParamHWP_…`) | `HWP` |
 | `moduleType` | `%TT%` des ETS-Moduls (1..99) | Pflicht mit `<Output share>` |
-| `text` | Name des Moduls | „Hardware“ |
+| `text` | Name des Moduls | „Gerät“ |
 | `unselected` | `showAll`: „Nicht gewählt“ zeigt alles · `hide`: blendet alles Hardwareabhängige aus | `showAll` |
-| `unselectedValue` | Wert von „Nicht gewählt“ | 0 |
-| `order` | `manifest` oder `hwid` (Reihenfolge der Auswahlliste) | `manifest` |
-| `ids` | `slot` (IDs je Board fest, Slot-Datei) oder `index` (nur Bestands-OAMs) | `slot` |
+| `order` | `hwid` oder `manifest` (Reihenfolge der Auswahlliste) | `hwid` |
 | `portManualValue`, `portNoneValue` | Port-Werte „Manuell“ / „kein Port“ (nur zusammen) | kein `signalGpio` im Header |
 
 ### Manifest: Elemente
