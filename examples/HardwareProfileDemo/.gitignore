@@ -9,3 +9,4 @@ include/webassets.h
 release/
 src/*.baggages
 lib/
+out/
