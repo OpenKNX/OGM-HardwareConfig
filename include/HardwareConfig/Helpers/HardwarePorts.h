@@ -537,59 +537,90 @@ constexpr uint8_t hwPortGpio(uint8_t value)
 #undef HWPORTS_GPIO_64
 
 // Hard-wired relays of the board header (HW_RELAY_COUNT, HW_RELAY_<n>_GPIO); 0 relays without HW_RELAY_COUNT
-#ifdef HW_RELAY_COUNT
-    #define HWPORTS_RELAY_COUNT ((uint8_t)(HW_RELAY_COUNT))
-#else
-    #define HWPORTS_RELAY_COUNT ((uint8_t)0)
+#if defined(HW_RELAY_COUNT) && (HW_RELAY_COUNT) > 8
+    #error "HW_RELAY_COUNT of the board header is above 8 (HardwarePorts.h)"
 #endif
-#ifdef HW_RELAY_1_GPIO
+#if defined(HW_RELAY_COUNT) && (HW_RELAY_COUNT) > 0
+#if (HW_RELAY_COUNT) >= 1
+    #ifndef HW_RELAY_1_GPIO
+        #error "HW_RELAY_COUNT counts relay 1, but HW_RELAY_1_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_1_GPIO) >= 0 && (HW_RELAY_1_GPIO) <= 254, "HW_RELAY_1_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_1 ((uint8_t)(HW_RELAY_1_GPIO))
 #else
     #define HWPORTS_RELAY_1 ((uint8_t)255)
 #endif
-#ifdef HW_RELAY_2_GPIO
+#if (HW_RELAY_COUNT) >= 2
+    #ifndef HW_RELAY_2_GPIO
+        #error "HW_RELAY_COUNT counts relay 2, but HW_RELAY_2_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_2_GPIO) >= 0 && (HW_RELAY_2_GPIO) <= 254, "HW_RELAY_2_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_2 ((uint8_t)(HW_RELAY_2_GPIO))
 #else
     #define HWPORTS_RELAY_2 ((uint8_t)255)
 #endif
-#ifdef HW_RELAY_3_GPIO
+#if (HW_RELAY_COUNT) >= 3
+    #ifndef HW_RELAY_3_GPIO
+        #error "HW_RELAY_COUNT counts relay 3, but HW_RELAY_3_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_3_GPIO) >= 0 && (HW_RELAY_3_GPIO) <= 254, "HW_RELAY_3_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_3 ((uint8_t)(HW_RELAY_3_GPIO))
 #else
     #define HWPORTS_RELAY_3 ((uint8_t)255)
 #endif
-#ifdef HW_RELAY_4_GPIO
+#if (HW_RELAY_COUNT) >= 4
+    #ifndef HW_RELAY_4_GPIO
+        #error "HW_RELAY_COUNT counts relay 4, but HW_RELAY_4_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_4_GPIO) >= 0 && (HW_RELAY_4_GPIO) <= 254, "HW_RELAY_4_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_4 ((uint8_t)(HW_RELAY_4_GPIO))
 #else
     #define HWPORTS_RELAY_4 ((uint8_t)255)
 #endif
-#ifdef HW_RELAY_5_GPIO
+#if (HW_RELAY_COUNT) >= 5
+    #ifndef HW_RELAY_5_GPIO
+        #error "HW_RELAY_COUNT counts relay 5, but HW_RELAY_5_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_5_GPIO) >= 0 && (HW_RELAY_5_GPIO) <= 254, "HW_RELAY_5_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_5 ((uint8_t)(HW_RELAY_5_GPIO))
 #else
     #define HWPORTS_RELAY_5 ((uint8_t)255)
 #endif
-#ifdef HW_RELAY_6_GPIO
+#if (HW_RELAY_COUNT) >= 6
+    #ifndef HW_RELAY_6_GPIO
+        #error "HW_RELAY_COUNT counts relay 6, but HW_RELAY_6_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_6_GPIO) >= 0 && (HW_RELAY_6_GPIO) <= 254, "HW_RELAY_6_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_6 ((uint8_t)(HW_RELAY_6_GPIO))
 #else
     #define HWPORTS_RELAY_6 ((uint8_t)255)
 #endif
-#ifdef HW_RELAY_7_GPIO
+#if (HW_RELAY_COUNT) >= 7
+    #ifndef HW_RELAY_7_GPIO
+        #error "HW_RELAY_COUNT counts relay 7, but HW_RELAY_7_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_7_GPIO) >= 0 && (HW_RELAY_7_GPIO) <= 254, "HW_RELAY_7_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_7 ((uint8_t)(HW_RELAY_7_GPIO))
 #else
     #define HWPORTS_RELAY_7 ((uint8_t)255)
 #endif
-#ifdef HW_RELAY_8_GPIO
+#if (HW_RELAY_COUNT) >= 8
+    #ifndef HW_RELAY_8_GPIO
+        #error "HW_RELAY_COUNT counts relay 8, but HW_RELAY_8_GPIO is missing"
+    #endif
+    static_assert((HW_RELAY_8_GPIO) >= 0 && (HW_RELAY_8_GPIO) <= 254, "HW_RELAY_8_GPIO must be a GPIO 0..254");
     #define HWPORTS_RELAY_8 ((uint8_t)(HW_RELAY_8_GPIO))
 #else
     #define HWPORTS_RELAY_8 ((uint8_t)255)
 #endif
 
 /// @brief Number of hard-wired relays of the board (HW_RELAY_COUNT, 0 without)
-constexpr uint8_t hwRelayCount() { return HWPORTS_RELAY_COUNT; }
+constexpr uint8_t hwRelayCount() { return (uint8_t)(HW_RELAY_COUNT); }
 
 /// @brief GPIO of hard-wired relay index 0..7 (relay index + 1); 255 for an index the board header does not describe
 constexpr uint8_t hwRelayGpio(uint8_t index)
 {
-    return index >= HWPORTS_RELAY_COUNT ? (uint8_t)255
+    return index >= (uint8_t)(HW_RELAY_COUNT) ? (uint8_t)255
          : index == 0 ? HWPORTS_RELAY_1
          : index == 1 ? HWPORTS_RELAY_2
          : index == 2 ? HWPORTS_RELAY_3
@@ -604,10 +635,9 @@ constexpr uint8_t hwRelayGpio(uint8_t index)
 /// @brief true when the GPIO is one of the hard-wired relays of the board
 constexpr bool isHwRelayGpio(uint8_t gpio, uint8_t index = 0)
 {
-    return gpio != 255 && index < HWPORTS_RELAY_COUNT && (hwRelayGpio(index) == gpio || isHwRelayGpio(gpio, index + 1));
+    return gpio != 255 && index < (uint8_t)(HW_RELAY_COUNT) && (hwRelayGpio(index) == gpio || isHwRelayGpio(gpio, index + 1));
 }
 
-#undef HWPORTS_RELAY_COUNT
 #undef HWPORTS_RELAY_1
 #undef HWPORTS_RELAY_2
 #undef HWPORTS_RELAY_3
@@ -616,3 +646,9 @@ constexpr bool isHwRelayGpio(uint8_t gpio, uint8_t index = 0)
 #undef HWPORTS_RELAY_6
 #undef HWPORTS_RELAY_7
 #undef HWPORTS_RELAY_8
+#else
+// no hard-wired relay: no comparison against 0 (-Wtype-limits)
+constexpr uint8_t hwRelayCount() { return 0; }
+constexpr uint8_t hwRelayGpio(uint8_t) { return (uint8_t)255; }
+constexpr bool isHwRelayGpio(uint8_t, uint8_t = 0) { return false; }
+#endif

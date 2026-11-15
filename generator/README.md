@@ -577,7 +577,8 @@ Einstellung nicht startet (z. B. ein Takt ohne Daten-Port). Die ETS selbst (Wind
 verdrahtete Relais. Der Generator liest sie je Board als `$b.Relays` (`N`, `Gpio`, `Label`, ohne `LABEL` „Relais n“);
 ein fehlendes `HW_RELAY_<n>_GPIO` unter `HW_RELAY_COUNT` oder eines darüber bricht den Lauf ab, ebenso zwei Envs eines
 Boards mit verschiedenen Relais. Für ETS taugt `<Value expr="HW_RELAY_COUNT">` als Relais-Anzahl. Firmware:
-`hwRelayCount()`, `hwRelayGpio(index)`, `isHwRelayGpio(gpio)` aus `include/HardwareConfig/Helpers/HardwarePorts.h` (C++11).
+`hwRelayCount()`, `hwRelayGpio(index)`, `isHwRelayGpio(gpio)` aus `include/HardwareConfig/Helpers/HardwarePorts.h` (C++11);
+der Header bricht beim Kompilieren ab, wenn `HW_RELAY_COUNT` keine Ganzzahl für `#if` ist oder über 8 liegt, ein gezähltes `HW_RELAY_<n>_GPIO` fehlt oder nicht 0..254 ist.
 
 ## Vorlagen („Bausteine“)
 
