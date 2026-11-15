@@ -138,8 +138,8 @@ var HWP_conflictUses = [
 // DEVICE_HW_ID -> s: board number, ports: GPIO per port value (null: port not offered), relays: GPIO of the hard-wired relays
 // rsv: GPIOs the board reserves (flag 2); tp: KNX UART GPIOs of a board with TP and IP firmware variants (flag 3)
 var HWP_conflictBoards = {
-    4129: { s: 3, ports: [], relays: [], rsv: [0, 1, 2, 3, 4, 32, 33, 34, 35, 36, 38, 39], tp: [5, 37] },
-    4130: { s: 4, ports: [], relays: [], rsv: [0, 1, 2, 3, 4, 32, 33, 34, 35, 36, 38, 39], tp: [] },
+    4129: { s: 3, ports: [], relays: [], rsv: [2, 4, 32, 33, 34, 35, 36, 38, 39], tp: [5, 37] },
+    4130: { s: 4, ports: [], relays: [], rsv: [2, 4, 5, 32, 33, 34, 35, 36, 38, 39], tp: [] },
     4402: { s: 2, ports: [], relays: [], rsv: [2, 20, 21], tp: [0, 1] },
     4611: { s: 5, ports: [], relays: [], rsv: [2, 4, 5, 12, 13], tp: [0, 1] },
     4880: { s: 0, ports: [27, 28, 5, 6, 7, 2, 4, 3], relays: [], rsv: [0, 1, 25, 26], tp: [] },

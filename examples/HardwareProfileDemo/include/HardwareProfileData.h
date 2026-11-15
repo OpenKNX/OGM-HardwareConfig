@@ -318,6 +318,26 @@ constexpr bool isReservedGpio(uint8_t gpio)
 #ifdef PROG_BUTTON_PIN
         || ((int)(PROG_BUTTON_PIN) >= 0 && (int)(PROG_BUTTON_PIN) <= 254 && gpio == (uint8_t)(PROG_BUTTON_PIN))
 #endif
+#ifdef OPENKNX_SERIALLED_PIN
+        || ((int)(OPENKNX_SERIALLED_PIN) >= 0 && (int)(OPENKNX_SERIALLED_PIN) <= 254 && gpio == (uint8_t)(OPENKNX_SERIALLED_PIN))
+#endif
+#ifdef FUNC1_BUTTON_PIN
+        || ((int)(FUNC1_BUTTON_PIN) >= 0 && (int)(FUNC1_BUTTON_PIN) <= 254 && gpio == (uint8_t)(FUNC1_BUTTON_PIN))
+#endif
+#ifdef FUNC2_BUTTON_PIN
+        || ((int)(FUNC2_BUTTON_PIN) >= 0 && (int)(FUNC2_BUTTON_PIN) <= 254 && gpio == (uint8_t)(FUNC2_BUTTON_PIN))
+#endif
+#ifdef FUNC3_BUTTON_PIN
+        || ((int)(FUNC3_BUTTON_PIN) >= 0 && (int)(FUNC3_BUTTON_PIN) <= 254 && gpio == (uint8_t)(FUNC3_BUTTON_PIN))
+#endif
+#ifdef SAVE_INTERRUPT_PIN
+        || ((int)(SAVE_INTERRUPT_PIN) >= 0 && (int)(SAVE_INTERRUPT_PIN) <= 254 && gpio == (uint8_t)(SAVE_INTERRUPT_PIN))
+#endif
+#ifdef SAVE_POWER_PIN
+        || ((int)(SAVE_POWER_PIN) >= 0 && (int)(SAVE_POWER_PIN) <= 254 && gpio == (uint8_t)(SAVE_POWER_PIN))
+#endif
+    // LED pins; the serial LED auto config (Led/Manager.cpp) reads them as indices in the chain
+#if !(defined(OPENKNX_SERIALLED_ENABLE) && !defined(LED_INIT) && !defined(OPENKNX_LED_NO_AUTOCONF))
 #ifdef PROG_LED_PIN
         || ((int)(PROG_LED_PIN) >= 0 && (int)(PROG_LED_PIN) <= 254 && gpio == (uint8_t)(PROG_LED_PIN))
 #endif
@@ -333,20 +353,6 @@ constexpr bool isReservedGpio(uint8_t gpio)
 #ifdef INFO3_LED_PIN
         || ((int)(INFO3_LED_PIN) >= 0 && (int)(INFO3_LED_PIN) <= 254 && gpio == (uint8_t)(INFO3_LED_PIN))
 #endif
-#ifdef OPENKNX_SERIALLED_PIN
-        || ((int)(OPENKNX_SERIALLED_PIN) >= 0 && (int)(OPENKNX_SERIALLED_PIN) <= 254 && gpio == (uint8_t)(OPENKNX_SERIALLED_PIN))
-#endif
-#ifdef FUNC1_BUTTON_PIN
-        || ((int)(FUNC1_BUTTON_PIN) >= 0 && (int)(FUNC1_BUTTON_PIN) <= 254 && gpio == (uint8_t)(FUNC1_BUTTON_PIN))
-#endif
-#ifdef FUNC2_BUTTON_PIN
-        || ((int)(FUNC2_BUTTON_PIN) >= 0 && (int)(FUNC2_BUTTON_PIN) <= 254 && gpio == (uint8_t)(FUNC2_BUTTON_PIN))
-#endif
-#ifdef FUNC3_BUTTON_PIN
-        || ((int)(FUNC3_BUTTON_PIN) >= 0 && (int)(FUNC3_BUTTON_PIN) <= 254 && gpio == (uint8_t)(FUNC3_BUTTON_PIN))
-#endif
-#ifdef SAVE_INTERRUPT_PIN
-        || ((int)(SAVE_INTERRUPT_PIN) >= 0 && (int)(SAVE_INTERRUPT_PIN) <= 254 && gpio == (uint8_t)(SAVE_INTERRUPT_PIN))
 #endif
     // KNX UART: used with KNX_HAS_TP only, set by knx config.h for these mask versions (USE_TP)
 #if defined(MASK_VERSION) && (MASK_VERSION == 0x07B0 || MASK_VERSION == 0x091A || MASK_VERSION == 0x2920)

@@ -407,6 +407,9 @@ function Resolve-Board($M, $BoardEntry) {
     [void]$sb.AppendLine("@@ `"RSV$i`" " + $M.Reserved[$i])
     [void]$sb.AppendLine("#endif")
   }
+  [void]$sb.AppendLine("#if " + $SERIAL_LED_INDEX)
+  [void]$sb.AppendLine("@@ `"SLEDIDX`" 1")
+  [void]$sb.AppendLine("#endif")
   $rsvCheck = ($M.Conflicts -and $M.Conflicts.Reserved)
   if ($rsvCheck) {
     $autoMacros = @($AUTO_RESERVED) + @($TP_RESERVED)
@@ -557,9 +560,13 @@ function Resolve-Board($M, $BoardEntry) {
     if ($n -gt $M.Values[$i].Max) { Stop-WithError (T "{0}: value {1} = {2} is above max=`"{3}`" of the manifest - raise max" $BoardEntry.Define ($M.Values[$i].Name) $n ($M.Values[$i].Max)) }
     $board.Values += $n
   }
-  # pins the platform already uses (KNX UART, prog button/LED, ...) are never offered
+  # pins the platform already uses (KNX UART, prog button/LED, ...) are never offered; the LED macros of the serial LED auto
+  # config are chain indices, no GPIOs
+  $ledIndex = $res.ContainsKey("SLEDIDX")
+  $isLedIndex = { param([string]$Mac) return ($ledIndex -and $LED_INDEX_MACROS -ccontains $Mac) }
   $reservedGpio = @{}
   for ($i = 0; $i -lt $M.Reserved.Count; $i++) {
+    if (& $isLedIndex $M.Reserved[$i]) { continue }
     if ($res.ContainsKey("RSV$i")) {
       $rg = ConvertFrom-CInteger $res["RSV$i"]
       if ($null -ne $rg -and $rg -ge 0) { $reservedGpio[$rg] = $M.Reserved[$i] }
@@ -570,16 +577,16 @@ function Resolve-Board($M, $BoardEntry) {
   $board.ReservedGpios = @(); $board.TpGpios = @(); $board.TpStates = @()
   if ($rsvCheck) {
     $nonInt = @()
-    for ($i = 0; $i -lt $M.Reserved.Count; $i++) { if ($res.ContainsKey("RSV$i") -and $null -eq (ConvertFrom-CInteger $res["RSV$i"]) -and -not (Test-CNegative $res["RSV$i"])) { $nonInt += $M.Reserved[$i] } }
+    for ($i = 0; $i -lt $M.Reserved.Count; $i++) { if (-not (& $isLedIndex $M.Reserved[$i]) -and $res.ContainsKey("RSV$i") -and $null -eq (ConvertFrom-CInteger $res["RSV$i"]) -and -not (Test-CNegative $res["RSV$i"])) { $nonInt += $M.Reserved[$i] } }
     # manifest pins; a KNX UART macro listed there follows the TP rule below like the automatic one
     $own = @()
     for ($i = 0; $i -lt $M.Reserved.Count; $i++) {
-      if ($TP_RESERVED -contains $M.Reserved[$i] -or -not $res.ContainsKey("RSV$i")) { continue }
+      if ($TP_RESERVED -contains $M.Reserved[$i] -or -not $res.ContainsKey("RSV$i") -or (& $isLedIndex $M.Reserved[$i])) { continue }
       $mg = ConvertFrom-CInteger $res["RSV$i"]
       if ($null -ne $mg -and $mg -ge 0 -and $mg -le 254) { $own += $mg }
     }
     for ($i = 0; $i -lt $autoMacros.Count; $i++) {
-      if (-not $res.ContainsKey("ARSV$i")) { continue }
+      if (-not $res.ContainsKey("ARSV$i") -or (& $isLedIndex $autoMacros[$i])) { continue }
       $ag = ConvertFrom-CInteger $res["ARSV$i"]
       if ($null -eq $ag) { if (-not (Test-CNegative $res["ARSV$i"])) { $nonInt += $autoMacros[$i] }; continue }
       if ($ag -lt 0 -or $ag -gt 254) { continue }

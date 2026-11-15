@@ -683,8 +683,10 @@ Streifen auf dem KNX-TX-Pin ab. Reserviert sind:
 | Pins | Quelle | Bedingung |
 |---|---|---|
 | `PROG_BUTTON_PIN`, `FUNC1_BUTTON_PIN` .. `FUNC3_BUTTON_PIN` | OGM-Common `Hardware.cpp` (Interrupt), `Common.cpp`, `TimerInterrupt.cpp` | automatisch, wenn das Makro im Board-Header steht |
-| `PROG_LED_PIN`, `INFO_LED_PIN`, `INFO1_LED_PIN` .. `INFO3_LED_PIN`, `OPENKNX_SERIALLED_PIN` | OGM-Common `Led/Manager.cpp` | automatisch |
+| `PROG_LED_PIN`, `INFO_LED_PIN`, `INFO1_LED_PIN` .. `INFO3_LED_PIN` | OGM-Common `Led/Manager.cpp` | automatisch, außer bei der seriellen LED-Autokonfiguration (`OPENKNX_SERIALLED_ENABLE` ohne `LED_INIT` und ohne `OPENKNX_LED_NO_AUTOCONF`): dort sind die Werte Indizes in der LED-Kette, keine GPIOs; das gilt auch, wenn `<ReservedPins>` sie nennt |
+| `OPENKNX_SERIALLED_PIN` | OGM-Common `Led/Manager.cpp` | automatisch |
 | `SAVE_INTERRUPT_PIN` | OGM-Common `Common.cpp` | automatisch |
+| `SAVE_POWER_PIN` (Hilfsspannung beim Speichern abschalten) | OGM-Common `Common.cpp` | automatisch |
 | `KNX_UART_RX_PIN`, `KNX_UART_TX_PIN` | OGM-Common `Hardware.cpp` unter `KNX_HAS_TP` | automatisch, nur in einem TP-Build: `MASK_VERSION` 0x07B0, 0x091A oder 0x2920 (knx `config.h` setzt dort `USE_TP`) |
 | Flash-/PSRAM-Bus des ESP32 | ESP-IDF `soc/spi_pins.h` (`MSPI_IOMUX_PIN_NUM_*`), `sdkconfig.h` | automatisch, siehe unten |
 | `<ReservedPins macros>` des Manifests | Board-Header | was die Applikation darüber hinaus nicht ansteuert (z. B. Ethernet-PHY, Status-LED) |

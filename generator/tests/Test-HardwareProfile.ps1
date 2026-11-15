@@ -189,6 +189,30 @@ function Find-CppCompiler {
   return $null
 }
 
+# @brief A C++ compiler whose standard library has <cstdint> (the generated firmware header includes it): g++ / clang++ in
+#        PATH, else a PlatformIO toolchain; $null when none compiles the probe
+function Find-CppCompilerStd {
+  if ($script:CxxStdChecked) { return $script:CxxStd }
+  $script:CxxStdChecked = $true; $script:CxxStd = $null
+  $cands = @(@("g++", "clang++") | ForEach-Object { Get-Command $_ -ErrorAction SilentlyContinue } | Where-Object { $_ } | ForEach-Object { $_.Source })
+  $home2 = $env:PLATFORMIO_CORE_DIR; if (-not $home2) { $home2 = [System.IO.Path]::Combine([Environment]::GetFolderPath("UserProfile"), ".platformio") }
+  $pkg = [System.IO.Path]::Combine($home2, "packages")
+  if (Test-Path -LiteralPath $pkg) {
+    $cands += @(Get-ChildItem -LiteralPath $pkg -Recurse -File -Filter "*-g++*" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '-g\+\+(\.exe)?$' } | ForEach-Object { $_.FullName })
+  }
+  $probe = [System.IO.Path]::Combine($Work, "cxxstd-probe.cpp")
+  Write-Text $probe "#include <cstdint>`nstatic_assert(sizeof(uint8_t) == 1, `"probe`");`n"
+  $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
+  try {
+    foreach ($c in $cands) {
+      & $c -std=gnu++17 -fsyntax-only $probe 2>&1 | Out-Null
+      if ($LASTEXITCODE -eq 0) { $script:CxxStd = $c; break }
+    }
+  }
+  finally { $ErrorActionPreference = $prev }
+  return $script:CxxStd
+}
+
 # @brief Directory link without admin rights: junction on Windows, symbolic link elsewhere
 function New-DirLink([string]$Path, [string]$Target) {
   if ([System.IO.Path]::DirectorySeparatorChar -eq '\') { New-Item -ItemType Junction -Path $Path -Value $Target | Out-Null }
@@ -399,6 +423,69 @@ Add-Test "fixes-macro" (T "Fixes: value from a board macro, board without the ma
   $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
 }
 
+# @brief <Conflicts reserved="true"> test project: three boards of a test header (0x3F70 = 16240 serial LED auto config: PROG/INFO
+#        are chain indices; 0x3F71 = 16241 serial LED with LED_INIT: PROG/INFO stay GPIOs; 0x3F72 = 16242 GPIO LEDs, INFO1 on an
+#        IO expander pin), the LED macros also in <ReservedPins>
+function Copy-BaseWithLedBoards([string]$Name) {
+  $d = Copy-Base $Name
+  $real = [System.IO.Path]::Combine($RepoDir, "include", "HardwareConfig.h") -replace '\\', '/'
+  $board = { param($def, $id, $lines) @(('#ifdef ' + $def), ('#define DEVICE_HW_ID ' + $id), ('#define DEVICE_ID "' + $def + '"'), ('#define DEVICE_NAME "' + $def + '"')) + $lines + @('#endif') }
+  Write-Text ([System.IO.Path]::Combine($d, "include", "HardwareConfig.h")) ((@('#pragma once', ('#include "' + $real + '"')) +
+    (& $board 'TST_SLED_AUTO' '0x3F70' @('#define OPENKNX_SERIALLED_ENABLE', '#define OPENKNX_SERIALLED_PIN 16', '#define PROG_LED_PIN 0', '#define INFO1_LED_PIN 1', '#define INFO3_LED_PIN 3')) +
+    (& $board 'TST_SLED_INIT' '0x3F71' @('#define OPENKNX_SERIALLED_ENABLE', '#define OPENKNX_SERIALLED_PIN 17', '#define LED_INIT() do { } while (0)', '#define PROG_LED_PIN 5', '#define INFO1_LED_PIN 6')) +
+    (& $board 'TST_GPIO_LED' '0x3F72' @('#define PROG_LED_PIN 7', '#define INFO1_LED_PIN 0x101', '#define INFO2_LED_PIN 2', '#define SAVE_POWER_PIN 9'))) -join "`n")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' (@(
+    '  <IncludePath>include</IncludePath>'
+    '  <Board define="TST_SLED_AUTO" />'
+    '  <Board define="TST_SLED_INIT" />'
+    '  <Board define="TST_GPIO_LED" />'
+    '  <ReservedPins macros="PROG_LED_PIN INFO1_LED_PIN" />'
+    '  <Conflicts output="src/T.conflicts.gen.xml" number="900" reserved="true">'
+    '    <Use name="A" value="gpio" port="%AID%_P-%TT%00050_R-%TT%0005001" />'
+    '    <Use name="B" value="gpio" port="%AID%_P-%TT%00051_R-%TT%0005101" />'
+    '  </Conflicts>'
+    '</HardwareProfile>') -join "`n")
+  return $d
+}
+
+Add-Test "reserved-serialled" (T "Reserved: serial LED indices are no GPIOs, LED_INIT and expander pins as before") {
+  $d = Copy-BaseWithLedBoards "reserved-serialled"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $js = Read-Text ([System.IO.Path]::Combine($d, "src", "T.script.js"))
+  $rsv = { param($id) $mt = [regex]::Match($js, '(?m)^\s*' + $id + ': \{[^}]*rsv: \[([^\]]*)\]'); if (-not $mt.Success) { throw (T "board {0} not in the script" $id) }; $mt.Groups[1].Value }
+  Assert-True ((& $rsv 16240) -eq "16") (T "board {0}: rsv [{1}], expected [{2}]" 16240 (& $rsv 16240) "16")
+  Assert-True ((& $rsv 16241) -eq "5, 6, 17") (T "board {0}: rsv [{1}], expected [{2}]" 16241 (& $rsv 16241) "5, 6, 17")
+  Assert-True ((& $rsv 16242) -eq "2, 7, 9") (T "board {0}: rsv [{1}], expected [{2}]" 16242 (& $rsv 16242) "2, 7, 9")
+  $h = Read-Text ([System.IO.Path]::Combine($d, "include", "T.h"))
+  Assert-True ($h -match '#if !\(defined\(OPENKNX_SERIALLED_ENABLE\) && !defined\(LED_INIT\) && !defined\(OPENKNX_LED_NO_AUTOCONF\)\)\s*#ifdef PROG_LED_PIN') (T "firmware header: LED pins without the serial LED guard")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+}
+
+Add-Test "reserved-serialled-header" (T "Reserved: isReservedGpio of the firmware header per board (compiled)") {
+  $cxx = Find-CppCompilerStd
+  $d = Copy-BaseWithLedBoards "reserved-serialled-header"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $src = [System.IO.Path]::Combine($d, "t.cpp")
+  Write-Text $src (@(
+    '#include "T.h"'
+    'using HardwareProfile::isReservedGpio;'
+    '#if defined(TST_SLED_AUTO)'
+    'static_assert(!isReservedGpio(0) && !isReservedGpio(1) && !isReservedGpio(3) && isReservedGpio(16), "auto");'
+    '#elif defined(TST_SLED_INIT)'
+    'static_assert(isReservedGpio(5) && isReservedGpio(6) && isReservedGpio(17), "init");'
+    '#else'
+    'static_assert(isReservedGpio(7) && isReservedGpio(2) && isReservedGpio(9) && !isReservedGpio(1), "gpio");'
+    '#endif') -join "`n")
+  $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
+  try {
+    foreach ($def in @("TST_SLED_AUTO", "TST_SLED_INIT", "TST_GPIO_LED")) {
+      $o = (& $cxx -std=gnu++17 -fsyntax-only ("-D" + $def) ("-I" + [System.IO.Path]::Combine($d, "include")) ("-I" + [System.IO.Path]::Combine($RepoDir, "include")) $src 2>&1 | Out-String)
+      if ($LASTEXITCODE -ne 0) { throw (T "{0}: compile failed`n{1}" $def (Get-Tail $o)) }
+    }
+  }
+  finally { $ErrorActionPreference = $prev }
+} "cxxstd"
+
 Add-Test "init-second" (T "-Init: a second hardware module is refused") {
   $d = [System.IO.Path]::Combine($Work, "init-second")
   [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::Combine($d, "src"))
@@ -537,6 +624,7 @@ function Test-Need([string]$Need) {
   switch ($Need) {
     "" { return $null }
     "cxx" { if (Find-CppCompiler) { return $null } return (T "no g++ / clang++ found") }
+    "cxxstd" { if (Find-CppCompilerStd) { return $null } return (T "no C++ compiler with <cstdint> found") }
     "pio" {
       $demoLib = [System.IO.Path]::Combine($RepoDir, "examples", "HardwareProfileDemo", "lib", "OGM-Common")
       if (-not (Test-Path -LiteralPath $demoLib)) { return (T "the lib/ links of the demo are missing (examples/HardwareProfileDemo/README.md)") }

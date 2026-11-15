@@ -216,7 +216,11 @@ function New-ReservedGpioHeader($M) {
   [void]$sb.AppendLine("    // (void)gpio: a board without any of the pins leaves the parameter unused")
   [void]$sb.AppendLine("    return (void)gpio, false")
   [void]$sb.AppendLine("    // pins OGM-Common drives itself (Hardware.cpp, Common.cpp, Led/Manager.cpp, TimerInterrupt.cpp)")
-  foreach ($mac in $AUTO_RESERVED) { [void]$sb.Append((& $term $mac)) }
+  foreach ($mac in @($AUTO_RESERVED | Where-Object { $LED_INDEX_MACROS -cnotcontains $_ })) { [void]$sb.Append((& $term $mac)) }
+  [void]$sb.AppendLine("    // LED pins; the serial LED auto config (Led/Manager.cpp) reads them as indices in the chain")
+  [void]$sb.AppendLine("#if !(" + $SERIAL_LED_INDEX + ")")
+  foreach ($mac in @($AUTO_RESERVED | Where-Object { $LED_INDEX_MACROS -ccontains $_ })) { [void]$sb.Append((& $term $mac)) }
+  [void]$sb.AppendLine("#endif")
   [void]$sb.AppendLine("    // KNX UART: used with KNX_HAS_TP only, set by knx config.h for these mask versions (USE_TP)")
   [void]$sb.AppendLine("#if defined(MASK_VERSION) && (MASK_VERSION == 0x07B0 || MASK_VERSION == 0x091A || MASK_VERSION == 0x2920)")
   foreach ($mac in $TP_RESERVED) { [void]$sb.Append((& $term $mac)) }

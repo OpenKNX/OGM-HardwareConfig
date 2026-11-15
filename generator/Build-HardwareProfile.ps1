@@ -143,7 +143,12 @@ $PART_ROW_LABEL_MAX = 20        # <PartRows><Row label>: characters of the label
 # <Conflicts reserved="true">: GPIOs every board reserves without a manifest entry, in ETS and in HardwareProfile::isReservedGpio.
 # Pins OGM-Common drives itself when the macro is defined (Hardware.cpp, Common.cpp, Led/Manager.cpp, TimerInterrupt.cpp):
 $AUTO_RESERVED = @("PROG_BUTTON_PIN", "PROG_LED_PIN", "INFO_LED_PIN", "INFO1_LED_PIN", "INFO2_LED_PIN", "INFO3_LED_PIN",
-                   "OPENKNX_SERIALLED_PIN", "FUNC1_BUTTON_PIN", "FUNC2_BUTTON_PIN", "FUNC3_BUTTON_PIN", "SAVE_INTERRUPT_PIN")
+                   "OPENKNX_SERIALLED_PIN", "FUNC1_BUTTON_PIN", "FUNC2_BUTTON_PIN", "FUNC3_BUTTON_PIN", "SAVE_INTERRUPT_PIN",
+                   "SAVE_POWER_PIN")
+# LED macros that the serial LED auto config of Led/Manager.cpp reads as an index in the chain, not as a GPIO: never reserved
+# while $SERIAL_LED_INDEX holds (also when the manifest lists them); with LED_INIT the board creates its LEDs itself
+$LED_INDEX_MACROS = @("PROG_LED_PIN", "INFO_LED_PIN", "INFO1_LED_PIN", "INFO2_LED_PIN", "INFO3_LED_PIN")
+$SERIAL_LED_INDEX = "defined(OPENKNX_SERIALLED_ENABLE) && !defined(LED_INIT) && !defined(OPENKNX_LED_NO_AUTOCONF)"
 # the KNX UART only in a TP build: OGM-Common Hardware.cpp uses it under KNX_HAS_TP, knx config.h sets USE_TP for these masks
 $TP_RESERVED = @("KNX_UART_RX_PIN", "KNX_UART_TX_PIN")
 $TP_MASKS = @(0x07B0, 0x091A, 0x2920)
