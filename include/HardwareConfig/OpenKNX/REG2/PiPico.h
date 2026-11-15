@@ -110,6 +110,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1100
     #define DEVICE_ID PREFIX_ID
     #define DEVICE_NAME PREFIX_NAME
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico (RP2040), KNX über TP, Klemmleiste mit 7 GPIOs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1   // LED1
@@ -122,6 +123,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1120
     #define DEVICE_ID PREFIX_ID
     #define DEVICE_NAME PREFIX_NAME
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 (RP2350), KNX über TP, Klemmleiste mit 7 GPIOs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1   // LED1
@@ -134,6 +136,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1101
     #define DEVICE_ID PREFIX_ID "-DD"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay" // 24 + 16 = 40 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico (RP2040), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
@@ -147,6 +150,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1121
     #define DEVICE_ID PREFIX_ID "-DD"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay" // 24 + 16 = 40 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 (RP2350), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
@@ -160,6 +164,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1102
     #define DEVICE_ID PREFIX_ID "-DD-RTC"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay RTC" // 24 + 16 = 40 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico (RP2040), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231)."
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
@@ -174,6 +179,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1122
     #define DEVICE_ID PREFIX_ID "-DD-RTC"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay RTC" // 24 + 16 = 40 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 (RP2350), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231)."
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
@@ -188,6 +194,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1103
     #define DEVICE_ID PREFIX_ID "-DD-Meter"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay Meter" // 24 + 16 = 40 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico (RP2040), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231), zwei Zähler-Sensoranschlüsse (Rx/Tx) an der Klemmleiste."
     #define OKNXHW_REG2_PIPICO_V1_COMMON                   // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                     // LED1
@@ -203,6 +210,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1123
     #define DEVICE_ID PREFIX_ID "-DD-Meter"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay Meter" // 24 + 16 = 40 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 (RP2350), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231), zwei Zähler-Sensoranschlüsse (Rx/Tx) an der Klemmleiste."
     #define OKNXHW_REG2_PIPICO_V1_COMMON                   // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                     // LED1
@@ -218,6 +226,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1104
     #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
     #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico (RP2040), KNX über TP, Klemmleiste mit 7 GPIOs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1
@@ -232,6 +241,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1124
     #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
     #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 (RP2350), KNX über TP, Klemmleiste mit 7 GPIOs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1
@@ -246,6 +256,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1105
     #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
     #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico (RP2040), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -260,6 +271,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1125
     #define DEVICE_ID PREFIX_ID "-ETH"          // 12 + 4 = 16 characters
     #define DEVICE_NAME PREFIX_NAME " Ethernet" // 24 + 9 = 33 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 (RP2350), KNX über TP, Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
@@ -279,6 +291,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1110
     #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico W (RP2040), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -291,6 +304,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1130
     #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -303,6 +317,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1111
     #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico W (RP2040), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -316,6 +331,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1131
     #define DEVICE_ID PREFIX_ID "-W"        // 12 + 2 = 14 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi" // 24 + 5 = 29 characters --> + 14 = 43 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -329,6 +345,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1112
     #define DEVICE_ID PREFIX_ID "-W-DD-RTC"             // 12 + 10 = 22 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display RTC" // 24 + 14 = 38 characters --> + 22 = 60 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico W (RP2040), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231)."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -343,6 +360,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1132
     #define DEVICE_ID PREFIX_ID "-W-DD-RTC"             // 12 + 10 = 22 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display RTC" // 24 + 14 = 38 characters --> + 22 = 60 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231)."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -357,6 +375,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1113
     #define DEVICE_ID PREFIX_ID "-W-DD-Meter"             // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico W (RP2040), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, zwei Zähler-Sensoranschlüsse (Rx/Tx) an der Klemmleiste."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -371,6 +390,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1133
     #define DEVICE_ID PREFIX_ID "-W-DD-Meter"             // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Display Meter" // 24 + 20 = 44 characters --> + 20 = 64 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, zwei Zähler-Sensoranschlüsse (Rx/Tx) an der Klemmleiste."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -385,6 +405,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1114
     #define DEVICE_ID PREFIX_ID "-W-ETH"             // 12 + 6 = 18 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico W (RP2040), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -398,6 +419,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1134
     #define DEVICE_ID PREFIX_ID "-W-ETH"             // 12 + 6 = 18 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet" // 24 + 9 = 33 characters --> + 18 = 51 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -411,6 +433,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1115
     #define DEVICE_ID PREFIX_ID "-W-ETH-DD"           // 12 + 12 = 24 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico W (RP2040), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
@@ -425,6 +448,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define DEVICE_HW_ID 0x1135
     #define DEVICE_ID PREFIX_ID "-W-ETH-DD"           // 12 + 12 = 24 characters
     #define DEVICE_NAME PREFIX_NAME " WiFi Ethernet Display" // 24 + 20 = 44 characters --> + 24 = 68 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Ethernet-App-Board (SPI) mit SD-Kartenslot."
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED

@@ -22,6 +22,7 @@
         #define DEVICE_HW_ID 0x1000
         #define DEVICE_ID "REG1-Eth-V0"
         #define DEVICE_NAME "OpenKNX REG1 LAN Gateway V0"
+        #define HW_INFO_TEXT "Frühe Version des REG1 LAN Gateway (Controller2040 V00.01–V00.89): KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit Erweiterung REG1-App-Eth (Ethernet über SPI)."
 
         #define OKNXHW_REG1_CONTROLLER2040
 
@@ -34,6 +35,8 @@
         #define DEVICE_HW_ID 0x1001
         #define DEVICE_ID "REG1-Eth"
         #define DEVICE_NAME "OpenKNX REG1 LAN Gateway" 
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit Erweiterung REG1-App-Eth (10/100Base-T Ethernet), komplett busversorgt, für die Verbindung von KNX und IP."
+        #define HW_INFO_URL "https://device.openknx.de/REG1-Eth"
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -55,6 +58,7 @@
         #define DEVICE_HW_ID 0x1002
         #define DEVICE_ID "REG1-Base-V0"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul V0"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene (Controller2040 V00.01–V00.89) für Anwendungen mit wenig IO: ein 4-poliger Sensoranschluss (UART/I2C, 3,3 V) auf steckbarer 3,5-mm-Schraubklemme."
         #define OKNXHW_REG1_CONTROLLER2040
 
         #define OKNXHW_REG1_SENSOR_SDA_TX_PIN (8) // RP2040 GPIO 8 / SPI1 RX / UART1 TX / I2C0 SDA / PWM4 A
@@ -65,6 +69,7 @@
         #define DEVICE_HW_ID 0x1003
         #define DEVICE_ID "REG1-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene für Anwendungen ohne oder mit wenig IO: ein 4-poliger Sensoranschluss (UART/I2C, 3,3 V) auf steckbarer 3,5-mm-Schraubklemme."
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -83,6 +88,7 @@
         #define DEVICE_HW_ID 0x1010
         #define DEVICE_ID "REG1-Base-IP"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul IP"
+        #define HW_INFO_TEXT "KNX-IP-Reiheneinbaugerät für die 35-mm-Hutschiene (IpController2040, Ethernet über SPI) für Anwendungen mit hohem Datenaufkommen und ohne IO, auch außerhalb von KNX einsetzbar."
 
         #define OKNXHW_REG1_IPCONTROLLER2040
 
@@ -96,6 +102,7 @@
         #define DEVICE_HW_ID 0x1004
         #define DEVICE_ID "REG1-SEN-Multi"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit Multisensor-Erweiterung: 3 Sensoranschlüsse UART/I2C mit 3,3 V (1× Schraubklemme, 2× RJ10/RJ22), 3 galvanisch getrennte Binäreingänge für potentialfreie Kontakte (S0, Taster, Magnetkontakte)."
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -114,6 +121,7 @@
         #define DEVICE_HW_ID 0x1005
         #define DEVICE_ID "REG1-SA-4xSELV"
         #define DEVICE_NAME "OpenKNX REG1 Schaltaktor 4xSELV"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene: 4 bistabile Wechsler-Relais (NC, NO, COM) für SELV-Stromkreise (2 A bis 30 V DC, 1 A bis 50 V AC) und ein 4-poliger Sensoranschluss (UART/I2C, 3,3 V), auf steckbaren 3,5-mm-Schraubklemmen."
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -132,6 +140,7 @@
         #define DEVICE_HW_ID 0x1006
         #define DEVICE_ID "REG1-Dali"
         #define DEVICE_NAME "OpenKNX REG1 Dali Gateway"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit Erweiterung REG1-App-Dali für den Einsatz als KNX/DALI-Gateway."
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -145,6 +154,7 @@
         #define DEVICE_HW_ID 0x1007
         #define DEVICE_ID "REG1-GW-RS485"
         #define DEVICE_NAME "OpenKNX REG1 RS485 Gateway"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene: RS485-/Modbus-RTU-Gateway, RS485 galvanisch von KNX getrennt und busversorgt, 4 isolierte Binäreingänge für potentialfreie Kontakte (z. B. S0), I2C/UART-Sensoranschluss (u. a. SML)."
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -159,6 +169,7 @@
         #define DEVICE_HW_ID 0x1020
         #define DEVICE_ID "REG1-LAN-TP-Dali"
         #define DEVICE_NAME "OpenKNX REG1 Dali Gateway LAN"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), komplett busversorgt, mit DALI-Erweiterung REG1-App-2xDali (zwei DALI-Anschlüsse) für den Einsatz als KNX/DALI-Gateway."
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
@@ -174,6 +185,7 @@
         #define DEVICE_HW_ID 0x1021
         #define DEVICE_ID "REG1-LAN-TP-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), komplett busversorgt, für die Verbindung von KNX und IP."
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
@@ -191,6 +203,7 @@
         #define DEVICE_HW_ID 0x1022
         #define DEVICE_ID "REG1-LAN-Base"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN"
+        #define HW_INFO_TEXT "KNX-IP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), für die Verbindung von KNX und IP."
 
         #define OKNXHW_REG1_CONTROLLERESP_DCU
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
@@ -209,6 +222,7 @@
         #define DEVICE_HW_ID 0x1023
         #define DEVICE_ID "REG1-LAN-SEN-Multi"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor LAN"
+        #define HW_INFO_TEXT "KNX-IP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32) und Multisensor-Erweiterung: 2 Sensoranschlüsse UART/I2C mit 3,3 V (RJ10/RJ22), 3 galvanisch getrennte Binäreingänge (S0, Taster, Magnetkontakte)."
 
         #define OKNXHW_REG1_CONTROLLERESP_DCU
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
@@ -228,6 +242,7 @@
         #define DEVICE_HW_ID 0x1008
         #define DEVICE_ID "REG1-GW-RF868M"
         #define DEVICE_NAME "OpenKNX REG1 868MHz-Gateway"
+        #define HW_INFO_TEXT "KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 868-MHz-Funkschnittstelle: Wireless-M-Bus-Gateway für Wasser- und Wärmemengenzähler, dazu zwei SML-Schnittstellen für Stromzähler des Netzbetreibers."
 
         #define OKNXHW_REG1_CONTROLLER2040_V1
 
@@ -249,6 +264,7 @@
         #define DEVICE_HW_ID 0x10F0
         #define DEVICE_ID "REG1-DEV-LAN-TP-Base-V00-02"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP Devboard V00.02"
+        #define HW_INFO_TEXT "Entwicklungsplatine V00.02 des REG1 Basismodul LAN+TP: ControllerESP V00.02 (ESP32) mit Ethernet-PHY LAN8720 (RMII) und KNX-TP, Front-Platine RGB."
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_02
 
@@ -259,6 +275,7 @@
         #define DEVICE_HW_ID 0x10F1
         #define DEVICE_ID "REG1-DEV-LAN-TP-Base-V00-11"
         #define DEVICE_NAME "OpenKNX REG1 Basismodul LAN+TP Devboard V00.11"
+        #define HW_INFO_TEXT "Entwicklungsplatine V00.11 des REG1 Basismodul LAN+TP: ControllerESP V00.11 (ESP32) mit Ethernet (RMII) und KNX-TP, Front-Platine RGB."
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
@@ -269,6 +286,7 @@
         #define DEVICE_HW_ID 0x10F2
         #define DEVICE_ID "REG1-DEV-LAN-SEN-Multi-V00-11"
         #define DEVICE_NAME "OpenKNX REG1 Multisensor LAN Devboard V00.11"
+        #define HW_INFO_TEXT "Entwicklungsplatine V00.11 des REG1 Multisensor LAN: ControllerESP V00.11 (ESP32) mit Ethernet (RMII) und KNX-TP, Front-Platine RGB, Multisensor-Erweiterung (2 Sensoranschlüsse UART/I2C, 3 Binäreingänge)."
 
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 

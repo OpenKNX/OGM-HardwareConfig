@@ -31,6 +31,7 @@
     #define DEVICE_HW_ID 0x1140
     #define DEVICE_ID PREFIX_ID ""
     #define DEVICE_NAME PREFIX_NAME ""                 // 24 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit ESP32-S3-Pico, KNX über TP, Klemmleiste mit 7 GPIOs, RGB-LED (WS2812), Ethernet-App-Board mit W5500 (SPI); noch nicht auf Hardware getestet."
     #define OKNXHW_REG2_ESPS3PICO_V1_COMMON          // Common pins for all REG2-ESP-S3-Pico V1
     #define OKNXHW_REG2_ESPS3PICO_V1_SAVE_INTERRUPT
     // #define OKNHW_HAS_SERIALLED_COLOR
@@ -47,6 +48,7 @@
     #define DEVICE_HW_ID 0x1141
     #define DEVICE_ID PREFIX_ID "-DD"                // 12 + 8 = 20 characters
     #define DEVICE_NAME PREFIX_NAME " DeviceDisplay" // 24 + 16 = 40 characters
+    #define HW_INFO_TEXT "OpenKNX REG2 mit ESP32-S3-Pico, KNX über TP, Klemmleiste mit 7 GPIOs, RGB-LED (WS2812), Ethernet-App-Board mit W5500 (SPI), Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs; noch nicht auf Hardware getestet."
     #define OKNXHW_REG2_ESPS3PICO_V1_COMMON          // Common pins for all REG2-ESP-S3-Pico V1
     #define OKNXHW_REG2_ESPS3PICO_V1_SAVE_INTERRUPT
     #define OKNHW_HAS_SERIALLED_COLOR

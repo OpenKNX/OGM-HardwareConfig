@@ -287,19 +287,19 @@
               <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
                 <when test="4129">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG1 Basismodul LAN+TP" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), komplett busversorgt, für die Verbindung von KNX und IP." />
                 </when>
                 <when test="4130">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG1 Basismodul LAN" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-IP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), für die Verbindung von KNX und IP." />
                 </when>
                 <when test="4402">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG2 PiPico2 V1 WiFi Display RTC" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231)." />
                 </when>
                 <when test="4611">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX UP1 Taster" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf diese Hardware abgestimmt." />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-TP-Gerät für 60-mm-UP-Dosen und 55-mm-Programme mit Tastwippen: 4 Taster, 2 RGB-Status-LEDs, erweiterbar um ein zweites 55-mm-Feld (insgesamt 8 Taster, 4 LEDs); 2 Binäreingänge, I2C-Anschluss für Temperatur-/Feuchtesensor." />
                 </when>
                 <when test="4880">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNXiao V1 KNeoPix RP2350" UIHint="Headline" />

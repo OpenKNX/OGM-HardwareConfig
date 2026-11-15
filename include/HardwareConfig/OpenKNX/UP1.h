@@ -22,6 +22,7 @@
     #define DEVICE_HW_ID 0x1200
     #define DEVICE_ID "SEN-UP1-8xTH"
     #define DEVICE_NAME "OpenKNX UP1 8xSensor"
+    #define HW_INFO_TEXT "KNX-TP-Unterputz-Sensormodul (Kennung SEN-UP1-8xTH) mit 8 herausgeführten I2C-Kanälen."
 
     #define OKNXHW_UP1_CONTROLLER2040
 
@@ -48,6 +49,7 @@
     #define DEVICE_HW_ID 0x1201
     #define DEVICE_ID "UP1-SEN-8x"
     #define DEVICE_NAME "OpenKNX UP1 8xSensor"
+    #define HW_INFO_TEXT "KNX-TP-Unterputz-Sensormodul mit 8 herausgeführten I2C-Kanälen, 3,3 V und GND; an den Klemmen liegen 16 ESD-geschützte GPIOs mit optionalen Pull-ups."
 
     #define OKNXHW_UP1_CONTROLLER2040
 
@@ -76,6 +78,7 @@
     #define DEVICE_HW_ID 0x1202
     #define DEVICE_ID "UP1-PM-HF"
     #define DEVICE_NAME "OpenKNX UP1 Präsenzmelder+"
+    #define HW_INFO_TEXT "KNX-TP-Unterputz-Präsenzmelder für 60-mm-UP-Dosen und 55-mm-Programme. Front: Radarsensor HLK-LD2420, Lichtsensor VEML7700, Entfernungsmesser TOF400, Touch-Taste, RGB-Status-LED. Rückseite: 4 Binäreingänge, Anschluss für Temperatur-/Feuchtesensor."
 
     #define OKNXHW_UP1_CONTROLLER2040
 
@@ -126,6 +129,7 @@
     #define DEVICE_HW_ID 0x1203
     #define DEVICE_ID "UP1-TAS-4x"
     #define DEVICE_NAME "OpenKNX UP1 Taster"
+    #define HW_INFO_TEXT "KNX-TP-Gerät für 60-mm-UP-Dosen und 55-mm-Programme mit Tastwippen: 4 Taster, 2 RGB-Status-LEDs, erweiterbar um ein zweites 55-mm-Feld (insgesamt 8 Taster, 4 LEDs); 2 Binäreingänge, I2C-Anschluss für Temperatur-/Feuchtesensor."
 
     #define PROG_LED_PIN (5)
     #define PROG_LED_PIN_ACTIVE_ON HIGH
@@ -205,6 +209,7 @@
     #define DEVICE_HW_ID 0x1221
     #define DEVICE_ID "UP1-GW-RS485"
     #define DEVICE_NAME "OpenKNX UP1 RS485 Gateway"
+    #define HW_INFO_TEXT "KNX-TP-Unterputzgerät: RS485-/Modbus-RTU-Gateway, RS485 galvanisch von KNX getrennt und busversorgt, ein isolierter Binäreingang für potentialfreie Kontakte, I2C-Anschluss für einen Temperatur-/Feuchtesensor."
 
     #define OKNXHW_UP1_CONTROLLER2040
 
@@ -227,6 +232,7 @@
     #define DEVICE_HW_ID 0x1222
     #define DEVICE_ID "UP1-GW-2xUART"
     #define DEVICE_NAME "OpenKNX UP1 UART Gateway"
+    #define HW_INFO_TEXT "KNX-TP-Unterputzgerät (UP1-Controller2040) mit zwei UART-Schnittstellen (je RX/TX) und I2C-Anschluss."
 
     #define OKNXHW_UP1_CONTROLLER2040
 
@@ -245,6 +251,7 @@
     #define DEVICE_HW_ID  0x1220 // Used for demo/testing purposes only
     #define DEVICE_ID "UP1-GW-UART"
     #define DEVICE_NAME "OpenKNX UP1 UART Gateway"
+    #define HW_INFO_TEXT "KNX-TP-Unterputzgerät mit isolierter Universal-Schnittstelle (1 Eingang, 2 Ausgänge), z. B. für TTL-UART oder adressierbare LED-Streifen, dazu I2C-Anschluss für einen Temperatur-/Feuchtesensor."
     #define HW_INFO_URL "https://go.openknx.de/up1-gw-uart" // short link to the UP1 UART Gateway wiki page
 
     #define OKNXHW_UP1_CONTROLLER2040
@@ -266,6 +273,7 @@
     #define DEVICE_HW_ID 0x1223
     #define DEVICE_ID "UP1-WLAN-2xUART"
     #define DEVICE_NAME "OpenKNX UP1 WLAN UART Gateway"
+    #define HW_INFO_TEXT "UP1-Gerät mit XIAO ESP32-S3 (WLAN): zwei UART-Schnittstellen (je RX/TX) und I2C-Anschluss; in der Variante mit BCU zusätzlich KNX über TP."
 
     #ifdef DEVICE_UP1_WLAN_2XUART_ONBOARD
         #define PROG_LED_PIN LED_BUILTIN
@@ -307,6 +315,7 @@
     #define DEVICE_HW_ID 0x1224
     #define DEVICE_ID "UP1-GW-IR"
     #define DEVICE_NAME "OpenKNX UP1 Infrared Gateway"
+    #define HW_INFO_TEXT "Infrarot-Gateway auf Basis des OpenKNX UP1 (KNX-TP): sendet und empfängt IR-Signale."
 
     #define OKNXHW_UP1_CONTROLLER2040
 

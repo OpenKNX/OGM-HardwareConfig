@@ -21,6 +21,7 @@
         #define DEVICE_HW_ID 0x1F00
         #define DEVICE_ID "PiPico-BCU-Connector"
         #define DEVICE_NAME "OpenKNX PiPico BCU Connector"
+        #define HW_INFO_TEXT "Adapterplatine, die einen Raspberry Pi Pico (RP2040) mit einer NanoBCU oder MicroBCU verbindet: KNX-Anschluss (TP), Reset- und Prog-Taster, Prog-LED."
 
         #define PROG_LED_PIN 21
         #define PROG_LED_PIN_ACTIVE_ON HIGH
@@ -38,6 +39,7 @@
         #define DEVICE_HW_ID 0x1F01
         #define DEVICE_ID "PiPico2-BCU-Connector"
         #define DEVICE_NAME "OpenKNX PiPico2 BCU Connector"
+        #define HW_INFO_TEXT "Adapterplatine, die einen Raspberry Pi Pico 2 (RP2350) mit einer NanoBCU oder MicroBCU verbindet: KNX-Anschluss (TP), Reset- und Prog-Taster, Prog-LED."
 
         #define PROG_LED_PIN 21
         #define PROG_LED_PIN_ACTIVE_ON HIGH
