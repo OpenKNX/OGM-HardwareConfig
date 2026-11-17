@@ -35,36 +35,8 @@
 
 #pragma region "QuinLED Controllers"
 
-#if defined(DEVICE_QUINLED_DIG_UNO_V3) && !defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) && !defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET) && !defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS)
-    #if defined(KNX_IP_LAN)
-        #define DEVICE_QUINLED_DIG_UNO_V3_ETHERNET
-    #elif defined(QUINLED_ESP32_AE_PLUS) && QUINLED_ESP32_AE_PLUS
-        #define DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS
-    #else
-        #define DEVICE_QUINLED_DIG_UNO_V3_WIFI
-    #endif
-#endif
-
-#if defined(DEVICE_QUINLED_DIG_QUAD_V3) && !defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI) && !defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET) && !defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS)
-    #if defined(KNX_IP_LAN)
-        #define DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET
-    #elif defined(QUINLED_ESP32_AE_PLUS) && QUINLED_ESP32_AE_PLUS
-        #define DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS
-    #else
-        #define DEVICE_QUINLED_DIG_QUAD_V3_WIFI
-    #endif
-#endif
-
-#if defined(DEVICE_QUINLED_DIG_OCTA_32_8L) && !defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI) && !defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET)
-    #if defined(KNX_IP_WIFI)
-        #define DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI
-    #else
-        #define DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET
-    #endif
-#endif
-
 #if defined(DEVICE_QUINLED_DIG2GO) ||                     \
-    defined(DEVICE_QUINLED_DIG_NEXT2) ||                  \
+    defined(DEVICE_QUINLED_DIG_NEXT_2) ||                 \
     defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) ||            \
     defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET) ||        \
     defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS) ||    \
@@ -131,7 +103,7 @@
     #endif
 #endif
 
-#ifdef DEVICE_QUINLED_DIG_NEXT2
+#ifdef DEVICE_QUINLED_DIG_NEXT_2
     #define DEVICE_HW_ID 0x2140
     #define DEVICE_ID "QuinLED-Dig-Next-2"
     #define DEVICE_NAME "QuinLED Dig-Next 2" // Flash: 8 MB, PSRAM: 2MB
