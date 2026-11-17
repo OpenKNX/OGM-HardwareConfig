@@ -15,7 +15,8 @@
  */
 
 #pragma region "Gledopto Controllers"
-#ifdef DEVICE_GLEDOPTO_ESP32_WLED_DIGITAL_UP
+
+#ifdef DEVICE_GL_C_309WL
     // ============================================================================
     // Gledopto GL-C-309WL / GL-C-310WL - ESP32 WLED Digital Unterputz
     // ============================================================================
@@ -84,7 +85,7 @@
 
 #endif
 
-#ifdef DEVICE_GLEDOPTO_GL_C_017WL
+#ifdef DEVICE_GL_C_017WL
 // ============================================================================
 // Gledopto GL-C-017WL - ESP32 controller with 4 LED outputs and 2 relais
 // ============================================================================
@@ -148,7 +149,7 @@
 
 #endif
 
-#ifdef DEVICE_GLEDOPTO_GL_C_620WL
+#ifdef DEVICE_GL_C_620WL
 // ============================================================================
 // Gledopto GL-C-620WL - ESP32 LAN Controller
 // ============================================================================
