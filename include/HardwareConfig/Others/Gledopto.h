@@ -15,7 +15,8 @@
  */
 
 #pragma region "Gledopto Controllers"
-#ifdef DEVICE_GLEDOPTO_ESP32_WLED_DIGITAL_UP
+
+#ifdef DEVICE_GL_C_309WL
     // ============================================================================
     // Gledopto GL-C-309WL / GL-C-310WL - ESP32 WLED Digital Unterputz
     // ============================================================================
@@ -85,7 +86,7 @@
 
 #endif
 
-#ifdef DEVICE_GLEDOPTO_GL_C_017WL
+#ifdef DEVICE_GL_C_017WL
 // ============================================================================
 // Gledopto GL-C-017WL - ESP32 controller with 4 LED outputs and 2 relais
 // ============================================================================
@@ -151,7 +152,7 @@
 
 #endif
 
-#ifdef DEVICE_GLEDOPTO_GL_C_620WL
+#ifdef DEVICE_GL_C_620WL
 // ============================================================================
 // Gledopto GL-C-620WL - ESP32 LAN Controller
 // ============================================================================
@@ -259,7 +260,7 @@
  */
 #pragma region Port description
 
-#if defined(DEVICE_GLEDOPTO_ESP32_WLED_DIGITAL_UP)
+#if defined(DEVICE_GL_C_309WL)
     #define HW_PORT_COUNT 3
     #define HW_PORT_1_GPIO GLEDOPTO_LED_DATA1_GPIO
     #define HW_PORT_1_LABEL "IO16 (LED Primary)"
@@ -267,7 +268,7 @@
     #define HW_PORT_2_LABEL "IO2 (LED Secondary)"
     #define HW_PORT_3_GPIO GLEDOPTO_RELAIS1_GPIO
     #define HW_PORT_3_LABEL "IO12 (Relais)"
-#elif defined(DEVICE_GLEDOPTO_GL_C_017WL)
+#elif defined(DEVICE_GL_C_017WL)
     #define HW_PORT_COUNT 6
     #define HW_PORT_1_GPIO GLEDOPTO_LED_DATA1_GPIO
     #define HW_PORT_1_LABEL "IO16 (LED 1)"
@@ -281,7 +282,7 @@
     #define HW_PORT_5_LABEL "IO13 (Relais)"
     #define HW_PORT_6_GPIO GLEDOPTO_RELAIS2_GPIO
     #define HW_PORT_6_LABEL "IO18 (Onboard Relais)"
-#elif defined(DEVICE_GLEDOPTO_GL_C_620WL)
+#elif defined(DEVICE_GL_C_620WL)
     #define HW_PORT_COUNT 3
     #define HW_PORT_1_GPIO GLEDOPTO_LED_DATA1_GPIO
     #define HW_PORT_1_LABEL "IO16 (LED 1)"
@@ -301,11 +302,11 @@
 #pragma region Relay description
 
 // onboard relay on IO18 of GL-C-017WL and GL-C-620WL; IO13 of GL-C-017WL and IO12 of GL-C-309WL are free ports
-#if defined(DEVICE_GLEDOPTO_GL_C_017WL)
+#if defined(DEVICE_GL_C_017WL)
     #define HW_RELAY_COUNT 1
     #define HW_RELAY_1_GPIO GLEDOPTO_RELAIS2_GPIO
     #define HW_RELAY_1_LABEL "IO18 (Onboard Relais)"
-#elif defined(DEVICE_GLEDOPTO_GL_C_620WL)
+#elif defined(DEVICE_GL_C_620WL)
     #define HW_RELAY_COUNT 1
     #define HW_RELAY_1_GPIO GLEDOPTO_RELAIS1_GPIO
     #define HW_RELAY_1_LABEL "IO18 (Relais)"

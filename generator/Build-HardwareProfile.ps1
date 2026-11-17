@@ -1415,7 +1415,7 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
             $otherDefs = @($defs | Where-Object { $script:KnownBoards -notcontains $_ })
             $hit = @($words | Where-Object { $script:KnownBoards -contains $_ })
             if ($hit.Count -eq 0) {
-              # alias define (e.g. DEVICE_QUINLED_DIG_QUAD_V3): a board only when it resolves to a DEVICE_HW_ID
+              # alias define: a board only when it resolves to a DEVICE_HW_ID
               foreach ($cd in @($words | Where-Object { $_ -match '^(DEVICE|OKNXHW)_' })) {
                 try { if ($null -ne (Get-BoardIdentity $cd (@($cd) + $otherDefs)).HwId) { $hit += $cd } } catch { }
               }
@@ -1430,7 +1430,7 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
       }
     }
     # the board is the define of a header block with DEVICE_HW_ID (not a build flag like DEVICE_DISPLAY_MODULE);
-    # an alias define (e.g. DEVICE_QUINLED_DIG_QUAD_V3 + KNX_IP_LAN) is accepted when the env resolves to an ID
+    # an alias define is accepted when the env resolves to an ID
     if ($null -eq $script:KnownBoards) { $script:KnownBoards = @(Get-AllHardwareIdBoards) }
     $plain = @($defs | Where-Object { $_ -match '^[A-Za-z_][A-Za-z0-9_]*$' })
     $known = @($plain | Where-Object { $script:KnownBoards -contains $_ })
@@ -1450,7 +1450,7 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
     if ($known.Count -gt 1) { Stop-OnSkip ("env {0}: two boards ({1})" -f $envName, ($known -join ", ")); continue }
     $board = $known | Select-Object -First 1
     if (-not $board) {
-      # alias define (e.g. DEVICE_QUINLED_DIG_QUAD_V3 + KNX_IP_LAN): test each candidate on its own with the
+      # alias define: test each candidate on its own with the
       # env's other defines, so a build flag like DEVICE_DISPLAY_MODULE never becomes the board
       $cands = @($plain | Where-Object { $_ -match '^(DEVICE|OKNXHW)_' })
       $rest = @($defs | Where-Object { $cands -notcontains $_ })
@@ -3685,8 +3685,8 @@ try {
   # the "not selected" value is one more entry of the selection: it must not be a board's HW-ID
   $clash = @($boards | Where-Object { [int]$_.HwId -eq $m.UnselectedValue }) | Select-Object -First 1
   if ($clash) { Stop-WithError ("unselectedValue {0} is the DEVICE_HW_ID of {1}" -f $m.UnselectedValue, $clash.Define) }
-  # an explicit entry can resolve to the same HW-ID as a pattern board (alias define + flags, e.g.
-  # DEVICE_QUINLED_DIG_QUAD_V3 + -DKNX_IP_LAN = 0x2121): the explicit one wins, two explicit ones stop
+  # an explicit entry can resolve to the same HW-ID as a pattern board (alias define + flags):
+  # the explicit one wins, two explicit ones stop
   $dups = $boards | Group-Object { $_.HwId } | Where-Object { $_.Count -gt 1 }
   foreach ($d in $dups) {
     # priority: a <Board> line of the manifest > a PlatformIO env (already merged per HW-ID) > a pattern
