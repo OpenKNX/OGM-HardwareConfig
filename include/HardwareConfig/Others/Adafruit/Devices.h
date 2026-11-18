@@ -2,7 +2,7 @@
 /**
  * OpenKNX Hardware definition header file
  *
- * File: Adafruit.h
+ * File: Others/Adafruit/Devices.h
  * Hardware: Adafruit
  * Responsible: mgeramb
  *

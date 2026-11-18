@@ -2,7 +2,7 @@
 /**
  * OpenKNX Hardware definition header file
  *
- * File: Shelly.h
+ * File: Others/Shelly/Devices.h
  * Hardware: Shelly (Allterco Robotics), Plus / Gen3 series, ESP32 / ESP32-C3, KNX over IP (WiFi)
  * Responsible: <tbd>
  *
@@ -335,7 +335,7 @@
  * ============================================================================
  *
  * 1) Register the header (include/HardwareConfig.h, next to the other vendors):
- *        #include "HardwareConfig/Others/Shelly.h"
+ *        #include "HardwareConfig/Others/Shelly/Devices.h"
  *
  * 2) PlatformIO env per device (platformio.custom.ini of the OAM):
  *        [env:release_SHELLY_PLUS_2PM]

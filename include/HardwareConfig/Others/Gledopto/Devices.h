@@ -2,7 +2,7 @@
 /**
  * OpenKNX Hardware definition header file
  *
- * File: Gledopto.h
+ * File: Others/Gledopto/Devices.h
  * Hardware: Gledopto
  * Responsible: u20p17
  *

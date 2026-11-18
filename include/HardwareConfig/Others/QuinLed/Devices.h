@@ -2,7 +2,7 @@
 /**
  * QuinLED Hardware definition header file
  *
- * File: QuinLed.h
+ * File: Others/QuinLed/Devices.h
  * Hardware: QuinLED
  * Responsible: u20p17
  *

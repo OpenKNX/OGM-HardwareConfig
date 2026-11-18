@@ -11,7 +11,7 @@
  * Naming Conventions for OpenKNX Hardware Definitions:
  *     1. to be defined.
  *
- * Naming Conventions for "OpenKNX Ready" 3rd Party Hardware Definitions:
+ * Naming Conventions for 3rd Party Hardware Definitions (Others/<vendor>/Devices.h, logo.png next to it):
  *     1. to be defined.
  */
 
@@ -27,13 +27,11 @@
 #include "HardwareConfig/OpenKNX/Xiao.h"
 #include "HardwareConfig/OpenKNX/misc.h"
 
-// OpenKNX Ready Hardware Configurations
+// 3rd Party Hardware Configurations: one folder per vendor (Devices.h, logo.png)
+//  #include "HardwareConfig/Others/XYZ/Devices.h"
 #include "HardwareConfig/Others/AB-SmartHouse/Devices.h"
+#include "HardwareConfig/Others/Adafruit/Devices.h"
+#include "HardwareConfig/Others/Gledopto/Devices.h"
+#include "HardwareConfig/Others/QuinLed/Devices.h"
+#include "HardwareConfig/Others/Shelly/Devices.h"
 #include "HardwareConfig/Others/Smart-MF/Devices.h"
-
-// Other 3rd Party Hardware Configurations
-//  #include "HardwareConfig/Others/XYZ-Hardware.h"
-#include "HardwareConfig/Others/Adafruit.h"
-#include "HardwareConfig/Others/Gledopto.h"
-#include "HardwareConfig/Others/QuinLed.h"
-#include "HardwareConfig/Others/Shelly.h"

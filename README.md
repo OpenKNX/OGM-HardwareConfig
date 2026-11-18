@@ -33,11 +33,11 @@ flowchart LR
 |---|---|
 | `include/HardwareConfig.h` | bindet alle Hersteller-Header ein (nur `#include`-Zeilen) |
 | `include/HardwareConfig/OpenKNX/` | OpenKNX-Geräte (REG1, REG2, UP1, OpenKNXiao; PiPico/PiPico2 BCU Connector in `misc.h`) |
-| `include/HardwareConfig/Others/` | Drittanbieter und Partner (Gledopto, QuinLED, Adafruit, Smart-MF, AB-SmartHouse, Shelly) |
+| `include/HardwareConfig/Others/<Hersteller>/` | Drittanbieter (AB-SmartHouse, Adafruit, Gledopto, QuinLED, Shelly, Smart-MF): je Hersteller `Devices.h` und das Logo der Gerätekarte `logo.png` |
 | `include/HardwareConfig/Helpers/HardwarePorts.h` | `hwPortGpio()`, `hwRelayGpio()`: Ports und fest verdrahtete Relais des eigenen Boards für die Firmware |
 | `generator/` | Generator, Vorlagen, Fähigkeiten-Paket, Bilder; Einstieg [README](generator/README.md), Kurzweg [QUICKSTART](generator/QUICKSTART.md) |
 | `examples/HardwareProfileDemo/` | Demo-Applikation mit allen Funktionen des Generators |
-| `doc/` | Datenblätter von Bauteilen (`doc/datasheets`); `doc/OpenKNX` und `doc/OpenKNX-Ready` (Partner) sind Platzhalter (nur `.keep`), die Geräteunterlagen folgen |
+| `doc/` | Datenblätter von Bauteilen (`doc/datasheets`); `doc/OpenKNX` und `doc/Others` (Drittanbieter) sind Platzhalter (nur `.keep`), die Geräteunterlagen folgen |
 | `.github/workflows/hardware-profile.yml` | CI: `-ListIds` (doppelte IDs) und `-Check` der Demo (erzeugte Dateien aktuell) |
 
 Grundregeln, auf denen alles aufbaut:
@@ -67,7 +67,7 @@ Jede Geräte-Definition erfolgt als ein Block, abhängig von `DEVICE_<DeviceID-M
 
 `<DeviceID>` darf aus a-z, A-Z, 0-9, _ und - bestehen. Hardware von Drittanbietern muss ein jeweilig einheitliches Präfix vorangestellt werden.  
 Maximallänge: am besten nicht länger als 16 Zeichen
-Beispiel: `PiPico-BCU-Connector` (OpenKNX) oder `SMARTMF-Modbus-RTU-3BE` (OpenKNX-Ready, Präfix SMARTMF)
+Beispiel: `PiPico-BCU-Connector` (OpenKNX) oder `SMARTMF-Modbus-RTU-3BE` (Drittanbieter, Präfix SMARTMF)
 
 
 `<DeviceID-Macro>` wird aus der `<DeviceID>` gebildet, wobei alle Kleinbuchstaben durch Großbuchstaben und - durch _ ersetzt werden.  
@@ -152,7 +152,7 @@ Gerät überall gleich heißt:
 | Hauptgruppe | Untergruppen |
 |---|---|
 | 0x1 OpenKNX | 0x10xx REG1, 0x11xx REG2 (0x110x–0x113x PiPico, 0x114x ESP-S3-Pico), 0x12xx UP1, 0x13xx OpenKNXiao, 0x1Fxx Sonstige |
-| 0x2 OpenKNX-Ready / Partner | 0x20xx Gledopto, 0x21xx QuinLED, 0x22xx Adafruit, 0x23xx Smart-MF, 0x24xx AB-SmartHouse, 0x25xx Shelly |
+| 0x2 Drittanbieter | 0x20xx Gledopto, 0x21xx QuinLED, 0x22xx Adafruit, 0x23xx Smart-MF, 0x24xx AB-SmartHouse, 0x25xx Shelly |
 | 0x3 Community | frei |
 
 Regeln:
