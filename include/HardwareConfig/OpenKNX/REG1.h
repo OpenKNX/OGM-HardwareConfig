@@ -42,6 +42,11 @@
 
         #define OKNXHW_REG1_FRONT_AUTO
 
+        // Info LED labels of the IP front cover (KNX | IP | Info | Prog), row text "Info <n> (<label>)" in ETS
+        #define INFO1_LED_LABEL "Info"
+        #define INFO2_LED_LABEL "IP"
+        #define INFO3_LED_LABEL "KNX"
+
         #define OKNXHW_REG1_APP_ETH
 
         #define ETH_SPI_INTERFACE SPI1 // SPI or SPI1, depends on the pins
@@ -190,6 +195,11 @@
         #define OKNXHW_REG1_CONTROLLERESP_V00_11
 
         #define OKNXHW_REG1_FRONT_RGB
+
+        // Info LED labels of the IP front cover (KNX | IP | Info | Prog), row text "Info <n> (<label>)" in ETS
+        #define INFO1_LED_LABEL "Info"
+        #define INFO2_LED_LABEL "IP"
+        #define INFO3_LED_LABEL "KNX"
 
         #define DEVICE_INIT() \
             pinMode(ETH_PHY_POWER, OUTPUT); \
