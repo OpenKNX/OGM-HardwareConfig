@@ -38,7 +38,7 @@ Alle Skripte: Windows PowerShell 5.1 kompatibel (`#Requires -Version 5.1`), kein
 Kurzfassung mit allen Zeilen zum Kopieren: [QUICKSTART.md](QUICKSTART.md).
 
 1. **Board-Header:** Das Gerät hat eine `DEVICE_HW_ID` (siehe [README](../README.md#hardware-id-device_hw_id)).
-2. **Manifest** `HardwareProfile.xml` im Repo der Applikation anlegen (Beispiel unten).
+2. **Manifest** `HardwareManifest.xml` im Repo der Applikation anlegen (Beispiel unten).
 3. **Generator laufen lassen** – vor dem OpenKNXproducer, im selben Schritt, in dem `knxprod.h` entsteht:
    ```
    pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1
@@ -67,7 +67,7 @@ Kurzfassung mit allen Zeilen zum Kopieren: [QUICKSTART.md](QUICKSTART.md).
 ```mermaid
 flowchart LR
   H["Board-Header<br/>DEVICE_HW_ID, HW_PORT_*, HW_INFO_*"] --> G
-  M["HardwareProfile.xml<br/>(Manifest des OAM)"] --> G
+  M["HardwareManifest.xml<br/>(Manifest des OAM)"] --> G
   P["platformio.ini<br/>release_* Envs"] --> G
   G["Build-HardwareProfile.ps1"] --> C["conf.xml<br/>Feature-Flags"]
   G --> S["share.xml + .js<br/>Auswahl, Seite, Abfrage"]
@@ -98,8 +98,10 @@ flowchart LR
 
 - Der Generator läuft vor dem OpenKNXproducer: im Release-Build ruft ihn `Build-Release-Preprocess.ps1` von OGM-Common auf,
   sobald das OAM ein Manifest hat (OGM-Common README „Hardware Profile“).
-- Manifest: `HardwareProfile.xml` im Projektordner, sonst `src/HardwareProfile.xml` (ohne `-Manifest`; beide zugleich: Abbruch).
-  Die Slot-Datei `HardwareProfile.slots` liegt immer daneben; bei einem Umzug mit `git mv` mitnehmen, nie neu erzeugen lassen
+- Manifest: `HardwareManifest.xml` im Projektordner, sonst `src/HardwareManifest.xml` (ohne `-Manifest`; beide zugleich: Abbruch).
+  Bis 19.11.2026 hieß es `HardwareProfile.xml` mit dem Wurzelelement `<HardwareProfile>`: beides bricht mit dem neuen Namen ab
+  (Manifest und Slot-Datei mit `git mv` umbenennen, das Wurzelelement im Manifest umbenennen).
+  Die Slot-Datei `HardwareManifest.slots` liegt immer daneben; bei einem Umzug mit `git mv` mitnehmen, nie neu erzeugen lassen
   (sie hält die Board-Nummern der Port-IDs). Pfade im Manifest gelten relativ zu seinem Ordner, in `src/` also `../include/…`
   und `<Boards project="..">`. Ein Umzug ändert die Pfade, über die die Versionswache ihren Fingerabdruck bildet: danach warnt
   sie, bis die ApplicationVersion steigt; bei einer nie ausgelieferten Version stattdessen die `ets`-Zeile der Slot-Datei löschen.
@@ -107,7 +109,7 @@ flowchart LR
 - Neue Hardware = neuer Board-Block mit eigener `DEVICE_HW_ID`; Drittanbieter-Hardware zusätzlich mit
   `DEVICE_THIRD_PARTY` (Badge und Hinweis kommen dann von selbst).
 - Board-Texte stehen im Board-Header (`HW_INFO_TEXT`, `HW_INFO_URL`), Seitentexte im Manifest, nie in der Applikations-XML.
-- `HardwareProfile.slots` wird mit committet.
+- `HardwareManifest.slots` wird mit committet.
 - Jede inhaltliche Änderung an der knxprod bekommt eine neue Applikationsversion (`ReplacesVersionsDownTo`).
 - Nach jeder Änderung prüfen: Generator zweimal (zweiter Lauf „unverändert“), dann die Seite in ETS5.
 
@@ -200,7 +202,7 @@ Für ein OAM ohne Manifest einmalig:
 pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 -Init
 ```
 
-Schreibt `HardwareProfile.xml` neben die `platformio.ini` (Ziel: `-Manifest`) und bricht ab, wenn es die Datei schon
+Schreibt `HardwareManifest.xml` neben die `platformio.ini` (Ziel: `-Manifest`) und bricht ab, wenn es die Datei schon
 gibt (kein Überschreiben). Inhalt: `<Boards platformio="release_*" />` mit den gefundenen Boards als Kommentar (HW-ID,
 Define, Name); `release_*`-Envs ohne Board kommen nach `exclude`. Kein oder nur ein Board: Abbruch ohne Datei (eine Auswahl braucht mindestens zwei Boards).
 `moduleType` = 45, sonst der nächste freie Wert aufwärts bis 99, dann abwärts ab 44 (alle `op:define ModuleType` der
@@ -210,7 +212,7 @@ Standardwert jedes unsichtbaren Parameters), Standard-Ausgaben `src/HardwareProf
 `include/HardwareProfileData.h` (Abbruch, wenn eine davon existiert und keine Generator-Ausgabe ist),
 `Import` von `capabilities/Common.caps.xml`, `<Page text="Gerät" icon="memory" />`, `<InfoImage style="card" />` und
 `<Notice when="ThirdParty">` (Seite „Gerät“ mit Gerätekarte). Danach folgt jede weitere Einstellung als auskommentiertes
-Beispiel aus `init/HardwareProfile.examples.xml` (`@PREFIX@` = Präfix, `@DEVTYPE@` = nächster freier ModuleType für die
+Beispiel aus `init/HardwareManifest.examples.xml` (`@PREFIX@` = Präfix, `@DEVTYPE@` = nächster freier ModuleType für die
 Entwickleransicht), darunter Info-LEDs (`<PartRows>`) und die Entwickleransicht (`<Page dev features>`, nur Dev-Applikation).
 Danach zeigt das Skript die Zeilen für die Applikations-XML (`op:config`,
 `op:define`, `op:include` in `<generate><Dynamic>`, wahlweise als Seite im OpenKNX-Kanal) und erinnert an die neue Applikationsversion
@@ -220,7 +222,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 ## Manifest
 
 ```xml
-<HardwareProfile prefix="HWP" moduleType="45" text="Gerät">
+<HardwareManifest prefix="HWP" moduleType="45" text="Gerät">
   <Output conf="src/HardwareProfile.conf.xml" share="src/HardwareProfile.share.xml"
           script="src/HardwareProfile.script.js" header="include/HardwareProfileData.h" />
 
@@ -240,7 +242,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
     <Pins board="OKNXHW_OPENKNXIAO_*" scan="^OKNXHW_OPENKNXIAO_D(\d+)$" label="D$1" />
     <Pins board="DEVICE_X"><Pin gpio="X_PIN_A" label="Klemme A" /></Pins>
   </GpioRole>
-</HardwareProfile>
+</HardwareManifest>
 ```
 
 | Element | Bedeutung |
@@ -406,7 +408,7 @@ einen festen Wert:
 - Gemessen in ETS6: ein `<Assign>` allein sperrt die Zeile nicht. ETS hält den Wert je ParameterRef, deshalb bekommt die
   nur lesbare Zeile ein eigenes `<Assign>`; die änderbare Zeile ist auf diesen Boards nicht sichtbar.
 
-Wert aus dem Board-Header, Beispiel der [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml): die Funktion der Info-LEDs
+Wert aus dem Board-Header, Beispiel der [Demo](../examples/HardwareProfileDemo/HardwareManifest.xml): die Funktion der Info-LEDs
 von OGM-Common (`Info1LedFunc`, BASE = ModuleType 10) wird beim Wählen eines Boards mit `OPENKNX_INFOLED1_DEFAULT` auf diesen
 Wert gesetzt, die Zeile bleibt auf der Seite „Info LEDs“ änderbar:
 
@@ -495,7 +497,7 @@ Applikation lässt das Modul diese Kopie statt seines eigenen Bausteins laden (b
 - Die Envs eines Boards müssen dieselbe Bedingung und dasselbe Label ergeben, sonst Abbruch (ETS zeigt eine Seite je Board).
 - Die Kopie hängt vom Stand des Bausteins ab: ändert sich die Quelle (anderer Stand von OGM-Common), ändert sich die Ausgabe
   und `-Check` meldet sie.
-- Beispiel: die [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml) (Raumcontroller Plus: „Info 1 (links)“,
+- Beispiel: die [Demo](../examples/HardwareProfileDemo/HardwareManifest.xml) (Raumcontroller Plus: „Info 1 (links)“,
   „Info 2 (rechts)“; REG1: drei Zeilen ohne Label; Shelly: keine Zeile; Ausgabe `src/HardwareProfile.infoled.gen.xml`).
 
 ### Auswahl je Gerät filtern (`<Filters>`)
@@ -564,7 +566,7 @@ Träger hat Speicher: Firmware, `choose` auf dem Träger und die Konfliktprüfun
   `F<Slot>`): sonst kopiert die sichtbare Liste ihren alten Wert per `<Assign>` zurück.
 - App-Update: der Träger behält seinen Wert (gleiche ParameterRef); ein Board mit eigener Liste steht danach auf deren Vorgabe
   (neue ParameterRef) - bei ausgelieferten Versionen in der CHANGELOG des Produkts nennen.
-- Beispiele: [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml) Seite „3 Listen je Hardware“; NeoPixel „Externe Relais“
+- Beispiele: [Demo](../examples/HardwareProfileDemo/HardwareManifest.xml) Seite „3 Listen je Hardware“; NeoPixel „Externe Relais“
   (Modul) und die Effektlisten ohne 2D-Effekte (Segment-Vorlage mit Übersichtszeilen, Szenen- und Cue-Baustein,
   `except="@src/NeoPixel.Effects2D.values"`).
 
@@ -617,10 +619,10 @@ folgt dem Fenster (ETS5 und ETS6), eine eigene Bildkante wäre nie bündig mit d
 #endif
 ```
 
-### 2. Manifest (`HardwareProfile.xml`)
+### 2. Manifest (`HardwareManifest.xml`)
 
 ```xml
-<HardwareProfile prefix="XYZHW" moduleType="45" text="Gerät">
+<HardwareManifest prefix="XYZHW" moduleType="45" text="Gerät">
   <Output conf="src/MyApp.hw.conf.xml" share="src/MyApp.hw.module.gen.xml" script="src/MyApp.hw.module.gen.js" />
 
   <Page text="Gerät" icon="memory" help="XYZ-Hardware" /> <!-- alle Texte mit Standard, siehe Tabelle unten; help = Help_de/XYZ-Hardware.md -->
@@ -628,7 +630,7 @@ folgt dem Fenster (ETS5 und ETS6), eine eigene Bildkante wäre nie bündig mit d
   <InfoImage style="card" />
 
   <Boards platformio="release_*" />
-</HardwareProfile>
+</HardwareManifest>
 ```
 
 ### 3. Applikations-XML
@@ -806,7 +808,7 @@ unbekannter) Hardware sind alle Flags 0. Die Flags sind Parameter ohne Gerätesp
 Parameter, deren IDs bleiben. Ohne `<Conflicts>` ändert sich keine Ausgabe.
 
 ```xml
-<HardwareProfile ... portManualValue="10" portNoneValue="15">
+<HardwareManifest ... portManualValue="10" portNoneValue="15">
   <Conflicts output="src/MyApp.conflicts.gen.xml" number="900">
     <Param name="Strips" ref="%AID%_UP-%TT%00020_R-%TT%0002001" />
     <Param name="Type1" ref="%AID%_UP-%TT%91030_R-%TT%9103001" />
@@ -817,7 +819,7 @@ Parameter, deren IDs bleiben. Ohne `<Conflicts>` ändert sich keine Ausgabe.
     </Use>
     <Use name="Relay1" text="Relais 1" wiredRelay="1" when="Relays >= 1" port="..." />
   </Conflicts>
-</HardwareProfile>
+</HardwareManifest>
 ```
 
 | Element / Attribut | Bedeutung |
@@ -1066,7 +1068,7 @@ Mit `hide` wären die eingepackten Seiten dann unsichtbar, und ein Download vor 
 die Einstellungen des Anwenders zurücksetzen. Mit `showAll` bleibt bis zur Auswahl alles sichtbar.
 Das App-Update selbst übernimmt die Werte über die ParameterRef-Nummer; eingepackte Parameter behalten sie.
 
-## Slot-Datei (`HardwareProfile.slots`)
+## Slot-Datei (`HardwareManifest.slots`)
 
 Die GPIO-Parameter haben pro Board eine eigene ETS-ID. Damit ein App-Update die Pinauswahl nicht
 verliert, hängt diese ID nicht am Listenplatz, sondern an einem Slot pro `DEVICE_HW_ID`. Der Generator

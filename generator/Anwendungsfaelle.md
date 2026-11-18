@@ -1,7 +1,7 @@
 # Anwendungsfälle: so nutzt eine Applikation die Hardware-Auswahl
 
 Kurze Rezepte. Jedes Beispiel zeigt, wo die Angabe hingehört: **Board-Header** (was die Hardware hat) →
-**Manifest** `HardwareProfile.xml` (wie die Applikation es nennt) → **Applikations-XML** (was ETS zeigt) →
+**Manifest** `HardwareManifest.xml` (wie die Applikation es nennt) → **Applikations-XML** (was ETS zeigt) →
 **Firmware** (was das Gerät tut). Präfix in allen Beispielen: `HWP`. Begriffe und Attribute: [README](README.md).
 
 Grundregel: Die Applikation fragt nie nach einer HW-ID, sondern nur nach einer Fähigkeit oder einem Wert.
@@ -287,7 +287,7 @@ Kombination aus Board und den Werten aller anderen Nutzungen.
 ```
 ```xml
 <!-- Manifest: Port-Werte einmal (ETS-Prüfung und Firmware-Header), dann die Prüfung -->
-<HardwareProfile ... portManualValue="10" portNoneValue="15">
+<HardwareManifest ... portManualValue="10" portNoneValue="15">
   <Ports board="*" excludeRelayPins="true" max="10" />
   <Conflicts output="src/MyApp.conflicts.gen.xml" number="900">
     <Param name="Outputs" ref="%AID%_P-%TT%00023_R-%TT%0002301" />
@@ -302,7 +302,7 @@ Kombination aus Board und den Werten aller anderen Nutzungen.
     </Use>
     <Use name="Relay1" text="Relais 1" wiredRelay="1" port="..." />   <!-- Port nur auf Boards ohne festes Relais 1 -->
   </Conflicts>
-</HardwareProfile>
+</HardwareManifest>
 ```
 ```xml
 <!-- Applikations-XML: die Teile in das eigene Modul (%TT%) einbinden -->

@@ -3,7 +3,7 @@
        below its element lines (the element lines in between are complete). Details: lib/OGM-HardwareConfig/generator/README.md, QUICKSTART.md
        ====================================================================================================================== -->
 
-  <!-- Root attributes of <HardwareProfile> (add them to the root element above):
+  <!-- Root attributes of <HardwareManifest> (add them to the root element above):
          unselected="hide"                         without selection every board-dependent setting is hidden (new products only)
          order="manifest"                          selection list in manifest order instead of DEVICE_HW_ID order
          portManualValue="10" portNoneValue="15"   values "manual GPIO" / "no port" of the port selections (<Ports>, <Conflicts>) -->

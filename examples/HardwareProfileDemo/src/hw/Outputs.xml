@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 @@# Demo: two outputs with a port selection per board (like the data/clock ports of an LED controller), the input of the
-@@# GPIO conflict check (<Conflicts> in HardwareProfile.xml). Port value = hardware port number - 1, 10 = manual GPIO,
+@@# GPIO conflict check (<Conflicts> in HardwareManifest.xml). Port value = hardware port number - 1, 10 = manual GPIO,
 @@# 15 = not selected, 97 = filler of a board without ports. Each selection is one byte (union of one parameter per board):
 @@#   Out1Data 60, Out1Clock 61, Out2Data 62, Out2Clock 63 (HardwareProfileDemo.share.xml).
 @@# Parameter of board $b: Out1Data 1000 + board number, Out1Clock 1100 +, Out2Data 1200 +, Out2Clock 1300 +.

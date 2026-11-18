@@ -368,7 +368,7 @@
  *          #endif
  *        #endif
  *
- * 4) ETS: the manifest (HardwareProfile.xml) turns the same defines into feature flags:
+ * 4) ETS: the manifest (HardwareManifest.xml) turns the same defines into feature flags:
  *        <Value name="Relays" text="Schaltkanäle" expr="HW_RELAY_COUNT" default="0" max="16" />
  *        <Capability name="PowerMeter"  text="Leistungsmessung" expr="defined(HW_POWER_METER)" />
  *        <Capability name="Temperature" text="Gerätetemperatur" expr="defined(HW_TEMP_SENSOR)" />

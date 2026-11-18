@@ -17,11 +17,11 @@ Kurzweg für ein bestehendes OAM. Details zu jedem Schritt: [README](README.md).
 pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 -Init
 ```
 
-Schreibt `HardwareProfile.xml` neben die `platformio.ini`, mit freiem `moduleType` und Präfix (Standard `45` / `HWP`).
+Schreibt `HardwareManifest.xml` neben die `platformio.ini`, mit freiem `moduleType` und Präfix (Standard `45` / `HWP`).
 Aktiv sind nur die Teile, die jedes OAM braucht:
 
 ```xml
-<HardwareProfile prefix="HWP" moduleType="45" text="Gerät" unselected="showAll">
+<HardwareManifest prefix="HWP" moduleType="45" text="Gerät" unselected="showAll">
   <Output conf="src/HardwareProfile.conf.xml" share="src/HardwareProfile.share.xml" script="src/HardwareProfile.script.js" header="include/HardwareProfileData.h" />
   <Import href="lib/OGM-HardwareConfig/generator/capabilities/Common.caps.xml" />
   <Page text="Gerät" icon="memory" />
@@ -29,7 +29,7 @@ Aktiv sind nur die Teile, die jedes OAM braucht:
   <Notice when="ThirdParty" title="Hardware eines Drittanbieters. ..." />
   <Boards platformio="release_*" />
   <!-- danach jede weitere Einstellung als auskommentiertes Beispiel -->
-</HardwareProfile>
+</HardwareManifest>
 ```
 
 - `<Page>` gibt Baumtext und Icon der Seite vor, alle anderen Texte haben einen Standard. Ohne `<Page>` heißt die Seite
@@ -43,7 +43,7 @@ Aktiv sind nur die Teile, die jedes OAM braucht:
   (`<generate base>`), steht die Entwickleransicht nicht in der gemeinsamen Vorlage.
 - Beispiele stehen auskommentiert im Manifest (Seitentexte, Gerätekarte, eigene Fähigkeit und Wert, Boards, Ports,
   reservierte Pins, GPIO-Rollen, Info-LEDs, Fixes, Filter, Hinweise je Wert, GPIO-Konflikte, Vorlagen). Zum Benutzen die
-  Kommentarzeile über und unter den Elementzeilen löschen. Die Vorlage dafür ist `generator/init/HardwareProfile.examples.xml`.
+  Kommentarzeile über und unter den Elementzeilen löschen. Die Vorlage dafür ist `generator/init/HardwareManifest.examples.xml`.
 
 Envs ohne Board (Test, native) kommen nach `exclude`, z. B. `<Boards platformio="release_*" exclude="release_native_*" />`.
 `unselected="showAll"` bei einem bestehenden OAM so lassen (sonst setzt ein Download vor der Hardware-Wahl Werte zurück).
@@ -53,7 +53,7 @@ Envs ohne Board (Test, native) kommen nach `exclude`, z. B. `<Boards platformio=
 `-Init` legt nur ein neues Manifest an. Für einen zweiten Lauf, z. B. um die Beispiele einer neueren Generator-Version zu
 bekommen:
 
-1. `HardwareProfile.xml` löschen (oder umbenennen und eigene Einträge danach übernehmen). `HardwareProfile.slots` nur
+1. `HardwareManifest.xml` löschen (oder umbenennen und eigene Einträge danach übernehmen). `HardwareManifest.slots` nur
    löschen, solange keine knxprod mit dem Hardware-Modul ausgeliefert oder in ETS importiert ist: die Slot-Datei hält die
    Board-Nummern der Parameter-IDs, die Bits der Geräteabfrage, die Slots der `<Filters>`-Regeln und die `ets`-Zeilen der
    Versionswache fest.
@@ -63,7 +63,7 @@ bekommen:
 3. `-Init` laufen lassen, danach das `op:define` wieder aktivieren und die gewünschten Beispiele einschalten.
 
 Lag das Manifest in `src/`: `-Init` schreibt das neue immer in den Projektordner (neben die `platformio.ini`). Vor dem
-nächsten Lauf die behaltene Slot-Datei daneben legen (`git mv src/HardwareProfile.slots HardwareProfile.slots`) oder das neue
+nächsten Lauf die behaltene Slot-Datei daneben legen (`git mv src/HardwareManifest.slots HardwareManifest.slots`) oder das neue
 Manifest nach `src/` verschieben (Pfade darin relativ zum Manifest anpassen, README „Regeln“); sonst legt der Lauf eine neue
 Slot-Datei an und die Board-Nummern der Parameter-IDs können sich verschieben.
 
@@ -135,12 +135,12 @@ unter „Module“). Hardwareabhängige Einstellungen nur über Feature-Flags ei
 
 ## 3. Build
 
-Mit einem `HardwareProfile.xml` im Projektordner (sonst in `src/`) ruft OGM-Common den Generator im Release-Build selbst
+Mit einem `HardwareManifest.xml` im Projektordner (sonst in `src/`) ruft OGM-Common den Generator im Release-Build selbst
 auf (`Build-Release-Preprocess.ps1`, vor dem OpenKNXproducer, bei `compileWith` = `openknxproducer`, nicht mit `-SkipKnxprod`): kein Aufruf im `scripts/Build-Release.ps1` der OAM nötig.
 Fehlt der Generator in `lib/OGM-HardwareConfig`, bricht der Build ab. Eigene Parameter für den Generator: OGM-Common,
 `doc/Build-and-release-environment.md`.
 
-- `HardwareProfile.xml` und `HardwareProfile.slots` **committen** (die Slot-Datei hält die Parameter-IDs je Board fest).
+- `HardwareManifest.xml` und `HardwareManifest.slots` **committen** (die Slot-Datei hält die Parameter-IDs je Board fest).
 - Die übrigen Ausgaben erzeugt der Build. Entweder in die `.gitignore` (wie NeoPixel) oder committen und in der CI
   `-Check` laufen lassen (wie die Demo). Ein `pio run` allein erzeugt sie nicht: nach einem Clean erst das Build-Skript.
 
@@ -190,7 +190,7 @@ if (HardwareProfile::checkSelection(ParamHWP_HardwareSelect) == HardwareProfile:
 gesetzt ist. Alles andere hat einen Standard oder fällt weg, wenn es fehlt. Das Manifest aus `-Init` läuft so durch,
 auch ohne `<Import>` und ohne `header`.
 
-### Manifest: Attribute der Wurzel `<HardwareProfile>`
+### Manifest: Attribute der Wurzel `<HardwareManifest>`
 
 | Attribut | Wirkung | Ohne |
 |---|---|---|
@@ -254,7 +254,7 @@ Details zu jeder Zeile: [README](README.md#manifest), [Hardware-Seite](README.md
 
 ## Nicht tun
 
-- Erzeugte Dateien von Hand ändern, Slot-Nummern in `HardwareProfile.slots` ändern, die `DEVICE_HW_ID` eines
+- Erzeugte Dateien von Hand ändern, Slot-Nummern in `HardwareManifest.slots` ändern, die `DEVICE_HW_ID` eines
   ausgelieferten Boards ändern (ETS verliert beim Update die Werte).
 - In der Firmware Port- oder Pin-Parameter lesen, solange die Auswahl nicht das eigene Board ist.
 - OAM-Spezifisches in OGM-HardwareConfig eintragen: alles Eigene gehört ins Manifest des OAM.

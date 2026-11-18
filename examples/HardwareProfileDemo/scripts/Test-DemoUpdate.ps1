@@ -180,7 +180,7 @@ function New-WorkCopy {
   $caps = [System.IO.Path]::Combine($Work, "caps")
   [void][System.IO.Directory]::CreateDirectory($caps)
   Copy-Item -LiteralPath ([System.IO.Path]::Combine($Repo, "generator", "capabilities", "Common.caps.xml")) -Destination $caps
-  Edit-Manifest { param($x) $x.HardwareProfile.SelectSingleNode("Import").SetAttribute("href", "caps/Common.caps.xml") }
+  Edit-Manifest { param($x) $x.HardwareManifest.SelectSingleNode("Import").SetAttribute("href", "caps/Common.caps.xml") }
 }
 
 # ------------------------------------------------------------------------------------------------
@@ -202,7 +202,7 @@ function Save-XmlFile($Xml, [string]$Path) {
 }
 
 function Edit-Manifest([scriptblock]$Change) {
-  $p = [System.IO.Path]::Combine($Work, "HardwareProfile.xml")
+  $p = [System.IO.Path]::Combine($Work, "HardwareManifest.xml")
   $x = Read-XmlFile $p
   & $Change $x
   Save-XmlFile $x $p
@@ -243,7 +243,7 @@ function Invoke-Build([string]$Label) {
   Write-Step (T "build {0}: version {1}" $Label $v)
   $log = [System.IO.Path]::Combine($OutDir, ("generator-{0}.log" -f $v))
   $ps = (Get-Process -Id $PID).Path
-  & $ps -NoProfile -ExecutionPolicy Bypass -File $Generator -Manifest ([System.IO.Path]::Combine($Work, "HardwareProfile.xml")) -Language $Language *> $log
+  & $ps -NoProfile -ExecutionPolicy Bypass -File $Generator -Manifest ([System.IO.Path]::Combine($Work, "HardwareManifest.xml")) -Language $Language *> $log
   if ($LASTEXITCODE -ne 0) { Get-Content -LiteralPath $log | Select-Object -Last 15 | ForEach-Object { Write-Note $_ }; throw (T "generator failed for {0} (log: {1})" $Label $log) }
   foreach ($l in @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^\s*! ' })) { Write-Note $l.Trim() }
   $out = [System.IO.Path]::Combine($OutDir, ("HardwareProfileDemo-{0}.knxprod" -f $v))
@@ -252,7 +252,7 @@ function Invoke-Build([string]$Label) {
   try { & $Producer create -h ([System.IO.Path]::Combine($Work, "include", "knxprod.h")) -o $out "HardwareProfileDemo.xml" *> $plog }
   finally { Pop-Location }
   if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $out)) { Get-Content -LiteralPath $plog | Select-Object -Last 15 | ForEach-Object { Write-Note $_ }; throw (T "producer failed for {0} (log: {1})" $Label $plog) }
-  Copy-Item -LiteralPath ([System.IO.Path]::Combine($Work, "HardwareProfile.slots")) -Destination ([System.IO.Path]::Combine($OutDir, ("HardwareProfile-{0}.slots" -f $v))) -Force
+  Copy-Item -LiteralPath ([System.IO.Path]::Combine($Work, "HardwareManifest.slots")) -Destination ([System.IO.Path]::Combine($OutDir, ("HardwareProfile-{0}.slots" -f $v))) -Force
   Write-Ok ([System.IO.Path]::GetFileName($out))
   return $out
 }
@@ -275,14 +275,14 @@ function Invoke-Changes {
   Write-Note (T "C1  capability UpdPack inserted in the pack before {0}" $mid.GetAttribute("name"))
 
   # slot of the board removed in C7 (from the slot file of version N)
-  $slots = [System.IO.File]::ReadAllLines([System.IO.Path]::Combine($Work, "HardwareProfile.slots"))
+  $slots = [System.IO.File]::ReadAllLines([System.IO.Path]::Combine($Work, "HardwareManifest.slots"))
   foreach ($l in $slots) { if ($l -match '^\s*0x3F14\s*=\s*(\d+)') { $exp.RemovedSlots += [int]$Matches[1] } }
   if ($exp.RemovedSlots.Count -ne 1) { throw (T "slot of 0x3F14 not found in the slot file of version N") }
   $exp.RemovedIds = @(0x3F14)
 
   Edit-Manifest {
     param($x)
-    $r = $x.HardwareProfile
+    $r = $x.HardwareManifest
     # C2: own capability in front of the first own one, as a switch
     $first = Get-Capability $r "LargeFlash"
     [void]$r.InsertBefore((New-Element $x "Capability" @{ name = "UpdOwn"; text = "Update-Test Schalter"; expr = "defined(UPD_TEST_NEVER)"; switch = "true" }), $first)

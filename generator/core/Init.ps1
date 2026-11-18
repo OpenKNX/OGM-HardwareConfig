@@ -98,7 +98,7 @@ function Invoke-Init {
   [void]$sb.AppendLine('  Review and commit it; the generator reads it on every build. Boards found in the release_* envs:')
   foreach ($b in $boards) { [void]$sb.AppendLine((ConvertTo-XmlComment ("    0x{0:X4}  {1}  {2}" -f $b.HwId, $b.Define, $b.Name))) }
   [void]$sb.AppendLine('-->')
-  [void]$sb.AppendLine(('<HardwareProfile prefix="{0}" moduleType="{1}" text="{2}" unselected="showAll">' -f $prefix, $moduleType, ("Ger" + [char]0xE4 + "t")))
+  [void]$sb.AppendLine(('<HardwareManifest prefix="{0}" moduleType="{1}" text="{2}" unselected="showAll">' -f $prefix, $moduleType, ("Ger" + [char]0xE4 + "t")))
   [void]$sb.AppendLine('  <!-- showAll: in an existing product the ETS download writes the default of every invisible parameter; hide only for new products -->')
   [void]$sb.AppendLine(('  <Output conf="{0}" share="{1}" script="{2}" header="{3}" />' -f $outputs.conf, $outputs.share, $outputs.script, $outputs.header))
   [void]$sb.AppendLine(('  <Import href="{0}" />' -f $caps))
@@ -116,15 +116,15 @@ function Invoke-Init {
     [void]$sb.AppendLine(('  <Boards platformio="release_*" exclude="{0}" />' -f ($noBoard -join " ")))
   }
   else { [void]$sb.AppendLine('  <Boards platformio="release_*" />') }
-  # every other setting as a commented-out example (generator/init/HardwareProfile.examples.xml, UTF-8): @PREFIX@ = prefix,
+  # every other setting as a commented-out example (generator/init/HardwareManifest.examples.xml, UTF-8): @PREFIX@ = prefix,
   # @DEVTYPE@ = free ModuleType for the developer view
-  $examples = [System.IO.Path]::Combine($script:GeneratorDir, "init", "HardwareProfile.examples.xml")
-  if (-not (Test-Path -LiteralPath $examples -PathType Leaf)) { Stop-WithError (T "Not found: {0} (relative to {1})" "init/HardwareProfile.examples.xml" $script:GeneratorDir) }
+  $examples = [System.IO.Path]::Combine($script:GeneratorDir, "init", "HardwareManifest.examples.xml")
+  if (-not (Test-Path -LiteralPath $examples -PathType Leaf)) { Stop-WithError (T "Not found: {0} (relative to {1})" "init/HardwareManifest.examples.xml" $script:GeneratorDir) }
   $devText = "$devType"; if ($devType -eq 0) { $devText = "<free ModuleType>" }
   $exText = [System.IO.File]::ReadAllText($examples, [System.Text.Encoding]::UTF8).Replace("`r`n", "`n").Replace("@PREFIX@", $prefix).Replace("@DEVTYPE@", $devText)
   [void]$sb.AppendLine('')
   [void]$sb.Append($exText.TrimEnd("`n")).Append("`n")
-  [void]$sb.AppendLine('</HardwareProfile>')
+  [void]$sb.AppendLine('</HardwareManifest>')
   Write-Utf8File $target $sb.ToString()
   Write-Ok (T "wrote {0}" $target)
 

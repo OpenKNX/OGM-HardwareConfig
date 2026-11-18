@@ -41,7 +41,7 @@
   <op:define prefix="DEMO" ModuleType="46" configTransferName="Demo"
     share="HardwareProfileDemo.share.xml" />
 
-  <!-- developer view of the hardware page (generated with the hardware module, HardwareProfile.xml <Page dev>) -->
+  <!-- developer view of the hardware page (generated with the hardware module, HardwareManifest.xml <Page dev>) -->
   <op:define prefix="HWPDEV" ModuleType="47" share="HardwareProfile.dev.gen.xml" />
 
   <generate>

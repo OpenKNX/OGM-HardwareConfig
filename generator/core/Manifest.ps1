@@ -7,7 +7,7 @@ Open =
 FILEPATH: OGM-HardwareConfig/generator/core/Manifest.ps1
 
 .SYNOPSIS
-    Manifest (HardwareProfile.xml): read, check unknown nodes, <Conflicts> declaration.
+    Manifest (HardwareManifest.xml): read, check unknown nodes, <Conflicts> declaration.
 
 .DESCRIPTION
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
@@ -47,7 +47,7 @@ function ConvertTo-FlagList([string]$Text) {
 #        and stops: Conflicts, Use, InfoImage, BoardTable). Test-ManifestNodes warns about anything else: a typo would fall back
 #        to the default without a word.
 $script:ManifestNodes = @{
-  HardwareProfile = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
+  HardwareManifest = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
                       "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows Filters ValueNotices")
   CapabilityPack  = @("name", "Capability Value ReservedPins")
   Output          = @("conf share script header", "")
@@ -107,11 +107,21 @@ function Test-ManifestNodes($Node, [string]$File) {
     Test-ManifestNodes $c $File
   }
 }
-# @brief Manifest path without -Manifest: HardwareProfile.xml in the current folder, else src/HardwareProfile.xml; both stop
+# @brief Manifest path without -Manifest: HardwareManifest.xml in the current folder, else src/HardwareManifest.xml; both stop
 #        (two manifests would keep two slot files with different board numbers)
 function Resolve-DefaultManifest {
-  $root = "HardwareProfile.xml"
-  $src = [System.IO.Path]::Combine("src", "HardwareProfile.xml")
+  # old name (before the rename to HardwareManifest): stop with the rename, the slot file moves with it (board numbers)
+  foreach ($old in @("HardwareProfile.xml", [System.IO.Path]::Combine("src", "HardwareProfile.xml"))) {
+    if (Test-Path -LiteralPath $old -PathType Leaf) {
+      # a new manifest in either place (project folder or src/): the old one is left over
+      $new = @(@("HardwareManifest.xml", [System.IO.Path]::Combine("src", "HardwareManifest.xml")) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }) | Select-Object -First 1
+      if ($new) { Stop-WithError (T "{0} and {1}: the old manifest is left over - delete {0} (the slot file belongs next to {1})" $old $new) }
+      $oldSlots = [System.IO.Path]::ChangeExtension($old, ".slots")
+      Stop-WithError (T "{0}: the manifest is now called HardwareManifest.xml - rename it and its slot file: git mv {0} {1}; git mv {2} {3}" $old ($old -replace 'HardwareProfile\.xml$', 'HardwareManifest.xml') $oldSlots ($oldSlots -replace 'HardwareProfile\.slots$', 'HardwareManifest.slots'))
+    }
+  }
+  $root = "HardwareManifest.xml"
+  $src = [System.IO.Path]::Combine("src", "HardwareManifest.xml")
   $hasRoot = Test-Path -LiteralPath $root -PathType Leaf
   $hasSrc = Test-Path -LiteralPath $src -PathType Leaf
   if ($hasRoot -and $hasSrc) { Stop-WithError (T "Two manifests: {0} and {1} - keep one (its .slots file belongs next to it)" $root $src) }
@@ -122,9 +132,17 @@ function Read-Manifest([string]$Path) {
   if (-not (Test-Path $Path)) { Stop-WithError (T "Manifest not found: {0}" $Path) }
   $full = (Resolve-Path $Path).Path
   $baseDir = [System.IO.Path]::GetDirectoryName($full)
+  # slot file of the old name next to the manifest, but none of the manifest name: the run would give every board a new slot
+  $slotNew = [System.IO.Path]::ChangeExtension($full, ".slots")
+  $slotOld = [System.IO.Path]::Combine($baseDir, "HardwareProfile.slots")
+  if (($slotNew -ne $slotOld) -and -not (Test-Path -LiteralPath $slotNew -PathType Leaf) -and (Test-Path -LiteralPath $slotOld -PathType Leaf)) {
+    Stop-WithError (T "{0}: slot file of the old name, none for {1} - rename it (git mv {0} {2}), new slots would move every GPIO parameter ID" $slotOld ([System.IO.Path]::GetFileName($full)) ([System.IO.Path]::GetFileName($slotNew)))
+  }
   [xml]$doc = [System.IO.File]::ReadAllText($full, [System.Text.Encoding]::UTF8)
-  $root = $doc.HardwareProfile
-  if (-not $root) { Stop-WithError (T "Manifest root element must be <HardwareProfile>") }
+  # old root name (before the rename to HardwareManifest): stop with the new name instead of "wrong root"
+  if ($doc.DocumentElement -and $doc.DocumentElement.LocalName -ceq "HardwareProfile") { Stop-WithError (T "{0}: the root element <HardwareProfile> is now <HardwareManifest> - rename it (opening and closing tag)" ([System.IO.Path]::GetFileName($full))) }
+  $root = $doc.HardwareManifest
+  if (-not $root) { Stop-WithError (T "Manifest root element must be <HardwareManifest>") }
   Test-ManifestNodes $root ([System.IO.Path]::GetFileName($full))
   if ("$($root.prefix)" -and "$($root.prefix)" -cnotmatch '^[A-Za-z][A-Za-z0-9]*$') { Stop-WithError (T "prefix `"{0}`" must be letters and digits (it is part of ETS, JavaScript and C names)" $root.prefix) }
 
@@ -1003,7 +1021,7 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
       $u.Manuals += , @{ Ref = $mRef; When = $mWhen }
     }
     if ($u.Manuals.Count -gt 0 -and $u.Value -ne "port") { Stop-WithError (T "{0}: <Manual> needs value=`"port`" (a GPIO value has no manual entry)" $uw) }
-    if ($u.Manuals.Count -gt 0 -and $null -eq $u.Manual) { Stop-WithError (T "{0}: <Manual> needs portManualValue=... on <HardwareProfile> (the port value of the manual GPIO)" $uw) }
+    if ($u.Manuals.Count -gt 0 -and $null -eq $u.Manual) { Stop-WithError (T "{0}: <Manual> needs portManualValue=... on <HardwareManifest> (the port value of the manual GPIO)" $uw) }
     if (-not $u.Port -and ($u.Manuals.Count -gt 0)) { Stop-WithError (T "{0}: <Manual> needs port=..." $uw) }
     $cf.Uses.Add($u)
   }

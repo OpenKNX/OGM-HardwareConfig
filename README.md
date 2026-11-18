@@ -12,18 +12,18 @@ Das Repo hat zwei Teile, die dieselben Makros lesen:
    einer Applikation (OAM) bindet `HardwareConfig.h` ein; die Bibliothek stellt `include/` als Quell- und
    Include-Pfad bereit (`library.json`).
 2. **Hardware-Profil-Generator** (`generator/`): liest die Board-Header mit den Build-Flags jedes PlatformIO-Envs der
-   Applikation und das Manifest `HardwareProfile.xml` der Applikation. Daraus erzeugt er das ETS-Modul der
+   Applikation und das Manifest `HardwareManifest.xml` der Applikation. Daraus erzeugt er das ETS-Modul der
    Hardware-Auswahl und einen Firmware-Header mit dem eigenen Board.
 
 ```mermaid
 flowchart LR
   H["Board-Header<br/>include/HardwareConfig/**"] --> FW["Firmware der Applikation"]
   H --> G["generator/Build-HardwareProfile.ps1"]
-  M["HardwareProfile.xml<br/>(Manifest der Applikation)"] --> G
+  M["HardwareManifest.xml<br/>(Manifest der Applikation)"] --> G
   P["platformio.ini<br/>release_* Envs"] --> G
   G --> X["ETS-Modul, Feature-Flags, ETS-Skript, Bilder"]
   G --> D["include/HardwareProfileData.h"]
-  G --> S["HardwareProfile.slots"]
+  G --> S["HardwareManifest.slots"]
   X --> O["OpenKNXproducer -> knxprod -> ETS"]
   D --> FW
   O -- "Geräteabfrage FP 158/4" --> FW
@@ -47,7 +47,7 @@ Grundregeln, auf denen alles aufbaut:
   Generator) und Firmware lesen dieselben Defines.
 - **Was eine Applikation nicht nutzt, ändert ihre Ausgaben nicht:** jede Funktion des Generators ist über das Manifest
   eingeschaltet; ohne den Eintrag bleiben die erzeugten Dateien byte-gleich.
-- **Stabile ETS-IDs:** Parameter je Board hängen an einem Slot je HW-ID (`HardwareProfile.slots`), nicht am Listenplatz;
+- **Stabile ETS-IDs:** Parameter je Board hängen an einem Slot je HW-ID (`HardwareManifest.slots`), nicht am Listenplatz;
   ein App-Update behält die Werte.
 
 ## Regeln

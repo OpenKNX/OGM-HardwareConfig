@@ -94,7 +94,7 @@ $script:CheckMode = $false
 # ------------------------------------------------------------------------------------------------
 
 # @brief Runs the generator in its own process; returns exit code and the whole output as one string
-function Invoke-Generator([string]$Dir, [string[]]$Arguments, [string]$Manifest = "HardwareProfile.xml") {
+function Invoke-Generator([string]$Dir, [string[]]$Arguments, [string]$Manifest = "HardwareManifest.xml") {
   $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
   Push-Location $Dir
   try {
@@ -139,16 +139,16 @@ function New-BaseProject {
   [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::Combine($dir, "src"))
   [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::Combine($dir, "include"))
   $caps = [System.IO.Path]::Combine($GeneratorDir, "capabilities", "Common.caps.xml") -replace '\\', '/'
-  Write-Text ([System.IO.Path]::Combine($dir, "HardwareProfile.xml")) (@(
+  Write-Text ([System.IO.Path]::Combine($dir, "HardwareManifest.xml")) (@(
     '<?xml version="1.0" encoding="utf-8"?>'
-    ('<HardwareProfile prefix="TST" moduleType="45" text="Ger' + $ae + 't">')
+    ('<HardwareManifest prefix="TST" moduleType="45" text="Ger' + $ae + 't">')
     '  <Output conf="src/T.conf.xml" share="src/T.share.xml" script="src/T.script.js" header="include/T.h" />'
     ('  <Import href="' + $caps + '" />')
     '  <Capability name="OwnA" text="Own A" expr="defined(TST_NEVER_A)" />'
     '  <Board define="DEVICE_REG1_LAN_TP_BASE" />'
     '  <Board define="DEVICE_REG1_LAN_BASE" />'
     '  <Board define="DEVICE_UP1_TAS_4X" />'
-    '</HardwareProfile>'
+    '</HardwareManifest>'
   ) -join "`n")
   Write-Text ([System.IO.Path]::Combine($dir, "src", "T.xml")) (@(
     '<?xml version="1.0" encoding="utf-8"?>'
@@ -246,46 +246,75 @@ Add-Test "outputs-stale" (T "Outputs: -Check reports a changed file") {
 # @brief Base project with the manifest and its slot file moved to src/ (paths of the manifest made relative to src/)
 function Copy-BaseManifestInSrc([string]$Name) {
   $d = Copy-Base $Name
-  $mf = [System.IO.Path]::Combine($d, "HardwareProfile.xml")
+  $mf = [System.IO.Path]::Combine($d, "HardwareManifest.xml")
   $t = (Read-Text $mf).Replace('conf="src/', 'conf="').Replace('share="src/', 'share="').Replace('script="src/', 'script="').Replace('header="include/', 'header="../include/')
-  Write-Text ([System.IO.Path]::Combine($d, "src", "HardwareProfile.xml")) $t
+  Write-Text ([System.IO.Path]::Combine($d, "src", "HardwareManifest.xml")) $t
   [System.IO.File]::Delete($mf)
-  Move-Item -LiteralPath ([System.IO.Path]::Combine($d, "HardwareProfile.slots")) -Destination ([System.IO.Path]::Combine($d, "src", "HardwareProfile.slots"))
+  Move-Item -LiteralPath ([System.IO.Path]::Combine($d, "HardwareManifest.slots")) -Destination ([System.IO.Path]::Combine($d, "src", "HardwareManifest.slots"))
   return $d
 }
 
-Add-Test "manifest-src" (T "Manifest: without -Manifest the generator takes src/HardwareProfile.xml, the slot file next to it; two manifests stop") {
+Add-Test "manifest-src" (T "Manifest: without -Manifest the generator takes src/HardwareManifest.xml, the slot file next to it; two manifests stop") {
   $d = Copy-BaseManifestInSrc "manifest-src"
-  $before = Read-Text ([System.IO.Path]::Combine($d, "src", "HardwareProfile.slots"))
+  $before = Read-Text ([System.IO.Path]::Combine($d, "src", "HardwareManifest.slots"))
   $r = Invoke-Generator $d @() ""; Assert-Exit $r 0
   # the move changes the output paths of the ETS fingerprint: the version guard warns until the version is raised
   Assert-Out $r 'ETS content changed since' (T "version guard warning after the move")
-  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "HardwareProfile.slots")))) (T "a slot file was written in the project folder")
-  $after = Read-Text ([System.IO.Path]::Combine($d, "src", "HardwareProfile.slots"))
+  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "HardwareManifest.slots")))) (T "a slot file was written in the project folder")
+  $after = Read-Text ([System.IO.Path]::Combine($d, "src", "HardwareManifest.slots"))
   $keep = { param($x) @($x -split "`n" | Where-Object { $_ -match '^(0x[0-9A-Fa-f]{4}|cap|val) ' }) -join "`n" }
   Assert-True (@((& $keep $before) -split "`n" | Where-Object { $_ -match '^0x' }).Count -eq 3) (T "the slot file holds no board lines to compare")
   Assert-True ((& $keep $before) -ceq (& $keep $after)) (T "the slot file in src/ lost or changed a bit or board number")
   Assert-True ((Read-Text ([System.IO.Path]::Combine($d, "include", "T.h"))).Contains("Build-HardwareProfile.ps1")) (T "header output ../include/T.h missing")
   $r = Invoke-Generator $d @("-Check") ""; Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
-  # -Init next to platformio.ini refuses while src/HardwareProfile.xml exists
+  # -Init next to platformio.ini refuses while src/HardwareManifest.xml exists
   Write-Text ([System.IO.Path]::Combine($d, "platformio.ini")) "[platformio]`n"
   $r = Invoke-Generator $d @("-Init") ""; Assert-Exit $r 1; Assert-Out $r 'Manifest exists' (T "-Init message")
-  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "HardwareProfile.xml")))) (T "-Init wrote a second manifest")
+  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "HardwareManifest.xml")))) (T "-Init wrote a second manifest")
   # <Boards platformio> without project="..": no platformio.ini next to the manifest in src/
-  $mf = [System.IO.Path]::Combine($d, "src", "HardwareProfile.xml")
+  $mf = [System.IO.Path]::Combine($d, "src", "HardwareManifest.xml")
   $keepMf = Read-Text $mf
-  Edit-File $mf '</HardwareProfile>' ('  <Boards platformio="tst_*" />' + "`n</HardwareProfile>")
+  Edit-File $mf '</HardwareManifest>' ('  <Boards platformio="tst_*" />' + "`n</HardwareManifest>")
   $r = Invoke-Generator $d @() ""; Assert-Exit $r 1; Assert-Out $r 'no platformio.ini in' (T "stop message")
   Write-Text $mf $keepMf
   # both places: stop
-  Copy-Item -LiteralPath ([System.IO.Path]::Combine($d, "src", "HardwareProfile.xml")) -Destination ([System.IO.Path]::Combine($d, "HardwareProfile.xml"))
+  Copy-Item -LiteralPath ([System.IO.Path]::Combine($d, "src", "HardwareManifest.xml")) -Destination ([System.IO.Path]::Combine($d, "HardwareManifest.xml"))
   $r = Invoke-Generator $d @() ""; Assert-Exit $r 1; Assert-Out $r 'Two manifests' (T "stop message")
 }
 
+Add-Test "manifest-oldname" (T "Manifest: the old name HardwareProfile.xml and the old root element <HardwareProfile> stop with the new name") {
+  $d = Copy-Base "manifest-oldname"
+  $mf = [System.IO.Path]::Combine($d, "HardwareManifest.xml")
+  $old = [System.IO.Path]::Combine($d, "HardwareProfile.xml")
+  Move-Item -LiteralPath $mf -Destination $old
+  $r = Invoke-Generator $d @() ""; Assert-Exit $r 1; Assert-Out $r 'is now called HardwareManifest.xml' (T "stop message")
+  Move-Item -LiteralPath $old -Destination $mf
+  Edit-File $mf '<HardwareManifest' '<HardwareProfile'
+  Edit-File $mf '</HardwareManifest>' '</HardwareProfile>'
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'is now <HardwareManifest>' (T "stop message")
+  Edit-File $mf '<HardwareProfile' '<HardwareManifest'
+  Edit-File $mf '</HardwareProfile>' '</HardwareManifest>'
+  # manifest renamed, slot file not: stop instead of new slots
+  $slots = [System.IO.Path]::Combine($d, "HardwareManifest.slots")
+  $oldSlots = [System.IO.Path]::Combine($d, "HardwareProfile.slots")
+  Move-Item -LiteralPath $slots -Destination $oldSlots
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'slot file of the old name' (T "stop message")
+  Move-Item -LiteralPath $oldSlots -Destination $slots
+  # old name in src/ and old next to new
+  $srcOld = [System.IO.Path]::Combine($d, "src", "HardwareProfile.xml")
+  Copy-Item -LiteralPath $mf -Destination $srcOld
+  $r = Invoke-Generator $d @() ""; Assert-Exit $r 1; Assert-Out $r 'old manifest is left over' (T "stop message")
+  [System.IO.File]::Delete($srcOld)
+  Copy-Item -LiteralPath $mf -Destination $old
+  $r = Invoke-Generator $d @() ""; Assert-Exit $r 1; Assert-Out $r 'old manifest is left over' (T "stop message")
+  [System.IO.File]::Delete($old)
+  $r = Invoke-Generator $d @() ""; Assert-Exit $r 0
+}
+
 Add-Test "bits-insert" (T "Bit order: new capability in front, every bit stays") {
-  $d = Copy-Base "bits-insert"; $slots = [System.IO.Path]::Combine($d, "HardwareProfile.slots")
+  $d = Copy-Base "bits-insert"; $slots = [System.IO.Path]::Combine($d, "HardwareManifest.slots")
   $before = @((Read-Text $slots) -split "`n" | Where-Object { $_ -match '^(cap|val) ' })
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  <Capability name="OwnA"' "  <Capability name=`"NewMid`" text=`"New`" expr=`"defined(TST_NEVER_B)`" />`n  <Capability name=`"OwnA`""
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '  <Capability name="OwnA"' "  <Capability name=`"NewMid`" text=`"New`" expr=`"defined(TST_NEVER_B)`" />`n  <Capability name=`"OwnA`""
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $after = @((Read-Text $slots) -split "`n" | Where-Object { $_ -match '^(cap|val) ' })
   foreach ($l in $before) { Assert-True ($after -contains $l) (T "recorded line lost or moved: {0}" $l) }
@@ -295,12 +324,12 @@ Add-Test "bits-insert" (T "Bit order: new capability in front, every bit stays")
 
 Add-Test "bits-removed" (T "Bit order: a removed capability stops") {
   $d = Copy-Base "bits-removed"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) "  <Capability name=`"OwnA`" text=`"Own A`" expr=`"defined(TST_NEVER_A)`" />`n" ""
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) "  <Capability name=`"OwnA`" text=`"Own A`" expr=`"defined(TST_NEVER_A)`" />`n" ""
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r "OwnA' is gone from the manifest" (T "stop message")
 }
 
 Add-Test "bits-twice" (T "Bit order: a bit listed twice in the slot file stops") {
-  $d = Copy-Base "bits-twice"; $slots = [System.IO.Path]::Combine($d, "HardwareProfile.slots")
+  $d = Copy-Base "bits-twice"; $slots = [System.IO.Path]::Combine($d, "HardwareManifest.slots")
   Write-Text $slots ((Read-Text $slots) + "cap 0 = Other`n")
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'listed twice' (T "stop message")
 }
@@ -317,37 +346,37 @@ Add-Test "guard-attribute" (T "Version guard: an attribute warns, a new version 
   $r = Invoke-Generator $d @("-Check"); Assert-Out $r 'ETS content changed since T\.xml ApplicationVersion 1\.0' (T "same version")
   Edit-File $prod 'ApplicationVersion="1.0"' 'ApplicationVersion="1.1"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 0; Assert-NoOut $r 'ETS content changed' (T "new version")
-  Assert-True ((Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))) -match '(?m)^ets "T\.xml" 1\.1 [0-9A-F]{16}$') (T "slot file has no ets line for 1.1")
+  Assert-True ((Read-Text ([System.IO.Path]::Combine($d, "HardwareManifest.slots"))) -match '(?m)^ets "T\.xml" 1\.1 [0-9A-F]{16}$') (T "slot file has no ets line for 1.1")
 }
 
 Add-Test "guard-duplicate" (T "Version guard: a second ets line stops") {
-  $d = Copy-Base "guard-duplicate"; $slots = [System.IO.Path]::Combine($d, "HardwareProfile.slots")
+  $d = Copy-Base "guard-duplicate"; $slots = [System.IO.Path]::Combine($d, "HardwareManifest.slots")
   Write-Text $slots ((Read-Text $slots) + "ets `"T.xml`" 0.9 0123456789ABCDEF`n")
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'second ets line' (T "stop message")
 }
 
 Add-Test "manifest-unknown" (T "Manifest: an unknown attribute warns") {
   $d = Copy-Base "manifest-unknown"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '<Capability name="OwnA"' '<Capability foo="1" name="OwnA"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '<Capability name="OwnA"' '<Capability foo="1" name="OwnA"'
   $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'attribute foo is unknown' (T "warning")
 }
 
 Add-Test "manifest-prefix" (T "Manifest: an invalid prefix stops") {
   $d = Copy-Base "manifest-prefix"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'prefix="TST"' 'prefix="T-1"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'prefix="TST"' 'prefix="T-1"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'must be letters and digits' (T "stop message")
 }
 
 Add-Test "manifest-ids" (T "Manifest: the removed ids=`"index`" stops") {
   $d = Copy-Base "manifest-ids"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'prefix="TST"' 'prefix="TST" ids="index"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'prefix="TST"' 'prefix="TST" ids="index"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'was removed' (T "stop message")
 }
 
 $FixLine = '<Fix name="W" capability="Lan" ref="%AID%_P-1401001_R-140100100" value="1" />'
 Add-Test "fixes-parts" (T "Fixes: parts file with both Assigns and the read-only row") {
   $d = Copy-Base "fixes-parts"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">$FixLine</Fixes>`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ("  <Fixes output=`"src/T.fixes.gen.xml`">$FixLine</Fixes>`n</HardwareManifest>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.fixes.gen.xml"))
   Assert-True ($f.Contains('<ParameterRef Id="%AID%_P-1401001_R-140100199" RefId="%AID%_P-1401001" Access="Read" />')) (T "read-only ParameterRef missing")
@@ -358,19 +387,19 @@ Add-Test "fixes-parts" (T "Fixes: parts file with both Assigns and the read-only
 
 Add-Test "fixes-case" (T "Fixes: wrong upper/lower case stops") {
   $d = Copy-Base "fixes-case"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine.Replace('"Lan"', '"lan"') + "</Fixes>`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine.Replace('"Lan"', '"lan"') + "</Fixes>`n</HardwareManifest>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'case-sensitive' (T "stop message")
 }
 
 Add-Test "fixes-twice" (T "Fixes: the same ref twice stops") {
   $d = Copy-Base "fixes-twice"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine + $FixLine.Replace('name="W"', 'name="W2"') + "</Fixes>`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine + $FixLine.Replace('name="W"', 'name="W2"') + "</Fixes>`n</HardwareManifest>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'already fixed' (T "stop message")
 }
 
 Add-Test "fixes-notcap" (T "Fixes: capability=`"!Name`" fixes the boards without the capability (e.g. hide a module)") {
   $d = Copy-Base "fixes-notcap"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`"><Fix name=`"NoLan`" capability=`"!Lan`" ref=`"%AID%_UP-1099825_R-109982501`" value=`"0`" show=`"assign`" /></Fixes>`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ("  <Fixes output=`"src/T.fixes.gen.xml`"><Fix name=`"NoLan`" capability=`"!Lan`" ref=`"%AID%_UP-1099825_R-109982501`" value=`"0`" show=`"assign`" /></Fixes>`n</HardwareManifest>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.fixes.gen.xml"))
   Assert-True ($f -match '<when test="4611">\s*<Assign TargetParamRefRef="%AID%_UP-1099825_R-109982501" Value="0" />') (T "!Lan: only board 4611 (no LAN) must get the value")
@@ -379,7 +408,7 @@ Add-Test "fixes-notcap" (T "Fixes: capability=`"!Name`" fixes the boards without
 
 Add-Test "page-cardfeatures" (T "Page: cardFeatures lists the features of the selected board under the card, boards with the same lines share a when") {
   $d = Copy-Base "page-cardfeatures"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' "  <Page features=`"Lan`" cardFeatures=`"true`" />`n</HardwareProfile>"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' "  <Page features=`"Lan`" cardFeatures=`"true`" />`n</HardwareManifest>"
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $x = New-Object System.Xml.XmlDocument; $x.LoadXml((Read-Text ([System.IO.Path]::Combine($d, "src", "T.share.xml"))))
   $ns = New-Object System.Xml.XmlNamespaceManager($x.NameTable); $ns.AddNamespace("k", "http://knx.org/xml/project/20")
@@ -393,7 +422,7 @@ Add-Test "page-cardfeatures" (T "Page: cardFeatures lists the features of the se
   Assert-True ($up1.Count -eq 1 -and $null -ne $up1[0].SelectSingleNode("k:ParameterSeparator[@Text='LAN: nein']", $ns) -and $up1[0].SelectNodes("k:ParameterSeparator", $ns).Count -eq 2) (T "card features: 4611 with the headline and LAN: nein only")
   $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
   $d = Copy-Base "page-cardfeatures-none"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' "  <Page cardFeatures=`"true`" />`n</HardwareProfile>"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' "  <Page cardFeatures=`"true`" />`n</HardwareManifest>"
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'cardFeatures needs features' (T "stop message")
 }
 
@@ -401,7 +430,7 @@ Add-Test "fixes-tokens" (T "Fixes: ref with tokens of a channel template or part
   $d = Copy-Base "fixes-tokens"
   $tok = '<Fix name="Ch" capability="Lan" ref="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701" value="2" />' +
          '<Fix name="Sc" capability="Lan" ref="%AID%_UP-%TT%%CC%%PPP+3%_R-%TT%%CC%%PPP+3%01" value="5" />'
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">$FixLine$tok</Fixes>`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ("  <Fixes output=`"src/T.fixes.gen.xml`">$FixLine$tok</Fixes>`n</HardwareManifest>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.fixes.gen.xml"))
   $shared = $f.Substring($f.IndexOf('<Block name="ParameterRefs">')); $shared = $shared.Substring(0, $shared.IndexOf('</Block>'))
@@ -411,7 +440,7 @@ Add-Test "fixes-tokens" (T "Fixes: ref with tokens of a channel template or part
   Assert-True ($f.Contains('<Assign TargetParamRefRef="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701" Value="2" />') -and $f.Contains('<Assign TargetParamRefRef="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05799" Value="2" />')) (T "template fix: Assigns of the setting and the read-only row missing")
   $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
   $d = Copy-Base "fixes-badref"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine.Replace('_R-140100100', '_R-140200100') + "</Fixes>`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine.Replace('_R-140100100', '_R-140200100') + "</Fixes>`n</HardwareManifest>")
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'or producer tokens' (T "stop message")
 }
 
@@ -455,7 +484,7 @@ function Copy-BaseWithBoardMacros([string]$Name, [string]$ManifestLines) {
     '  </ChannelIndependentBlock></Dynamic></ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData>'
     '</KNX>'
   ) -join "`n")
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <IncludePath>include</IncludePath>`n" + $ManifestLines + "`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ("  <IncludePath>include</IncludePath>`n" + $ManifestLines + "`n</HardwareManifest>")
   return $d
 }
 $RowsSrc = '<PartRows source="src/P.part.xml" output="src/T.rows.gen.xml">'
@@ -506,9 +535,9 @@ function Copy-BaseWithValueNotices([string]$Name, [string]$Lines, [switch]$Envs)
     '#endif'
   ) -join "`n")
   if ($Envs) {
-    $mf = [System.IO.Path]::Combine($d, "HardwareProfile.xml")
+    $mf = [System.IO.Path]::Combine($d, "HardwareManifest.xml")
     Write-Text $mf ((Read-Text $mf) -replace '  <Board define="[A-Z0-9_]+" />\r?\n', '')
-    Edit-File $mf '</HardwareProfile>' ('  <Boards platformio="tst_*" />' + "`n</HardwareProfile>")
+    Edit-File $mf '</HardwareManifest>' ('  <Boards platformio="tst_*" />' + "`n</HardwareManifest>")
     Write-Text ([System.IO.Path]::Combine($d, "platformio.ini")) (@(
       '[env:tst_tp]', 'build_flags = -D DEVICE_REG1_LAN_TP_BASE'
       '[env:tst_lan]', 'build_flags = -D DEVICE_REG1_LAN_BASE'
@@ -516,7 +545,7 @@ function Copy-BaseWithValueNotices([string]$Name, [string]$Lines, [switch]$Envs)
       '[env:tst_tas]', 'build_flags = -D DEVICE_UP1_TAS_4X'
     ) -join "`n")
   }
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ('  <BoardTable name="Off" header="include/Off.h" scan="^TST_OFF_(\d+)$" />' + "`n" + $Lines + "`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ('  <BoardTable name="Off" header="include/Off.h" scan="^TST_OFF_(\d+)$" />' + "`n" + $Lines + "`n</HardwareManifest>")
   return $d
 }
 $VnRef = '%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701'
@@ -807,7 +836,7 @@ function Copy-BaseWithFilter([string]$Name, [string]$Filters, [switch]$NoUnion) 
     '    <ParameterRef Id="%AID%_P-%TT%00070_R-%TT%0007001" RefId="%AID%_P-%TT%00070" />'
     '  </ParameterRefs>'
     '</Static></ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData></KNX>')) -join "`n")
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ($Filters + "`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ($Filters + "`n</HardwareManifest>")
   return $d
 }
 
@@ -843,7 +872,7 @@ function Copy-BaseWithTemplFilter([string]$Name, [string]$Filters) {
     '  </ParameterRefs>'
     '</Static></ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData></KNX>')) -join "`n")
   Write-Text ([System.IO.Path]::Combine($d, "src", "two.values")) "# 2D effects`n3`n4-5`n"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ($Filters + "`n</HardwareProfile>")
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' ($Filters + "`n</HardwareManifest>")
   return $d
 }
 
@@ -896,14 +925,14 @@ Add-Test "filters-sets" (T "Filters: value set per board (first matching define,
   Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%00701" Name="ModeF1" ParameterType="%AID%_PT-ModeF1" Text="Modus" Value="1" />')) (T "parameter of slot 1 must default to its first value 1")
   Assert-True ($f -match '<when test="0 4611">\s*<ParameterRefRef RefId="%AID%_UP-%TT%00060_R-%TT%0006001" IndentLevel="1" />') (T "not selected and board 4611: the carrier row missing")
   Assert-True ($f -match '<when test="4129">\s*<ParameterRefRef RefId="%AID%_P-%TT%00700_R-%TT%0070001" IndentLevel="1" />\s*<Assign TargetParamRefRef="%AID%_UP-%TT%00060_R-%TT%0006001" SourceParamRefRef="%AID%_P-%TT%00700_R-%TT%0070001" />') (T "board 4129: own list with copy into the carrier missing")
-  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))
+  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareManifest.slots"))
   Assert-True ($slots.Contains("filter Mode board:DEVICE_REG1_LAN_TP_BASE = 0") -and $slots.Contains("filter Mode board:DEVICE_REG1_LAN_* = 1")) (T "slot lines of the rules missing")
   $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
   # another list for the same rule keeps its slot and id; a new rule takes the next slot
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'values="1 5-6"' 'values="1 5"'
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '<Allow capability="Tp"' '<Allow board="DEVICE_UP1_TAS_4X" values="0 6" /><Allow capability="Tp"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'values="1 5-6"' 'values="1 5"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '<Allow capability="Tp"' '<Allow board="DEVICE_UP1_TAS_4X" values="0 6" /><Allow capability="Tp"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
-  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))
+  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareManifest.slots"))
   Assert-True ($slots.Contains("filter Mode board:DEVICE_REG1_LAN_TP_BASE = 0") -and $slots.Contains("filter Mode board:DEVICE_REG1_LAN_* = 1") -and $slots.Contains("filter Mode board:DEVICE_UP1_TAS_4X = 2")) (T "a changed list must keep the slot of its rule, a new rule must take the next slot")
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.filters.gen.xml"))
   $t1 = $f.Substring($f.IndexOf('<ParameterType Id="%AID%_PT-ModeF1"')); $t1 = $t1.Substring(0, $t1.IndexOf('</ParameterType>'))
@@ -942,21 +971,21 @@ Add-Test "filters-rules" (T "Filters: rule keys ignore case, an orphan rule warn
   # a rule written in other case keeps its slot and its boards
   $d = Copy-BaseWithFilter "filters-rulecase" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef + '<Allow board="DEVICE_UP1_TAS_4X" values="2" /></Filter></Filters>')
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'board="DEVICE_UP1_TAS_4X"' 'board="Device_Up1_Tas_4x"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'board="DEVICE_UP1_TAS_4X"' 'board="Device_Up1_Tas_4x"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.filters.gen.xml"))
   Assert-True ($f -match '<when test="4611">\s*<ParameterRefRef RefId="%AID%_P-%TT%00700_R-%TT%0070001" IndentLevel="1" />') (T "a rule in other case must keep its slot and its boards")
   # a rule that now gives the full list still matches its boards: no orphan warning, the slot stays
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'values="2"' 'values="0-6"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'values="2"' 'values="0-6"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 0; Assert-NoOut $r 'match no board' (T "a rule with the full list is no orphan")
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'values="0-6"' 'values="2"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'values="0-6"' 'values="2"'
   # an edited rule: the old line matches no board (warning); a digit number has room for the new slot
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'board="Device_Up1_Tas_4x"' 'board="DEVICE_REG1_LAN_BASE"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'board="Device_Up1_Tas_4x"' 'board="DEVICE_REG1_LAN_BASE"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 0; Assert-Out $r 'match no board' (T "warning on an orphan rule")
-  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareProfile.slots"))
+  $slots = Read-Text ([System.IO.Path]::Combine($d, "HardwareManifest.slots"))
   Assert-True ($slots.Contains("filter Mode board:DEVICE_UP1_TAS_4X = 0") -and $slots.Contains("filter Mode board:DEVICE_REG1_LAN_BASE = 1")) (T "the orphan rule keeps slot 0, the new rule takes slot 1")
   # an old slot line (value set instead of rule) stops
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.slots")) 'filter Mode board:DEVICE_UP1_TAS_4X = 0' 'filter Mode 0,1 = 0'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.slots")) 'filter Mode board:DEVICE_UP1_TAS_4X = 0' 'filter Mode 0,1 = 0'
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'is no slot line' (T "stop message")
   # a blank in a board pattern stops (the slot line could not be read back)
   $d = Copy-BaseWithFilter "filters-blank" ('<Filters output="src/T.filters.gen.xml">' + $FilterRef + '<Allow board="DEVICE_UP1 *" values="2" /></Filter></Filters>')
@@ -979,9 +1008,9 @@ Add-Test "filters-rules" (T "Filters: rule keys ignore case, an orphan rule warn
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'reach the next instance \(increment 20\)' (T "stop message")
   $d = Copy-BaseWithTemplFilter "filters-tokrule" ('<Filters output="src/T.filters.gen.xml">' + ($tf -f '', 'DEVICE_UP1_TAS_4X') + '</Filters>')
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'board="DEVICE_UP1_TAS_4X"' 'board="DEVICE_REG1_LAN_BASE"'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'board="DEVICE_UP1_TAS_4X"' 'board="DEVICE_REG1_LAN_BASE"'
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'write its key into that rule' (T "stop message")
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.slots")) 'filter SceneFx board:DEVICE_UP1_TAS_4X = 0' 'filter SceneFx board:DEVICE_REG1_LAN_BASE = 0'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.slots")) 'filter SceneFx board:DEVICE_UP1_TAS_4X = 0' 'filter SceneFx board:DEVICE_REG1_LAN_BASE = 0'
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.filters.gen.xml"))
   Assert-True ($f -match '<when test="4130">\s*<ParameterRefRef RefId="%AID%_P-%TT%%CC%%PPP\+19%_R-%TT%%CC%%PPP\+19%01"') (T "the edited rule must keep the id %PPP+19%")
@@ -1011,7 +1040,7 @@ function Copy-BaseWithLedBoards([string]$Name) {
     (& $board 'TST_SLED_AUTO' '0x3F70' @('#define OPENKNX_SERIALLED_ENABLE', '#define OPENKNX_SERIALLED_PIN 16', '#define PROG_LED_PIN 0', '#define INFO1_LED_PIN 1', '#define INFO3_LED_PIN 3')) +
     (& $board 'TST_SLED_INIT' '0x3F71' @('#define OPENKNX_SERIALLED_ENABLE', '#define OPENKNX_SERIALLED_PIN 17', '#define LED_INIT() do { } while (0)', '#define PROG_LED_PIN 5', '#define INFO1_LED_PIN 6')) +
     (& $board 'TST_GPIO_LED' '0x3F72' @('#define PROG_LED_PIN 7', '#define INFO1_LED_PIN 0x101', '#define INFO2_LED_PIN 2', '#define SAVE_POWER_PIN 9'))) -join "`n")
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' (@(
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '</HardwareManifest>' (@(
     '  <IncludePath>include</IncludePath>'
     '  <Board define="TST_SLED_AUTO" />'
     '  <Board define="TST_SLED_INIT" />'
@@ -1021,7 +1050,7 @@ function Copy-BaseWithLedBoards([string]$Name) {
     '    <Use name="A" value="gpio" port="%AID%_P-%TT%00050_R-%TT%0005001" />'
     '    <Use name="B" value="gpio" port="%AID%_P-%TT%00051_R-%TT%0005101" />'
     '  </Conflicts>'
-    '</HardwareProfile>') -join "`n")
+    '</HardwareManifest>') -join "`n")
   return $d
 }
 
@@ -1066,26 +1095,26 @@ Add-Test "reserved-serialled-header" (T "Reserved: isReservedGpio of the firmwar
 Add-Test "conflicts-channeltoken" (T "Conflicts: <ChannelBlock> with channelToken %C% (default) and %CC% (flag numbers, template ref), wrong token or number stops") {
   $cb = '    <ChannelBlock name="Ch" text="Kanal {0}" uses="A B" />' + "`n  </Conflicts>"
   $d = Copy-BaseWithLedBoards "conflicts-ctok1"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  </Conflicts>' ($cb -f '%C%')
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '  </Conflicts>' ($cb -f '%C%')
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.conflicts.gen.xml"))
   Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%00911"') -and $f.Contains('<Parameter Id="%AID%_P-%TT%00912"') -and $f.Contains('<ParameterRefRef RefId="%AID%_P-%TT%0091%C%_R-%TT%0091%C%01" />')) (T "%C%: flags 911/912 and template ref %TT%0091%C% expected")
   $d = Copy-BaseWithLedBoards "conflicts-ctok2"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="900" reserved="true" channelToken="%CC%">'
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  </Conflicts>' ($cb -f '%CC%')
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'number="900" reserved="true">' 'number="900" reserved="true" channelToken="%CC%">'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '  </Conflicts>' ($cb -f '%CC%')
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.conflicts.gen.xml"))
   Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%01001"') -and $f.Contains('<Parameter Id="%AID%_P-%TT%01002"') -and $f.Contains('<ParameterRefRef RefId="%AID%_P-%TT%010%CC%_R-%TT%010%CC%01" />')) (T "%CC%: flags 1001/1002 and template ref %TT%010%CC% expected")
   $d = Copy-BaseWithLedBoards "conflicts-ctok3"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="950" reserved="true" channelToken="%CC%">'
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  </Conflicts>' ($cb -f '%CC%')
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'number="900" reserved="true">' 'number="950" reserved="true" channelToken="%CC%">'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) '  </Conflicts>' ($cb -f '%CC%')
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'must be a multiple of 100' (T "stop message")
   $d = Copy-BaseWithLedBoards "conflicts-ctok4"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="900" reserved="true" channelToken="%N%">'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'number="900" reserved="true">' 'number="900" reserved="true" channelToken="%N%">'
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'channelToken must be' (T "stop message")
   # a channel template next to the output: %TT%%CC%001 of channel 1 is the 5-digit number 01001 = flag B of number 1000
   $d = Copy-BaseWithLedBoards "conflicts-ctok5"
-  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="1000" reserved="true">'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) 'number="900" reserved="true">' 'number="1000" reserved="true">'
   Write-Text ([System.IO.Path]::Combine($d, "src", "X.templ.xml")) '<KNX><Parameter Id="%AID%_UP-%TT%%CC%001" Name="Ch%C%A" /></KNX>'
   $r = Invoke-Generator $d @(); Assert-Exit $r 0; Assert-Out $r 'channel 1 = flag 01001 of B' (T "warning on a template id")
 }
@@ -1147,7 +1176,7 @@ Add-Test "language-de" (T "Language: German by default") {
   $d = Copy-Base "language-de"
   $r = Invoke-Generator $d @("-Check", "-Language", "en"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
   $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
-  try { $o = (& $PwshExe -NoProfile -ExecutionPolicy Bypass -File $Generator -Manifest ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) -Check 2>&1 | Out-String) }
+  try { $o = (& $PwshExe -NoProfile -ExecutionPolicy Bypass -File $Generator -Manifest ([System.IO.Path]::Combine($d, "HardwareManifest.xml")) -Check 2>&1 | Out-String) }
   finally { $ErrorActionPreference = $prev }
   if ($o -notmatch 'Check: aktuell') { throw (T "default language is not German`n{0}" (Get-Tail $o)) }
 }

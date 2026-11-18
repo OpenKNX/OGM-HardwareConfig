@@ -253,7 +253,7 @@ function New-PortValuesHeader($M) {
   $p = $M.Prefix
   $sb = New-Object System.Text.StringBuilder
   [void]$sb.AppendLine("")
-  [void]$sb.AppendLine("// Port selections (HardwareProfile.xml portManualValue / portNoneValue, the same values as the ETS conflict check):")
+  [void]$sb.AppendLine("// Port selections (HardwareManifest.xml portManualValue / portNoneValue, the same values as the ETS conflict check):")
   [void]$sb.AppendLine("// 0..n-1 = port n of the board (hwPortGpio), PORT_MANUAL = the manual GPIO parameter, PORT_NONE and every value that")
   [void]$sb.AppendLine("// is no port of the board = no GPIO; PORT_MANUAL and PORT_NONE are tested first, a described port on one of them is")
   [void]$sb.AppendLine("// never used (the generator stops when ETS offers such a port). Pass Param${p}_HardwareSelect as 'selected': another")

@@ -8,7 +8,7 @@
       %HWP_CAP_<Name>%           hardware IDs with the capability (e.g. %HWP_CAP_Lan%)
       %HWP_NOCAP_<Name>%         hardware IDs without it
       %HWP_VAL_<Name>_GE_<n>%    hardware IDs whose value is at least n (e.g. 3 binary inputs)
-    A new board in HardwareProfile.xml changes the feature flags; this file stays as it is.
+    A new board in HardwareManifest.xml changes the feature flags; this file stays as it is.
   -->
   <!-- port selection per board (src/hw/Outputs.xml): the parameters of one selection share one byte on purpose (union) -->
   <op:nowarn id="10" regex="Parameter DEMO_Out[12](Data|Clock)B\d+" />
