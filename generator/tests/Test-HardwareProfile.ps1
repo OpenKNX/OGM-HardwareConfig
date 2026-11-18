@@ -913,29 +913,28 @@ Write-Host (T "  work folder: {0}" $Work) -ForegroundColor DarkGray
 Write-Host (T "  create the base project ...") -ForegroundColor Cyan
 $script:Base = New-BaseProject
 Write-Host ""
-$width = ($selected | ForEach-Object { $_.Name.Length } | Measure-Object -Maximum).Maximum
+# one line per test: "[n/N] <spinner> name" while it runs (console only), then "[n/N] <mark> name  <time>"; the reason of a
+# failure below it
 $n = 0
 foreach ($t in $selected) {
   $n++
   $num = "  [{0,2}/{1}] " -f $n, $selected.Count
+  Start-ProgressLine $num $t.Name
   $why = Test-Need $t.Need
-  if ($why) {
-    Write-Host $num -NoNewline -ForegroundColor DarkGray; Write-Host $t.Name.PadRight($width) -NoNewline
-    Write-Host (" " + (Get-PhaseMark "skip")) -ForegroundColor Yellow -NoNewline; Write-Host ("          " + $why) -ForegroundColor DarkGray; $skip++; continue
-  }
-  Write-Host $num -NoNewline -ForegroundColor DarkGray; Write-Host $t.Name.PadRight($width) -NoNewline
-  $sw = [System.Diagnostics.Stopwatch]::StartNew()
+  if ($why) { Complete-ProgressLine "skip" $why -NoTime; $skip++; continue }
   try {
     & $t.Run
-    Write-Host (" " + (Get-PhaseMark "ok")) -ForegroundColor Green -NoNewline; Write-Host ("{0,6:N1} s" -f $sw.Elapsed.TotalSeconds) -ForegroundColor DarkGray
+    Complete-ProgressLine "ok"
     $pass++
   }
   catch {
-    Write-Host (" " + (Get-PhaseMark "fail")) -ForegroundColor Red -NoNewline; Write-Host ("{0,6:N1} s" -f $sw.Elapsed.TotalSeconds) -ForegroundColor DarkGray
-    foreach ($l in ("$($_.Exception.Message)" -split "`n")) { Write-Host ("        " + $l) -ForegroundColor Red }
+    $msg = "$($_.Exception.Message)"
+    Complete-ProgressLine "fail"
+    foreach ($l in ($msg -split "`n")) { Write-Host ("        " + $l) -ForegroundColor Red }
     $fail++; $failed += $t.Id
   }
 }
+Stop-ProgressSpinner
 
 Write-Host ""
 $color = "Green"; if ($fail -gt 0) { $color = "Red" }
@@ -944,6 +943,7 @@ if ($fail -gt 0) { Write-Host (T "  failed: {0}" ($failed -join ", ")) -Foregrou
 
 }
 finally {
+  Stop-ProgressSpinner
   # links as links only (Test-DemoUpdate and init-second leave junctions / symbolic links to the repositories)
   if ($KeepWork) { Write-Host (T "  work folder kept: {0}" $Work) -ForegroundColor DarkGray }
   else { Remove-Tree $Work }

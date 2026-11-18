@@ -227,8 +227,6 @@ $script:Compact = -not ($Detailed -or $ListIds -or $NextId -or $Init -or $DryRun
 $script:CheckMode = [bool]$Check
 $script:LastStep = ""
 $script:WrittenCount = 0
-$script:ActivityShown = $false
-$script:ActivityWidth = 79
 $script:WrittenFiles = New-Object System.Collections.Generic.List[string]
 $script:InitMode = $false
 $script:NoBoardEnvs = @()
@@ -303,10 +301,11 @@ try {
 }
 catch {
   # an unexpected error (not Stop-WithError): the running step gets its cross line, the error goes on as before
-  if ($script:PhaseWatch) { Write-PhaseLine (Get-PhaseMark "fail") "Red" ""; $script:PhaseWatch = $null }
+  if ($script:PhaseWatch) { Write-PhaseLine "fail" ""; $script:PhaseWatch = $null }
   throw
 }
 finally {
-  Clear-Activity
+  # also after exit (Stop-WithError, -Check): the spinner runspace ends, its line is cleared
+  Stop-ProgressSpinner
   if (Test-Path $script:TempDir) { Remove-Item -Recurse -Force $script:TempDir -ErrorAction SilentlyContinue }
 }
