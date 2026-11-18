@@ -38,6 +38,7 @@
     //   GPIO19 - Add-On DIGITAL IN
     // ============================================================================
     #define DEVICE_HW_ID 0x2500
+    #define HW_INFO_LOGO "HardwareConfig/Others/Shelly/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY
     #define DEVICE_ID "Shelly-Plus-1"
     #define DEVICE_NAME "Shelly Plus 1"
@@ -76,6 +77,7 @@
     // PCB v0.1.9 (single core, 160 MHz) and v0.2.0 (dual core, 240 MHz): same pins
     // ============================================================================
     #define DEVICE_HW_ID 0x2501
+    #define HW_INFO_LOGO "HardwareConfig/Others/Shelly/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY
     #define DEVICE_ID "Shelly-Plus-1PM"
     #define DEVICE_NAME "Shelly Plus 1PM"
@@ -114,6 +116,7 @@
     //                                                            GPIO37 - NTC (input only)
     // ============================================================================
     #define DEVICE_HW_ID 0x2502
+    #define HW_INFO_LOGO "HardwareConfig/Others/Shelly/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY
     #define DEVICE_ID "Shelly-Plus-2PM-v015"
     #define DEVICE_NAME "Shelly Plus 2PM (PCB v0.1.5)"
@@ -153,6 +156,7 @@
     //   GPIO12 - Relay 2               GPIO25 - I2C SCL
     // ============================================================================
     #define DEVICE_HW_ID 0x2503
+    #define HW_INFO_LOGO "HardwareConfig/Others/Shelly/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY
     #define DEVICE_ID "Shelly-Plus-2PM"
     #define DEVICE_NAME "Shelly Plus 2PM (PCB v0.1.9)"
@@ -191,6 +195,7 @@
     // Button / LED pins are not in the source; PROG_BUTTON_PIN stays open until measured.
     // ============================================================================
     #define DEVICE_HW_ID 0x2504
+    #define HW_INFO_LOGO "HardwareConfig/Others/Shelly/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY
     #define DEVICE_ID "Shelly-Plus-i4"
     #define DEVICE_NAME "Shelly Plus i4"
@@ -220,6 +225,7 @@
     //       for channel 2. Order of OPENKNX_BI_GPIO_PINS to be measured.
     // ============================================================================
     #define DEVICE_HW_ID 0x2510
+    #define HW_INFO_LOGO "HardwareConfig/Others/Shelly/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY
     #define DEVICE_ID "Shelly-2PM-Gen3"
     #define DEVICE_NAME "Shelly 2PM Gen3"
@@ -260,6 +266,7 @@
     // First flash only over UART (plug has to be opened), no OTA from the stock firmware.
     // ============================================================================
     #define DEVICE_HW_ID 0x2511
+    #define HW_INFO_LOGO "HardwareConfig/Others/Shelly/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY
     #define DEVICE_ID "Shelly-Plug-S-Gen3"
     #define DEVICE_NAME "Shelly Plug S MTR Gen3"

@@ -24,7 +24,7 @@ Beispiel-Applikation: [examples/HardwareProfileDemo](../examples/HardwareProfile
 | `QUICKSTART.md` | Schnellstart: das Hardware-Profil in fünf Schritten in ein bestehendes OAM einbinden |
 | `Anwendungsfaelle.md` | Rezepte mit Beispielen: Module, Feature-Flags, Kanalzahl, Auswahllisten, Sensoren, Netzwerk, Firmware |
 | `tests/` | `Test-HardwareProfile.ps1`: Selbsttest (auch `Build-HardwareProfile.ps1 -SelfTest`), siehe [Selbsttest](#selbsttest) |
-| `helpers/` | vom Aufrufer per Dot-Source geladen: `TemplateEngine.ps1` (Vorlagen), `QrCode.ps1` (QR-Kodierer), `PngImage.ps1` (PNG lesen/schreiben, QR-Code + Link) |
+| `helpers/` | vom Aufrufer per Dot-Source geladen: `TemplateEngine.ps1` (Vorlagen), `QrCode.ps1` (QR-Kodierer), `PngImage.ps1` (PNG lesen/schreiben, QR-Code + Beschriftung) |
 | `capabilities/` | `Common.caps.xml`: Fähigkeiten-Paket zum Einbinden per `<Import href>` (LAN, WLAN, Display, … aus den Board-Headern, dazu die gesperrten Plattform-Pins); optional, aber empfohlen, `-Init` bindet es ein. Eigene Fähigkeiten definiert jedes OAM in seinem Manifest; `ThirdParty` ist fest eingebaut |
 | `templates/` | Standard-Vorlagen für `<Generate template="@hw/…">` |
 | `assets/` | Logo, Badge, Schriftatlas, Seiten-Icon (siehe `assets/README.md`) |
@@ -564,7 +564,7 @@ Träger hat Speicher: Firmware, `choose` auf dem Träger und die Konfliktprüfun
 
 ## Hardware-Seite (Gerätekarte)
 
-Eine OpenKNX-Seite „Gerät“ mit Auswahl, Geräteabfrage und Gerätekarte. Alles ist ETS-Text, nur Logo, Badge, QR-Code und
+Eine OpenKNX-Seite „Gerät“ mit Auswahl, Geräteabfrage und Gerätekarte. Alles ist ETS-Text, nur Logo, Stempel, QR-Code und
 das Schritt-Bild sind Bilder (ETS skaliert Bilder mit der Windows-Skalierung, Bildtext wird dabei weich).
 
 ```
@@ -573,15 +573,26 @@ Nicht gewählt (Baum: „Gerät (nicht gewählt)“)   Gerät gewählt (Baum: �
 Gerät auswählen                                 Gerät auswählen
 <intro>                                         <intro>
 Gerätetyp  [Nicht gewählt          v]           Gerätetyp  [OpenKNXiao V1 KNeoPix   v]
-─────────────────────────────────────           [OpenKNX-Logo] bzw. [Drittanbieter-Badge]
-Oder automatisch erkennen                       OpenKNXiao V1 KNeoPix RP2350   (Überschrift)
-           [Vom Gerät lesen]                    <HW_INFO_TEXT>                 [QR-Code]
-(i) <queryHelp>: „Vom Gerät lesen“ ist                                         go.openknx.de/kneopix
-    grau/inaktiv? 1. … 2. … 3. …                (i) <Notice>   nur Drittanbieter
+─────────────────────────────────────           OpenKNXiao V1 KNeoPix RP2350   (Überschrift)
+Oder automatisch erkennen                       [Logo]       <HW_INFO_TEXT>        [QR-Code]
+           [Vom Gerät lesen]                    [Stempel]    <HW_INFO_TEXT2>       Geräteinfo
+(i) <queryHelp>: „Vom Gerät lesen“ ist          (i) <Notice>   nur Drittanbieter
+    grau/inaktiv? 1. … 2. … 3. …
 [Schritt-Bild <queryImage>]
 ```
 
-Der Abfrage-Knopf steht nur bei „Nicht gewählt“. Ohne Info-URL entfällt der QR-Code, der Text nutzt die volle Breite.
+Der Abfrage-Knopf steht nur bei „Nicht gewählt“. Die Karte ist ein Raster mit einem Element je Zelle: links das Logo und
+darunter der Stempel „Drittanbieter“ (nur Boards mit `DEVICE_THIRD_PARTY`), in der Mitte `HW_INFO_TEXT` (sonst `<Page
+infoDefault>`) und darunter `HW_INFO_TEXT2` (zwei Textelemente, ETS nimmt je Text höchstens 255 Zeichen), rechts neben dem
+ersten Text das Bild „QR-Code + `<InfoImage caption>`“ (Standard „Geräteinfo“, die URL steht im QR-Code). Eine Spalte ohne
+Inhalt entfällt: ohne Info-URL kein QR-Code, der Text nutzt die Breite. Jedes Logo ist auf die Höhe des Bilds „QR-Code +
+Beschriftung“ aufgefüllt und steht mittig zum QR-Code, auch ohne QR-Code: alle Logos stehen auf einer Linie, der Stempel darunter.
+Logo: `<InfoImage><Logo>` des Boards, sonst `HW_INFO_LOGO` des Board-Blocks (Pfad relativ zu einem Include-Ordner des
+Generators, gesucht erst in `<IncludePath>` des Manifests, dann in OGM-HardwareConfig `include/`; der erste Treffer gilt), sonst auf
+Boards ohne `DEVICE_THIRD_PARTY` das OpenKNX-Logo
+(`<InfoImage logo>`, Standard `include/HardwareConfig/OpenKNX/logo.png`); ein Drittanbieter-Board ohne Logo zeigt den
+Stempel an der Stelle des Logos. Ein Logo ist höchstens 100 px breit (linke Spalte 104 px) und so hoch wie der QR-Code (74 px), ein
+Stempel höchstens 100 px breit, sonst Abbruch.
 Den Baumtext setzt eine Berechnung (`PC-<TT>00903`) aus der Auswahl in einen Text ohne Gerätespeicher (`P-<TT>00903`); das
 Schritt-Bild ist `P-<TT>00902`. Das Schritt-Bild hat einen transparenten Hintergrund und den Inhalt mittig: die Seitenbreite
 folgt dem Fenster (ETS5 und ETS6), eine eigene Bildkante wäre nie bündig mit dem Info-Kasten.
@@ -593,8 +604,10 @@ folgt dem Fenster (ETS5 und ETS6), eine eigene Bildkante wäre nie bündig mit d
     #define DEVICE_HW_ID 0x1310
     #define DEVICE_NAME "OpenKNX Mein Board"
     #define HW_INFO_TEXT "OpenKNX-Controller für ... (höchstens 255 Zeichen)"   // optional, sonst <Page infoDefault>
+    #define HW_INFO_TEXT2 "Zweiter Teil, direkt darunter (höchstens 255 Zeichen)" // optional
+    #define HW_INFO_LOGO "HardwareConfig/Others/MeinHersteller/logo.png"        // optional, Pfad wie bei #include
     #define HW_INFO_URL "https://go.openknx.de/meinboard"                     // optional, sonst kein QR-Code
-    // #define DEVICE_THIRD_PARTY                                             // Drittanbieter: Badge statt Logo + <Notice>
+    // #define DEVICE_THIRD_PARTY                                             // Drittanbieter: Stempel unter dem Logo + <Notice>
 #endif
 ```
 
@@ -605,7 +618,7 @@ folgt dem Fenster (ETS5 und ETS6), eine eigene Bildkante wäre nie bündig mit d
   <Output conf="src/MyApp.hw.conf.xml" share="src/MyApp.hw.module.gen.xml" script="src/MyApp.hw.module.gen.js" />
 
   <Page text="Gerät" icon="memory" help="XYZ-Hardware" /> <!-- alle Texte mit Standard, siehe Tabelle unten; help = Help_de/XYZ-Hardware.md -->
-  <Notice when="ThirdParty" title="Produkt eines Drittanbieters: ... (höchstens 255 Zeichen)" />
+  <Notice when="ThirdParty" title="Hardware eines Drittanbieters. ... (höchstens 255 Zeichen)" />
   <InfoImage style="card" />
 
   <Boards platformio="release_*" />
@@ -670,28 +683,30 @@ nutzen ihre Begriffe (Gerät, physikalische Adresse, Programmiertaste).
 |---|---|---|
 | `define` | `HW_INFO_URL` | Makro der Info-URL im Board-Header |
 | `default` | leer | URL für Boards ohne Makro; leer = kein QR-Code |
-| `width` | 150 | Breite des Bilds „QR-Code + Link“ in px (40..400); der Link muss hineinpassen, sonst Abbruch |
+| `width` | 100 | Breite des Bilds „QR-Code + Beschriftung“ in px (40..400); die Beschriftung muss hineinpassen, sonst Abbruch |
 | `module`, `version` | 2, 3 | px je QR-Modul, QR-Version (größer nur, wenn die URL nicht passt: Warnung) |
-| `urlColor` | `#0067C0` | Farbe des Links |
+| `urlColor` | `#0067C0` | Farbe der Beschriftung unter dem QR-Code |
 | `urlFont`, `supersample` | `NotoSans-Regular-44`, 4 | Glyphenatlas in `assets/fonts` und Faktor (11 px Schrift, auf 1/4 px gesetzt) |
-| `logo`, `badge` | `assets/card-badge.png`, `assets/third-party-badge.png` | eigene PNGs, Pfad relativ zum Manifest; leer = kein Bild für alle OpenKNX- bzw. Drittanbieter-Boards |
-| `thirdPartyWhen` | `ThirdParty` | Fähigkeit, die Badge und `<Notice>` auslöst |
+| `logo`, `badge` | `include/HardwareConfig/OpenKNX/logo.png`, `assets/third-party-badge.png` | Logo der Boards ohne `HW_INFO_LOGO` und ohne Drittanbieter-Kennung bzw. Stempel der Drittanbieter-Boards (höchstens 100 px breit); eigene PNGs, Pfad relativ zum Manifest; leer = kein Bild |
+| `caption` | „Geräteinfo“ | Zeile unter dem QR-Code (eine Zeile, Zeichen des Glyphenatlas) |
+| `thirdPartyWhen` | `ThirdParty` | Fähigkeit, die Stempel und `<Notice>` auslöst |
 
-Bild je Board über dem Namen: `<Logo board="..." file="..."/>` in `<InfoImage>` setzt für die passenden Boards ein eigenes
-PNG (Pfad relativ zum Manifest) oder mit `file=""` keines; sonst gilt `badge` (Board mit `thirdPartyWhen`) bzw. `logo`.
+Logo je Board aus dem Manifest: `<Logo board="..." file="..."/>` in `<InfoImage>` setzt für die passenden Boards ein eigenes
+PNG (Pfad relativ zum Manifest) statt `HW_INFO_LOGO` oder mit `file=""` keines; Drittanbieter-Boards behalten den Stempel.
 `board` ist ein Define oder Muster (`*`, `?`); ein Define schlägt ein Muster, zwei gleichrangige Treffer brechen ab, ein
-`<Logo>` ohne Treffer gibt eine Warnung. Höchstens 10 eigene Bilder.
+`<Logo>` ohne Treffer gibt eine Warnung. Höchstens 10 eigene Logos (`HW_INFO_LOGO` und `<Logo>` zusammen).
 
 ```xml
 <InfoImage style="card">
-  <Logo board="DEVICE_AB_BUT_GIR" file="" />                           <!-- kein Bild -->
+  <Logo board="DEVICE_AB_BUT_GIR" file="" />                           <!-- kein Logo (Drittanbieter: Stempel an seiner Stelle) -->
   <Logo board="DEMO_RAUMCONTROLLER_PLUS" file="src/hw/logo-retro.png" /> <!-- eigenes Bild -->
 </InfoImage>
 ```
 
-Bilder: `Baggages/<prefix>Info/Logo.png`, `Badge.png`, eigene `Logo1.png` … `Logo10.png`, je URL `Info<n>.png` (n = kleinste
-Board-Nummer der Gruppe), `Steps.png` (`<Page queryImage>`). Parameter ohne Speicher: Logo 900, Badge 901, Schritt-Bild 902,
-Baumtext 903, eigene Bilder 910–919, QR 1000 + n. Gleicher Dateiinhalt = ein Bild (auch über einen anderen Pfad). Bilder im
+Bilder: `Baggages/<prefix>Info/Logo.png` (OpenKNX-Logo), `Badge.png` (Stempel), `BadgeLogo.png` (Stempel an der Stelle des
+Logos), eigene `Logo1.png` … `Logo10.png` (Logos aufgefüllt), je URL `Info<n>.png` (n = kleinste Board-Nummer der
+Gruppe), `Steps.png` (`<Page queryImage>`). Parameter ohne Speicher: Logo 900, Stempel 901, Schritt-Bild 902, Baumtext 903,
+Stempel an der Stelle des Logos 905, eigene Logos 911–920 (911 = Logo1), QR 1000 + n. Gleicher Dateiinhalt = ein Bild (auch über einen anderen Pfad). Bilder im
 Ordner, die der Lauf nicht schreibt, löscht der Generator (mit `<Page>` oder `<InfoImage>`).
 
 ### Regeln aus der ETS5-Messung
@@ -700,7 +715,7 @@ Ordner, die der Lauf nicht schreibt, löscht der Generator (mit `<Page>` oder `<
   (nicht skaliert). `HorizontalAlignment="Stretch"` zieht ein Bild in ETS5 nicht auf die Breite.
 - Raster: je Zelle genau ein Element. Ein eingebetteter Block in einer Zelle bekommt eine Scrollleiste.
 - Text in einer Rasterzelle steht mittig zum QR: kurzer Text neben dem QR lässt oben eine Lücke.
-- Ein Bild ohne Raster steht in der Wertespalte; Logo und Badge stehen deshalb in einem Raster mit einer Spalte 100 %.
+- Ein Bild ohne Raster steht in der Wertespalte; Logo und Stempel stehen deshalb in der linken Rasterspalte der Karte (104 px, 20 %).
 
 ### Prüfen
 

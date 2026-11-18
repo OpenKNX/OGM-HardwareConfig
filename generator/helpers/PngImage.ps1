@@ -7,7 +7,7 @@ Open =
 FILEPATH: OGM-HardwareConfig/generator/helpers/PngImage.ps1
 
 .SYNOPSIS
-    PNG reader/writer and the QR code + link image of the hardware profile generator.
+    PNG reader/writer and the QR code + caption image of the hardware profile generator.
 
 .DESCRIPTION
     Dot-sourced by Build-HardwareProfile.ps1 (needs QrCode.ps1). No System.Drawing: zlib streams via
@@ -239,7 +239,7 @@ function Update-PngRgba([string]$Path, [int]$Width, [int]$Height, [byte[]]$Pixel
 }
 
 # ------------------------------------------------------------------------------------------------
-# QR code + link of the device card (<InfoImage>): proportional glyph atlas, text supersampled
+# QR code + caption of the device card (<InfoImage>): proportional glyph atlas, text supersampled
 # ------------------------------------------------------------------------------------------------
 # @brief Reads a glyph atlas <Dir>/<Name>.png (alpha = coverage) and its metrics <Name>.txt
 #        (lines "height h", "baseline b", "code x width lsb advance64")
@@ -319,7 +319,7 @@ function Add-GlyphTextScaled([byte[]]$Px, [int]$ImgW, [int]$ImgH, $Font, [int]$S
   }
 }
 
-# @brief QR code + link, Width px wide, transparent: QR code of Url (EC M, version Version or the smallest larger one that fits,
+# @brief QR code + caption, Width px wide, transparent: QR code of Url (EC M, version Version or the smallest larger one that fits,
 #        Module px per module, quiet zone 4 modules opaque white) centered at the top; below it Shown in one line, centered
 #        (atlas Font at Scale times the target size, color Rgb). Stops when the QR code or the line is wider than Width.
 # @return Width, Height, Pixels, Qr, QrPx, TextW
@@ -331,7 +331,7 @@ function New-QrLinkImage([string]$Url, [string]$Shown, [int]$Width, [int]$Module
   $qrPx = ($n + 2 * $quiet) * $mp
   if ($qrPx -gt $Width) { throw (T "QR code {0} px (version {1}) is wider than the image ({2} px): {3}" $qrPx $q.Version $Width $Url) }
   $textW = (Measure-GlyphText $Font $Shown) / $Scale
-  if ($textW -gt $Width) { throw (T "link '{0}' is {1:N1} px wide, the image {2} px (shorter link or larger width)" $Shown $textW $Width) }
+  if ($textW -gt $Width) { throw (T "caption '{0}' is {1:N1} px wide, the image {2} px (shorter caption or larger width)" $Shown $textW $Width) }
   $gap = 4
   $h = $qrPx + $gap + [int][Math]::Ceiling($Font.Height / $Scale)
   $px = New-Object byte[] ($Width * $h * 4)

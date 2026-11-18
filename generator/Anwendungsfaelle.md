@@ -195,7 +195,7 @@ Abweichung (jede Variante passt zum Eintrag).
 ```c
 #define DEVICE_THIRD_PARTY   // im Board-Block
 ```
-Badge statt OpenKNX-Logo und `<Notice when="ThirdParty">` kommen von selbst (Fähigkeit `ThirdParty` ist eingebaut).
+Stempel (unter dem Logo, ohne `HW_INFO_LOGO` an dessen Stelle) und `<Notice when="ThirdParty">` kommen von selbst (Fähigkeit `ThirdParty` ist eingebaut).
 
 ## 9. Firmware: Auswahl prüfen, Abfrage beantworten
 

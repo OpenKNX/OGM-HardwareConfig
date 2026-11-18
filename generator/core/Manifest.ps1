@@ -530,29 +530,37 @@ function Read-ManifestNotices($root, $m, $capIndex) {
   }
 }
 
-# @brief Read-Manifest: <InfoImage>: device card (logo, badge, QR code + link)
+# @brief Read-Manifest: <InfoImage>: device card (logo, badge, QR code + caption)
 function Read-ManifestInfoImage($root, $m, $baseDir, $capIndex) {
-  # <InfoImage define="HW_INFO_URL" default="" module="2" version="3" width="150" urlFont="NotoSans-Regular-44" supersample="4"
-  #   urlColor="#0067C0" logo="..." badge="..." thirdPartyWhen="ThirdParty"/>: device card on the <Page> (ETS elements, no text in
-  #   pictures except the link): OpenKNX logo, or the third-party badge on boards with capability thirdPartyWhen; DEVICE_NAME as
-  #   headline; board text (HW_INFO_TEXT, else <Page infoDefault>); with an info URL (define in the board header, else default;
-  #   empty default = no QR code) a grid: board text | picture "QR code + link" (width px, QR v<version> EC M,
-  #   <module> px per module, white quiet zone, link without scheme in one line, glyph atlas urlFont = supersample x the size).
-  #   logo / badge: PNG paths relative to the manifest (default: generator assets card-badge.png / third-party-badge.png)
+  # <InfoImage define="HW_INFO_URL" default="" module="2" version="3" width="100" caption="Geraeteinfo" urlFont="NotoSans-Regular-44"
+  #   supersample="4" urlColor="#0067C0" logo="..." badge="..." thirdPartyWhen="ThirdParty"/>: device card on the <Page> (ETS
+  #   elements, no text in pictures except the caption): DEVICE_NAME as headline, below it a grid: left the logo (<Logo> of the
+  #   board, else HW_INFO_LOGO of the board, else logo on boards without thirdPartyWhen) and the badge on boards with thirdPartyWhen,
+  #   middle the board text (HW_INFO_TEXT, else <Page infoDefault>) and HW_INFO_TEXT2, right with an info URL (define in the
+  #   board header, else default; empty default = no QR code) the picture "QR code + caption" (width px, QR v<version> EC M,
+  #   <module> px per module, white quiet zone, caption in one line, glyph atlas urlFont = supersample x the size).
+  #   logo / badge: PNG paths relative to the manifest (default: include/HardwareConfig/OpenKNX/logo.png / generator asset
+  #   third-party-badge.png)
   $m.Info = $null
   $ii = $root.SelectSingleNode("InfoImage")
   if ($ii) {
     if (-not $m.Page) { Stop-WithError (T "<InfoImage> needs <Page> (the device card is part of the hardware page)") }
     if (-not $m.Outputs.ContainsKey("share")) { Stop-WithError (T "<InfoImage> needs <Output share=...> (the images are baggages of the ETS module)") }
-    $allowed = @("define", "default", "style", "module", "version", "width", "urlFont", "supersample", "urlColor", "logo", "badge", "thirdPartyWhen")
+    $allowed = @("define", "default", "style", "module", "version", "width", "caption", "urlFont", "supersample", "urlColor", "logo", "badge", "thirdPartyWhen")
     foreach ($at in $ii.Attributes) {
       if ($allowed -cnotcontains $at.Name) { Stop-WithError (T "<InfoImage>: attribute {0} is not supported (allowed: {1})" $at.Name ($allowed -join ", ")) }
     }
     if ($ii.HasAttribute("style") -and "$($ii.style)" -ne "card") { Stop-WithError (T "<InfoImage>: style must be card (or absent)") }
     $assets = [System.IO.Path]::Combine($script:GeneratorDir, "assets")
-    $m.Info = @{ Define = "$($ii.define)"; Default = "$($ii.default)"; Module = 2; Version = 3; Width = 150; UrlFont = "NotoSans-Regular-44"; Supersample = 4
-      UrlRgb = [byte[]](0x00, 0x67, 0xC0); Logo = [System.IO.Path]::Combine($assets, "card-badge.png"); Badge = [System.IO.Path]::Combine($assets, "third-party-badge.png")
-      ThirdWhen = "ThirdParty" }
+    $m.Info = @{ Define = "$($ii.define)"; Default = "$($ii.default)"; Module = 2; Version = 3; Width = 100; UrlFont = "NotoSans-Regular-44"; Supersample = 4
+      UrlRgb = [byte[]](0x00, 0x67, 0xC0); Logo = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($HardwareConfigInclude, "HardwareConfig", "OpenKNX", "logo.png"))
+      Badge = [System.IO.Path]::Combine($assets, "third-party-badge.png"); ThirdWhen = "ThirdParty"
+      Caption = "Ger" + [char]0xE4 + "teinfo" }
+    # caption: line under the QR code (one line, the glyph atlas must have every character)
+    if ($ii.HasAttribute("caption")) {
+      $m.Info.Caption = "$($ii.caption)"
+      if (-not $m.Info.Caption -or $m.Info.Caption -match "[`r`n]") { Stop-WithError (T "<InfoImage>: caption must be one line of text") }
+    }
     if (-not $m.Info.Define) { $m.Info.Define = "HW_INFO_URL" }
     if ($m.Info.Define -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') { Stop-WithError (T "<InfoImage>: define must be a macro name") }
     foreach ($a in @(@("module", "Module", 1, 10), @("version", "Version", 1, 40), @("width", "Width", 40, 400), @("supersample", "Supersample", 1, 8))) {

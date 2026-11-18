@@ -128,6 +128,8 @@ $script:LogoParamNum = "00900"
 $script:StepsParamNum = "00902"
 $script:PageTitleParamNum = "00903"
 $script:BadgeParamNum = "00901"
+# badge of a third-party board without logo, padded in the logo row of the card
+$script:BadgeLogoParamNum = "00905"
 # @brief QR pictures of the device card: boards with an info URL grouped by URL; Num = smallest board slot of the group
 #        (parameter 1000 + Num, file Info<Num>.png). Boards without URL (no define, empty <InfoImage default>) get none.
 function Get-InfoGroups($M, $Boards) {
@@ -143,16 +145,31 @@ function Get-InfoGroups($M, $Boards) {
   foreach ($g in $groups) { $g.File = "Info{0}.png" -f $g.Num; $g.ParamNum = "{0:D5}" -f (1000 + $g.Num) }
   return ,$groups.ToArray()
 }
-# @brief $true for a board with the capability <InfoImage thirdPartyWhen> (badge instead of the OpenKNX logo)
+# @brief $true for a board with the capability <InfoImage thirdPartyWhen> (badge below the logo, or in its place without logo)
 function Test-ThirdPartyBoard($M, $Board) {
   return [bool]($M.Info -and $M.Info.ThirdWhen -and $Board.Cap[$M.Info.ThirdWhen])
 }
+# @brief Height in px of the picture "QR code + caption" at the manifest QR version (New-QrLinkImage: QR with quiet zone, 4 px gap,
+#        one line of the glyph atlas); QrPx = height of the QR code alone. A logo next to a QR code is padded to this height.
+function Get-CardQrGeometry($M, $Font) {
+  $n = 17 + 4 * $M.Info.Version
+  $qrPx = ($n + 8) * $M.Info.Module
+  return @{ QrPx = $qrPx; Height = $qrPx + 4 + [int][Math]::Ceiling($Font.Height / $M.Info.Supersample) }
+}
+# @brief Pictures of the left card column: per board the logo (<InfoImage><Logo> of the board, else HW_INFO_LOGO of the board
+#        header, else <InfoImage logo> on boards without thirdPartyWhen) and the badge on boards with thirdPartyWhen. Every logo
+#        is padded to the height of the QR picture (Padded), with or without QR code, so all logos stand on one line and the badge
+#        below them on another; a third-party board without logo gets the badge padded in the logo row (BadgeLogo).
+#        Same file content = one picture. Board fields: CardLogo (mark or $null), CardBadge (mark or $null).
+#        Numbers: Logo 900, Badge 901, BadgeLogo 905, own logos Logo<n> 910+n (n = 1..10).
 function Get-CardMarks($M, $Boards) {
   $marks = New-Object System.Collections.Generic.List[object]
   if (-not $M.Info) { return ,$marks.ToArray() }
-  $own = 0
+  $own = @{}   # file hash -> own picture number 1..10
   $used = @{}
+  $defHash = $null; if ($M.Info.Logo) { $defHash = Get-FileContentHash $M.Info.Logo }
   foreach ($b in $Boards) {
+    $third = Test-ThirdPartyBoard $M $b
     $hits = @($M.Info.Logos | Where-Object { Test-Wildcard $_.Board $b.Define })
     foreach ($h in $hits) { $used[$h.Board] = $true }
     if ($hits.Count -gt 0) {
@@ -161,24 +178,39 @@ function Get-CardMarks($M, $Boards) {
       if ($hits.Count -gt 1) { Stop-WithError (T "{0}: {1} <InfoImage><Logo> entries match ({2})" $b.Define $hits.Count (($hits | ForEach-Object { $_.Board }) -join ", ")) }
       $file = $hits[0].File
     }
-    elseif (Test-ThirdPartyBoard $M $b) { $file = $M.Info.Badge }
-    else { $file = $M.Info.Logo }
-    if (-not $file) { continue }
-    # same picture = same file content (a path through another folder or link is the same picture)
-    $hash = Get-FileContentHash $file
-    $g = @($marks | Where-Object { $_.Hash -eq $hash }) | Select-Object -First 1
-    if (-not $g) {
-      if ($M.Info.Logo -and $hash -eq (Get-FileContentHash $M.Info.Logo)) { $name = "Logo"; $num = $script:LogoParamNum }
-      elseif ($M.Info.Badge -and $hash -eq (Get-FileContentHash $M.Info.Badge)) { $name = "Badge"; $num = $script:BadgeParamNum }
+    elseif ($b.LogoFile) { $file = $b.LogoFile }
+    elseif (-not $third) { $file = $M.Info.Logo }
+    else { $file = "" }
+    $b.CardLogo = $null; $b.CardBadge = $null
+    if ($file) {
+      $hash = Get-FileContentHash $file
+      if ($defHash -and $hash -eq $defHash) { $name = "Logo"; $num = 900 }
       else {
-        $own++
-        if ($own -gt 10) { Stop-WithError (T "<InfoImage><Logo>: at most 10 own pictures") }
-        $name = "Logo$own"; $num = "{0:D5}" -f (909 + $own)
+        if (-not $own.ContainsKey($hash)) {
+          if ($own.Count -ge 10) { Stop-WithError (T "<InfoImage>: at most 10 own logos (HW_INFO_LOGO, <Logo>)") }
+          $own[$hash] = $own.Count + 1
+        }
+        $name = "Logo{0}" -f $own[$hash]; $num = 910 + $own[$hash]
       }
-      $g = @{ Name = $name; File = $file; Num = $num; Hash = $hash; Boards = @() }
-      $marks.Add($g)
+      $k = @($marks | Where-Object { $_.Name -ceq $name }) | Select-Object -First 1
+      if (-not $k) { $k = @{ Name = $name; File = $file; Num = ("{0:D5}" -f $num); Padded = $true; Boards = @() }; $marks.Add($k) }
+      $k.Boards += $b
+      $b.CardLogo = $k
     }
-    $g.Boards += $b
+    elseif ($third -and $M.Info.Badge) {
+      # no logo: the badge stands in the logo row, where the badge of the other third-party boards has its logo
+      $k = @($marks | Where-Object { $_.Name -ceq "BadgeLogo" }) | Select-Object -First 1
+      if (-not $k) { $k = @{ Name = "BadgeLogo"; File = $M.Info.Badge; Num = $script:BadgeLogoParamNum; Padded = $true; Boards = @() }; $marks.Add($k) }
+      $k.Boards += $b
+      $b.CardLogo = $k
+      continue
+    }
+    if ($third -and $M.Info.Badge) {
+      $k = @($marks | Where-Object { $_.Name -ceq "Badge" }) | Select-Object -First 1
+      if (-not $k) { $k = @{ Name = "Badge"; File = $M.Info.Badge; Num = $script:BadgeParamNum; Padded = $false; Boards = @() }; $marks.Add($k) }
+      $k.Boards += $b
+      $b.CardBadge = $k
+    }
   }
   foreach ($lg in $M.Info.Logos) { if (-not $used.ContainsKey($lg.Board)) { Write-Warn (T "<InfoImage><Logo board=`"{0}`">: matches no board" $lg.Board) } }
   return ,$marks.ToArray()
@@ -237,76 +269,81 @@ function Get-BoardText($M, $Board) {
   if ($Board.InfoText) { return $Board.InfoText }
   return $M.Page.InfoDefault
 }
-# @brief Board view of <Page> (a board is selected). With <InfoImage>: OpenKNX logo or third-party badge (picture in a
-#        one-column grid, the pattern of the OGM-Common logo: a plain picture row sits in the value column), DEVICE_NAME as
-#        headline, board text; with an info URL board text and QR picture side by side (grid, right column = picture width of
-#        the ETS5 page width, rounded up; one separator per cell:
-#        a nested block in a cell gets a scroll bar in ETS5). Without <InfoImage>: the board text. Then switches and notices.
+# @brief Board view of <Page> (a board is selected). DEVICE_NAME as headline (with <InfoImage>), then one grid, one element per
+#        cell (a nested block in a cell gets a scroll bar in ETS5): left column the logo and below it the badge (third party),
+#        middle the board text (HW_INFO_TEXT, else <Page infoDefault>) and below it HW_INFO_TEXT2, right column the picture
+#        "QR code + caption" next to the first text row. A column without content is left out. Without <InfoImage>: the texts.
+#        Then switches and notices.
+$script:CardLogoColumnPx = 104
 function New-PageInfoXml($M, $Boards, [string]$SelRef, $Switches, $InfoGroups, [string]$Ind) {
   $sb = New-Object System.Text.StringBuilder
-  if ($M.Info) {
-    # picture row (logo, badge or own picture); boards without picture get no row (no empty grid)
-    $marks = @($M.Marks)
-    $marked = @($marks | ForEach-Object { $_.Boards })
-    if ($marks.Count -gt 0) {
-      $mi = $Ind
-      $wrap = ($marked.Count -lt @($Boards).Count)
-      if ($wrap) { [void]$sb.AppendLine(("$Ind<choose ParamRefId=`"$SelRef`"><when test=`"{0}`">" -f (Get-IdList $marked))); $mi = "$Ind  " }
-      [void]$sb.AppendLine("$mi<ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"ProfileMark`" Inline=`"true`" Layout=`"Grid`">")
-      [void]$sb.AppendLine("$mi  <Rows><Row Id=`"%AID%_PB-nnn_R-1`" Name=`"Row1`" /></Rows>")
-      [void]$sb.AppendLine("$mi  <Columns><Column Id=`"%AID%_PB-nnn_C-1`" Name=`"Col1`" Width=`"100%`" /></Columns>")
-      [void]$sb.AppendLine("$mi  <choose ParamRefId=`"$SelRef`">")
-      foreach ($k in $marks) { [void]$sb.AppendLine(("$mi    <when test=`"{0}`"><ParameterRefRef RefId=`"%AID%_P-%TT%{1}_R-%TT%{1}01`" Cell=`"1,1`" /></when>" -f (Get-IdList $k.Boards), $k.Num)) }
-      [void]$sb.AppendLine("$mi  </choose>")
-      [void]$sb.AppendLine("$mi</ParameterBlock>")
-      if ($wrap) { [void]$sb.AppendLine("$Ind</when></choose>") }
-    }
-    $qrPct = [int][Math]::Ceiling($M.Info.Width * 100.0 / $script:EtsPageWidth)
-    # name, board text and QR picture: boards grouped by these three
-    $cards = New-Object System.Collections.Generic.List[object]
-    foreach ($b in $Boards) {
-      $t = Get-BoardText $M $b
+  # boards with the same card share one when
+  $cards = New-Object System.Collections.Generic.List[object]
+  foreach ($b in $Boards) {
+    $texts = @(@((Get-BoardText $M $b), $b.InfoText2) | Where-Object { $_ })
+    $qrNum = ""; $logoNum = ""; $badgeNum = ""
+    if ($M.Info) {
       $qr = @($InfoGroups | Where-Object { $_.Url -ceq $b.InfoUrl }) | Select-Object -First 1
-      $qrNum = ""; if ($qr) { $qrNum = $qr.ParamNum }
-      $key = "{0}|{1}|{2}" -f $b.Name, $t, $qrNum
-      $g = @($cards | Where-Object { $_.Key -ceq $key }) | Select-Object -First 1
-      if (-not $g) { $g = @{ Key = $key; Name = $b.Name; Text = $t; QrNum = $qrNum; Boards = @() }; $cards.Add($g) }
-      $g.Boards += $b
+      if ($qr) { $qrNum = $qr.ParamNum }
+      if ($b.CardLogo) { $logoNum = $b.CardLogo.Num }
+      if ($b.CardBadge) { $badgeNum = $b.CardBadge.Num }
     }
-    [void]$sb.AppendLine("$Ind<choose ParamRefId=`"$SelRef`">")
-    foreach ($g in $cards) {
-      [void]$sb.AppendLine(("$Ind  <when test=`"{0}`">" -f (Get-IdList $g.Boards)))
-      [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Headline`" />" -f (ConvertTo-XmlText $g.Name)))
-      if ($g.QrNum) {
-        [void]$sb.AppendLine("$Ind    <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"ProfileCard`" Inline=`"true`" Layout=`"Grid`">")
-        [void]$sb.AppendLine("$Ind      <Rows><Row Id=`"%AID%_PB-nnn_R-1`" Name=`"Row1`" /></Rows>")
-        [void]$sb.AppendLine(("$Ind      <Columns><Column Id=`"%AID%_PB-nnn_C-1`" Name=`"Col1`" Width=`"{0}%`" /><Column Id=`"%AID%_PB-nnn_C-2`" Name=`"Col2`" Width=`"{1}%`" /></Columns>" -f (100 - $qrPct), $qrPct))
-        [void]$sb.AppendLine(("$Ind      <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" Cell=`"1,1`" />" -f (ConvertTo-XmlText $g.Text)))
-        [void]$sb.AppendLine(("$Ind      <ParameterRefRef RefId=`"%AID%_P-%TT%{0}_R-%TT%{0}01`" Cell=`"1,2`" />" -f $g.QrNum))
-        [void]$sb.AppendLine("$Ind    </ParameterBlock>")
-      }
-      elseif ($g.Text) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $g.Text))) }
-      [void]$sb.AppendLine("$Ind  </when>")
-    }
-    [void]$sb.AppendLine("$Ind</choose>")
+    # the number of texts is part of the key: "A`nB" in one text and "A" + "B" in two are different cards
+    $key = "{0}|{1}|{2}|{3}|{4}|{5}" -f $b.Name, $texts.Count, ($texts -join [char]0), $qrNum, $logoNum, $badgeNum
+    $g = @($cards | Where-Object { $_.Key -ceq $key }) | Select-Object -First 1
+    if (-not $g) { $g = @{ Key = $key; Name = $b.Name; Texts = $texts; QrNum = $qrNum; LogoNum = $logoNum; BadgeNum = $badgeNum; Boards = @() }; $cards.Add($g) }
+    $g.Boards += $b
   }
-  else {
-    # board text, boards grouped by text
-    $texts = New-Object System.Collections.Generic.List[object]
-    foreach ($b in $Boards) {
-      $t = Get-BoardText $M $b
-      if (-not $t) { continue }
-      $g = @($texts | Where-Object { $_.Text -ceq $t }) | Select-Object -First 1
-      if (-not $g) { $g = @{ Text = $t; Boards = @() }; $texts.Add($g) }
-      $g.Boards += $b
+  $pic = { param($num, $cell) "<ParameterRefRef RefId=`"%AID%_P-%TT%{0}_R-%TT%{0}01`" Cell=`"{1}`" />" -f $num, $cell }
+  $txt = { param($text, $cell) "<ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" Cell=`"{1}`" />" -f (ConvertTo-XmlText $text), $cell }
+  $qrPct = 0; if ($M.Info) { $qrPct = [int][Math]::Ceiling($M.Info.Width * 100.0 / $script:EtsPageWidth) }
+  $logoPct = [int][Math]::Ceiling($script:CardLogoColumnPx * 100.0 / $script:EtsPageWidth)
+  $body = New-Object System.Text.StringBuilder
+  foreach ($g in $cards) {
+    $left = @(@($g.LogoNum, $g.BadgeNum) | Where-Object { $_ })
+    $texts = @($g.Texts)
+    if (-not $M.Info) {
+      if ($texts.Count -eq 0) { continue }
+      [void]$body.AppendLine(("$Ind  <when test=`"{0}`">" -f (Get-IdList $g.Boards)))
+      foreach ($t in $texts) { [void]$body.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $t))) }
+      [void]$body.AppendLine("$Ind  </when>")
+      continue
     }
-    if ($texts.Count -gt 0) {
-      [void]$sb.AppendLine("$Ind<choose ParamRefId=`"$SelRef`">")
-      foreach ($g in $texts) {
-        [void]$sb.AppendLine(("$Ind  <when test=`"{0}`"><ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{1}`" /></when>" -f (Get-IdList $g.Boards), (ConvertTo-XmlText $g.Text)))
-      }
-      [void]$sb.AppendLine("$Ind</choose>")
+    [void]$body.AppendLine(("$Ind  <when test=`"{0}`">" -f (Get-IdList $g.Boards)))
+    [void]$body.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Headline`" />" -f (ConvertTo-XmlText $g.Name)))
+    # columns in this order: logo/badge, texts, QR picture; each only when the card has content for it
+    $cols = @()
+    if ($left.Count -gt 0) { $cols += "L" }
+    if ($texts.Count -gt 0) { $cols += "T" }
+    if ($g.QrNum) { $cols += "Q" }
+    if ($cols.Count -eq 1 -and $cols[0] -eq "T") {
+      foreach ($t in $texts) { [void]$body.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $t))) }
     }
+    elseif ($cols.Count -gt 0) {
+      $widths = @()
+      foreach ($c in $cols) { if ($c -eq "L") { $widths += $logoPct } elseif ($c -eq "Q") { $widths += $qrPct } else { $widths += 0 } }
+      $fixed = 0; foreach ($w in $widths) { $fixed += $w }
+      for ($i = 0; $i -lt $widths.Count; $i++) { if ($cols[$i] -eq "T") { $widths[$i] = 100 - $fixed } }
+      # without a text column the last column takes the rest (logo + QR: 20 + 80; one picture column: 100)
+      if ($cols -notcontains "T") { $widths[$widths.Count - 1] = 100 - ($fixed - $widths[$widths.Count - 1]) }
+      $rows = [Math]::Max([Math]::Max($left.Count, $texts.Count), 1)
+      [void]$body.AppendLine("$Ind    <ParameterBlock Id=`"%AID%_PB-nnn`" Name=`"ProfileCard`" Inline=`"true`" Layout=`"Grid`">")
+      $rx = ""; for ($r = 1; $r -le $rows; $r++) { $rx += "<Row Id=`"%AID%_PB-nnn_R-$r`" Name=`"Row$r`" />" }
+      [void]$body.AppendLine("$Ind      <Rows>$rx</Rows>")
+      $cx = ""; for ($i = 0; $i -lt $cols.Count; $i++) { $cx += ("<Column Id=`"%AID%_PB-nnn_C-{0}`" Name=`"Col{0}`" Width=`"{1}%`" />" -f ($i + 1), $widths[$i]) }
+      [void]$body.AppendLine("$Ind      <Columns>$cx</Columns>")
+      $ci = 1
+      if ($cols -contains "L") { for ($r = 0; $r -lt $left.Count; $r++) { [void]$body.AppendLine("$Ind      " + (& $pic $left[$r] ("{0},{1}" -f ($r + 1), $ci))) }; $ci++ }
+      if ($cols -contains "T") { for ($r = 0; $r -lt $texts.Count; $r++) { [void]$body.AppendLine("$Ind      " + (& $txt $texts[$r] ("{0},{1}" -f ($r + 1), $ci))) }; $ci++ }
+      if ($cols -contains "Q") { [void]$body.AppendLine("$Ind      " + (& $pic $g.QrNum ("1,{0}" -f $ci))) }
+      [void]$body.AppendLine("$Ind    </ParameterBlock>")
+    }
+    [void]$body.AppendLine("$Ind  </when>")
+  }
+  if ($body.Length -gt 0) {
+    [void]$sb.AppendLine("$Ind<choose ParamRefId=`"$SelRef`">")
+    [void]$sb.Append($body.ToString())
+    [void]$sb.AppendLine("$Ind</choose>")
   }
   # optional: firmware of the board (<Page firmware="Firmware: {env}">, the release env(s) of the board)
   if ($M.Page.Firmware) {
@@ -454,7 +491,7 @@ function New-ShareXml($M, $Boards) {
     [void]$sb.AppendLine('        </ParameterType>')
   }
   $infoGroups = @($M.InfoGroups)
-  # device card pictures: logo and badge left-aligned (full-width row), QR + link right-aligned in its grid cell
+  # device card pictures: logo, badge and QR code + caption, each a read-only picture parameter in its grid cell
   $marks = @($M.Marks)
   foreach ($k in $marks) {
     [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}{1}`" Name=`"{0}{1}`"><TypePicture RefId=`"%FILE-{0}{1}%`" HorizontalAlignment=`"Left`" /></ParameterType>" -f $p, $k.Name))
@@ -670,7 +707,8 @@ function New-ShareXml($M, $Boards) {
   [void]$sb.AppendLine('      </Channel>')
   [void]$sb.AppendLine('    </Dynamic>')
   if ($infoGroups.Count -gt 0 -or $marks.Count -gt 0 -or $steps) {
-    # baggages: Baggages/<prefix>Info/Logo.png, Badge.png, Info<n>.png, Steps.png next to this file (written by the generator)
+    # baggages: Baggages/<prefix>Info/Logo.png, Logo<n>.png, Badge.png, BadgeLogo.png, Info<n>.png, Steps.png next to this file
+    # (written by the generator)
     [void]$sb.AppendLine('  </ApplicationProgram></ApplicationPrograms>')
     [void]$sb.AppendLine('  <Baggages>')
     foreach ($k in $marks) {

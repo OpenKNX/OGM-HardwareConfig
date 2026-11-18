@@ -146,7 +146,8 @@ auch ohne `<Import>` und ohne `header`.
 |---|---|---|
 | `DEVICE_HW_ID` | Identität in ETS und Firmware | Pflicht (Abbruch) |
 | `DEVICE_ID`, `DEVICE_NAME` | Name in der Auswahlliste | Pflicht (Abbruch), `DEVICE_ID` nur aus a-z A-Z 0-9 _ - |
-| `HW_INFO_TEXT`, `HW_INFO_URL` | Text und QR-Code der Gerätekarte | `<Page infoDefault>`, kein QR-Code |
+| `HW_INFO_TEXT`, `HW_INFO_TEXT2`, `HW_INFO_URL` | Text (zwei Teile, je höchstens 255 Zeichen) und QR-Code der Gerätekarte | `<Page infoDefault>`, kein zweiter Teil, kein QR-Code |
+| `HW_INFO_LOGO` | Logo der Gerätekarte, Pfad wie bei `#include` (z. B. `"HardwareConfig/Others/Shelly/logo.png"`), höchstens 100x74 px | OpenKNX-Logo, bei Drittanbietern der Stempel an seiner Stelle |
 | `DEVICE_THIRD_PARTY` | Drittanbieter-Badge und `<Notice>` | OpenKNX-Logo |
 | `HW_PORT_COUNT`, `HW_PORT_<n>_GPIO`, `HW_PORT_<n>_LABEL` | Ports des Boards | keine Ports (Label ohne Angabe: „Port n“) |
 | `HW_RELAY_COUNT`, `HW_RELAY_<n>_GPIO`, `HW_RELAY_<n>_LABEL` | fest verdrahtete Relais | keine |

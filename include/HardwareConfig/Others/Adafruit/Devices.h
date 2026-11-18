@@ -18,6 +18,7 @@
 #ifdef DEVICE_ADAFRUIT_ESP32_FEATHER_V2
     #define DEVICE_HW_ID 0x2200
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Adafruit/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "ADF-ESP32-FEATHER-V2"
     #define DEVICE_NAME "Adafruit ESP32 Feather V2"
     #if !defined(KNX_IP_LAN) && !defined(KNX_IP_WIFI)

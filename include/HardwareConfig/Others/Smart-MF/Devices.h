@@ -22,6 +22,7 @@
 #ifdef DEVICE_SMARTMF_WIEGAND_READER
     #define DEVICE_HW_ID 0x2300
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-WR"
     #define DEVICE_NAME "Smart-MF Wiegand Reader"
 
@@ -53,6 +54,7 @@
 #ifdef DEVICE_SMARTMF_SOM_UP
     #define DEVICE_HW_ID 0x2301
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SOM-UP"
     #define DEVICE_NAME "Smart-MF Soundmodul UP"
 
@@ -66,6 +68,7 @@
 #ifdef DEVICE_SMARTMF_SOM_UP_EXT_PWR
     #define DEVICE_HW_ID 0x2302
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SOM-UP-EXT-PWR"
     #define DEVICE_NAME "Smart-MF Soundmodul UP (Ext-Power)"
 
@@ -75,6 +78,7 @@
 #ifdef DEVICE_SMARTMF_SOM_REG
     #define DEVICE_HW_ID 0x2303
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SOM-UP-REG"
     #define DEVICE_NAME "Smart-MF Soundmodul REG"
 
@@ -112,6 +116,7 @@
 #ifdef DEVICE_SMARTMF_1TE_BE_3CH
     #define DEVICE_HW_ID 0x2304
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-1TE-BE-3CH"
     #define DEVICE_NAME "Smart-MF S0-Zählermodul"
 
@@ -141,6 +146,7 @@
 
     #define DEVICE_HW_ID 0x2305
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-1TE-REG"
     #define DEVICE_NAME "Smart-MF 1TE REG"
 #endif
@@ -151,6 +157,7 @@
 
     #define DEVICE_HW_ID 0x2306
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-1Wire-1CH"
     #define DEVICE_NAME "Smart-MF 1-Wire Gateway 1CH"
 
@@ -174,6 +181,7 @@
 
     #define DEVICE_HW_ID 0x2307
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-1TE-MODBUS"
     #define DEVICE_NAME "Smart-MF 1TE Modbus RTU"
 
@@ -212,6 +220,7 @@
 #ifdef DEVICE_SMARTMF_1WIRE_3CH
     #define DEVICE_HW_ID 0x2308
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-1Wire-3CH"
     #define DEVICE_NAME "Smart-MF 1-Wire Gateway 3CH"
 
@@ -241,6 +250,7 @@
 #ifdef DEVICE_SMARTMF_2SML_3BE
     #define DEVICE_HW_ID 0x2309
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-2SML-3BE"
     #define DEVICE_NAME "Smart-MF eHZ Schnittstelle"
 
@@ -273,6 +283,7 @@
 #ifdef DEVICE_SMARTMF_MODBUS_RTU_3BE
     #define DEVICE_HW_ID 0x230A
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-Modbus-RTU-3BE"
     #define DEVICE_NAME "Smart-MF Modbus-RTU Gateway"
 
@@ -301,6 +312,7 @@
 #ifdef DEVICE_SMARTMF_ECOWITT_WN90LP
     #define DEVICE_HW_ID 0x230B
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-WN90LP"
     #define DEVICE_NAME "Smart-MF Ecowitt WN90LP"
 
@@ -335,6 +347,7 @@
 #ifdef DEVICE_SMARTMF_SENSORMODUL
     #define DEVICE_HW_ID 0x230C
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-SEN-V4"
     #define DEVICE_NAME "Smart-MF Sensormodul V4"
 
@@ -401,6 +414,7 @@
 #ifdef DEVICE_SMARTMF_GARDENCONTROL
     #define DEVICE_HW_ID 0x230D
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-GC"
     #define DEVICE_NAME "Smart-MF GardenControl"
 
@@ -420,6 +434,7 @@
 #ifdef DEVICE_SMARTMF_MODBUS_AUSSEN
     #define DEVICE_HW_ID 0x230E
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-Modbus-Aussen"
     #define DEVICE_NAME "Smart-MF Modbus RTU Aussen"
 
@@ -449,6 +464,7 @@
 #ifdef DEVICE_SMARTMF_ENOCEANGATEWAY_V2
     #define DEVICE_HW_ID 0x230F
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-ENO"
     #define DEVICE_NAME "Smart-MF Enocean Gateway V2"
     #define PROG_LED_PIN 1
@@ -472,6 +488,7 @@
 #ifdef DEVICE_SMARTMF_TASTERINTERFACE
     #define DEVICE_HW_ID 0x2310
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-Taster"
     #define DEVICE_NAME "Smart-MF Tasterinterface"
 
@@ -481,6 +498,7 @@
 #ifdef DEVICE_SMARTMF_REALPRESENCE_V2
     #define DEVICE_HW_ID 0x2311
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
+    #define HW_INFO_LOGO "HardwareConfig/Others/Smart-MF/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_ID "SMARTMF-RP-V2"
     #define DEVICE_NAME "Smart-MF RealPresence 2.0"
 

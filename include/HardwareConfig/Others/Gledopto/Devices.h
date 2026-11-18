@@ -47,6 +47,7 @@
                                        //  -----------------------------------------------------------------
 
     #define DEVICE_HW_ID 0x2000
+    #define HW_INFO_LOGO "HardwareConfig/Others/Gledopto/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "GL-C-309WL"
     #define DEVICE_NAME "Gledopto GL-C-309WL ESP32"
@@ -112,6 +113,7 @@
     #define GLEDOPTO_MIC_WS_GPIO 15
 
     #define DEVICE_HW_ID 0x2001
+    #define HW_INFO_LOGO "HardwareConfig/Others/Gledopto/logo.png" // device card picture (<InfoImage>), found like an #include
     #define HW_INFO_TEXT "ESP32-Controller von Gledopto mit 4 LED-Ausgängen und eingebautem Relais (IO18). KNX über IP per WLAN." // board description on the ETS hardware page (max. 255 characters)
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "GL-C-017WL"
@@ -193,6 +195,7 @@
     #define GLEDOPTO_ETHERNET_CLK_IN_GPIO 0 // RMII clock input of ETH_CLOCK_GPIO0_IN
 
     #define DEVICE_HW_ID 0x2002
+    #define HW_INFO_LOGO "HardwareConfig/Others/Gledopto/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "GL-C-620WL"
     #define DEVICE_NAME "Gledopto GL-C-620WL ESP32"

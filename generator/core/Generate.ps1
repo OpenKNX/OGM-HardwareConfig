@@ -101,6 +101,8 @@ function Get-ProductBoards($m) {
       if ($relA -cne $relB) { Stop-WithError (T "0x{0:X4}: env {1} has other relays than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
       if ($o.InfoUrl -ne $first.InfoUrl) { Stop-WithError (T "0x{0:X4}: env {1} has another info URL than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
       if ($o.InfoText -cne $first.InfoText) { Stop-WithError (T "0x{0:X4}: env {1} has another HW_INFO_TEXT than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
+      if ($o.InfoText2 -cne $first.InfoText2) { Stop-WithError (T "0x{0:X4}: env {1} has another HW_INFO_TEXT2 than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
+      if ($o.LogoFile -cne $first.LogoFile) { Stop-WithError (T "0x{0:X4}: env {1} has another HW_INFO_LOGO than env {2}" ([int]$first.HwId) $o.Env $first.Env) }
       # <PartRows> and <Fix valueMacro>: one row state and one value per HW-ID (ETS shows one page for every firmware of the board)
       foreach ($rk in @($first.PartRows.Keys)) {
         $sa = $first.PartRows[$rk]; $sb2 = $o.PartRows[$rk]
@@ -201,33 +203,62 @@ function Update-SlotsAndPorts($m, $boards) {
 
 # @brief Pictures of the device card and the query steps; returns Images (rendered, written later)
 function New-CardImages($m, $boards) {
-  # device card pictures (logo, badge, QR code + link): rendered with the text outputs, written after them
+  # device card pictures (logo, badge, QR code + caption): rendered with the text outputs, written after them
   $m.InfoGroups = Get-InfoGroups $m $boards
   $m.Marks = Get-CardMarks $m $boards
   $images = @()
   if ($m.Info) {
     $infoDir = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($m.Outputs["share"]), "Baggages", ($m.Prefix + "Info"))
+    try { $urlFont = Read-GlyphFont ([System.IO.Path]::Combine($script:GeneratorDir, "assets", "fonts")) $m.Info.UrlFont }
+    catch { Stop-WithError (T "<InfoImage>: {0}" $_.Exception.Message) }
+    # QR pictures first: a logo next to a QR code takes the height of that picture (a long URL raises the QR version)
+    $imageIndex = 0
+    foreach ($g in $m.InfoGroups) {
+      # the caption under the QR code (<InfoImage caption>); the QR code holds the URL
+      $imageIndex++
+      Write-Activity (T "QR picture {0}/{1}  {2}" $imageIndex (@($m.InfoGroups).Count) $g.Url)
+      try { $img = New-QrLinkImage $g.Url $m.Info.Caption $m.Info.Width $m.Info.Module $m.Info.Version $urlFont $m.Info.Supersample $m.Info.UrlRgb }
+      catch { Stop-WithError (T "device card {0} ({1}): {2}" $g.File $g.Url $_.Exception.Message) }
+      $g.QrPx = $img.QrPx; $g.ImgHeight = $img.Height
+      $images += @{ Output = [System.IO.Path]::Combine($infoDir, $g.File); Image = $img }
+      if ($img.Qr.Version -gt $m.Info.Version) { Write-Warn (T "device card {0}: the URL needs QR version {1} (manifest version {2}): {3}" $g.File $img.Qr.Version $m.Info.Version $g.Url) }
+      Write-Step (T "device card {0}: {1}x{2} px, QR version {3}-{4} {5} px, caption {6:N1} px: {7}, {8} board(s)" $g.File $img.Width $img.Height $img.Qr.Version $img.Qr.Ec $img.QrPx $img.TextW $g.Url $g.Boards.Count)
+    }
     try {
-      $urlFont = Read-GlyphFont ([System.IO.Path]::Combine($script:GeneratorDir, "assets", "fonts")) $m.Info.UrlFont
+      $geo = Get-CardQrGeometry $m $urlFont
+      $logoMaxW = $script:CardLogoColumnPx - 4
       foreach ($k in $m.Marks) {
         $img = Read-PngRgba $k.File
+        # padded logo: height of the QR picture of its boards, the largest one (all of one size in the usual case); a board
+        # without QR code takes the QR picture of the manifest version, so its logo stands on the same line
+        $kGeo = $geo
+        if ($k.Padded) {
+          $urls = @($k.Boards | ForEach-Object { $_.InfoUrl })
+          $gs = @($m.InfoGroups | Where-Object { $urls -ccontains $_.Url } | ForEach-Object { @{ QrPx = $_.QrPx; Height = $_.ImgHeight } })
+          if (@($k.Boards | Where-Object { -not $_.InfoUrl }).Count -gt 0) { $gs += @{ QrPx = $geo.QrPx; Height = $geo.Height } }
+          $sizes = @($gs | ForEach-Object { "{0}/{1}" -f $_.QrPx, $_.Height } | Sort-Object -Unique)
+          $kGeo = @($gs | Sort-Object { $_.Height } -Descending)[0]
+          if ($sizes.Count -gt 1) { Write-Warn (T "device card {0}.png stands next to QR codes of different size ({1}): padded for the largest" $k.Name ($sizes -join ", ")) }
+        }
+        # a logo fits the left card column and the height of the QR code
+        if ($k.Padded -and ($img.Width -gt $logoMaxW -or $img.Height -gt $kGeo.QrPx)) {
+          throw (T "logo {0} is {1}x{2} px, at most {3}x{4} px (left card column, QR code height)" $k.File $img.Width $img.Height $logoMaxW $kGeo.QrPx)
+        }
+        if (-not $k.Padded -and $img.Width -gt $logoMaxW) {
+          throw (T "badge {0} is {1} px wide, at most {2} px (left card column)" $k.File $img.Width $logoMaxW)
+        }
+        if ($k.Padded) {
+          # height of the QR picture, the logo centered on the QR code (the caption below it stays free)
+          $h = $kGeo.Height; $top = [int][Math]::Floor(($kGeo.QrPx - $img.Height) / 2)
+          $px = New-Object byte[] ($img.Width * $h * 4)
+          [Array]::Copy($img.Pixels, 0, $px, $top * $img.Width * 4, $img.Width * $img.Height * 4)
+          $img = @{ Width = $img.Width; Height = $h; Pixels = $px }
+        }
         $images += @{ Output = [System.IO.Path]::Combine($infoDir, $k.Name + ".png"); Image = $img }
         Write-Step (T "device card {0}.png: {1}x{2} px from {3}, {4} board(s)" $k.Name $img.Width $img.Height $k.File (@($k.Boards).Count))
       }
     }
     catch { Stop-WithError (T "<InfoImage>: {0}" $_.Exception.Message) }
-    $imageIndex = 0
-    foreach ($g in $m.InfoGroups) {
-      # the link without scheme (the QR code holds the full URL)
-      $shown = $g.Url -replace '^[A-Za-z][A-Za-z0-9+.-]*://', ''
-      $imageIndex++
-      Write-Activity (T "QR picture {0}/{1}  {2}" $imageIndex (@($m.InfoGroups).Count) $shown)
-      try { $img = New-QrLinkImage $g.Url $shown $m.Info.Width $m.Info.Module $m.Info.Version $urlFont $m.Info.Supersample $m.Info.UrlRgb }
-      catch { Stop-WithError (T "device card {0} ({1}): {2}" $g.File $g.Url $_.Exception.Message) }
-      $images += @{ Output = [System.IO.Path]::Combine($infoDir, $g.File); Image = $img }
-      if ($img.Qr.Version -gt $m.Info.Version) { Write-Warn (T "device card {0}: the URL needs QR version {1} (manifest version {2}): {3}" $g.File $img.Qr.Version $m.Info.Version $g.Url) }
-      Write-Step (T "device card {0}: {1}x{2} px, QR version {3}-{4} {5} px, link {6:N1} px: {7}, {8} board(s)" $g.File $img.Width $img.Height $img.Qr.Version $img.Qr.Ec $img.QrPx $img.TextW $shown $g.Boards.Count)
-    }
   }
 
   # <Page queryImage>: steps picture of the device query, copied as Baggages/<prefix>Info/Steps.png (at most the page width)

@@ -87,9 +87,6 @@ function Get-RelativeOutputPath([string]$BaseDir, [string]$Path) {
   for ($k = $i; $k -lt $p.Count; $k++) { $parts += $p[$k] }
   return ($parts -join "/")
 }
-# @brief Pictures above the device card name: per board the file of a matching <InfoImage><Logo>, else the badge (third-party
-#        board) or the logo; boards grouped by file. Logo 00900, Badge 00901, own files Logo1..Logo10 = 00910..00919.
-#        A board without picture ("" file) is in no group.
 # @brief Content of a picture file as comparison key (the files are a few kB; no hash API, which FIPS policy can block)
 function Get-FileContentHash([string]$Path) {
   return [System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes($Path))

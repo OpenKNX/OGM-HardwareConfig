@@ -95,6 +95,7 @@
 
 #ifdef DEVICE_QUINLED_DIG2GO
     #define DEVICE_HW_ID 0x2100
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig2Go"
     #define DEVICE_NAME "QuinLED Dig2Go" // Flash: 4 MB, PSRAM: 0 MB
@@ -137,6 +138,7 @@
 
 #ifdef DEVICE_QUINLED_DIG_NEXT2
     #define DEVICE_HW_ID 0x2140
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74AHCT125
     #define DEVICE_ID "QuinLED-Dig-Next-2"
@@ -176,6 +178,7 @@
 
 #if defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI)
     #define DEVICE_HW_ID 0x2110
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-WiFi"
@@ -189,6 +192,7 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET)
     #define DEVICE_HW_ID 0x2111
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-Ethernet"
@@ -202,6 +206,7 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS)
     #define DEVICE_HW_ID 0x2112
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Uno-V3-WiFi-AE-Plus"
     #define DEVICE_NAME "QuinLED Dig-Uno V3 (WiFi + AE_Plus)" // Flash: 4 MB, PSRAM: 0 MB
@@ -279,6 +284,7 @@
 
 #if defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI)
     #define DEVICE_HW_ID 0x2120
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
@@ -291,6 +297,7 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET)
     #define DEVICE_HW_ID 0x2121
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Quad V3 (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
@@ -303,6 +310,7 @@
     #define QUINLED_HAS_AUDIO_INPUT 0
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS)
     #define DEVICE_HW_ID 0x2122
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V3-WiFi-AE-Plus"
     #define DEVICE_NAME "QuinLED Dig-Quad V3 (WiFi + AE_Plus)" // Flash: 4 MB, PSRAM: 0 MB
@@ -379,6 +387,7 @@
 
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET)
     #define DEVICE_HW_ID 0x2130
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (Ethernet)" // Flash: 4 MB, PSRAM: 0 MB
@@ -389,6 +398,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI)
     #define DEVICE_HW_ID 0x2131
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L (WiFi)" // Flash: 4 MB, PSRAM: 0 MB
@@ -401,6 +411,7 @@
 
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET)
     #define DEVICE_HW_ID 0x2132
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (Ethernet)" // Flash: 16 MB, PSRAM: 0 MB
@@ -410,6 +421,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI)
     #define DEVICE_HW_ID 0x2133
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V2-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V2 (WiFi)" // Flash: 16 MB, PSRAM: 0 MB
@@ -465,6 +477,7 @@
 // Ethernet PHY: WLED wled00/network.cpp, WLED_ETH_QUINLED_V4.
 #if defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI)
     #define DEVICE_HW_ID 0x2113
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V4-WiFi"
@@ -475,6 +488,7 @@
     #define QUINLED_HAS_ETHERNET 0
 #elif defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2114
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define HW_LEVELSHIFTER HW_LEVELSHIFTER_SN74HCT125
     #define DEVICE_ID "QuinLED-Dig-Uno-V4-Ethernet"
@@ -485,6 +499,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI)
     #define DEVICE_HW_ID 0x2123
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V4-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Quad V4 (WiFi)" // Flash: 8 MB, PSRAM: 2 MB
@@ -494,6 +509,7 @@
     #define QUINLED_HAS_ETHERNET 0
 #elif defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2124
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define HW_INFO_TEXT "ESP32-Controller von QuinLED mit 4 LED-Ausgängen und einem Relais-Ausgang, 8 MB Flash, 2 MB PSRAM. KNX über IP per Ethernet." // board description on the ETS hardware page (max. 255 characters)
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Quad-V4-Ethernet"
@@ -544,6 +560,7 @@
 // V4 Octa: https://quinled.info/quinled-dig-octa-brainboard-32-8l-pinout-guide/
 #if defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
     #define DEVICE_HW_ID 0x2134
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-Ethernet"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (Ethernet)" // Flash: 16 MB, PSRAM: 0 MB
@@ -553,6 +570,7 @@
     #define QUINLED_HAS_ETHERNET 1
 #elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI)
     #define DEVICE_HW_ID 0x2135
+    #define HW_INFO_LOGO "HardwareConfig/Others/QuinLed/logo.png" // device card picture (<InfoImage>), found like an #include
     #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "QuinLED-Dig-Octa-32-8L-V4-WiFi"
     #define DEVICE_NAME "QuinLED Dig-Octa 32-8L V4 (WiFi)" // Flash: 16 MB, PSRAM: 0 MB

@@ -453,9 +453,15 @@ function Resolve-Board($M, $BoardEntry) {
     [void]$sb.AppendLine("@@ `"INFOURL`" " + $M.Info.Define)
     [void]$sb.AppendLine("#endif")
   }
-  # board description for <Page> (HW_INFO_TEXT of the board block)
+  # board description for <Page> (HW_INFO_TEXT, second part HW_INFO_TEXT2) and the device card picture (HW_INFO_LOGO)
   [void]$sb.AppendLine("#ifdef HW_INFO_TEXT")
   [void]$sb.AppendLine("@@ `"INFOTEXT`" HW_INFO_TEXT")
+  [void]$sb.AppendLine("#endif")
+  [void]$sb.AppendLine("#ifdef HW_INFO_TEXT2")
+  [void]$sb.AppendLine("@@ `"INFOTEXT2`" HW_INFO_TEXT2")
+  [void]$sb.AppendLine("#endif")
+  [void]$sb.AppendLine("#ifdef HW_INFO_LOGO")
+  [void]$sb.AppendLine("@@ `"INFOLOGO`" HW_INFO_LOGO")
   [void]$sb.AppendLine("#endif")
   # <PartRows>: condition and label macro of each row; <Fix valueMacro>: the value of the macro
   foreach ($pr in @($M.PartRows)) {
@@ -493,11 +499,29 @@ function Resolve-Board($M, $BoardEntry) {
   $board = @{
     Define = $BoardEntry.Define; HwId = $ident.HwId; DeviceId = $ident.Id; Name = $ident.Name
     Caps = @(); CapMask = [uint32]0; Values = @(); ValueSource = @(); Pins = @{}; Slot = -1; CapMixed = @{}; InfoText = $null
+    InfoText2 = $null; LogoFile = $null
   }
   if ($res.ContainsKey("INFOTEXT")) {
     $board.InfoText = ConvertFrom-CString $res["INFOTEXT"]
     if (-not $board.InfoText) { Stop-WithError (T "{0}: HW_INFO_TEXT is not a string: {1}" $BoardEntry.Define $res["INFOTEXT"]) }
     if ($board.InfoText.Length -gt 255) { Stop-WithError (T "{0}: HW_INFO_TEXT has {1} characters, ETS shows at most 255" $BoardEntry.Define $board.InfoText.Length) }
+  }
+  # second part of the board text (one more text element, ETS: 255 characters per text)
+  if ($res.ContainsKey("INFOTEXT2")) {
+    $board.InfoText2 = ConvertFrom-CString $res["INFOTEXT2"]
+    if (-not $board.InfoText2) { Stop-WithError (T "{0}: HW_INFO_TEXT2 is not a string: {1}" $BoardEntry.Define $res["INFOTEXT2"]) }
+    if ($board.InfoText2.Length -gt 255) { Stop-WithError (T "{0}: HW_INFO_TEXT2 has {1} characters, ETS shows at most 255" $BoardEntry.Define $board.InfoText2.Length) }
+  }
+  # picture of the device card: a path relative to an include folder of the generator (<IncludePath> first, then the
+  # OGM-HardwareConfig include folder), first match wins
+  if ($res.ContainsKey("INFOLOGO")) {
+    $rel = ConvertFrom-CString $res["INFOLOGO"]
+    if (-not $rel) { Stop-WithError (T "{0}: HW_INFO_LOGO is not a string: {1}" $BoardEntry.Define $res["INFOLOGO"]) }
+    foreach ($inc in @($script:IncludeDirs)) {
+      $cand = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($inc, ($rel -replace '\\', '/')))
+      if (Test-Path -LiteralPath $cand -PathType Leaf) { $board.LogoFile = $cand; break }
+    }
+    if (-not $board.LogoFile) { Stop-WithError (T "{0}: HW_INFO_LOGO {1} not found in the include folders ({2})" $BoardEntry.Define $rel (@($script:IncludeDirs) -join ", ")) }
   }
   # <PartRows>: "<part>/<row>" -> On (the board shows the row), Label (text of the label macro, "" = none)
   $board.PartRows = @{}

@@ -99,9 +99,9 @@ aus den LED-Ports nehmen.
 entsprechen `LevelShifterType` von OFM-NeoPixel; ein Build-Flag `-DNEOPIXEL_HW_LEVELSHIFTER=<n>` geht dort vor.
 
 `HW_INFO_URL` im Board-Block: Info-Seite des Geräts, z. B.
-`#define HW_INFO_URL "https://go.openknx.de/kneopix"` (Kurzlink: kürzere URL, kleinerer QR-Code; der Link muss in
-eine Zeile von 150 px passen). Der [Generator](generator/README.md) zeigt sie in ETS als QR-Code mit dem Link ohne Schema
-darunter (ETS zeigt keine Links); ohne Define kein QR-Code. Die Firmware liest das Makro nicht. Welche Boards es setzen:
+`#define HW_INFO_URL "https://go.openknx.de/kneopix"` (Kurzlink: kürzere URL, kleinerer QR-Code). Der [Generator](generator/README.md)
+zeigt sie in ETS als QR-Code mit der Beschriftung „Geräteinfo“ darunter (ETS zeigt keine Links, die URL steht nur im QR-Code);
+ohne Define kein QR-Code. Die Firmware liest das Makro nicht. Welche Boards es setzen:
 `grep -rn HW_INFO_URL include/HardwareConfig` (PowerShell:
 `Get-ChildItem include/HardwareConfig -Recurse -Filter *.h | Select-String HW_INFO_URL`).
 
@@ -117,8 +117,8 @@ Zeile erscheint dann über die Bedingung `defined(INFO<n>_LED_PIN) || defined(IN
 sonst ab). Der Generator zeigt sie auf der Hardware-Seite unter dem Gerätenamen (mit Info-URL links neben dem QR-Code); ohne Define
 gilt der Standardtext der Applikation. Welche Boards es setzen: `grep -rn HW_INFO_TEXT include/HardwareConfig` (PowerShell: `Select-String` wie oben).
 
-Bild über dem Gerätenamen: OpenKNX-Logo, bei `#define DEVICE_THIRD_PARTY` im Board-Block das Badge „Drittanbieter“ mit
-Hinweis. Ein eigenes Bild oder keines je Board legt das Manifest der Applikation fest (`<InfoImage><Logo board file>`, siehe
+Bild links auf der Gerätekarte: `HW_INFO_LOGO` des Board-Blocks, sonst das OpenKNX-Logo; bei `#define DEVICE_THIRD_PARTY`
+darunter der Stempel „Drittanbieter / Hardware“ und unter der Karte ein Hinweis. Ein eigenes Bild oder keines je Board legt das Manifest der Applikation fest (`<InfoImage><Logo board file>`, siehe
 [Generator](generator/README.md#hardware-seite-gerätekarte)).
 
 ## Hardware-ID (`DEVICE_HW_ID`)
