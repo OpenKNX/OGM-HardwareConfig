@@ -445,6 +445,175 @@ Add-Test "partrows-nohit" (T "PartRows: a selection without a row stops") {
   Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "src", "T.rows.gen.xml")))) (T "a parts file was written")
 }
 
+# @brief <PartRows> with <Fix>/<Filter> blocks: a foreign module file in lib/X/src (href to a sibling file), a Fix target in a grid
+#        cell that is also a selected row, a Filter target with IndentLevel; manifest lines go after the board macros
+function Copy-BaseWithForeignPart([string]$Name, [string]$Lines) {
+  $items = @(0..4 | ForEach-Object { '            <Enumeration Text="E{0}" Value="{0}" Id="%ENID%" />' -f $_ })
+  $d = Copy-BaseWithBoardMacros $Name $Lines
+  $dir = [System.IO.Path]::Combine($d, "lib", "X", "src")
+  [void][System.IO.Directory]::CreateDirectory($dir)
+  Write-Text ([System.IO.Path]::Combine($dir, "M.part.xml")) ((@(
+    '<?xml version="1.0" encoding="utf-8"?>'
+    '<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20">'
+    '  <ManufacturerData><Manufacturer RefId="M-00FA"><ApplicationPrograms><ApplicationProgram>'
+    '    <Static>'
+    '      <ParameterTypes>'
+    '        <ParameterType Id="%AID%_PT-MMode" Name="MMode">'
+    '          <TypeRestriction Base="Value" SizeInBit="8" UIHint="DropDown">') + $items + @(
+    '          </TypeRestriction>'
+    '        </ParameterType>'
+    '      </ParameterTypes>'
+    '      <Parameters>'
+    '        <Union SizeInBit="16">'
+    '          <Memory CodeSegment="%AID%_RS-04-00000" Offset="0" BitOffset="0" />'
+    '          <Parameter Id="%AID%_UP-%TT%00050" Name="MMode" ParameterType="%AID%_PT-MMode" Offset="0" BitOffset="0" Text="Modus" Value="1" />'
+    '          <Parameter Id="%AID%_UP-%TT%00051" Name="MSet" ParameterType="%AID%_PT-MMode" Offset="1" BitOffset="0" Text="Wert" Value="0" />'
+    '        </Union>'
+    '      </Parameters>'
+    '      <ParameterRefs>'
+    '        <ParameterRef Id="%AID%_UP-%TT%00050_R-%TT%0005001" RefId="%AID%_UP-%TT%00050" />'
+    '        <ParameterRef Id="%AID%_UP-%TT%00051_R-%TT%0005101" RefId="%AID%_UP-%TT%00051" />'
+    '      </ParameterRefs>'
+    '      <ParameterCalculations><ParameterCalculation Id="%AID%_PC-%TT%00001" Language="JavaScript" Name="C" LRTransformationFunc="f" RLTransformationFunc="g">'
+    '        <LParameters><ParameterRefRef RefId="%AID%_UP-%TT%00051_R-%TT%0005101" AliasName="S" /></LParameters><RParameters /></ParameterCalculation></ParameterCalculations>'
+    '    </Static>'
+    '    <Dynamic><ChannelIndependentBlock>'
+    '      <ParameterBlock Id="%AID%_PB-nnn" Name="Page" Text="Page">'
+    '        <op:include href="Other.part.xml" xpath="//Block[@name=''X'']/*" />'
+    '        <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid">'
+    '          <ParameterSeparator Id="%AID%_PS-nnn" Text="Wert" Cell="1,1" />'
+    '          <ParameterRefRef RefId="%AID%_UP-%TT%00051_R-%TT%0005101" Cell="1,2" />'
+    '        </ParameterBlock>'
+    '        <ParameterRefRef RefId="%AID%_UP-%TT%00050_R-%TT%0005001" IndentLevel="2" />'
+    '      </ParameterBlock>'
+    '    </ChannelIndependentBlock></Dynamic>'
+    '  </ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData>'
+    '</KNX>')) -join "`n")
+  return $d
+}
+$ForeignFix = '<Fixes output="src/T.fixes.gen.xml"><Fix name="MSet" capability="Lan" ref="%AID%_UP-%TT%00051_R-%TT%0005101" value="3" indent="1" /></Fixes>'
+$ForeignFilter = '<Filters output="src/T.filters.gen.xml"><Filter name="MMode" ref="%AID%_UP-%TT%00050_R-%TT%0005001" source="lib/X/src/M.part.xml" number="700"><Allow board="DEVICE_UP1_TAS_4X" values="0 1" /></Filter></Filters>'
+
+Add-Test "partrows-blocks" (T "PartRows: <Fix> and <Filter> blocks in a copy of a foreign file, also inside a selected row, layout of the source kept, hrefs rewritten") {
+  $d = Copy-BaseWithForeignPart "partrows-blocks" ($ForeignFix + $ForeignFilter +
+    '<PartRows source="lib/X/src/M.part.xml" output="src/M.copy.gen.xml"><Row ref="%AID%_UP-%TT%00051_R-%TT%0005101" expr="defined(DEVICE_REG1_LAN_TP_BASE) || defined(DEVICE_UP1_TAS_4X)" /><Fix name="MSet" /><Filter name="MMode" /></PartRows>' +
+    '<PartRows source="lib/X/src/S.share.xml" output="src/S.copy.gen.xml" />')
+  # a share of the same module that includes M.part.xml: its plain copy must include the copy of M.part.xml
+  Write-Text ([System.IO.Path]::Combine($d, "lib", "X", "src", "S.share.xml")) ('<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20"><Dynamic>' +
+    '<op:include href="M.part.xml" xpath="//Dynamic/*" type="template" /><op:include href="Other.part.xml" xpath="//X/*" /></Dynamic></KNX>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $sc = Read-Text ([System.IO.Path]::Combine($d, "src", "S.copy.gen.xml"))
+  Assert-True ($sc.Contains('<op:include href="M.copy.gen.xml"') -and $sc.Contains('<op:include href="../lib/X/src/Other.part.xml"')) (T "a copy that includes the source of another <PartRows> must point to its copy")
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "M.copy.gen.xml"))
+  Assert-True ($f.Contains('<op:include href="../lib/X/src/Other.part.xml"')) (T "href of the copy not rewritten to ../lib/X/src/Other.part.xml")
+  $x = New-Object System.Xml.XmlDocument; $x.LoadXml($f)
+  $ns = New-Object System.Xml.XmlNamespaceManager($x.NameTable); $ns.AddNamespace("k", "http://knx.org/xml/project/20")
+  $sel = "%AID%_UP-4500001_R-450000101"
+  # the row: not selected + one group (4129 4611); in each, the Fix block: 4129 4130 fixed read-only, else the normal cell
+  $row = $x.SelectSingleNode("//k:choose[@ParamRefId='$sel'][k:when/k:ParameterBlock[@Layout='Grid']]", $ns)
+  Assert-True ($null -ne $row) (T "choose of the selected row missing")
+  $rowWhens = @($row.SelectNodes("k:when", $ns))
+  Assert-True ($rowWhens.Count -eq 2 -and $rowWhens[0].GetAttribute("test") -ceq "0" -and $rowWhens[1].GetAttribute("test") -ceq "4129 4611") (T "row whens: expected 0 and 4129 4611")
+  foreach ($w in $rowWhens) {
+    $fix = $w.SelectSingleNode("k:ParameterBlock/k:choose[@ParamRefId='$sel']", $ns)
+    Assert-True ($null -ne $fix) (T "row when {0}: the Fix block is missing" $w.GetAttribute("test"))
+    $fw = $fix.SelectSingleNode("k:when[@test='4129 4130']", $ns)
+    Assert-True ($null -ne $fw -and $null -ne $fw.SelectSingleNode("k:Assign[@TargetParamRefRef='%AID%_UP-%TT%00051_R-%TT%0005101'][@Value='3']", $ns) -and $null -ne $fw.SelectSingleNode("k:ParameterRefRef[@RefId='%AID%_UP-%TT%00051_R-%TT%0005199'][@Cell='1,2']", $ns)) (T "Fix block: Assign 3 and the read-only cell 1,2 missing")
+    Assert-True ($null -ne $fix.SelectSingleNode("k:when[@default='true']/k:ParameterRefRef[@RefId='%AID%_UP-%TT%00051_R-%TT%0005101'][@Cell='1,2']", $ns)) (T "Fix block: the normal cell 1,2 for the other boards missing")
+  }
+  Assert-True ($x.SelectNodes("//k:ParameterBlock[@Layout='Grid']/k:ParameterRefRef[@RefId='%AID%_UP-%TT%00051_R-%TT%0005101']", $ns).Count -eq 0) (T "the replaced ParameterRefRef is still there")
+  Assert-True ($null -ne $x.SelectSingleNode("//k:LParameters/k:ParameterRefRef[@RefId='%AID%_UP-%TT%00051_R-%TT%0005101'][@AliasName='S']", $ns) -and $x.SelectNodes("//k:LParameters//k:choose", $ns).Count -eq 0) (T "the ParameterRefRef of a calculation must stay untouched")
+  Assert-True ($x.SelectNodes("//k:ParameterBlock[@Layout='Grid']//k:ParameterRefRef[@IndentLevel]", $ns).Count -eq 0) (T "a grid cell without IndentLevel must not get the indent of the Fix")
+  # the Filter: carrier for not selected and the full-list boards, own list for 4611, IndentLevel 2 of the source
+  $flt = @($x.SelectNodes("//k:choose[@ParamRefId='$sel'][k:when/k:ParameterRefRef[@RefId='%AID%_UP-%TT%00050_R-%TT%0005001']]", $ns))
+  Assert-True ($flt.Count -eq 1) (T "Filter block missing in place of the carrier")
+  Assert-True ($null -ne $flt[0].SelectSingleNode("k:when[@test='4611']/k:ParameterRefRef[@RefId='%AID%_P-%TT%00700_R-%TT%0070001'][@IndentLevel='2']", $ns)) (T "Filter block: own list of 4611 with IndentLevel 2 missing")
+  Assert-True ($null -ne $flt[0].SelectSingleNode("k:when[@test='4611']/k:Assign[@TargetParamRefRef='%AID%_UP-%TT%00050_R-%TT%0005001']", $ns)) (T "Filter block: copy into the carrier missing")
+  # Static of the copy: the read-only ref of the Fix and the own list of the Filter with its ref, once each
+  Assert-True ($x.SelectNodes("//k:Static/k:ParameterRefs/k:ParameterRef[@Id='%AID%_UP-%TT%00051_R-%TT%0005199'][@Access='Read']", $ns).Count -eq 1) (T "Static: read-only ref of the Fix missing or twice")
+  Assert-True ($x.SelectNodes("//k:Static/k:Parameters/k:Parameter[@Id='%AID%_P-%TT%00700']", $ns).Count -eq 1 -and $x.SelectNodes("//k:Static/k:ParameterRefs/k:ParameterRef[@Id='%AID%_P-%TT%00700_R-%TT%0070001']", $ns).Count -eq 1) (T "Static: own list of the Filter or its ref missing or twice")
+  Assert-True ($x.SelectNodes("//k:ParameterType", $ns).Count -eq 1) (T "Static: the copy must not take the filter types (the product includes them once)")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+  # the source takes the parameters of the Filter itself: the copy must not insert them a second time
+  $d = Copy-BaseWithForeignPart "partrows-blocks-incl" ($ForeignFix + $ForeignFilter + '<PartRows source="lib/X/src/M.part.xml" output="src/M.copy.gen.xml"><Filter name="MMode" /></PartRows>')
+  Edit-File ([System.IO.Path]::Combine($d, "lib", "X", "src", "M.part.xml")) '      <Parameters>' "      <Parameters>`n        <op:include href=`"../../../src/T.filters.gen.xml`" xpath='//Block[@name=`"Filter_MMode_Parameters`"]/*' />"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "M.copy.gen.xml"))
+  Assert-True (-not $f.Contains('<Parameter Id="%AID%_P-%TT%00700"') -and $f.Contains('<ParameterRef Id="%AID%_P-%TT%00700_R-%TT%0070001"')) (T "a block the source includes itself must not be inserted again (the other one must)")
+  $d = Copy-BaseWithForeignPart "partrows-blocks-twice" ($ForeignFix + '<PartRows source="lib/X/src/M.part.xml" output="src/M.copy.gen.xml"><Fix name="MSet" /></PartRows><PartRows source="lib/X/src/M.part.xml" output="src/M2.copy.gen.xml" />')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'is used twice - put all rows' (T "stop message")
+  # errors: unknown name, show="assign", a ref the source does not have
+  $d = Copy-BaseWithForeignPart "partrows-blocks-name" ($ForeignFix + '<PartRows source="lib/X/src/M.part.xml" output="src/M.copy.gen.xml"><Fix name="Nope" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'no <Fix> with this name' (T "stop message")
+  $d = Copy-BaseWithForeignPart "partrows-blocks-assign" ($ForeignFix.Replace('value="3" indent="1" />', 'value="3" indent="1" show="assign" />') + '<PartRows source="lib/X/src/M.part.xml" output="src/M.copy.gen.xml"><Fix name="MSet" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'no row to replace' (T "stop message")
+  $d = Copy-BaseWithForeignPart "partrows-blocks-noref" ($ForeignFix.Replace('00051_R-%TT%0005101', '00052_R-%TT%0005201') + '<PartRows source="lib/X/src/M.part.xml" output="src/M.copy.gen.xml"><Fix name="MSet" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'the source has no ParameterRefRef' (T "stop message")
+}
+
+Add-Test "partrows-channelcount" (T "PartRows: %N% of a copy comes from the NumChannels of the op:define that names the source, none stops") {
+  $d = Copy-BaseWithForeignPart "partrows-n" '<PartRows source="lib/X/src/S.share.xml" output="src/S.copy.gen.xml" />'
+  Write-Text ([System.IO.Path]::Combine($d, "lib", "X", "src", "S.share.xml")) ('<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20"><Dynamic>' +
+    '<choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101"><when test="&lt;%N%"><ParameterSeparator Id="%AID%_PS-nnn" Text="%N-1% von %N%" /></when></choose></Dynamic></KNX>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'no op:define of a product XML names this file' (T "stop message")
+  Edit-File ([System.IO.Path]::Combine($d, "src", "T.xml")) '</KNX>' '  <op:define prefix="X" ModuleType="47" share="../lib/X/src/S.share.xml" NumChannels="6" />
+</KNX>'
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "S.copy.gen.xml"))
+  Assert-True ($f.Contains('test="&lt;6"') -and $f.Contains('Text="5 von 6"') -and -not $f.Contains('%N')) (T "%N% and %N-1% of the copy must be 6 and 5")
+  # a second product XML (Release next to Dev): same NumChannels is fine, another one stops
+  $second = '<?xml version="1.0" encoding="utf-8"?><KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20"><op:ETS OpenKnxId="0xAD" ApplicationNumber="251" ApplicationVersion="1.0" ReplacesVersionsDownTo="0.1" ProductName="Selftest 2" /><op:define prefix="TST" ModuleType="45" share="T.share.xml" /><op:define prefix="X" ModuleType="47" share="../lib/X/src/S.share.xml" NumChannels="{0}" /></KNX>'
+  Write-Text ([System.IO.Path]::Combine($d, "src", "T2.xml")) ($second -f 6)
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  Write-Text ([System.IO.Path]::Combine($d, "src", "T2.xml")) ($second -f 8)
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'give different NumChannels \(6, 8\)' (T "stop message")
+  # the copy itself is the template of a define: the producer replaces %N% there, the copy keeps it
+  Write-Text ([System.IO.Path]::Combine($d, "src", "T2.xml")) ($second -f 6).Replace('share="../lib/X/src/S.share.xml" NumChannels="6"', 'template="S.copy.gen.xml" NumChannels="4"')
+  Edit-File ([System.IO.Path]::Combine($d, "src", "T.xml")) '  <op:define prefix="X" ModuleType="47" share="../lib/X/src/S.share.xml" NumChannels="6" />' ''
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "S.copy.gen.xml"))
+  Assert-True ($f.Contains('test="&lt;%N%"') -and $f.Contains('Text="%N-1% von %N%"')) (T "a copy that is itself a template must keep %N% for the producer")
+  # the same with the copy as share=
+  Write-Text ([System.IO.Path]::Combine($d, "src", "T2.xml")) ($second -f 6).Replace('share="../lib/X/src/S.share.xml" NumChannels="6"', 'share="S.copy.gen.xml" NumChannels="4"')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  Assert-True ((Read-Text ([System.IO.Path]::Combine($d, "src", "S.copy.gen.xml"))).Contains('test="&lt;%N%"')) (T "a copy that is itself a share must keep %N% for the producer")
+}
+
+Add-Test "partrows-count" (T "PartRows: <Row count> shows channel n only while the value of the board is at least n, count parameter in the hardware module") {
+  $d = Copy-BaseWithBoardMacros "partrows-count" ($RowsSrc + '<Row ref="%AID%_UP-%TT%00020_R-%TT%0002001" count="BinaryInputs" />' +
+    '<Row ref="%AID%_UP-%TT%00021_R-%TT%0002101" expr="defined(DEVICE_UP1_TAS_4X)" count="BinaryInputs" /></PartRows>')
+  # %C% exists only in a channel template: without an op:define that takes the source or the copy as template= it stops
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'needs a channel template' (T "stop message")
+  Edit-File ([System.IO.Path]::Combine($d, "src", "T.xml")) '</KNX>' '  <op:define prefix="P" ModuleType="47" share="T.share.xml" template="T.rows.gen.xml" NumChannels="3" />
+</KNX>'
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $sh = Read-Text ([System.IO.Path]::Combine($d, "src", "T.share.xml"))
+  $mt = [regex]::Match($sh, '<Parameter Id="%AID%_P-%TT%(003\d\d)" Name="BinaryInputsCount" ParameterType="%AID%_PT-TSTCount" Text="BinaryInputs" Access="None" Value="255" />')
+  Assert-True $mt.Success (T "count parameter BinaryInputsCount (number 300 + value index, Access None, 255) missing")
+  $num = $mt.Groups[1].Value
+  $cref = "%AID%_P-%TT%{0}_R-%TT%{0}01" -f $num
+  $x = New-Object System.Xml.XmlDocument; $x.LoadXml($sh)
+  $ns = New-Object System.Xml.XmlNamespaceManager($x.NameTable); $ns.AddNamespace("k", "http://knx.org/xml/project/20")
+  $ch = $x.SelectSingleNode("//k:choose[k:when/k:Assign[@TargetParamRefRef='$cref']]", $ns)
+  Assert-True ($null -ne $ch -and $null -ne $ch.SelectSingleNode("k:when[@test='0']/k:Assign[@Value='255']", $ns)) (T "count parameter: not selected must assign 255")
+  foreach ($id in @(4129, 4130, 4611)) {
+    $hits = @($ch.SelectNodes("k:when", $ns) | Where-Object { @($_.GetAttribute("test") -split ' ') -contains [string]$id })
+    Assert-True ($hits.Count -eq 1) (T "count parameter: board {0} must be in exactly one when, found {1}" $id $hits.Count)
+  }
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.rows.gen.xml"))
+  $y = New-Object System.Xml.XmlDocument; $y.LoadXml($f)
+  $ns2 = New-Object System.Xml.XmlNamespaceManager($y.NameTable); $ns2.AddNamespace("k", "http://knx.org/xml/project/20")
+  $dref = "%AID%_P-45{0}_R-45{0}01" -f $num
+  $cc = @($y.SelectNodes("//k:choose[@ParamRefId='$dref']", $ns2))
+  Assert-True ($cc.Count -eq 2) (T "copy: expected 2 chooses on the count parameter (module digits), found {0}" $cc.Count)
+  Assert-True ($null -ne $cc[0].SelectSingleNode("k:when[@test='>=%C%']/k:ParameterBlock[k:ParameterRefRef[@RefId='%AID%_UP-%TT%00020_R-%TT%0002001']]", $ns2)) (T "copy: row A (count only) must sit directly in when >=%C%")
+  Assert-True ($null -ne $cc[1].SelectSingleNode("k:when[@test='>=%C%']/k:choose[@ParamRefId='%AID%_UP-4500001_R-450000101']/k:when[@test='4611']", $ns2)) (T "copy: row B (expr and count) must keep its choose on the selection inside when >=%C%")
+  Assert-True ($f.Contains('test="&gt;=%C%"')) (T "copy: the test must be written as &gt;=%C%")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+  $d = Copy-BaseWithBoardMacros "partrows-count-bad" ($RowsSrc + '<Row ref="%AID%_UP-%TT%00020_R-%TT%0002001" count="Nope" /></PartRows>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'is no <Value> of the manifest' (T "stop message")
+}
+
 Add-Test "partrows-tokens" (T "PartRows: a row with tokens of a channel template and a part") {
   $tr = '%AID%_UP-%TT%%CC%%PPP+2%_R-%TT%%CC%%PPP+2%01'
   $d = Copy-BaseWithBoardMacros "partrows-tokens" ($RowsSrc + '<Row ref="' + $tr + '" expr="defined(DEVICE_UP1_TAS_4X)" /></PartRows>')

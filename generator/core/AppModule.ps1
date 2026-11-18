@@ -466,6 +466,9 @@ function New-ShareXml($M, $Boards) {
   $treeTitle = [bool]($M.Page -and $M.Page.UnselectedTitle)
   if ($steps) { [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}Steps`" Name=`"{0}Steps`"><TypePicture RefId=`"%FILE-{0}Steps%`" HorizontalAlignment=`"Left`" /></ParameterType>" -f $p)) }
   if ($treeTitle) { [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}PageTitle`" Name=`"{0}PageTitle`"><TypeText SizeInBit=`"2040`" /></ParameterType>" -f $p)) }
+  # <PartRows><Row count>: the value of the selected board as a number (no memory), compared with the channel number of a template
+  $counts = @($M.CountValues)
+  if ($counts.Count -gt 0) { [void]$sb.AppendLine(("        <ParameterType Id=`"%AID%_PT-{0}Count`" Name=`"{0}Count`"><TypeNumber SizeInBit=`"8`" Type=`"unsignedInt`" minInclusive=`"0`" maxInclusive=`"255`" /></ParameterType>" -f $p)) }
   for ($bi = 0; $bi -lt $Boards.Count; $bi++) {
     $b = $Boards[$bi]
     foreach ($role in $M.Roles) {
@@ -518,6 +521,8 @@ function New-ShareXml($M, $Boards) {
   if ($steps) { [void]$sb.AppendLine(("        <Parameter Id=`"%AID%_P-%TT%{0}`" Name=`"Steps`" ParameterType=`"%AID%_PT-{1}Steps`" Text=`"`" Access=`"Read`" Value=`"`" />" -f $script:StepsParamNum, $p)) }
   # page text of the tree: no memory, Access None; the calculation sets it from the selection, the default fits "not selected"
   if ($treeTitle) { [void]$sb.AppendLine(("        <Parameter Id=`"%AID%_P-%TT%{0}`" Name=`"PageTitle`" ParameterType=`"%AID%_PT-{1}PageTitle`" Text=`"`" Access=`"None`" Value=`"{2}`" />" -f $script:PageTitleParamNum, $p, (ConvertTo-XmlText $M.Page.UnselectedTitle))) }
+  # 255 = not selected: every channel shows
+  foreach ($cv in $counts) { [void]$sb.AppendLine(("        <Parameter Id=`"%AID%_P-%TT%{0}`" Name=`"{1}Count`" ParameterType=`"%AID%_PT-{2}Count`" Text=`"{1}`" Access=`"None`" Value=`"255`" />" -f $cv.Num, $cv.Name, $p)) }
   [void]$sb.AppendLine('      </Parameters>')
   [void]$sb.AppendLine('      <ParameterRefs>')
   [void]$sb.AppendLine("        <ParameterRef Id=`"$selRef`" RefId=`"%AID%_UP-%TT%00001`" />")
@@ -541,6 +546,7 @@ function New-ShareXml($M, $Boards) {
   }
   if ($steps) { [void]$sb.AppendLine(("        <ParameterRef Id=`"%AID%_P-%TT%{0}_R-%TT%{0}01`" RefId=`"%AID%_P-%TT%{0}`" />" -f $script:StepsParamNum)) }
   if ($treeTitle) { [void]$sb.AppendLine(("        <ParameterRef Id=`"{0}`" RefId=`"%AID%_P-%TT%{1}`" />" -f $refs.TitleTT, $script:PageTitleParamNum)) }
+  foreach ($cv in $counts) { [void]$sb.AppendLine(("        <ParameterRef Id=`"%AID%_P-%TT%{0}_R-%TT%{0}01`" RefId=`"%AID%_P-%TT%{0}`" />" -f $cv.Num)) }
   [void]$sb.AppendLine('      </ParameterRefs>')
   if ($treeTitle) {
     # tree text: <page> while a board is selected, unselectedTitle while not (runs on every change of the selection)
@@ -645,6 +651,20 @@ function New-ShareXml($M, $Boards) {
       }
       [void]$sb.AppendLine("          </choose>")
     }
+  }
+  # count parameters: set from the selection (not selected 255, else the value of the board); invisible (Access None)
+  foreach ($cv in $counts) {
+    $cref = "%AID%_P-%TT%{0}_R-%TT%{0}01" -f $cv.Num
+    [void]$sb.AppendLine("          <choose ParamRefId=`"$selRef`">")
+    [void]$sb.AppendLine(("            <when test=`"{0}`"><Assign TargetParamRefRef=`"{1}`" Value=`"255`" /></when>" -f $M.UnselectedValue, $cref))
+    # string keys: an [ordered] dictionary indexes an int key by position
+    $byVal = @{}
+    foreach ($b in $Boards) { $v = [string][int]$b.Val[$cv.Name]; if (-not $byVal.ContainsKey($v)) { $byVal[$v] = @() }; $byVal[$v] += $b }
+    foreach ($v in @($byVal.Keys | Sort-Object { [int]$_ })) {
+      if ([int]$v -lt 0 -or [int]$v -gt 254) { Stop-WithError (T "<PartRows><Row count=`"{0}`">: value {1} of {2} is outside 0..254" $cv.Name $v (@($byVal[$v] | ForEach-Object { $_.Define }) -join ", ")) }
+      [void]$sb.AppendLine(("            <when test=`"{0}`"><Assign TargetParamRefRef=`"{1}`" Value=`"{2}`" /></when>" -f (Get-IdList $byVal[$v]), $cref, $v))
+    }
+    [void]$sb.AppendLine("          </choose>")
   }
   [void]$sb.AppendLine('        </ParameterBlock>')
   [void]$sb.AppendLine('      </Channel>')

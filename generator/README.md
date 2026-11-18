@@ -404,15 +404,42 @@ Applikation lässt das Modul diese Kopie statt seines eigenen Bausteins laden (b
 <op:config name="%BASE_InfoLedPart%" value="../../../src/HardwareProfile.infoled.gen.xml" />
 ```
 
-- `source`: der Baustein, relativ zum Manifest; `output`: die Kopie (nicht die Quelle, nicht zweimal). Mehrere `<PartRows>`
-  sind erlaubt. Auch eine Kanal-Vorlage geht: das Produkt nennt dann die Kopie als `template=` des `op:define` und bindet ihre
-  Seiten aus der Kopie ein (Demo: `HardwareProfile.channel.gen.xml`, Zeile „Status-LED“ je Kanal).
+- `source`: der Baustein, relativ zum Manifest; `output`: die Kopie (nicht die Quelle, nicht zweimal; eine Quelle nur in einem
+  `<PartRows>`). Mehrere `<PartRows>` sind erlaubt. Auch eine Kanal-Vorlage geht: das Produkt nennt dann die Kopie als
+  `template=` des `op:define` und bindet ihre Seiten aus der Kopie ein (Demo: `HardwareProfile.channel.gen.xml`, Zeile
+  „Status-LED“ je Kanal).
+- Die Quelle darf eine Datei eines fremden Moduls sein (OFM-Vorlage, OFM-Share): keine Änderung an der Bibliothek. Die Kopie
+  schreibt relative `href` auf ihren Ordner um; eine `href` auf die Quelle eines anderen `<PartRows>` zeigt auf dessen Kopie
+  (eine kopierte Share-Datei bindet die kopierte Vorlage ein). `<PartRows>` ohne Kind = nur die Kopie mit diesen `href`.
+  `op:part`, die die Kopie deklariert, heißen dort `<Name>-PR<n>` (mit ihren `op:usePart`): der Producer führt Teile über das
+  ganze Produkt nach Namen, eine zweite Deklaration unter demselben Namen verschöbe die Ids. `%N%` / `%N-1%` ersetzt der
+  Producer nur in einer Datei, die er als `share=` oder `template=` liest: nutzt das Produkt die Kopie nur als Dynamic-Include,
+  schreibt der Generator `NumChannels` des `op:define` der Quelle hinein (keines oder verschiedene: Abbruch).
+- Einbinden einer kopierten **Share-Datei**: `share=` bleibt das Original (Static und `Baggages`: der Producer liest Hilfe und
+  Icons immer aus dem Ordner der eingebundenen Datei), nur das Include des Dynamic-Teils zeigt auf die Kopie. Was die Blöcke im
+  Static des Moduls brauchen, kommt über ein zweites `op:define` mit demselben ModuleType (eigenes Präfix, eigene kleine
+  Share-Datei mit den Includes der Blöcke, `noConfigTransfer="true"`; gleicher ModuleType = gleicher Id-Raum, wie NEO und
+  NEOSTRIP in OAM-NeoPixel). Eine kopierte **Vorlage** ist `template=` und bekommt das Static der Blöcke selbst.
+- `<Fix name>` / `<Filter name [row]>` (Kinder): die Kopie zeigt den Block `Fix_<name>` / `Filter_<name>[_<row>]` an jeder
+  Zeile der Einstellung (eine `ParameterRefRef` direkt in einem `ParameterBlock` oder `when`, auch in den Kopien einer
+  gewählten Zeile; nie in einer Berechnung); keine solche Zeile: Abbruch. `Cell` und `IndentLevel` kommen von der ersetzten
+  Zeile (fehlen sie dort, fallen sie weg), `HelpContext` von dort oder aus dem Manifest. Ins Static der Kopie kommen einmal
+  die eigenen Listen und Refs des Filters bzw. die schreibgeschützte Ref eines Fix mit Tokens (nicht, wenn die Quelle den Block
+  schon selbst einbindet; ein Fix mit Modulziffern bringt seine Ref über den gemeinsamen Block `ParameterRefs`); die Typen
+  bindet das Produkt wie sonst einmal ein. Ein `<Fix show="assign">` hat keine Zeile: Abbruch. Demo: Info 3 fest auf dem
+  Raumcontroller Pro in der Kopie des OGM-Common-Bausteins (Ref über das Modul `BASEHW`, ModuleType 10).
 - `<Row ref>`: wählt eine Zeile über die RefId einer `ParameterRefRef` des Bausteins, so wie sie dort steht (mit `%TT%`, in
   einer Vorlage oder einem Baustein mit allen Tokens, z. B. `%AID%_UP-%TT%%CC%003_R-%TT%%CC%00301`).
   Die Zeile ist der `ParameterBlock` mit `Inline="true"`, in dem diese `ParameterRefRef` direkt steht. Abbruch, wenn der
   Baustein keine oder mehr als eine solche `ParameterRefRef` hat, wenn sie nicht direkt in einem Inline-Block steht oder
   wenn zwei `<Row>` dieselbe Zeile treffen: ein geänderter Baustein ergibt so nie still eine falsche Seite.
 - `expr`: Präprozessor-Bedingung wie `<Capability expr>`; Boards, für die sie nicht gilt, bekommen die Zeile nicht.
+- `count="<Value>"` (nur in einer Kanal-Vorlage: ein `op:define` nimmt Quelle oder Kopie als `template=`, sonst Abbruch): die
+  Zeile von Kanal n erscheint nur, solange der Wert des gewählten Boards mindestens n ist (`<when test="&gt;=%C%">`). Der
+  Generator legt dafür im Hardware-Modul einen Parameter ohne Speicher an (`%AID%_P-%TT%00<300 + Index des Werts>`,
+  `Access="None"`, nicht gewählt 255 = jeder Kanal), den die Auswahl je Board per `<Assign>` setzt (Werte 0..254). Ohne `expr`
+  und `label` bekommt die Zeile keinen `<choose>` auf die Auswahl. In ETS6 gemessen (Demo 3.0): „Schaltzustand senden“ auf
+  Kanal 1 und 2 beim Shelly Plus 2PM, nur Kanal 1 beim 1PM, keiner beim i4, alle ohne Auswahl.
 - Info-LEDs: Ein Board, das seine LEDs selbst in `LED_INIT` anlegt (z. B. REG2-ESP-S3-Pico mit Display: INFO1/INFO2 am
   IO-Expander, INFO3 = WS2812), definiert kein `INFO<n>_LED_PIN`, denn diese Werte wären keine GPIOs. Es meldet die LED mit
   `INFO<n>_LED_LABEL`; die Bedingung der Zeile prüft deshalb auch das Label (`defined(INFO<n>_LED_PIN) ||

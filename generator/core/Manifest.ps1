@@ -77,8 +77,10 @@ $script:ManifestNodes = @{
   BoardTable      = @("*", "")
   Fixes           = @("output", "Fix")
   Fix             = @("name capability ref value valueMacro show indent help", "")
-  PartRows        = @("source output", "Row")
-  "PartRows/Row"  = @("ref expr label", "")
+  PartRows        = @("source output", "Row Fix Filter")
+  "PartRows/Row"  = @("ref expr label count", "")
+  "PartRows/Fix"  = @("name", "")
+  "PartRows/Filter" = @("name row", "")
   Filters         = @("output", "Filter")
   Filter          = @("name ref source value number slots indent help", "Allow Row")
   "Filter/Allow"  = @("board capability values except", "")
@@ -145,6 +147,7 @@ function Read-Manifest([string]$Path) {
   Read-ManifestBoardTables $root $m $baseDir
   Read-ManifestPartRows $root $m $baseDir
   Read-ManifestFilters $root $m $baseDir
+  Test-ManifestPartRowBlocks $m
   return $m
 }
 
@@ -657,6 +660,7 @@ function Read-ManifestPartRows($root, $m, $baseDir) {
   # <PartRows source output><Row ref expr label/></PartRows>: a copy of the part file source in which each selected row (the inline
   # ParameterBlock that holds the ParameterRefRef ref) appears only on boards whose header makes expr true; absent = no output changes
   $m.PartRows = @()
+  $m.CountValues = @()
   $prIndex = 0
   foreach ($pn in $root.SelectNodes("PartRows")) {
     $src = "$($pn.GetAttribute('source'))"; $out = "$($pn.GetAttribute('output'))"
@@ -667,18 +671,64 @@ function Read-ManifestPartRows($root, $m, $baseDir) {
     $prIndex++
     if (-not (Test-Path -LiteralPath $pr.Source -PathType Leaf)) { Stop-WithError (T "<PartRows source=`"{0}`">: file not found: {1}" $src $pr.Source) }
     foreach ($o in $m.PartRows) { if ([string]::Equals($o.Output, $pr.Output, [StringComparison]::OrdinalIgnoreCase)) { Stop-WithError (T "<PartRows output=`"{0}`"> is used twice" $out) } }
+    # one copy per source: another copy that includes this source must know which copy it points to
+    foreach ($o in $m.PartRows) { if ([string]::Equals($o.Source, $pr.Source, [StringComparison]::OrdinalIgnoreCase)) { Stop-WithError (T "<PartRows source=`"{0}`"> is used twice - put all rows and blocks of one file into one <PartRows>" $src) } }
     if ([string]::Equals($pr.Output, $pr.Source, [StringComparison]::OrdinalIgnoreCase)) { Stop-WithError (T "<PartRows output=`"{0}`"> would overwrite its source" $out) }
     foreach ($rn in $pn.SelectNodes("Row")) {
       $w = "<PartRows source=`"$src`"><Row ref=`"$($rn.GetAttribute('ref'))`">"
-      $row = @{ Ref = "$($rn.GetAttribute('ref'))"; Expr = "$($rn.GetAttribute('expr'))"; Label = "$($rn.GetAttribute('label'))" }
+      $row = @{ Ref = "$($rn.GetAttribute('ref'))"; Expr = "$($rn.GetAttribute('expr'))"; Label = "$($rn.GetAttribute('label'))"; Count = "$($rn.GetAttribute('count'))"; Always = $false }
       if ($row.Ref -notmatch '^%AID%_\S+$') { Stop-WithError (T "{0}: ref must be the RefId of a ParameterRefRef of the part (e.g. %AID%_UP-%TT%00020_R-%TT%0002001)" $w) }
+      # count="<Value>": in a channel template the row of channel n shows on boards whose value is at least n (when >= %C%)
+      if ($row.Count) {
+        $vi = -1; for ($i = 0; $i -lt $m.Values.Count; $i++) { if ($m.Values[$i].Name -ceq $row.Count) { $vi = $i } }
+        if ($vi -lt 0) { Stop-WithError (T "{0}: count={1} is no <Value> of the manifest (names are case-sensitive)" $w $row.Count) }
+        if ($vi -gt 99) { Stop-WithError (T "{0}: count={1}: only the first 100 values have a count parameter" $w $row.Count) }
+        if (@($m.CountValues | Where-Object { $_.Name -ceq $row.Count }).Count -eq 0) { $m.CountValues += @{ Name = $row.Count; Index = $vi; Num = ("{0:D5}" -f (300 + $vi)) } }
+        if (-not $row.Expr) { $row.Expr = "1"; $row.Always = $true }
+      }
       if (-not $row.Expr) { Stop-WithError (T "{0}: expr=... is missing (a preprocessor condition like defined(MACRO))" $w) }
       if ($row.Label -and $row.Label -cnotmatch '^[A-Za-z_][A-Za-z0-9_]*$') { Stop-WithError (T "{0}: label must be a macro name: {1}" $w $row.Label) }
       if (@($pr.Rows | Where-Object { $_.Ref -ceq $row.Ref }).Count -gt 0) { Stop-WithError (T "{0}: the same ref is selected twice" $w) }
       $pr.Rows += $row
     }
-    if ($pr.Rows.Count -eq 0) { Stop-WithError (T "<PartRows source=`"{0}`"> without <Row>" $src) }
+    # <Fix name> / <Filter name [row]>: the copy shows that block of <Fixes> / <Filters> in place of the row of its setting
+    $pr.Blocks = @()
+    foreach ($bn in $pn.ChildNodes) {
+      if ($bn.NodeType -ne [System.Xml.XmlNodeType]::Element -or ($bn.LocalName -cne "Fix" -and $bn.LocalName -cne "Filter")) { continue }
+      $bk = @{ Kind = $bn.LocalName; Name = "$($bn.GetAttribute('name'))"; Row = "$($bn.GetAttribute('row'))" }
+      if (-not $bk.Name) { Stop-WithError (T "<PartRows source=`"{0}`"><{1}>: name=... is missing" $src $bk.Kind) }
+      if (@($pr.Blocks | Where-Object { $_.Kind -ceq $bk.Kind -and $_.Name -ceq $bk.Name -and $_.Row -ceq $bk.Row }).Count -gt 0) { Stop-WithError (T "<PartRows source=`"{0}`"><{1} name=`"{2}`"> is listed twice" $src $bk.Kind $bk.Name) }
+      $pr.Blocks += $bk
+    }
+    # no child: a plain copy whose hrefs point to the copies of other <PartRows> (a share that includes a copied template)
     $m.PartRows += $pr
+  }
+}
+# @brief Read-Manifest: the <Fix>/<Filter> children of <PartRows> name a <Fix> (not show="assign": it has no row) or a <Filter>
+#        (row = one of its <Row name>, else its main row) of the manifest; the ref of the block is set for New-PartRowsXml
+function Test-ManifestPartRowBlocks($m) {
+  foreach ($pr in @($m.PartRows)) {
+    foreach ($bk in @($pr.Blocks)) {
+      $w = "<PartRows source=`"{0}`"><{1} name=`"{2}`">" -f $pr.SourceAttr, $bk.Kind, $bk.Name
+      if ($bk.Kind -ceq "Fix") {
+        $f = $null; if ($m.Fixes) { $f = @($m.Fixes.Items | Where-Object { $_.Name -ceq $bk.Name }) | Select-Object -First 1 }
+        if (-not $f) { Stop-WithError (T "{0}: no <Fix> with this name (names are case-sensitive)" $w) }
+        if ($bk.Row) { Stop-WithError (T "{0}: row=... is for <Filter> only" $w) }
+        if ($f.Show -ceq "assign") { Stop-WithError (T "{0}: the <Fix> has show=`"assign`" and no row to replace - include its block Fix_{1} elsewhere or choose another show" $w $bk.Name) }
+        $bk.Ref = $f.Ref; $bk.Block = "Fix_" + $bk.Name
+      }
+      else {
+        $f = $null; if ($m.Filters) { $f = @($m.Filters.Items | Where-Object { $_.Name -ceq $bk.Name }) | Select-Object -First 1 }
+        if (-not $f) { Stop-WithError (T "{0}: no <Filter> with this name (names are case-sensitive)" $w) }
+        if ($bk.Row) {
+          $fr = @($f.Rows | Where-Object { $_.Name -ceq $bk.Row }) | Select-Object -First 1
+          if (-not $fr) { Stop-WithError (T "{0}: the <Filter> has no <Row name=`"{1}`">" $w $bk.Row) }
+          $bk.Ref = $fr.Ref; $bk.Block = "Filter_{0}_{1}" -f $bk.Name, $bk.Row
+        }
+        else { $bk.Ref = $f.Ref; $bk.Block = "Filter_" + $bk.Name }
+      }
+      if (@($pr.Blocks | Where-Object { -not [object]::ReferenceEquals($_, $bk) -and $_.Ref -ceq $bk.Ref -and $_.ContainsKey("Ref") }).Count -gt 0) { Stop-WithError (T "{0}: another block of this <PartRows> replaces the same ref {1}" $w $bk.Ref) }
+    }
   }
 }
 # @brief Read-Manifest: <Filters>: selection lists that offer only the values the selected board allows
