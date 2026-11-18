@@ -472,10 +472,12 @@ Träger hat Speicher: Firmware, `choose` auf dem Träger und die Konfliktprüfun
   <Slot>` in der [Slot-Datei](#slot-datei-hardwareprofileslots), Regel = `board:<Muster>`, `capability:<Name>` oder `value:<n>`;
   bekommt eine Liste einen Eintrag dazu (z. B. ein neuer Effekt), bleibt ihre Id. Ein Slot wird nie neu vergeben. Schlüssel
   vergleicht der Generator ohne Groß-/Kleinschreibung; ein Board-Muster hat keine Leerzeichen. `slots="n"` begrenzt die Zahl der
-  Listen, für die die Ids Platz haben (Vorgabe unbegrenzt); eine Token-Nummer hat genau einen Slot (`%PPP+19%` + 1 kann
-  `%PPP+0%` der nächsten Instanz sein), `slots` > 1 bricht dort ab. Eine Regel, die kein Board mehr trifft, meldet eine Warnung
+  Listen, für die die Ids Platz haben (Vorgabe unbegrenzt); eine Token-Nummer hat Vorgabe 1 Slot (`%PPP+19%` + 1 kann
+  `%PPP+0%` der nächsten Instanz sein); `slots` > 1 geht dort nur, wenn ein `op:part` neben den Quellen den Baustein mit
+  `<op:param name="%PPP%" increment="n">` einbindet und alle Nummern unter der Schrittweite bleiben (`%PPP+18%` mit `slots="2"`
+  bei `increment="20"`: 18 und 19; `%PPP+19%`: Abbruch), sonst Abbruch. Eine Regel, die kein Board mehr trifft, meldet eine Warnung
   und behält ihren Slot; wurde sie nur geändert, ihren neuen Schlüssel in ihre Zeile der Slot-Datei schreiben (die Id bleibt) -
-  bei einer Token-Nummer der einzige Weg, sonst bricht der Lauf mit „slots lässt Platz für 1 Liste" ab. Abbruch auch, wenn eine
+  bei einer Token-Nummer ohne Platz der einzige Weg, sonst bricht der Lauf mit „slots lässt Platz für 1 Liste" ab. Abbruch auch, wenn eine
   eigene Id schon in der Quelle steht (auch als `UP-` statt `P-`, `%X+0%` = `%X%`), bei einem anderen Filter oder bei einem
   Konflikt-Flag von `<Conflicts>`, dessen Bausteindatei die Quelle mit dem Block `Parameters` einbindet (bindet eine andere Datei
   des Moduls sie ein, meldet erst der Producer die doppelte Id). Eine Regel, deren Liste wieder voll ist, trifft ihre Boards weiter

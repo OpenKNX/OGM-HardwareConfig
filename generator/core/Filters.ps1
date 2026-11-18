@@ -18,9 +18,9 @@ FILEPATH: OGM-HardwareConfig/generator/core/Filters.ps1
     The carrier may sit in a channel template or a part: its id may hold producer tokens (%TT%, %CC%, %PPP+n%); the generated
     parameters take the same prefix and the number from <Filter number> (digits or a token like %PPP+19%), so the product
     includes them into the same template or part.
-    Functions: Split-FilterRef, ConvertFrom-FilterValueList, Get-FilterNumber, Get-FilterIdBody, Get-FilterOwnId,
-    Read-FilterSource, Get-FilterValues, Get-FilterKey, Get-FilterBoardChoice, Test-FilterConflictIds, Add-FilterChoose,
-    New-FiltersXml.
+    Functions: Split-FilterRef, ConvertFrom-FilterValueList, Get-FilterNumber, Get-FilterTokenStride, Get-FilterIdBody,
+    Get-FilterOwnId, Read-FilterSource, Get-FilterValues, Get-FilterKey, Get-FilterBoardChoice, Test-FilterConflictIds,
+    Add-FilterChoose, New-FiltersXml.
 
 .NOTES
     AUTHOR : Erkan Colak
@@ -72,6 +72,31 @@ function Get-FilterNumber($Item, [int]$Slot) {
     return "%{0}+{1}%" -f $Item.Num.Token, $o
   }
   return ([string]($Item.Num.Base + $Slot)).PadLeft($Item.Id.Width, '0')
+}
+
+# @brief Id step of the part token of a filter number: the increment of <op:param name="%TOKEN%"> in every op:part that includes
+#        one of the source files (XML files in the folders of the sources, not *.debug.xml); the smallest of several; 0 = none
+function Get-FilterTokenStride($Item) {
+  $names = @($Item.Sources | ForEach-Object { [System.IO.Path]::GetFileName($_.Full) })
+  $stride = 0
+  foreach ($dir in @(Get-OrdinalSorted @($Item.Sources | ForEach-Object { [System.IO.Path]::GetDirectoryName($_.Full) }) -Unique)) {
+    foreach ($f in @(Get-ChildItem -LiteralPath $dir -Filter "*.xml" -File)) {
+      if ($f.Name -like "*.debug.xml") { continue }
+      $text = [System.IO.File]::ReadAllText($f.FullName, [System.Text.Encoding]::UTF8)
+      if (-not $text.Contains("op:part")) { continue }
+      $x = New-Object System.Xml.XmlDocument
+      try { $x.LoadXml($text) } catch { continue }
+      foreach ($p in $x.SelectNodes("//*[local-name()='part']")) {
+        if ($names -notcontains [System.IO.Path]::GetFileName($p.GetAttribute("href"))) { continue }
+        foreach ($q in $p.SelectNodes("*[local-name()='param']")) {
+          if ($q.GetAttribute("name") -cne ("%" + $Item.Num.Token + "%")) { continue }
+          $inc = 0
+          if ([int]::TryParse($q.GetAttribute("increment"), [ref]$inc) -and $inc -gt 0 -and ($stride -eq 0 -or $inc -lt $stride)) { $stride = $inc }
+        }
+      }
+    }
+  }
+  return $stride
 }
 
 # @brief Id body for comparisons: without %AID%_ and kind (UP-/P-), token offsets as numbers (%X+019% = %X+19%, %X+0% = %X%)

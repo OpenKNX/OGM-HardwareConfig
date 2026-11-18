@@ -720,7 +720,6 @@ function Read-ManifestFilters($root, $m, $baseDir) {
     # slots: how many lists the ids have room for; a token number (%PPP+19%) lies between the numbers of the next instance: 1
     $fsl = "$($f.GetAttribute('slots'))"
     if ($fsl -and $fsl -notmatch '^[1-9]\d{0,3}$') { Stop-WithError (T "{0}: slots must be a number 1..9999" $w) }
-    if ($fsl -and $num.Token -and [int]$fsl -gt 1) { Stop-WithError (T "{0}: slots=`"{1}`" with the token number {2}: the ids of the next instance follow it (%PPP+20% may be the next instance's %PPP+0%) - one list per filter, or a digit number" $w $fsl $fnum) }
     $slotsMax = $(if ($fsl) { [int]$fsl } elseif ($num.Token) { 1 } else { 0 })
     $fi = "$($f.GetAttribute('indent'))"; if (-not $fi) { $fi = "1" }
     if ($fi -notmatch '^\d{1,2}$') { Stop-WithError (T "{0}: indent must be a number" $w) }
@@ -761,6 +760,12 @@ function Read-ManifestFilters($root, $m, $baseDir) {
     $item = @{ Name = $fn; Ref = $fr; Id = $id; Param = $id.Param; Sources = $srcFiles; SourceAttr = $src
                Value = $fv; Num = $num; Slots = $slotsMax; Indent = $fi; Help = $fh; Allows = $allows; Rows = $rows; SetSlots = @{} }
     Read-FilterSource $item
+    # slots > 1 with a token number: the lists must stay inside one instance (increment of the op:param of the token)
+    if ($num.Token -and $slotsMax -gt 1) {
+      $stride = Get-FilterTokenStride $item
+      if ($stride -le 0) { Stop-WithError (T "{0}: slots=`"{1}`" with the token number {2}: no op:part next to the sources includes them with <op:param name=`"%{3}%`" increment> - one list per filter, or a digit number" $w $slotsMax $fnum $num.Token) }
+      if ($num.Base + $slotsMax - 1 -ge $stride) { Stop-WithError (T "{0}: slots=`"{1}`" with the token number {2}: offsets {3}..{4} reach the next instance (increment {5})" $w $slotsMax $fnum $num.Base ($num.Base + $slotsMax - 1) $stride) }
+    }
     # the generated type ids are <carrier type name>F<slot>: two filters on one type would give the same id
     $same = @($m.Filters.Items | Where-Object { $_.Carrier.TypeName -ceq $item.Carrier.TypeName })
     if ($same.Count -gt 0) { Stop-WithError (T "{0}: its parameter has the type {1} like <Filter name=`"{2}`"> - give each filtered parameter its own ParameterType" $w $item.Carrier.TypeName $same[0].Name) }

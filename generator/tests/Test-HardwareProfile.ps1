@@ -646,6 +646,18 @@ Add-Test "filters-rules" (T "Filters: rule keys ignore case, an orphan rule warn
   $tf = '<Filter name="SceneFx" ref="%AID%_UP-%TT%%CC%%PPP+0%_R-%TT%%CC%%PPP+0%01" source="src/C.templ.xml src/C.share.xml" number="%PPP+19%"{0}><Allow board="{1}" values="0 1" /></Filter>'
   $d = Copy-BaseWithTemplFilter "filters-tokslots" ('<Filters output="src/T.filters.gen.xml">' + ($tf -f ' slots="2"', 'DEVICE_UP1_TAS_4X') + '</Filters>')
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'one list per filter' (T "stop message")
+  # with an op:part of the source (increment 20): two lists fit at offsets 18 and 19, offsets 19 and 20 reach the next instance
+  $part = '<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer"><op:part href="C.templ.xml" name="S" instances="3"><op:param name="%PPP%" value="320" increment="20" /></op:part></KNX>'
+  $two = ('<Filter name="SceneFx" ref="%AID%_UP-%TT%%CC%%PPP+0%_R-%TT%%CC%%PPP+0%01" source="src/C.templ.xml src/C.share.xml" number="{0}" slots="2">' +
+    '<Allow board="DEVICE_UP1_TAS_4X" values="0 1" /><Allow board="DEVICE_REG1_LAN_BASE" values="0 2" /></Filter>')
+  $d = Copy-BaseWithTemplFilter "filters-tokstride" ('<Filters output="src/T.filters.gen.xml">' + ($two -f '%PPP+18%') + '</Filters>')
+  Write-Text ([System.IO.Path]::Combine($d, "src", "U.templ.xml")) $part
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.filters.gen.xml"))
+  Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%%CC%%PPP+18%"') -and $f.Contains('<Parameter Id="%AID%_P-%TT%%CC%%PPP+19%"')) (T "two lists of a token number at offsets 18 and 19 expected")
+  $d = Copy-BaseWithTemplFilter "filters-tokreach" ('<Filters output="src/T.filters.gen.xml">' + ($two -f '%PPP+19%') + '</Filters>')
+  Write-Text ([System.IO.Path]::Combine($d, "src", "U.templ.xml")) $part
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'reach the next instance \(increment 20\)' (T "stop message")
   $d = Copy-BaseWithTemplFilter "filters-tokrule" ('<Filters output="src/T.filters.gen.xml">' + ($tf -f '', 'DEVICE_UP1_TAS_4X') + '</Filters>')
   $r = Invoke-Generator $d @(); Assert-Exit $r 0
   Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'board="DEVICE_UP1_TAS_4X"' 'board="DEVICE_REG1_LAN_BASE"'
