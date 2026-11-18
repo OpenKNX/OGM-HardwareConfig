@@ -17,18 +17,87 @@ Kurzweg für ein bestehendes OAM. Details zu jedem Schritt: [README](README.md).
 pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 -Init
 ```
 
-Schreibt `HardwareProfile.xml` neben die `platformio.ini`, mit freiem `moduleType` und Präfix (Standard `45` / `HWP`):
+Schreibt `HardwareProfile.xml` neben die `platformio.ini`, mit freiem `moduleType` und Präfix (Standard `45` / `HWP`).
+Aktiv sind nur die Teile, die jedes OAM braucht:
 
 ```xml
 <HardwareProfile prefix="HWP" moduleType="45" text="Gerät" unselected="showAll">
   <Output conf="src/HardwareProfile.conf.xml" share="src/HardwareProfile.share.xml" script="src/HardwareProfile.script.js" header="include/HardwareProfileData.h" />
   <Import href="lib/OGM-HardwareConfig/generator/capabilities/Common.caps.xml" />
+  <Page text="Gerät" icon="memory" />
+  <InfoImage style="card" />
+  <Notice when="ThirdParty" title="Hardware eines Drittanbieters. ..." />
   <Boards platformio="release_*" />
+  <!-- danach jede weitere Einstellung als auskommentiertes Beispiel -->
 </HardwareProfile>
 ```
 
+- `<Page>` gibt Baumtext und Icon der Seite vor, alle anderen Texte haben einen Standard. Ohne `<Page>` heißt die Seite
+  „Geräteprofil“ (Zahnrad-Icon), hat keine Gerätekarte und listet alle Fähigkeiten auf.
+- `<InfoImage>` zeigt die Gerätekarte (`DEVICE_NAME`, Logo aus `HW_INFO_LOGO` bzw. OpenKNX-Logo, Stempel „Drittanbieter“,
+  `HW_INFO_TEXT` + `HW_INFO_TEXT2`, QR-Code aus `HW_INFO_URL` mit „Geräteinfo“ darunter),
+  `<Notice>` den Hinweis für Drittanbieter-Boards.
+- Die Liste der Fähigkeiten und Werte je Board ist eine **Entwickler-Sache**: das Beispiel „DEVELOPER VIEW“ (`<Page dev features>`)
+  gehört nur in die Dev-Applikation. Der Generator unterscheidet Dev und Release nicht; er schreibt die Datei der
+  Entwickleransicht immer, nur die Dev-Applikations-XML bindet sie ein. Teilen sich Dev und Release eine Vorlage
+  (`<generate base>`), steht die Entwickleransicht nicht in der gemeinsamen Vorlage.
+- Beispiele stehen auskommentiert im Manifest (Seitentexte, Gerätekarte, eigene Fähigkeit und Wert, Boards, Ports,
+  reservierte Pins, GPIO-Rollen, Info-LEDs, Fixes, Filter, Hinweise je Wert, GPIO-Konflikte, Vorlagen). Zum Benutzen die
+  Kommentarzeile über und unter den Elementzeilen löschen. Die Vorlage dafür ist `generator/init/HardwareProfile.examples.xml`.
+
 Envs ohne Board (Test, native) kommen nach `exclude`, z. B. `<Boards platformio="release_*" exclude="release_native_*" />`.
 `unselected="showAll"` bei einem bestehenden OAM so lassen (sonst setzt ein Download vor der Hardware-Wahl Werte zurück).
+
+### `-Init` noch einmal (Manifest neu anlegen)
+
+`-Init` legt nur ein neues Manifest an. Für einen zweiten Lauf, z. B. um die Beispiele einer neueren Generator-Version zu
+bekommen:
+
+1. `HardwareProfile.xml` löschen (oder umbenennen und eigene Einträge danach übernehmen). `HardwareProfile.slots` nur
+   löschen, solange keine knxprod mit dem Hardware-Modul ausgeliefert oder in ETS importiert ist: die Slot-Datei hält die
+   Board-Nummern der Parameter-IDs, die Bits der Geräteabfrage, die Slots der `<Filters>`-Regeln und die `ets`-Zeilen der
+   Versionswache fest.
+2. Das `op:define` des Hardware-Moduls in jeder Applikations-XML vorübergehend auskommentieren. Sonst bricht `-Init` ab
+   („already includes a hardware module“); ist nur die erzeugte Share-Datei weg, wählt `-Init` einen neuen Präfix und
+   ModuleType (`HWP2` und den nächsten freien ModuleType), weil es die alten als belegt sieht.
+3. `-Init` laufen lassen, danach das `op:define` wieder aktivieren und die gewünschten Beispiele einschalten.
+
+Lag das Manifest in `src/`: `-Init` schreibt das neue immer in den Projektordner (neben die `platformio.ini`). Vor dem
+nächsten Lauf die behaltene Slot-Datei daneben legen (`git mv src/HardwareProfile.slots HardwareProfile.slots`) oder das neue
+Manifest nach `src/` verschieben (Pfade darin relativ zum Manifest anpassen, README „Regeln“); sonst legt der Lauf eine neue
+Slot-Datei an und die Board-Nummern der Parameter-IDs können sich verschieben.
+
+### Beispiel aktivieren: Info-LEDs
+
+Die Seite „Info LEDs“ von OGM-Common zeigt dann je Gerät nur die Zeilen der LEDs, die das Board hat, mit dem Label aus dem
+Board-Header („Info 1 (rot, links)“); ohne Auswahl alle drei.
+
+1. **Manifest:** beim Beispiel `<PartRows source="lib/OGM-Common/src/InfoLed.part.xml" …>` die Zeile `<!--` darüber und die
+   Zeile `-->` darunter löschen. Danach steht dort aktiv:
+
+   ```xml
+   <PartRows source="lib/OGM-Common/src/InfoLed.part.xml" output="src/HardwareProfile.infoled.gen.xml">
+     <Row ref="%AID%_UP-%TT%00020_R-%TT%0002001" expr="defined(INFO1_LED_PIN) || defined(INFO_LED_PIN) || defined(INFO1_LED_LABEL)" label="INFO1_LED_LABEL" />
+     <Row ref="%AID%_UP-%TT%00021_R-%TT%0002101" expr="defined(INFO2_LED_PIN) || defined(INFO2_LED_LABEL)" label="INFO2_LED_LABEL" />
+     <Row ref="%AID%_UP-%TT%00022_R-%TT%0002201" expr="defined(INFO3_LED_PIN) || defined(INFO3_LED_LABEL)" label="INFO3_LED_LABEL" />
+   </PartRows>
+   ```
+
+   Die Bedingung fragt auch das Label ab: Boards, deren `LED_INIT` die LEDs anlegt (REG2 ESP-S3-Pico), haben keine
+   `INFO<n>_LED_PIN`, nur `INFO<n>_LED_LABEL`.
+2. **Jede Applikations-XML** (Dev und Release): vor dem `op:define` von BASE diese Zeile (Pfad relativ zu `lib/OGM-Common/src`):
+
+   ```xml
+   <op:config name="%BASE_InfoLedPart%" value="../../../src/HardwareProfile.infoled.gen.xml" />
+   ```
+
+   Braucht ein OGM-Common, dessen `Common.share.xml` die Seite über `%BASE_InfoLedPart%` einbindet; ein älteres übergeht das
+   `op:config` und zeigt die Originalseite.
+3. **Seite „Gerät“ eingebunden** (Schritt 2): die Zeilen hängen von der Geräteauswahl ab, ohne die Seite bleiben immer alle drei.
+4. **Bauen** (Schritt 3) und im Viewer je Gerät die Seite „Info LEDs“ ansehen. Neue Applikationsversion nicht vergessen.
+
+Die anderen Beispiele schaltet man genauso ein (Kommentarzeilen löschen); was sie in der Applikations-XML brauchen, steht im
+Kommentar über dem Beispiel.
 
 ## 2. Applikations-XML
 
@@ -41,8 +110,17 @@ Envs ohne Board (Test, native) kommen nach `exclude`, z. B. `<Boards platformio=
 <op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWP" />
 ```
 
-Das bindet die Seite als eigenen Kanal „Gerät“ (`text`) ein. Soll sie im OpenKNX-Kanal stehen:
-[README, Applikations-XML](README.md#3-applikations-xml).
+Das bindet die Seite als eigenen Kanal „Gerät“ (`text`) ein. Baut die Applikation den OpenKNX-Kanal selbst auf (eigener
+`<Channel … Number="BASE">` in `<Dynamic>` mit den Seiten aus `Common.share.xml`, wie IP-Interface und NeoPixel), kann die
+Seite in diesem Kanal stehen, z. B. direkt nach dem Include der Seite „Allgemein“ (zeigt `-Init` ebenfalls):
+
+```xml
+<op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/Channel/ParameterBlock[@Name='Profile']" prefix="HWP" />
+```
+
+Das `op:define` gehört in **jede** Applikations-XML (Dev und Release), die die Seite einbindet, sonst bekommt die Seite die
+Nummern eines anderen Moduls (Producer: „duplicate Id“, „referenced but not defined“, „HWP_detectHardware is missing“).
+Mehr dazu: [README, Applikations-XML](README.md#3-applikations-xml).
 
 Hat das OAM ein Hauptmodul, bekommt `op:define` zusätzlich `isSubmoduleOf="<Präfix>"` (kein eigenes Kontrollkästchen
 unter „Module“). Hardwareabhängige Einstellungen nur über Feature-Flags ein- und ausblenden:

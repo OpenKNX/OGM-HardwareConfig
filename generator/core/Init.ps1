@@ -65,6 +65,9 @@ function Invoke-Init {
   $moduleType = 0
   foreach ($c in @(45..99) + @(44..1)) { if (-not $usedTypes.ContainsKey($c)) { $moduleType = $c; break } }
   if ($moduleType -eq 0) { Stop-WithError (T "No free ModuleType 1..99") }
+  # ModuleType of the developer view in the example (next free one after the hardware module, 0 = none free)
+  $devType = 0
+  foreach ($c in @(($moduleType + 1)..99) + @(($moduleType - 1)..1)) { if ($c -ge 1 -and $c -le 99 -and $c -ne $moduleType -and -not $usedTypes.ContainsKey($c)) { $devType = $c; break } }
   $prefix = "HWP"; $n = 2
   while ($usedPrefixes.ContainsKey($prefix)) { $prefix = "HWP$n"; $n++ }
   Write-Step (T "Product XML: {0}" (($products | ForEach-Object { $_.Name }) -join ", "))
@@ -99,11 +102,28 @@ function Invoke-Init {
   [void]$sb.AppendLine('  <!-- showAll: in an existing product the ETS download writes the default of every invisible parameter; hide only for new products -->')
   [void]$sb.AppendLine(('  <Output conf="{0}" share="{1}" script="{2}" header="{3}" />' -f $outputs.conf, $outputs.share, $outputs.script, $outputs.header))
   [void]$sb.AppendLine(('  <Import href="{0}" />' -f $caps))
+  $ae = [char]0xE4
+  [void]$sb.AppendLine('')
+  [void]$sb.AppendLine('  <!-- hardware page: tree text and icon; every other text of the page has a default (README "Texte (<Page>)") -->')
+  [void]$sb.AppendLine(('  <Page text="Ger{0}t" icon="memory" />' -f $ae))
+  [void]$sb.AppendLine('  <!-- device card of the selected board: DEVICE_NAME, logo (HW_INFO_LOGO or OpenKNX) and third-party badge, HW_INFO_TEXT, QR code from HW_INFO_URL;')
+  [void]$sb.AppendLine(('       pictures: src/Baggages/{0}Info (generated) -->' -f $prefix))
+  [void]$sb.AppendLine('  <InfoImage style="card" />')
+  [void]$sb.AppendLine(('  <Notice when="ThirdParty" title="Hardware eines Drittanbieters. OpenKNX ist ein Open-Source-Projekt ohne gesch{0}ftliche Verbindung zum Hersteller und liefert nur die Firmware. Gew{0}hrleistung, Support und Produktsicherheit liegen beim Hersteller. Nutzung auf eigene Verantwortung." />' -f $ae))
+  [void]$sb.AppendLine('')
   if ($noBoard.Count -gt 0) {
     [void]$sb.AppendLine('  <!-- release_* envs that build no board -->')
     [void]$sb.AppendLine(('  <Boards platformio="release_*" exclude="{0}" />' -f ($noBoard -join " ")))
   }
   else { [void]$sb.AppendLine('  <Boards platformio="release_*" />') }
+  # every other setting as a commented-out example (generator/init/HardwareProfile.examples.xml, UTF-8): @PREFIX@ = prefix,
+  # @DEVTYPE@ = free ModuleType for the developer view
+  $examples = [System.IO.Path]::Combine($script:GeneratorDir, "init", "HardwareProfile.examples.xml")
+  if (-not (Test-Path -LiteralPath $examples -PathType Leaf)) { Stop-WithError (T "Not found: {0} (relative to {1})" "init/HardwareProfile.examples.xml" $script:GeneratorDir) }
+  $devText = "$devType"; if ($devType -eq 0) { $devText = "<free ModuleType>" }
+  $exText = [System.IO.File]::ReadAllText($examples, [System.Text.Encoding]::UTF8).Replace("`r`n", "`n").Replace("@PREFIX@", $prefix).Replace("@DEVTYPE@", $devText)
+  [void]$sb.AppendLine('')
+  [void]$sb.Append($exText.TrimEnd("`n")).Append("`n")
   [void]$sb.AppendLine('</HardwareProfile>')
   Write-Utf8File $target $sb.ToString()
   Write-Ok (T "wrote {0}" $target)
@@ -118,6 +138,9 @@ function Invoke-Init {
   Write-Host ("    <op:define prefix=`"{0}`" ModuleType=`"{1}`" configTransferName=`"Ger$([char]0xE4)t`" share=`"{2}`" />" -f $prefix, $moduleType, $rel.share)
   Write-Host (T "  and inside <generate><Dynamic>:")
   Write-Host ("    <op:include href=`"{0}`" xpath=`"//ApplicationProgram/Dynamic/*`" prefix=`"{1}`" />" -f $rel.share, $prefix)
+  Write-Host (T "  or, in a product that builds the OpenKNX channel itself, as a page inside that channel:")
+  Write-Host ("    <op:include href=`"{0}`" xpath=`"//ApplicationProgram/Dynamic/Channel/ParameterBlock[@Name='Profile']`" prefix=`"{1}`" />" -f $rel.share, $prefix)
+  Write-Host (T "  Examples (Info LEDs, developer view, ...): commented out in the manifest")
   if (-not $usedPrefixes.ContainsKey("UCT")) { Write-Warn (T "No ConfigTransfer (UCT) module: a product with a module list needs OFM-ConfigTransfer") }
   Write-Warn (T "The ETS application content changes: raise the ApplicationVersion with ReplacesVersionsDownTo")
   Write-Host ""

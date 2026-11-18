@@ -226,6 +226,8 @@
   'Only one release_* env builds a board: a hardware selection needs at least two boards - no manifest written' = 'Nur ein release_*-Env baut ein Board: eine Hardware-Auswahl braucht mindestens zwei Boards - kein Manifest geschrieben'
   '  Add to {0}:' = '  In {0} ergänzen:'
   '  and inside <generate><Dynamic>:' = '  und in <generate><Dynamic>:'
+  '  or, in a product that builds the OpenKNX channel itself, as a page inside that channel:' = '  oder, wenn die Applikation den OpenKNX-Kanal selbst aufbaut, als Seite in diesem Kanal:'
+  '  Examples (Info LEDs, developer view, ...): commented out in the manifest' = '  Beispiele (Info-LEDs, Entwickleransicht, ...): auskommentiert im Manifest'
   'No ConfigTransfer (UCT) module: a product with a module list needs OFM-ConfigTransfer' = 'Kein ConfigTransfer-Modul (UCT): ein Produkt mit Modulliste braucht OFM-ConfigTransfer'
   'The ETS application content changes: raise the ApplicationVersion with ReplacesVersionsDownTo' = 'Der Inhalt der ETS-Applikation ändert sich: die ApplicationVersion mit ReplacesVersionsDownTo erhöhen'
   '  Then run this script without -Init (it writes the outputs and the slot file).' = '  Danach dieses Skript ohne -Init aufrufen (es schreibt die Ausgaben und die Slot-Datei).'

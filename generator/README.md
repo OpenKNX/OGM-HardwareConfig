@@ -208,8 +208,12 @@ Applikations-XMLs `src/*.xml` mit `<op:ETS`, Dev und Release zusammen; Werte in 
 `unselected="showAll"` (eine bestehende knxprod bekommt eine Auswahl: ETS schreibt beim Download den
 Standardwert jedes unsichtbaren Parameters), Standard-Ausgaben `src/HardwareProfile.*` und
 `include/HardwareProfileData.h` (Abbruch, wenn eine davon existiert und keine Generator-Ausgabe ist),
-`Import` von `capabilities/Common.caps.xml`. Danach zeigt das Skript die Zeilen für die Applikations-XML (`op:config`,
-`op:define`, `op:include` in `<generate><Dynamic>`) und erinnert an die neue Applikationsversion
+`Import` von `capabilities/Common.caps.xml`, `<Page text="Gerät" icon="memory" />`, `<InfoImage style="card" />` und
+`<Notice when="ThirdParty">` (Seite „Gerät“ mit Gerätekarte). Danach folgt jede weitere Einstellung als auskommentiertes
+Beispiel aus `init/HardwareProfile.examples.xml` (`@PREFIX@` = Präfix, `@DEVTYPE@` = nächster freier ModuleType für die
+Entwickleransicht), darunter Info-LEDs (`<PartRows>`) und die Entwickleransicht (`<Page dev features>`, nur Dev-Applikation).
+Danach zeigt das Skript die Zeilen für die Applikations-XML (`op:config`,
+`op:define`, `op:include` in `<generate><Dynamic>`, wahlweise als Seite im OpenKNX-Kanal) und erinnert an die neue Applikationsversion
 (`ReplacesVersionsDownTo`). Beim Build wird nie ein Manifest angelegt: ohne Manifest bleibt die knxprod, wie sie ist.
 Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danach ein.
 

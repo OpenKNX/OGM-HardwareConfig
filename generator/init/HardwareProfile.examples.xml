@@ -1,0 +1,172 @@
+  <!-- ======================================================================================================================
+       Examples (-Init): every setting of the manifest, commented out. To use one, delete the comment line above and the one
+       below its element lines (the element lines in between are complete). Details: lib/OGM-HardwareConfig/generator/README.md, QUICKSTART.md
+       ====================================================================================================================== -->
+
+  <!-- Root attributes of <HardwareProfile> (add them to the root element above):
+         unselected="hide"                         without selection every board-dependent setting is hidden (new products only)
+         order="manifest"                          selection list in manifest order instead of DEVICE_HW_ID order
+         portManualValue="10" portNoneValue="15"   values "manual GPIO" / "no port" of the port selections (<Ports>, <Conflicts>) -->
+
+  <!-- ===== Hardware page ===== -->
+
+  <!-- <Page>: every text of the page; an attribute left out keeps its default, an empty attribute removes the text (not button
+       and label: they must not be empty). At most 255 characters each (text: 249 while unselectedTitle is set, the default),
+       &#10; = line break (not in text, title, label, queryTitle, button, unselectedTitle).
+       help = context help Baggages/Help_de/<help>.md of the product -->
+  <!--
+  <Page text="Gerät" icon="memory" help="@PREFIX@-Hardware"
+        title="Gerät auswählen"
+        label="Gerätetyp"
+        intro="Diese Applikation gilt für mehrere Geräte. Wählen Sie das Gerät aus, das verbaut ist."
+        unselectedTitle="{page} (nicht gewählt)"
+        queryTitle="Oder automatisch erkennen"
+        button="Vom Gerät lesen"
+        infoDefault="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt."
+        firmware="Firmware: {env}"
+        changeInfo="Nach einem Wechsel des Geräts die Einstellungen prüfen." />
+  -->
+
+  <!-- DEVELOPER VIEW - Dev product only, never in a Release product: page "Entwickleransicht" with the capabilities and values of
+       the selected board (features), board data and ports. The generator does not tell Dev from Release: it writes the dev file
+       for both, only the Dev product XML includes it. Use this <Page> instead of the one above and add to the Dev product XML only:
+         <op:define prefix="@PREFIX@DEV" ModuleType="@DEVTYPE@" share="HardwareProfile.dev.gen.xml" />
+       and inside <generate><Dynamic>:
+         <op:include href="HardwareProfile.dev.gen.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="@PREFIX@DEV" /> -->
+  <!--
+  <Page text="Gerät" icon="memory" dev="src/HardwareProfile.dev.gen.xml" features="Tp Lan Wifi Display Rtc SdCard Buzzer BinaryInputs StatusLeds FlashMB" />
+  -->
+
+  <!-- <InfoImage> attributes: define = macro of the info URL (QR code), default = URL for boards without it, width = width of the
+       picture "QR code + caption", caption = line under the QR code; <Logo>: logo of a board instead of HW_INFO_LOGO of its header
+       (file relative to the manifest, file="" = none; third-party boards keep the badge) -->
+  <!--
+  <InfoImage style="card" define="HW_INFO_URL" default="" width="100" caption="Geräteinfo">
+    <Logo board="DEVICE_MY_BOARD" file="src/hw/logo-my-board.png" />
+  </InfoImage>
+  -->
+
+  <!-- <Notice> with several boxes: one <Text> per box -->
+  <!--
+  <Notice when="Wifi" title="WLAN">
+    <Text>Die WLAN-Einstellungen stehen unter Netzwerk.</Text>
+  </Notice>
+  -->
+
+  <!-- ===== Capabilities and values ===== -->
+
+  <!-- own capability: an #if expression over the board header and the env build flags; merge="all" = every env of the board must
+       have it (default any); feature* = row text of the developer view -->
+  <!--
+  <Capability name="LargeFlash" text="Großer Datenspeicher" expr="defined(DEVICE_FLASH_SIZE_MB) &amp;&amp; DEVICE_FLASH_SIZE_MB >= 8" merge="all" feature="Datenspeicher" featureOn="8 MB oder mehr" featureOff="weniger als 8 MB" />
+  -->
+
+  <!-- own value: a number from a macro (one byte); <Set> sets it per board for ETS only (query="false": not in the device query) -->
+  <!--
+  <Value name="Relays" text="Relais" expr="HW_RELAY_COUNT" default="0" max="4" query="false">
+    <Set board="DEVICE_MY_BOARD_*" value="2" />
+  </Value>
+  -->
+
+  <!-- ===== Boards ===== -->
+
+  <!-- a board beyond the release_* envs (define or pattern *, ?) with the build flags of its firmware; exclude/project on <Boards>:
+       <Boards platformio="release_*" exclude="release_native_*" project=".." /> -->
+  <!--
+  <Board define="DEVICE_MY_BOARD" flags="-DKNX_IP_WIFI" />
+  -->
+
+  <!-- ports offered per board (HW_PORT_* of the header): numbers or ranges; excludeRelayPins = no port on a hard-wired relay -->
+  <!--
+  <Ports board="DEVICE_MY_BOARD_*" use="1 2 3" excludeRelayPins="true" max="10" />
+  -->
+
+  <!-- pins the application never offers and reports as reserved (macro names of the board headers) -->
+  <!--
+  <ReservedPins macros="MY_STATUS_LED_PIN MY_POWER_PIN" />
+  -->
+
+  <!-- GPIO selection fields from the pin macros of the boards; number (1-9) is part of the parameter ID, never change it -->
+  <!--
+  <GpioRole name="Pin" number="1" text="Freier Anschluss" count="2">
+    <Pins board="DEVICE_MY_BOARD_*" scan="^MY_BOARD_D(\d+)$" label="D$1" />
+    <Pins board="DEVICE_MY_OTHER_BOARD"><Pin gpio="MY_PIN_A" label="Klemme A" /></Pins>
+  </GpioRole>
+  -->
+
+  <!-- ===== Settings of other modules per device ===== -->
+
+  <!-- Info LEDs: page "Info LEDs" of OGM-Common per device, row "Info <n>" only on boards whose header defines the LED
+       (INFO<n>_LED_PIN, INFO_LED_PIN = old name of INFO1; INFO<n>_LED_LABEL alone for boards whose LED_INIT creates the LEDs), row
+       text with the label ("Info 1 (rot, links)"); not selected: all three rows. Needs an OGM-Common whose Common.share.xml
+       includes the page through %BASE_InfoLedPart% (older ones ignore the op:config below and keep the original page).
+       Each product XML also needs, before the op:define of BASE (path relative to lib/OGM-Common/src):
+         <op:config name="%BASE_InfoLedPart%" value="../../../src/HardwareProfile.infoled.gen.xml" /> -->
+  <!--
+  <PartRows source="lib/OGM-Common/src/InfoLed.part.xml" output="src/HardwareProfile.infoled.gen.xml">
+    <Row ref="%AID%_UP-%TT%00020_R-%TT%0002001" expr="defined(INFO1_LED_PIN) || defined(INFO_LED_PIN) || defined(INFO1_LED_LABEL)" label="INFO1_LED_LABEL" />
+    <Row ref="%AID%_UP-%TT%00021_R-%TT%0002101" expr="defined(INFO2_LED_PIN) || defined(INFO2_LED_LABEL)" label="INFO2_LED_LABEL" />
+    <Row ref="%AID%_UP-%TT%00022_R-%TT%0002201" expr="defined(INFO3_LED_PIN) || defined(INFO3_LED_LABEL)" label="INFO3_LED_LABEL" />
+  </PartRows>
+  -->
+
+  <!-- fixed settings of other modules (refs with the digits of the module, here BASE = ModuleType 10, NETW = 14, NET = 11):
+       InfoLed<n> = function of Info LED n from OPENKNX_INFOLED<n>_DEFAULT of the board header; NetOff = module checkbox
+       "Netzwerk" (BASE_ModuleEnabled_NET, %AID%_UP-00998<ModuleType>, only modules with a row on the page "Module") off on boards
+       without the own capability Network (capability="!Name" = boards without it; a new capability adds a bit to the device
+       query and changes the firmware header). show="assign": the product includes the
+       blocks Fix_<name> in the hardware page (an Assign must sit in a ParameterBlock), the row stays where it is.
+       HasWifi = "WiFi-Schnittstelle" read-only "Ja" on boards with WLAN, show="readonly": the block Fix_<name> replaces the
+       original row (the product leaves that row out of the module include) and the block ParameterRefs goes into the
+       ParameterRefs of a module (README "Einstellungen festlegen") -->
+  <!--
+  <Capability name="Network" text="Netzwerk-Modul" expr="defined(KNX_IP_LAN) || defined(KNX_IP_WIFI)" />
+  <Fixes output="src/HardwareProfile.fixes.gen.xml">
+    <Fix name="InfoLed1" ref="%AID%_UP-1000020_R-100002001" valueMacro="OPENKNX_INFOLED1_DEFAULT" show="assign" />
+    <Fix name="InfoLed2" ref="%AID%_UP-1000021_R-100002101" valueMacro="OPENKNX_INFOLED2_DEFAULT" show="assign" />
+    <Fix name="InfoLed3" ref="%AID%_UP-1000022_R-100002201" valueMacro="OPENKNX_INFOLED3_DEFAULT" show="assign" />
+    <Fix name="NetOff" capability="!Network" ref="%AID%_UP-0099811_R-009981101" value="0" show="assign" />
+    <Fix name="HasWifi" capability="Wifi" ref="%AID%_P-1401001_R-140100100" value="1" show="readonly" indent="1" />
+  </Fixes>
+  -->
+
+  <!-- selection list per device: a parameter (carrier) offers per board only a subset of its entries; first matching <Allow> wins
+       (board define/pattern or capability), value="<Value>" = entries up to the value of the board -->
+  <!--
+  <Filters output="src/HardwareProfile.filters.gen.xml">
+    <Filter name="TimeSource" ref="%AID%_P-%TT%00033_R-%TT%0003301" source="src/MyApp.share.xml" number="650">
+      <Allow capability="Rtc" values="0-3" />
+      <Allow board="*" values="0 1" />
+    </Filter>
+  </Filters>
+  -->
+
+  <!-- notice under a selection whose value the selected board lacks, from a <BoardTable> (index = value of the selection):
+       all = every env of the board lacks it (error box), any = only some envs (information box) -->
+  <!--
+  <BoardTable name="FeaturesOff" header="src/MyAppFeatures.h" scan="^MY_FEATURE_OFF_(\d+)$" />
+  <ValueNotices output="src/HardwareProfile.notices.gen.xml">
+    <ValueNotice name="Mode" ref="%AID%_UP-%TT%00040_R-%TT%0004001" table="FeaturesOff"
+                 all="Nicht verfügbar: Die Firmware dieses Geräts enthält diese Funktion nicht."
+                 any="Hinweis: Diese Funktion fehlt in einer Firmware-Variante dieses Geräts." />
+  </ValueNotices>
+  -->
+
+  <!-- GPIO conflict check in ETS: two settings on the same GPIO of the selected board show an error under each (needs
+       portManualValue/portNoneValue on the root for port selections); reserved="true" also reports pins the board uses itself -->
+  <!--
+  <Conflicts output="src/HardwareProfile.conflicts.gen.xml" number="900" reserved="true">
+    <Param name="Outputs" ref="%AID%_UP-%TT%00020_R-%TT%0002001" />
+    <Use name="Out1" text="Ausgang 1" when="Outputs >= 1" value="gpio" port="%AID%_UP-%TT%00021_R-%TT%0002101" />
+    <Use name="Out2" text="Ausgang 2" when="Outputs >= 2" value="gpio" port="%AID%_UP-%TT%00022_R-%TT%0002201" />
+  </Conflicts>
+  -->
+
+  <!-- ===== Own generated files ===== -->
+
+  <!-- a whole file from a template ({{ }} expressions, @@for/@@if; $Boards, $M, $P; @hw/ = generator/templates) -->
+  <!--
+  <Generate template="src/hw/MyApp.hw.share.xml" output="src/MyApp.hw.share.gen.xml">
+    <Param name="Number" value="500" />
+  </Generate>
+  -->
