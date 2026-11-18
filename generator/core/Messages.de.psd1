@@ -742,5 +742,11 @@
   'Fixes: capability="!Name" fixes the boards without the capability (e.g. hide a module)' = 'Fixes: capability="!Name" setzt die Boards ohne die Fähigkeit fest (z. B. ein Modul ausblenden)'
   '!Lan: only board 4611 (no LAN) must get the value' = '!Lan: nur Board 4611 (ohne LAN) darf den Wert bekommen'
   '!Lan: the LAN boards 4129 and 4130 must not get the value' = '!Lan: die LAN-Boards 4129 und 4130 dürfen den Wert nicht bekommen'
+  'Page: cardFeatures lists the features of the selected board under the card, boards with the same lines share a when' = 'Page: cardFeatures zeigt die Funktionen des gewählten Boards unter der Karte, Boards mit gleichen Zeilen teilen ein when'
+  'card features: one choose with the headline expected, found {0}' = 'Funktionen: ein choose mit der Überschrift erwartet, gefunden {0}'
+  'card features: 4129 and 4130 share one when with LAN: ja' = 'Funktionen: 4129 und 4130 teilen ein when mit LAN: ja'
+  'card features: 4611 with the headline and LAN: nein only' = 'Funktionen: 4611 nur mit der Überschrift und LAN: nein'
   '<Fix name="{0}">: capability="!" needs a name' = '<Fix name="{0}">: capability="!" braucht einen Namen'
+  '<Page>: cardFeatures needs features=... (the capabilities and values to list)' = '<Page>: cardFeatures braucht features=... (die Fähigkeiten und Werte der Liste)'
+  '<Page cardFeatures>: the line of 0x{0:X4} has {1} characters, ETS shows at most 255' = '<Page cardFeatures>: die Zeile von 0x{0:X4} hat {1} Zeichen, ETS zeigt höchstens 255'
 }

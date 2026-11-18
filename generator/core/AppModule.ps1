@@ -183,6 +183,55 @@ function Get-CardMarks($M, $Boards) {
   foreach ($lg in $M.Info.Logos) { if (-not $used.ContainsKey($lg.Board)) { Write-Warn (T "<InfoImage><Logo board=`"{0}`">: matches no board" $lg.Board) } }
   return ,$marks.ToArray()
 }
+# @brief Lines "<label>: <state>" of the <Page features> of one board (developer view, and the device card with cardFeatures)
+function Get-BoardFeatureLines($M, $b) {
+  $lines = New-Object System.Collections.Generic.List[string]
+  foreach ($f in $M.Page.Features) {
+    $ci = -1; for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -eq $f) { $ci = $i } }
+    if ($ci -ge 0) {
+      $c = $M.Capabilities[$ci]
+      $label = $c.Feature; if (-not $label) { $label = $c.Text }
+      $on = $c.FeatureOn; if (-not $on) { $on = "ja" }
+      $off = $c.FeatureOff; if (-not $off) { $off = "nein" }
+      $has = [bool]$b.Caps[$ci]
+      if ($c.FeatureInvert) { $has = -not $has }
+      if ($b.CapMixed[$ci]) {
+        $state = "je nach Firmware-Variante"
+        if ($c.FeatureOn -or $c.FeatureOff) { $state = "{0} oder {1} (je nach Firmware-Variante)" -f $off, $on }
+      }
+      elseif ($has) {
+        $state = $on
+        if ($c.FeatureNoteWhen) {
+          $wi = 0; for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -eq $c.FeatureNoteWhen) { $wi = $i } }
+          if ($b.Caps[$wi]) { $state = "{0} ({1})" -f $on, $c.FeatureNote }
+        }
+      }
+      else { $state = $off }
+      $lines.Add(("{0}: {1}" -f $label, $state))
+    }
+    else {
+      $vi = 0; for ($i = 0; $i -lt $M.Values.Count; $i++) { if ($M.Values[$i].Name -eq $f) { $vi = $i } }
+      $v = $M.Values[$vi]
+      $n = [int]$b.Values[$vi]
+      $state = "nein"
+      if ($n -gt 0 -and $v.Relays) {
+        # relays: the first HW_RELAY_COUNT are hard-wired, every further one takes a port
+        $count = "bis {0}" -f $n; if ($n -eq 1) { $count = "1" }
+        $wired = [Math]::Min($n, @($b.Relays).Count); $free = $n - $wired
+        if ($wired -eq 0) { $state = "{0}, Port w{1}hlbar" -f $count, [System.Char]::ConvertFromUtf32(0xE4) }
+        elseif ($free -eq 0) { $state = "{0}, fest verdrahtet" -f $count }
+        else { $state = "{0}, {1} fest verdrahtet, {2} Port w{3}hlbar" -f $count, $wired, $free, [System.Char]::ConvertFromUtf32(0xE4) }
+      }
+      elseif ($n -gt 0) {
+        $state = [string]$n
+        if ($v.Unit) { $state = "{0} {1}" -f $n, $v.Unit }
+      }
+      $lines.Add(("{0}: {1}" -f $v.Text, $state))
+    }
+  }
+  # callers wrap the result in @(): one line comes back as a string, none as $null
+  return $lines.ToArray()
+}
 # @brief Board text: HW_INFO_TEXT, else <Page infoDefault> (empty = none)
 function Get-BoardText($M, $Board) {
   if ($Board.InfoText) { return $Board.InfoText }
@@ -273,6 +322,29 @@ function New-PageInfoXml($M, $Boards, [string]$SelRef, $Switches, $InfoGroups, [
     if ($fw.Count -gt 0) {
       [void]$sb.AppendLine("$Ind<choose ParamRefId=`"$SelRef`">")
       foreach ($g in $fw) { [void]$sb.AppendLine(("$Ind  <when test=`"{0}`"><ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{1}`" /></when>" -f (Get-IdList $g.Boards), (ConvertTo-XmlText $g.Text))) }
+      [void]$sb.AppendLine("$Ind</choose>")
+    }
+  }
+  # optional: the <Page features> of the selected board under the card (<Page cardFeatures="true">); boards with the same lines
+  # share one when
+  if ($M.Page.CardFeatures) {
+    $fg = New-Object System.Collections.Generic.List[object]
+    foreach ($b in $Boards) {
+      $ls = @(Get-BoardFeatureLines $M $b)
+      foreach ($l in $ls) { if ($l.Length -gt 255) { Stop-WithError (T "<Page cardFeatures>: the line of 0x{0:X4} has {1} characters, ETS shows at most 255" ([int]$b.HwId) $l.Length) } }
+      $key = $ls -join "`n"
+      $g = @($fg | Where-Object { $_.Key -ceq $key }) | Select-Object -First 1
+      if (-not $g) { $g = @{ Key = $key; Lines = $ls; Boards = @() }; $fg.Add($g) }
+      $g.Boards += $b
+    }
+    if ($fg.Count -gt 0) {
+      [void]$sb.AppendLine("$Ind<choose ParamRefId=`"$SelRef`">")
+      foreach ($g in $fg) {
+        [void]$sb.AppendLine(("$Ind  <when test=`"{0}`">" -f (Get-IdList $g.Boards)))
+        [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" UIHint=`"Headline`" />" -f (ConvertTo-XmlText $M.Page.CardFeaturesTitle)))
+        foreach ($l in $g.Lines) { [void]$sb.AppendLine(("$Ind    <ParameterSeparator Id=`"%AID%_PS-nnn`" Text=`"{0}`" />" -f (ConvertTo-XmlText $l))) }
+        [void]$sb.AppendLine("$Ind  </when>")
+      }
       [void]$sb.AppendLine("$Ind</choose>")
     }
   }
@@ -677,49 +749,7 @@ function New-DevShareXml($M, $Boards) {
       & $sep ("{0}: {1}" -f $v.Text, $vt) ""
     }
     & $sep "Module und Funktionen" ' UIHint="Headline"'
-    foreach ($f in $M.Page.Features) {
-      $ci = -1; for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -eq $f) { $ci = $i } }
-      if ($ci -ge 0) {
-        $c = $M.Capabilities[$ci]
-        $label = $c.Feature; if (-not $label) { $label = $c.Text }
-        $on = $c.FeatureOn; if (-not $on) { $on = "ja" }
-        $off = $c.FeatureOff; if (-not $off) { $off = "nein" }
-        $has = [bool]$b.Caps[$ci]
-        if ($c.FeatureInvert) { $has = -not $has }
-        if ($b.CapMixed[$ci]) {
-          $state = "je nach Firmware-Variante"
-          if ($c.FeatureOn -or $c.FeatureOff) { $state = "{0} oder {1} (je nach Firmware-Variante)" -f $off, $on }
-        }
-        elseif ($has) {
-          $state = $on
-          if ($c.FeatureNoteWhen) {
-            $wi = 0; for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -eq $c.FeatureNoteWhen) { $wi = $i } }
-            if ($b.Caps[$wi]) { $state = "{0} ({1})" -f $on, $c.FeatureNote }
-          }
-        }
-        else { $state = $off }
-        & $sep ("{0}: {1}" -f $label, $state) ""
-      }
-      else {
-        $vi = 0; for ($i = 0; $i -lt $M.Values.Count; $i++) { if ($M.Values[$i].Name -eq $f) { $vi = $i } }
-        $v = $M.Values[$vi]
-        $n = [int]$b.Values[$vi]
-        $state = "nein"
-        if ($n -gt 0 -and $v.Relays) {
-          # relays: the first HW_RELAY_COUNT are hard-wired, every further one takes a port
-          $count = "bis {0}" -f $n; if ($n -eq 1) { $count = "1" }
-          $wired = [Math]::Min($n, @($b.Relays).Count); $free = $n - $wired
-          if ($wired -eq 0) { $state = "{0}, Port w{1}hlbar" -f $count, [System.Char]::ConvertFromUtf32(0xE4) }
-          elseif ($free -eq 0) { $state = "{0}, fest verdrahtet" -f $count }
-          else { $state = "{0}, {1} fest verdrahtet, {2} Port w{3}hlbar" -f $count, $wired, $free, [System.Char]::ConvertFromUtf32(0xE4) }
-        }
-        elseif ($n -gt 0) {
-          $state = [string]$n
-          if ($v.Unit) { $state = "{0} {1}" -f $n, $v.Unit }
-        }
-        & $sep ("{0}: {1}" -f $v.Text, $state) ""
-      }
-    }
+    foreach ($line in @(Get-BoardFeatureLines $M $b)) { & $sep $line "" }
     & $sep "Ports" ' UIHint="Headline"'
     if ($b.Ports.Count -eq 0) { & $sep "keine" "" }
     else {

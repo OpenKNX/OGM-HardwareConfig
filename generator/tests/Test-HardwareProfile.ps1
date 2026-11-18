@@ -335,6 +335,26 @@ Add-Test "fixes-notcap" (T "Fixes: capability=`"!Name`" fixes the boards without
   Assert-True (-not $f.Contains('4129') -and -not $f.Contains('4130')) (T "!Lan: the LAN boards 4129 and 4130 must not get the value")
 }
 
+Add-Test "page-cardfeatures" (T "Page: cardFeatures lists the features of the selected board under the card, boards with the same lines share a when") {
+  $d = Copy-Base "page-cardfeatures"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' "  <Page features=`"Lan`" cardFeatures=`"true`" />`n</HardwareProfile>"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $x = New-Object System.Xml.XmlDocument; $x.LoadXml((Read-Text ([System.IO.Path]::Combine($d, "src", "T.share.xml"))))
+  $ns = New-Object System.Xml.XmlNamespaceManager($x.NameTable); $ns.AddNamespace("k", "http://knx.org/xml/project/20")
+  $hl = [regex]::Unescape('Funktionen des Ger\u00E4ts')
+  $ch = @($x.SelectNodes("//k:choose[k:when/k:ParameterSeparator[@Text='$hl']]", $ns))
+  Assert-True ($ch.Count -eq 1) (T "card features: one choose with the headline expected, found {0}" $ch.Count)
+  $w = @($ch[0].SelectNodes("k:when", $ns))
+  $lan = @($w | Where-Object { $_.GetAttribute("test") -ceq "4129 4130" })
+  $up1 = @($w | Where-Object { $_.GetAttribute("test") -ceq "4611" })
+  Assert-True ($lan.Count -eq 1 -and $null -ne $lan[0].SelectSingleNode("k:ParameterSeparator[@Text='LAN: ja']", $ns)) (T "card features: 4129 and 4130 share one when with LAN: ja")
+  Assert-True ($up1.Count -eq 1 -and $null -ne $up1[0].SelectSingleNode("k:ParameterSeparator[@Text='LAN: nein']", $ns) -and $up1[0].SelectNodes("k:ParameterSeparator", $ns).Count -eq 2) (T "card features: 4611 with the headline and LAN: nein only")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+  $d = Copy-Base "page-cardfeatures-none"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' "  <Page cardFeatures=`"true`" />`n</HardwareProfile>"
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'cardFeatures needs features' (T "stop message")
+}
+
 Add-Test "fixes-tokens" (T "Fixes: ref with tokens of a channel template or part gets its own ParameterRefs block, module digits stay in the shared block") {
   $d = Copy-Base "fixes-tokens"
   $tok = '<Fix name="Ch" capability="Lan" ref="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701" value="2" />' +

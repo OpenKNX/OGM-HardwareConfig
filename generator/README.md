@@ -577,6 +577,10 @@ ausnehmen (der Build erzeugt sie); wer `-Check` in der CI laufen lässt (wie die
 
 ### Texte (`<Page>`)
 
+`cardFeatures="true"` (oder ein Text = Überschrift statt „Funktionen des Geräts“): die Zeilen von `features` (Fähigkeiten und
+Werte, wie in der Entwickleransicht: „LAN: ja“, „Relais: 2“, „Binäreingänge: 10“) stehen unter der Gerätekarte des gewählten
+Boards; Boards mit gleichen Zeilen teilen sich ein `when`. Braucht `features`.
+
 Fehlt ein Attribut, gilt der Standard; ein leeres Attribut lässt den Text weg. Jeder Text höchstens 255 Zeichen; `&#10;`
 ist ein Zeilenumbruch (nicht in `text`, `title`, `label`, `queryTitle`, `button`, `unselectedTitle`: einzeilig, sonst Abbruch), `{page}` der Seitentext, `{button}` der Knopftext. Die Texte nennen die ETS nicht beim Namen und
 nutzen ihre Begriffe (Gerät, physikalische Adresse, Programmiertaste).

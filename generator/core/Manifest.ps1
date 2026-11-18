@@ -65,7 +65,7 @@ $script:ManifestNodes = @{
   GpioRole        = @("name number text count", "Pins")
   Pins            = @("board label scan", "Pin")
   Pin             = @("gpio label", "")
-  Page            = @("text icon help features dev title label intro queryTitle query button queryHelp queryImage unselectedTitle infoDefault unselectedInfo unselectedText updateInfo changeInfo firmware more summary portsText portsTextOne", "")
+  Page            = @("text icon help features cardFeatures dev title label intro queryTitle query button queryHelp queryImage unselectedTitle infoDefault unselectedInfo unselectedText updateInfo changeInfo firmware more summary portsText portsTextOne", "")
   Notice          = @("when title", "Text")
   Text            = @("", "")
   Conflicts       = @("*", "Param Use ChannelBlock")
@@ -434,6 +434,12 @@ function Read-ManifestPage($root, $m, $baseDir, $capIndex, $valIndex) {
       ImageFile       = $null
     }
     if (-not $m.Page.Text) { $m.Page.Text = $m.Text }
+    # cardFeatures: the rows of <Page features> also under the device card of the selected board; "true" = the default headline,
+    # any other text = the headline
+    $m.Page.CardFeatures = $pg.HasAttribute("cardFeatures") -and "$($pg.cardFeatures)" -ne "false"
+    $m.Page.CardFeaturesTitle = [regex]::Unescape('Funktionen des Ger\u00E4ts')
+    if ($m.Page.CardFeatures -and "$($pg.cardFeatures)" -ne "true" -and "$($pg.cardFeatures)") { $m.Page.CardFeaturesTitle = "$($pg.cardFeatures)" }
+    if ($m.Page.CardFeatures -and $m.Page.Features.Count -eq 0) { Stop-WithError (T "<Page>: cardFeatures needs features=... (the capabilities and values to list)") }
     # with unselectedTitle the tree text is "{{0:<text>}}", 6 characters more
     $textMax = 255; if ($m.Page.UnselectedTitle) { $textMax = 249 }
     if ($m.Page.Text.Length -gt $textMax) { Stop-WithError (T "<Page>: text has {0} characters, at most {1} (ETS shows 255; unselectedTitle adds {{{{0:...}}}})" $m.Page.Text.Length $textMax) }
