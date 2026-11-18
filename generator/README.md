@@ -15,6 +15,14 @@ Der Generator liest die Board-Header dieses Repos und erzeugt daraus für eine A
 
 Beispiel-Applikation: [examples/HardwareProfileDemo](../examples/HardwareProfileDemo).
 
+## Begriffe
+
+| Begriff | Dateien | Rolle |
+|---|---|---|
+| Manifest | `HardwareManifest.xml` (Wurzel `<HardwareManifest>`), `HardwareManifest.slots` | Eingabe, von Hand gepflegt; die Slot-Datei wird mit committet |
+| Hardware-Profil | die Ausgaben aus `<Output>` und den `output=`-Attributen (`-Init`: `src/HardwareProfile.share.xml`, `.conf.xml`, `.script.js`, `include/HardwareProfileData.h`; NeoPixel: `src/NeoPixel.hw.*`), in der Firmware der Namensraum `HardwareProfile::` | Ausgabe, erzeugt; nie von Hand ändern |
+| HW-Profiler | `Build-HardwareProfile.ps1` | das Werkzeug, das aus Manifest und Board-Headern das Profil baut |
+
 ## Ordner
 
 | Pfad | Inhalt |
