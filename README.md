@@ -166,9 +166,10 @@ Regeln:
   der Generator sie nicht.
 - Bausteine ohne eigenes Gerät (`OKNXHW_*_CONTROLLER*`, `*_APP_*`) bekommen keine ID.
 - Hardware eines Drittanbieters ohne OpenKNX-Support trägt im Board-Block zusätzlich
-  `#define DEVICE_THIRD_PARTY`. Das ist eine Angabe des Headers, keine Folge der ID: Hauptgruppe 0x2 enthält auch
-  OpenKNX-Ready-Partner. Der Generator kennt sie fest als Fähigkeit `ThirdParty` (Bit 0 der Geräteabfrage).
-  Gesetzt bei Gledopto (0x2000–0x2002), QuinLED (0x2100–0x2140) und Shelly (0x2500–0x2511).
+  `#define DEVICE_THIRD_PARTY`. Das ist eine Angabe des Headers, keine Folge der ID. Der Generator kennt sie fest als
+  Fähigkeit `ThirdParty` (Bit 0 der Geräteabfrage; Gerätekarte: Stempel „Drittanbieter“ und Hinweis). Gesetzt bei allen
+  Boards unter `Others/`: Gledopto (0x2000–0x2002), QuinLED (0x2100–0x2140), Adafruit (0x2200), Smart-MF (0x23xx),
+  AB-SmartHouse (0x2400–0x2406) und Shelly (0x2500–0x2511).
 
 Alle IDs auflisten und auf Doppelte prüfen:
 

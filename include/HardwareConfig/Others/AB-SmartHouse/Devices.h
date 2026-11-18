@@ -23,6 +23,7 @@
 
 #ifdef DEVICE_AB_BUT_GIR
     #define DEVICE_HW_ID 0x2400
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "AB-BUT-GIR"
     #define DEVICE_NAME "AB-SmartHouse Push Buttons for Gira"
     #define INFO_LED_PIN 11
@@ -81,6 +82,7 @@
 #ifdef DEVICE_AB_PRE
     #define DEVICE_AB_PRE_BASE
     #define DEVICE_HW_ID 0x2401
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "AB-PRE"
     #define HARDWARE_NAME "AB-PRE"
     #define DEVICE_NAME "AB-SmartHouse Presence MultiSensor"
@@ -89,6 +91,7 @@
 #ifdef DEVICE_AB_PRE_MR16
     #define DEVICE_AB_PRE_BASE
     #define DEVICE_HW_ID 0x2402
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "AB-PRE-MR16"
     #define HARDWARE_NAME "AB-PRE-MR16"
     #define DEVICE_NAME "AB-SmartHouse Presence MR16"
@@ -97,6 +100,7 @@
 #ifdef DEVICE_AB_PRE_WALL
     #define DEVICE_AB_PRE_BASE
     #define DEVICE_HW_ID 0x2403
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "AB-PRE-WALL"
     #define HARDWARE_NAME "AB-PRE-WALL"
     #define DEVICE_NAME "AB-SmartHouse Presence Wall"
@@ -104,6 +108,7 @@
 
 #ifdef DEVICE_AB_PRE_WALL_OUT
     #define DEVICE_HW_ID 0x2404
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "AB-PRE-WALL-OUT"
     #define HARDWARE_NAME "AB-PRE-WALL-OUT"
     #define DEVICE_NAME "AB-SmartHouse Presence Wall Outside"
@@ -172,6 +177,7 @@
 
 #ifdef DEVICE_AB_TOUCH_ROUND_RP2350
     #define DEVICE_HW_ID 0x2405
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "AB-TOUCH-ROUND"
     #define HARDWARE_NAME "AB-TOUCH-ROUND"
     #define DEVICE_NAME "AB-SmartHouse Touch Round"
@@ -198,6 +204,7 @@
 
 #ifdef DEVICE_AB_SMARTHOUSE_ESP32_P4_1TP
     #define DEVICE_HW_ID 0x2406
+    #define DEVICE_THIRD_PARTY // third-party hardware, no OpenKNX support
     #define DEVICE_ID "AB-IP-1TP"
     #define HARDWARE_NAME "AB-IP-1TP"
     #define DEVICE_NAME "AB-SmartHouse IP with 1x TP"
