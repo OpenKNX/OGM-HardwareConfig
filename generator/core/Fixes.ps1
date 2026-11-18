@@ -27,7 +27,8 @@ function Get-FixGroups($M, $Boards, $Fix) {
     for ($i = 0; $i -lt $M.Capabilities.Count; $i++) { if ($M.Capabilities[$i].Name -ceq $Fix.Capability) { $ci = $i } }
     if ($ci -lt 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} not found" $Fix.Name $Fix.Capability) }
   }
-  $withCap = @($Boards | Where-Object { $ci -lt 0 -or $_.Caps[$ci] })
+  # capability="!Name": the boards without it
+  $withCap = @($Boards | Where-Object { $ci -lt 0 -or ([bool]$_.Caps[$ci] -ne [bool]$Fix.NotCapability) })
   if (-not $Fix.ValueMacro) { return , @(@{ Ids = (Get-IdList $withCap); Value = $Fix.Value }) }
   $groups = New-Object System.Collections.Generic.List[object]
   foreach ($b in $withCap) {

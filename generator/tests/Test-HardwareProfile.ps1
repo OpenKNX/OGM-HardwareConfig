@@ -326,6 +326,15 @@ Add-Test "fixes-twice" (T "Fixes: the same ref twice stops") {
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'already fixed' (T "stop message")
 }
 
+Add-Test "fixes-notcap" (T "Fixes: capability=`"!Name`" fixes the boards without the capability (e.g. hide a module)") {
+  $d = Copy-Base "fixes-notcap"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`"><Fix name=`"NoLan`" capability=`"!Lan`" ref=`"%AID%_UP-1099825_R-109982501`" value=`"0`" show=`"assign`" /></Fixes>`n</HardwareProfile>")
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.fixes.gen.xml"))
+  Assert-True ($f -match '<when test="4611">\s*<Assign TargetParamRefRef="%AID%_UP-1099825_R-109982501" Value="0" />') (T "!Lan: only board 4611 (no LAN) must get the value")
+  Assert-True (-not $f.Contains('4129') -and -not $f.Contains('4130')) (T "!Lan: the LAN boards 4129 and 4130 must not get the value")
+}
+
 Add-Test "fixes-tokens" (T "Fixes: ref with tokens of a channel template or part gets its own ParameterRefs block, module digits stay in the shared block") {
   $d = Copy-Base "fixes-tokens"
   $tok = '<Fix name="Ch" capability="Lan" ref="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701" value="2" />' +

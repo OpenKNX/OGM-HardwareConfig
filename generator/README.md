@@ -335,6 +335,15 @@ einen festen Wert:
   die schreibgeschützte Zeile (Ref-Endung `99`) im eigenen Block `Fix_<name>_ParameterRefs`, den das Produkt in die
   ParameterRefs derselben Vorlage bzw. desselben Bausteins einbindet, und `Fix_<name>` gilt dort für jeden Kanal bzw. jede
   Instanz (Demo: „Betriebsart“ der Kanal-Vorlage). `value`: der Rohwert.
+- `capability="!Name"`: der Fix gilt für die Boards **ohne** die Fähigkeit. Damit verschwindet ein ganzes Modul, das ein Gerät
+  nicht hat: jedes OpenKNX-Modul hat auf OpenKNX → Module einen Schalter `BASE_ModuleEnabled_<Präfix>` mit der Id
+  `%AID%_UP-00998<ModuleType>` (Ref `…_R-00998<ModuleType>01`), auf dem der Producer den Kanal des Moduls ein- und
+  ausblendet; `<Fix capability="!Presence" ref="%AID%_UP-0099849_R-009984901" value="0" show="assign" />`, Block `Fix_<name>`
+  in der Hardware-Seite. In ETS6 gemessen (Demo 3.0, 1.1.151): Pro (Präsenz) zeigt das Modul, Basic blendet es aus, zurück
+  zum Pro ist es wieder da (ein per `<Assign>` gesetzter Wert fällt auf den eigenen Wert zurück, sobald das `<Assign>` nicht
+  mehr greift), „nicht gewählt“ zeigt es. Die Fähigkeit am besten aus der Bedingung nehmen, mit der die Firmware das Modul
+  hinzufügt (`openknx.addModule` im `main.cpp` der OAM). Ein Board, dessen Envs sich unterscheiden: mit `merge` any (Standard)
+  zählt es als „hat“ (nie ausgeblendet); mit `merge="all"` als „hat nicht“, sobald ein Env die Fähigkeit nicht hat.
 - `valueMacro` statt `value`: der Wert kommt je Board aus diesem Makro des Board-Headers (Präprozessor wie `<Capability expr>`,
   eine ganze Zahl 0..2147483647; ein Name, den nur die Firmware kennt, z. B. `OPENKNX_LEDFUNC_BASE_KNX` aus OGM-Common, bricht
   ab: im Header die Zahl schreiben). Boards ohne das Makro bekommen keinen Fix, Boards mit demselben Wert ein gemeinsames

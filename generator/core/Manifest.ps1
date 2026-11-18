@@ -590,6 +590,9 @@ function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
       $fc = "$($f.GetAttribute('capability'))"
       $fm = "$($f.GetAttribute('valueMacro'))"
       if (-not $fc -and -not $fm) { Stop-WithError (T "<Fix name=`"{0}`">: needs capability=... or valueMacro=..." $fn) }
+      # capability="!Name": the boards without the capability (e.g. hide a module: BASE_ModuleEnabled_<prefix> = 0)
+      $fNeg = $fc.StartsWith("!"); if ($fNeg) { $fc = $fc.Substring(1) }
+      if ($fNeg -and -not $fc) { Stop-WithError (T "<Fix name=`"{0}`">: capability=`"!`" needs a name" $fn) }
       if ($fc -and @($m.Capabilities | Where-Object { $_.Name -ceq $fc }).Count -eq 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} is not defined (names are case-sensitive)" $fn $fc) }
       if ($fm -and $fm -cnotmatch '^[A-Za-z_][A-Za-z0-9_]*$') { Stop-WithError (T "<Fix name=`"{0}`">: valueMacro must be a macro name: {1}" $fn $fm) }
       $fr = "$($f.GetAttribute('ref'))"
@@ -614,7 +617,7 @@ function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
       if ($fi -and ($fi -notmatch '^\d{1,2}$')) { Stop-WithError (T "<Fix name=`"{0}`">: indent must be a number" $fn) }
       $fh = "$($f.GetAttribute('help'))"
       if ($fh -and $fh -notmatch '^[A-Za-z0-9_-]+$') { Stop-WithError (T "<Fix name=`"{0}`">: help must be a help context name" $fn) }
-      $m.Fixes.Items += @{ Name = $fn; Capability = $fc; Ref = $fr; Param = $fParam; ReadOnlyRef = $fRo; Tokens = $fTok; Value = $fv; ValueMacro = $fm; Show = $fs; Indent = $fi; Help = $fh }
+      $m.Fixes.Items += @{ Name = $fn; Capability = $fc; NotCapability = $fNeg; Ref = $fr; Param = $fParam; ReadOnlyRef = $fRo; Tokens = $fTok; Value = $fv; ValueMacro = $fm; Show = $fs; Indent = $fi; Help = $fh }
     }
     if ($m.Fixes.Items.Count -eq 0) { Stop-WithError (T "<Fixes> without <Fix>") }
   }

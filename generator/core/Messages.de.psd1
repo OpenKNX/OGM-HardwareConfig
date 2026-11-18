@@ -737,4 +737,8 @@
   '%C%: flags 911/912 and template ref %TT%0091%C% expected' = '%C%: Flags 911/912 und Vorlagen-Ref %TT%0091%C% erwartet'
   '%CC%: flags 1001/1002 and template ref %TT%010%CC% expected' = '%CC%: Flags 1001/1002 und Vorlagen-Ref %TT%010%CC% erwartet'
   'warning on a template id' = 'Warnung bei einer Vorlagen-Id'
+  'Fixes: capability="!Name" fixes the boards without the capability (e.g. hide a module)' = 'Fixes: capability="!Name" setzt die Boards ohne die Fähigkeit fest (z. B. ein Modul ausblenden)'
+  '!Lan: only board 4611 (no LAN) must get the value' = '!Lan: nur Board 4611 (ohne LAN) darf den Wert bekommen'
+  '!Lan: the LAN boards 4129 and 4130 must not get the value' = '!Lan: die LAN-Boards 4129 und 4130 dürfen den Wert nicht bekommen'
+  '<Fix name="{0}">: capability="!" needs a name' = '<Fix name="{0}">: capability="!" braucht einen Namen'
 }
