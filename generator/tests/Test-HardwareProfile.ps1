@@ -445,6 +445,94 @@ Add-Test "partrows-nohit" (T "PartRows: a selection without a row stops") {
   Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "src", "T.rows.gen.xml")))) (T "a parts file was written")
 }
 
+# @brief <ValueNotices>: table header with off macros per board; -Envs: the boards come from a platformio.ini, REG1 LAN has a
+#        second env (flag TST_V2) that adds index 3
+function Copy-BaseWithValueNotices([string]$Name, [string]$Lines, [switch]$Envs) {
+  $d = Copy-Base $Name
+  Write-Text ([System.IO.Path]::Combine($d, "include", "Off.h")) (@(
+    '#pragma once'
+    '#ifdef DEVICE_REG1_LAN_TP_BASE'
+    '#define TST_OFF_2 1'
+    '#define TST_OFF_5 (1)'
+    '#endif'
+    '#ifdef DEVICE_REG1_LAN_BASE'
+    '#define TST_OFF_2 1'
+    '#define TST_OFF_4 0'
+    '#ifdef TST_V2'
+    '#define TST_OFF_3 1'
+    '#endif'
+    '#endif'
+  ) -join "`n")
+  if ($Envs) {
+    $mf = [System.IO.Path]::Combine($d, "HardwareProfile.xml")
+    Write-Text $mf ((Read-Text $mf) -replace '  <Board define="[A-Z0-9_]+" />\r?\n', '')
+    Edit-File $mf '</HardwareProfile>' ('  <Boards platformio="tst_*" />' + "`n</HardwareProfile>")
+    Write-Text ([System.IO.Path]::Combine($d, "platformio.ini")) (@(
+      '[env:tst_tp]', 'build_flags = -D DEVICE_REG1_LAN_TP_BASE'
+      '[env:tst_lan]', 'build_flags = -D DEVICE_REG1_LAN_BASE'
+      '[env:tst_lan_v2]', 'build_flags = -D DEVICE_REG1_LAN_BASE -D TST_V2'
+      '[env:tst_tas]', 'build_flags = -D DEVICE_UP1_TAS_4X'
+    ) -join "`n")
+  }
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ('  <BoardTable name="Off" header="include/Off.h" scan="^TST_OFF_(\d+)$" />' + "`n" + $Lines + "`n</HardwareProfile>")
+  return $d
+}
+$VnRef = '%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701'
+
+Add-Test "valuenotices" (T "ValueNotices: one block per notice, boards grouped by values, all = Error, any = Information, board without value has no when") {
+  $d = Copy-BaseWithValueNotices "valuenotices" ('<ValueNotices output="src/T.notices.gen.xml">' +
+    '<ValueNotice name="Fx" ref="' + $VnRef + '" table="Off" all="Fehlt &amp; l' + $ae + 'uft nicht" any="Fehlt teils" />' +
+    '<ValueNotice name="OnlyAny" ref="%AID%_UP-%TT%00010_R-%TT%0001001" table="Off" any="Fehlt teils" />' +
+    '<ValueNotice name="OnlyAll" ref="%AID%_UP-%TT%00011_R-%TT%0001101" table="Off" all="Fehlt" /></ValueNotices>')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.notices.gen.xml"))
+  $x = New-Object System.Xml.XmlDocument; $x.LoadXml($f)
+  $blocks = @($f -split '<Block name="')
+  Assert-True ($blocks.Count -eq 4) (T "expected 3 blocks, found {0}" ($blocks.Count - 1))
+  $fx = $blocks[1]; $oa = $blocks[2]; $ol = $blocks[3]
+  Assert-True ($fx.StartsWith('ValueNotice_Fx"') -and $fx.Contains('<choose ParamRefId="%AID%_UP-4500001_R-450000101">')) (T "Fx: choose on the hardware selection (module digits) missing")
+  Assert-True ($fx.Contains('<choose ParamRefId="' + $VnRef + '">')) (T "Fx: inner choose keeps the tokens of ref")
+  # 4129: 2 5; 4130: 2, 4 = 0 is no value; 4611: none; one env per board, so no "any" value
+  Assert-True ($fx.Contains('<when test="4129">') -and $fx.Contains('<when test="2 5"><ParameterSeparator Id="%AID%_PS-nnn" Text="Fehlt &amp; l' + $ae + 'uft nicht" UIHint="Error" /></when>')) (T "Fx: 4129 with 2 5 as Error missing")
+  Assert-True ($fx.Contains('<when test="4130">') -and $fx.Contains('<when test="2"><ParameterSeparator') -and -not $fx.Contains('UIHint="Information"')) (T "Fx: 4130 with 2 as Error missing")
+  Assert-True (-not $fx.Contains('4611') -and -not $fx.Contains('<when test="0">') -and -not $f.Contains('"4"') -and -not $f.Contains(' 4"')) (T "Fx: board without value, not selected or value 0 got a when")
+  Assert-True ($oa.Trim() -ceq 'ValueNotice_OnlyAny">' + "`n  </Block>") (T "OnlyAny: no board has an any value, the block must be empty")
+  Assert-True ($ol.Contains('<when test="4129">') -and $ol.Contains('<when test="4130">') -and -not $ol.Contains('UIHint="Information"')) (T "OnlyAll: two groups, no Information")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+}
+
+Add-Test "valuenotices-envs" (T "ValueNotices: a value of only one env of a board gives the any text, values of every env the all text") {
+  $d = Copy-BaseWithValueNotices "valuenotices-envs" ('<ValueNotices output="src/T.notices.gen.xml">' +
+    '<ValueNotice name="Fx" ref="' + $VnRef + '" table="Off" all="Fehlt" any="Fehlt teils" />' +
+    '<ValueNotice name="OnlyAll" ref="%AID%_UP-%TT%00011_R-%TT%0001101" table="Off" all="Fehlt" /></ValueNotices>') -Envs
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.notices.gen.xml"))
+  $blocks = @($f -split '<Block name="'); $fx = $blocks[1]; $ol = $blocks[2]
+  $b4130 = $fx.Substring($fx.IndexOf('<when test="4130">'))
+  Assert-True ($b4130.Contains('<when test="2"><ParameterSeparator Id="%AID%_PS-nnn" Text="Fehlt" UIHint="Error" />') -and $b4130.Contains('<when test="3"><ParameterSeparator Id="%AID%_PS-nnn" Text="Fehlt teils" UIHint="Information" />')) (T "Fx: 4130 with 2 Error and 3 Information missing")
+  Assert-True ($fx.Contains('<when test="2 5"><ParameterSeparator Id="%AID%_PS-nnn" Text="Fehlt" UIHint="Error" />') -and -not $fx.Contains('4611')) (T "Fx: 4129 with 2 5 as Error missing")
+  Assert-True (-not $ol.Contains('"3"') -and -not $ol.Contains('UIHint="Information"')) (T "OnlyAll: the any value 3 must give no notice")
+} "pio"
+
+Add-Test "valuenotices-errors" (T "ValueNotices: unknown table, bad ref, no text, twice the same name, too long a text stop") {
+  $cases = @(
+    @{ L = '<ValueNotice name="A" ref="' + $VnRef + '" table="off" all="x" />'; P = 'is no <BoardTable>' }
+    @{ L = '<ValueNotice name="A" ref="UP-1_R-1" table="Off" all="x" />'; P = 'ref must be the ParameterRef' }
+    @{ L = '<ValueNotice name="A" ref="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05801" table="Off" all="x" />'; P = 'ref must be the ParameterRef' }
+    @{ L = '<ValueNotice name="A" ref="' + $VnRef + '" table="Off" />'; P = 'needs all=' }
+    @{ L = '<ValueNotice name="A" ref="' + $VnRef + '" table="Off" all="x" /><ValueNotice name="A" ref="' + $VnRef + '" table="Off" all="y" />'; P = 'is listed twice' }
+    @{ L = '<ValueNotice name="A_1" ref="' + $VnRef + '" table="Off" all="x" />'; P = 'name must be letters and digits' }
+    @{ L = '<ValueNotice name="A" ref="' + $VnRef + '" table="Off" all="' + ("x" * 256) + '" />'; P = 'ETS shows at most 255' }
+  )
+  $i = 0
+  foreach ($c in $cases) {
+    $i++
+    $d = Copy-BaseWithValueNotices ("valuenotices-err" + $i) ('<ValueNotices output="src/T.notices.gen.xml">' + $c.L + '</ValueNotices>')
+    $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r ([regex]::Escape($c.P)) (T "case {0}" $i)
+    Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "src", "T.notices.gen.xml")))) (T "case {0}: a parts file was written" $i)
+  }
+}
+
 # @brief <PartRows> with <Fix>/<Filter> blocks: a foreign module file in lib/X/src (href to a sibling file), a Fix target in a grid
 #        cell that is also a selected row, a Filter target with IndentLevel; manifest lines go after the board macros
 function Copy-BaseWithForeignPart([string]$Name, [string]$Lines) {

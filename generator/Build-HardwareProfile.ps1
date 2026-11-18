@@ -171,7 +171,7 @@ $CHIP_RESERVED = @{
 # the generator itself, one file per area (dot-sourced: same script scope, constants and $script: state above)
 $script:GeneratorDir = $PSScriptRoot
 foreach ($corePart in @("Console", "Text", "Toolchain", "BoardIds", "Manifest", "Boards", "Slots", "AppModule", "AppScript",
-                        "Conflicts", "Fixes", "PartRows", "Filters", "Header", "Init", "Generate", "Language")) {
+                        "Conflicts", "Fixes", "PartRows", "Filters", "ValueNotices", "Header", "Init", "Generate", "Language")) {
   . ([System.IO.Path]::Combine($PSScriptRoot, "core", $corePart + ".ps1"))
 }
 Remove-Variable corePart

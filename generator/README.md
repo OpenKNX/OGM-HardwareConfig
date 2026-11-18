@@ -260,6 +260,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 | `portManualValue`, `portNoneValue` (Wurzel) | Werte der Port-Auswahlen der Applikation: 0..n-1 = Port n des Boards, `portManualValue` (0..254) = manueller GPIO, `portNoneValue` (0..255) = kein Port, jeder andere Wert (z. B. nie geschrieben 255) = kein GPIO. Nur zusammen, verschieden. Einmal angegeben, gilt es für die Konfliktprüfung (`<Conflicts>`) und den Firmware-Header (`signalGpio`, siehe [Port-Auswahl in der Firmware](#port-auswahl-in-der-firmware)). Ein angebotener Port auf einem der beiden Werte bricht den Lauf ab |
 | `<Conflicts output number value error reserved reservedError tpError>` | GPIO-Konfliktprüfung in ETS, siehe [GPIO-Konflikte](#gpio-konflikte-conflicts) und [Reservierte GPIOs](#reservierte-gpios-conflicts-reservedtrue) |
 | `<BoardTable name header scan>` | Zahlen-Tabelle je Board im ETS-Skript aus einem Header der OAM, siehe [Board-Tabellen](#board-tabellen-boardtable) |
+| `<ValueNotices output>` mit `<ValueNotice name ref table all any>` | Hinweis unter einer Auswahl, wenn ihr Wert auf dem gewählten Gerät fehlt (aus einer `<BoardTable>`, reines XML), siehe [Hinweise je Wert](#hinweise-je-wert-valuenotices) |
 | `<Fixes output>` mit `<Fix name capability ref value valueMacro show indent help>` | Einstellung eines anderen Moduls je Fähigkeit oder mit dem Wert eines Board-Makros festlegen, siehe [Einstellungen festlegen](#einstellungen-festlegen-fixes) |
 | `<PartRows source output>` mit `<Row ref expr label>` | Zeilen eines Bausteins (Part) eines anderen Moduls nur auf den Geräten zeigen, die sie haben, mit Label aus dem Board-Header, siehe [Zeilen je Gerät](#zeilen-je-gerät-partrows) |
 | `<Filters output>` mit `<Filter name ref source value number slots indent help>`, `<Allow board capability values except>` und `<Row name ref cell indent help>` | eine Auswahlliste je Gerät auf eine beliebige Teilmenge ihrer Einträge beschränken, siehe [Auswahl je Gerät filtern](#auswahl-je-gerät-filtern-filters) |
@@ -299,6 +300,32 @@ Target abschaltet), stehen damit auch im ETS-Skript.
   ```
 - Abbruch: `name` nicht nur Buchstaben und Ziffern oder doppelt, `header` fehlt, `scan` ohne genau eine unbenannte
   Gruppe, zwei Makros für einen Index. Warnung: kein Makro auf irgendeinem Board. Ohne `<BoardTable>` bleiben alle Ausgaben gleich.
+
+### Hinweise je Wert (`<ValueNotices>`)
+
+Ein Hinweis unter einer Auswahl, solange sie einen Wert hat, den die Firmware des gewählten Geräts nicht kann. Die Werte kommen
+aus einer `<BoardTable>` (Index = Wert der Auswahl, Eintrag ungleich 0 = fehlt). Reines XML, kein Skript, keine Merker.
+
+```xml
+<ValueNotices output="src/NeoPixel.hw.notices.gen.xml">
+  <ValueNotice name="SegmentFx" ref="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701" table="EffectsOff"
+               all="Effekt nicht verfügbar: …" any="Hinweis: Dieser Effekt fehlt in einer Firmware-Variante dieser Hardware." />
+</ValueNotices>
+```
+
+- Ausgabe: je `<ValueNotice>` ein Block `ValueNotice_<name>`: `choose` auf die Hardware-Auswahl (Ziffern des Moduls, gilt auch in
+  einer Vorlage oder einem Baustein), je Gruppe von Boards mit denselben Werten ein `when`, darin `choose` auf `ref` mit dem Text
+  `all` (`UIHint="Error"`) für die Werte, die in **jedem** Env des Boards fehlen, und dem Text `any` (`UIHint="Information"`)
+  für die Werte, die nur in **manchen** fehlen. „Nicht gewählt“ und Boards ohne fehlenden Wert bekommen kein `when`, ein
+  Hinweis ohne solches Board einen leeren Block.
+- Einbindung: `<op:include href="….hw.notices.gen.xml" xpath="//Block[@name='ValueNotice_<name>']/*" />` direkt unter der
+  Zeile der Auswahl, in derselben Vorlage bzw. demselben Baustein; `ref` behält die Tokens (`%TT%%CC%`, `%PPP+0%`), der Producer
+  setzt sie je Kanal bzw. Instanz.
+- `all` oder `any` darf fehlen (dann kein Hinweis dieser Art), beide nicht. Texte höchstens 255 Zeichen.
+- Abbruch: `name` nicht nur Buchstaben und Ziffern oder doppelt, `ref` keine ParameterRef, `table` keine `<BoardTable>`
+  (Groß-/Kleinschreibung zählt), kein Text, Text zu lang, `<ValueNotices>` zweimal oder ohne `<ValueNotice>`.
+- Eine Auswahl mit `<Filters>`: die gefilterte Liste bietet einen fehlenden Wert gar nicht an, ein Wechsel auf ein solches Board
+  setzt ihn zurück; der Hinweis greift dann nur für Werte, die der Filter durchlässt.
 
 ### Einstellungen anderer Module je Gerät: `<Fixes>`, `<PartRows>` oder `<Filters>`
 

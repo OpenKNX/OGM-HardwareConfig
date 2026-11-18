@@ -13,7 +13,8 @@ FILEPATH: OGM-HardwareConfig/generator/core/Manifest.ps1
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
     Functions: ConvertTo-FlagList, Test-ManifestNodes, Read-Manifest with its sections (Read-ManifestRoot, Read-ManifestOutputs,
     Read-ManifestCapabilities, Read-ManifestBoards, Read-ManifestPorts, Read-ManifestRoles, Read-ManifestPage, Read-ManifestNotices,
-    Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables, Read-ManifestPartRows, Read-ManifestFilters), Get-ConflictInt, ConvertFrom-ConflictCondition,
+    Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables, Read-ManifestPartRows, Read-ManifestFilters,
+    Read-ManifestValueNotices), Get-ConflictInt, ConvertFrom-ConflictCondition,
     Read-ConflictsNode.
 
 .NOTES
@@ -47,7 +48,7 @@ function ConvertTo-FlagList([string]$Text) {
 #        to the default without a word.
 $script:ManifestNodes = @{
   HardwareProfile = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
-                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows Filters")
+                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows Filters ValueNotices")
   CapabilityPack  = @("name", "Capability Value ReservedPins")
   Output          = @("conf share script header", "")
   Generate        = @("template output finalNewline", "Param")
@@ -75,6 +76,8 @@ $script:ManifestNodes = @{
   InfoImage       = @("*", "Logo")
   Logo            = @("board file", "")
   BoardTable      = @("*", "")
+  ValueNotices    = @("output", "ValueNotice")
+  ValueNotice     = @("name ref table all any", "")
   Fixes           = @("output", "Fix")
   Fix             = @("name capability ref value valueMacro show indent help", "")
   PartRows        = @("source output", "Row Fix Filter")
@@ -148,6 +151,7 @@ function Read-Manifest([string]$Path) {
   Read-ManifestPartRows $root $m $baseDir
   Read-ManifestFilters $root $m $baseDir
   Test-ManifestPartRowBlocks $m
+  Read-ManifestValueNotices $root $m $baseDir
   return $m
 }
 
@@ -654,6 +658,33 @@ function Read-ManifestBoardTables($root, $m, $baseDir) {
     $m.BoardTables += $t
   }
   if ($m.BoardTables.Count -gt 0 -and -not $m.Outputs.ContainsKey("script")) { Stop-WithError (T "<BoardTable> needs <Output script=...> (the table is part of the ETS script)") }
+}
+# @brief Read-Manifest: <ValueNotices output><ValueNotice name ref table all any/></ValueNotices>: a notice under the selection
+#        ref while it holds a value the selected board does not have (index of the <BoardTable> table = value of the selection;
+#        all = text when every env of the board has the index set, any = text when only some have); absent = no output changes
+function Read-ManifestValueNotices($root, $m, $baseDir) {
+  $m.ValueNotices = $null
+  $vn = @($root.SelectNodes("ValueNotices"))
+  if ($vn.Count -gt 1) { Stop-WithError (T "<ValueNotices> may appear only once") }
+  if ($vn.Count -eq 0) { return }
+  $out = "$($vn[0].GetAttribute('output'))"
+  if (-not $out) { Stop-WithError (T "<ValueNotices> needs output=... (the parts file the application includes)") }
+  if (-not $m.Outputs.ContainsKey("share")) { Stop-WithError (T "<ValueNotices> needs <Output share=...> (the hardware selection)") }
+  $m.ValueNotices = @{ Output = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $out)); Items = @() }
+  foreach ($n in $vn[0].SelectNodes("ValueNotice")) {
+    $name = "$($n.GetAttribute('name'))"; $w = "<ValueNotice name=`"$name`">"
+    if ($name -cnotmatch '^[A-Za-z][A-Za-z0-9]*$') { Stop-WithError (T "{0}: name must be letters and digits (it names the block ValueNotice_<name>)" $w) }
+    if (@($m.ValueNotices.Items | Where-Object { $_.Name -eq $name }).Count -gt 0) { Stop-WithError (T "{0} is listed twice" $w) }
+    $ref = "$($n.GetAttribute('ref'))"
+    if (-not (Split-FilterRef $ref)) { Stop-WithError (T "{0}: ref must be the ParameterRef of the selection (e.g. %AID%_UP-%TT%%CC%057_R-%TT%%CC%05701)" $w) }
+    $table = "$($n.GetAttribute('table'))"
+    if (@($m.BoardTables | Where-Object { $_.Name -ceq $table }).Count -eq 0) { Stop-WithError (T "{0}: table={1} is no <BoardTable> of the manifest (names are case-sensitive)" $w $table) }
+    $all = "$($n.GetAttribute('all'))"; $any = "$($n.GetAttribute('any'))"
+    if (-not $all -and -not $any) { Stop-WithError (T "{0}: needs all=... and/or any=... (the notice texts)" $w) }
+    foreach ($t in @($all, $any)) { if ($t.Length -gt 255) { Stop-WithError (T "{0}: a notice text has {1} characters, ETS shows at most 255" $w $t.Length) } }
+    $m.ValueNotices.Items += @{ Name = $name; Ref = $ref; Table = $table; AllText = $all; AnyText = $any }
+  }
+  if ($m.ValueNotices.Items.Count -eq 0) { Stop-WithError (T "<ValueNotices> without <ValueNotice>") }
 }
 # @brief Read-Manifest: <PartRows>: rows of a part of another module shown per board
 function Read-ManifestPartRows($root, $m, $baseDir) {
