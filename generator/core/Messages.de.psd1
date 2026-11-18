@@ -62,7 +62,7 @@
   'Duplicate DEVICE_HW_ID 0x{0:X4}: {1}' = 'Doppelte DEVICE_HW_ID 0x{0:X4}: {1}'
   '  {0} boards with DEVICE_HW_ID, {1} duplicate ID(s)' = '  {0} Boards mit DEVICE_HW_ID, {1} doppelte ID(s)'
   '-NextId: give a group prefix of 2 or 3 hex digits, e.g. 0x21 (0x2100..0x21FF) or 0x213 (0x2130..0x213F)' = '-NextId: ein Gruppenpräfix mit 2 oder 3 Hex-Ziffern angeben, z. B. 0x21 (0x2100..0x21FF) oder 0x213 (0x2130..0x213F)'
-  '-NextId: 0x{0:X4} is below the main groups (0x1000 OpenKNX, 0x2000 partners, 0x3000 community)' = '-NextId: 0x{0:X4} liegt unter den Hauptgruppen (0x1000 OpenKNX, 0x2000 Partner, 0x3000 Community)'
+  '-NextId: 0x{0:X4} is below the main groups (0x1000 OpenKNX, 0x2000 third party, 0x3000 community)' = '-NextId: 0x{0:X4} liegt unter den Hauptgruppen (0x1000 OpenKNX, 0x2000 Drittanbieter, 0x3000 Community)'
   'none used yet' = 'noch keine belegt'
   'after 0x{0:X4} {1}' = 'nach 0x{0:X4} {1}'
   'Next free DEVICE_HW_ID in 0x{0:X4}..0x{1:X4}: 0x{2:X4} ({3}; {4} board(s) in this range)' = 'Nächste freie DEVICE_HW_ID in 0x{0:X4}..0x{1:X4}: 0x{2:X4} ({3}; {4} Board(s) in diesem Bereich)'

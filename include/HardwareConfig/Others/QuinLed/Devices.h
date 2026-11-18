@@ -22,9 +22,9 @@
          H  = Main Group
          U  = Subgroup
          VV = Variant
-  Example: 0x2122 = Main Group 2 (OpenKNX-Ready), Subgroup 1 (QuinLED), Variant 0x22
+  Example: 0x2122 = Main Group 2 (Third Party), Subgroup 1 (QuinLED), Variant 0x22
 
- QuinLED devices live under Main Group 0x2 = OpenKNX-Ready (0x2000-0x2FFF):
+ QuinLED devices live under Main Group 0x2 = Third Party (0x2000-0x2FFF):
  └─ 0x21 = QuinLED (0x2100-0x21FF) → 256 variants
     ├─ 0x210x = Dig2Go          (0x2100)
     ├─ 0x211x = Dig-Uno          (V3: 0x2110 WiFi, 0x2111 Ethernet, 0x2112 WiFi+AE_Plus; V4: 0x2113 WiFi, 0x2114 Ethernet)

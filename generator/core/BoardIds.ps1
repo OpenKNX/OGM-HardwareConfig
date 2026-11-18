@@ -112,7 +112,7 @@ function Invoke-NextId {
   $low = [Convert]::ToInt32($digits, 16) -shl $shift
   $high = $low + (1 -shl $shift) - 1
   if ($high -gt 0xFFFE) { $high = 0xFFFE } # 0xFFFF is no valid DEVICE_HW_ID
-  if ($low -lt 0x1000) { Stop-WithError (T "-NextId: 0x{0:X4} is below the main groups (0x1000 OpenKNX, 0x2000 partners, 0x3000 community)" $low) }
+  if ($low -lt 0x1000) { Stop-WithError (T "-NextId: 0x{0:X4} is below the main groups (0x1000 OpenKNX, 0x2000 third party, 0x3000 community)" $low) }
   $rows = @()
   foreach ($b in (Get-AllHardwareIdBoards)) { $rows += (Get-BoardIdentity $b) }
   $inRange = @($rows | Where-Object { $null -ne $_.HwId -and $_.HwId -ge $low -and $_.HwId -le $high } | Sort-Object { $_.HwId })
