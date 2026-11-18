@@ -11,7 +11,7 @@ FILEPATH: OGM-HardwareConfig/generator/core/Manifest.ps1
 
 .DESCRIPTION
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
-    Functions: ConvertTo-FlagList, Test-ManifestNodes, Read-Manifest with its sections (Read-ManifestRoot, Read-ManifestOutputs,
+    Functions: ConvertTo-FlagList, Test-ManifestNodes, Resolve-DefaultManifest, Read-Manifest with its sections (Read-ManifestRoot, Read-ManifestOutputs,
     Read-ManifestCapabilities, Read-ManifestBoards, Read-ManifestPorts, Read-ManifestRoles, Read-ManifestPage, Read-ManifestNotices,
     Read-ManifestInfoImage, Read-ManifestFixes, Read-ManifestBoardTables, Read-ManifestPartRows, Read-ManifestFilters,
     Read-ManifestValueNotices), Get-ConflictInt, ConvertFrom-ConflictCondition,
@@ -106,6 +106,17 @@ function Test-ManifestNodes($Node, [string]$File) {
     if ($kids -cnotcontains $c.LocalName) { Write-Warn (T "{0}: <{1}> inside <{2}> is unknown and ignored" $File $c.LocalName $Node.LocalName); continue }
     Test-ManifestNodes $c $File
   }
+}
+# @brief Manifest path without -Manifest: HardwareProfile.xml in the current folder, else src/HardwareProfile.xml; both stop
+#        (two manifests would keep two slot files with different board numbers)
+function Resolve-DefaultManifest {
+  $root = "HardwareProfile.xml"
+  $src = [System.IO.Path]::Combine("src", "HardwareProfile.xml")
+  $hasRoot = Test-Path -LiteralPath $root -PathType Leaf
+  $hasSrc = Test-Path -LiteralPath $src -PathType Leaf
+  if ($hasRoot -and $hasSrc) { Stop-WithError (T "Two manifests: {0} and {1} - keep one (its .slots file belongs next to it)" $root $src) }
+  if ($hasSrc) { return $src }
+  return $root
 }
 function Read-Manifest([string]$Path) {
   if (-not (Test-Path $Path)) { Stop-WithError (T "Manifest not found: {0}" $Path) }
@@ -335,7 +346,11 @@ function Read-ManifestBoards($root, $m, $baseDir) {
       if (-not $proj) { $proj = "." }
       # exclude = env name patterns that are not boards (test or tool envs), separated by blanks
       $ex = @("$($_.exclude)" -split '\s+' | Where-Object { $_ })
-      @{ Pattern = "$($_.platformio)"; Exclude = $ex; Project = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $proj)) }
+      $projFull = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $proj))
+      if (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($projFull, "platformio.ini")) -PathType Leaf)) {
+        Stop-WithError (T "<Boards platformio>: no platformio.ini in {0} - project= is relative to the manifest (manifest in src/: project=`"..`")" $projFull)
+      }
+      @{ Pattern = "$($_.platformio)"; Exclude = $ex; Project = $projFull }
     })
   if ($m.Boards.Count -lt 1 -and $m.EnvPatterns.Count -lt 1) { Stop-WithError (T "No <Board> or <Boards platformio=...> entry") }
 }

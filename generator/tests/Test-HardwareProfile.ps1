@@ -98,7 +98,10 @@ function Invoke-Generator([string]$Dir, [string[]]$Arguments, [string]$Manifest 
   $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
   Push-Location $Dir
   try {
-    $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $Generator, "-Manifest", [System.IO.Path]::Combine($Dir, $Manifest)) + @($Arguments)
+    # $Manifest "" = no -Manifest: the generator looks for its default manifest in the current folder ($Dir)
+    $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $Generator)
+    if ($Manifest) { $argList += @("-Manifest", [System.IO.Path]::Combine($Dir, $Manifest)) }
+    $argList += @($Arguments)
     if (@($Arguments) -notcontains "-Language") { $argList += @("-Language", "en") }
     $out = (& $PwshExe @argList 2>&1 | Out-String)
     $code = $LASTEXITCODE
@@ -238,6 +241,45 @@ Add-Test "outputs-stale" (T "Outputs: -Check reports a changed file") {
   Write-Text $conf ((Read-Text $conf) + "<!-- edited -->`n")
   $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 1; Assert-Out $r 'out of date: T\.conf\.xml' "-Check"
   Assert-True ((Read-Text $conf).EndsWith("<!-- edited -->`n")) (T "-Check wrote the file")
+}
+
+# @brief Base project with the manifest and its slot file moved to src/ (paths of the manifest made relative to src/)
+function Copy-BaseManifestInSrc([string]$Name) {
+  $d = Copy-Base $Name
+  $mf = [System.IO.Path]::Combine($d, "HardwareProfile.xml")
+  $t = (Read-Text $mf).Replace('conf="src/', 'conf="').Replace('share="src/', 'share="').Replace('script="src/', 'script="').Replace('header="include/', 'header="../include/')
+  Write-Text ([System.IO.Path]::Combine($d, "src", "HardwareProfile.xml")) $t
+  [System.IO.File]::Delete($mf)
+  Move-Item -LiteralPath ([System.IO.Path]::Combine($d, "HardwareProfile.slots")) -Destination ([System.IO.Path]::Combine($d, "src", "HardwareProfile.slots"))
+  return $d
+}
+
+Add-Test "manifest-src" (T "Manifest: without -Manifest the generator takes src/HardwareProfile.xml, the slot file next to it; two manifests stop") {
+  $d = Copy-BaseManifestInSrc "manifest-src"
+  $before = Read-Text ([System.IO.Path]::Combine($d, "src", "HardwareProfile.slots"))
+  $r = Invoke-Generator $d @() ""; Assert-Exit $r 0
+  # the move changes the output paths of the ETS fingerprint: the version guard warns until the version is raised
+  Assert-Out $r 'ETS content changed since' (T "version guard warning after the move")
+  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "HardwareProfile.slots")))) (T "a slot file was written in the project folder")
+  $after = Read-Text ([System.IO.Path]::Combine($d, "src", "HardwareProfile.slots"))
+  $keep = { param($x) @($x -split "`n" | Where-Object { $_ -match '^(0x[0-9A-Fa-f]{4}|cap|val) ' }) -join "`n" }
+  Assert-True (@((& $keep $before) -split "`n" | Where-Object { $_ -match '^0x' }).Count -eq 3) (T "the slot file holds no board lines to compare")
+  Assert-True ((& $keep $before) -ceq (& $keep $after)) (T "the slot file in src/ lost or changed a bit or board number")
+  Assert-True ((Read-Text ([System.IO.Path]::Combine($d, "include", "T.h"))).Contains("Build-HardwareProfile.ps1")) (T "header output ../include/T.h missing")
+  $r = Invoke-Generator $d @("-Check") ""; Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+  # -Init next to platformio.ini refuses while src/HardwareProfile.xml exists
+  Write-Text ([System.IO.Path]::Combine($d, "platformio.ini")) "[platformio]`n"
+  $r = Invoke-Generator $d @("-Init") ""; Assert-Exit $r 1; Assert-Out $r 'Manifest exists' (T "-Init message")
+  Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "HardwareProfile.xml")))) (T "-Init wrote a second manifest")
+  # <Boards platformio> without project="..": no platformio.ini next to the manifest in src/
+  $mf = [System.IO.Path]::Combine($d, "src", "HardwareProfile.xml")
+  $keepMf = Read-Text $mf
+  Edit-File $mf '</HardwareProfile>' ('  <Boards platformio="tst_*" />' + "`n</HardwareProfile>")
+  $r = Invoke-Generator $d @() ""; Assert-Exit $r 1; Assert-Out $r 'no platformio.ini in' (T "stop message")
+  Write-Text $mf $keepMf
+  # both places: stop
+  Copy-Item -LiteralPath ([System.IO.Path]::Combine($d, "src", "HardwareProfile.xml")) -Destination ([System.IO.Path]::Combine($d, "HardwareProfile.xml"))
+  $r = Invoke-Generator $d @() ""; Assert-Exit $r 1; Assert-Out $r 'Two manifests' (T "stop message")
 }
 
 Add-Test "bits-insert" (T "Bit order: new capability in front, every bit stays") {

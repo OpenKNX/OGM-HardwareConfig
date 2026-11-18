@@ -96,7 +96,13 @@ flowchart LR
 
 **So ist es gedacht**
 
-- Der Generator läuft vor dem OpenKNXproducer (im OAM-Build, z. B. `Build-Release.ps1`).
+- Der Generator läuft vor dem OpenKNXproducer: im Release-Build ruft ihn `Build-Release-Preprocess.ps1` von OGM-Common auf,
+  sobald das OAM ein Manifest hat (OGM-Common README „Hardware Profile“).
+- Manifest: `HardwareProfile.xml` im Projektordner, sonst `src/HardwareProfile.xml` (ohne `-Manifest`; beide zugleich: Abbruch).
+  Die Slot-Datei `HardwareProfile.slots` liegt immer daneben; bei einem Umzug mit `git mv` mitnehmen, nie neu erzeugen lassen
+  (sie hält die Board-Nummern der Port-IDs). Pfade im Manifest gelten relativ zu seinem Ordner, in `src/` also `../include/…`
+  und `<Boards project="..">`. Ein Umzug ändert die Pfade, über die die Versionswache ihren Fingerabdruck bildet: danach warnt
+  sie, bis die ApplicationVersion steigt; bei einer nie ausgelieferten Version stattdessen die `ets`-Zeile der Slot-Datei löschen.
 - Module blenden nur über Feature-Flags ein und aus: `%<p>_SelectRef%`, `%<p>_CAP_<Name>%`, `%<p>_VAL_<Name>_GE_<n>%`.
 - Neue Hardware = neuer Board-Block mit eigener `DEVICE_HW_ID`; Drittanbieter-Hardware zusätzlich mit
   `DEVICE_THIRD_PARTY` (Badge und Hinweis kommen dann von selbst).

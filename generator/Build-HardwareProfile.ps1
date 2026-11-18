@@ -44,7 +44,8 @@ FILEPATH: OGM-HardwareConfig/generator/Build-HardwareProfile.ps1
     DEVICE_HW_ID of a group and a board block to start from.
 
 .PARAMETER Manifest
-    Path of the manifest. Default: HardwareProfile.xml in the current folder.
+    Path of the manifest. Default: HardwareProfile.xml in the current folder, else src/HardwareProfile.xml (both: stop).
+    The slot file (.slots) always sits next to the manifest.
 
 .PARAMETER ListIds
     List all hardware IDs found in OGM-HardwareConfig (no manifest needed) and check for duplicates.
@@ -185,7 +186,7 @@ function Show-Help {
   Write-Host "  pwsh lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 -ListIds [-Markdown] | -NextId <group> | -Init"
   Write-Host ""
   Write-Host (T "OPTIONS:") -ForegroundColor Yellow
-  Write-Host (T "  -Manifest <file>    Manifest of the application (default: HardwareProfile.xml in the current folder)")
+  Write-Host (T "  -Manifest <file>    Manifest of the application (default: HardwareProfile.xml in the current folder, else src/)")
   Write-Host (T "  -Check              Compare every output with the file on disk, write nothing; exit 1 when one is out of date (CI)")
   Write-Host (T "  -Detailed           Full log: manifest, boards with capabilities and values, every output (default: summary)")
   Write-Host (T "  -DryRun             Evaluate and print, write no file")
@@ -201,7 +202,7 @@ function Show-Help {
   Write-Host ""
   Write-Host (T "EXAMPLES:") -ForegroundColor Yellow
   $examples = @(
-    @("Build-HardwareProfile.ps1", (T "reads ./HardwareProfile.xml and writes the files named in it")),
+    @("Build-HardwareProfile.ps1", (T "reads ./HardwareProfile.xml (else src/HardwareProfile.xml) and writes the files named in it")),
     @("Build-HardwareProfile.ps1 -Check", (T "CI: exit 1 when a generated file is out of date")),
     @("Build-HardwareProfile.ps1 -Detailed", (T "full log")),
     @("Build-HardwareProfile.ps1 -ListIds -Markdown", (T "hardware ID table of all boards")),
@@ -269,6 +270,8 @@ try {
   if ($script:CheckMode -and ($ListIds -or $NextId -or $Init -or $DryRun)) { Stop-WithError (T "-Check cannot be combined with -ListIds, -NextId, -Init or -DryRun") }
   if ($ListIds) { Invoke-ListIds }
   if ($NextId) { Invoke-NextId }
+  # no -Manifest: HardwareProfile.xml in the current folder, else src/HardwareProfile.xml (its slot file sits next to it)
+  if (-not $PSBoundParameters.ContainsKey("Manifest")) { $Manifest = Resolve-DefaultManifest }
   if ($Init) { Invoke-Init }
 
   Start-Phase (T "Read the manifest")

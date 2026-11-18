@@ -57,13 +57,10 @@ unter „Module“). Hardwareabhängige Einstellungen nur über Feature-Flags ei
 
 ## 3. Build
 
-Den Generator vor dem OpenKNXproducer aufrufen, z. B. in `scripts/Build-Release.ps1`:
-
-```powershell
-$global:LASTEXITCODE = 0
-& lib/OGM-HardwareConfig/generator/Build-HardwareProfile.ps1 -Manifest HardwareProfile.xml
-if ($global:LASTEXITCODE -ne 0) { Write-Host "Hardware generation failed!" -ForegroundColor Red; exit 1 }
-```
+Mit einem `HardwareProfile.xml` im Projektordner (sonst in `src/`) ruft OGM-Common den Generator im Release-Build selbst
+auf (`Build-Release-Preprocess.ps1`, vor dem OpenKNXproducer, bei `compileWith` = `openknxproducer`, nicht mit `-SkipKnxprod`): kein Aufruf im `scripts/Build-Release.ps1` der OAM nötig.
+Fehlt der Generator in `lib/OGM-HardwareConfig`, bricht der Build ab. Eigene Parameter für den Generator: OGM-Common,
+`doc/Build-and-release-environment.md`.
 
 - `HardwareProfile.xml` und `HardwareProfile.slots` **committen** (die Slot-Datei hält die Parameter-IDs je Board fest).
 - Die übrigen Ausgaben erzeugt der Build. Entweder in die `.gitignore` (wie NeoPixel) oder committen und in der CI
