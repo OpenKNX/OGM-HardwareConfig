@@ -140,6 +140,9 @@ function ${p}_detectHardware(device, online, progress, context) {
     var resp;
     try {
         resp = online.invokeFunctionProperty($FP_OBJECT_INDEX, $FP_PROPERTY_ID, [0]);
+    } catch (e) {
+        // no answer (ETS: timeout): a firmware older than the application does not know the query, or the device is not reachable
+        throw new Error("Keine Antwort auf die Ger${JSAE}teabfrage. Die Firmware des Ger${JSAE}ts ist vermutlich ${JSAE}lter als diese Applikation (sie kennt die Abfrage nicht) oder das Ger${JSAE}t ist nicht erreichbar. Firmware aktualisieren oder den Ger${JSAE}tetyp oben von Hand w${JSAE}hlen. (" + ((e && e.message) ? e.message : e) + ")");
     } finally {
         online.disconnect();
     }

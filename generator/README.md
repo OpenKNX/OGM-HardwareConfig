@@ -1053,8 +1053,10 @@ Button → Function Property **158 / 4** → Antwort (7 Byte + 1 Byte je abgefra
 | 7–10 | Werte (max. 4, ohne `query="false"`, Reihenfolge wie im Manifest) |
 
 ETS setzt damit das Auswahlfeld und meldet Abweichungen zwischen dem erwarteten und dem tatsächlichen
-Profil (z. B. ein Pico W, der ohne WLAN gebaut wurde). Antwortet die Firmware nicht auf 158/4, meldet
-ETS einen Zeitüberlauf. Die Antwort steht fertig im erzeugten Header: `HardwareProfile::answerQuery(objectIndex,
+Profil (z. B. ein Pico W, der ohne WLAN gebaut wurde). Antwortet die Firmware nicht auf 158/4 (eine Firmware, die älter
+als die Applikation ist, kennt die Abfrage nicht), fängt das Skript den Zeitüberlauf von ETS ab und meldet „Keine Antwort auf
+die Geräteabfrage. Die Firmware des Geräts ist vermutlich älter als diese Applikation …“ mit dem Hinweis, die Firmware zu
+aktualisieren oder den Gerätetyp von Hand zu wählen (die Meldung von ETS steht in Klammern dahinter). Die Antwort steht fertig im erzeugten Header: `HardwareProfile::answerQuery(objectIndex,
 propertyId, resultData, resultLength)` schreibt sie und gibt `true` zurück, wenn es die Abfrage war; die Applikation ruft
 sie in `processFunctionProperty` auf. OGM-Common beantwortet 158/2 (nicht unterstützte Module), 158/4 nicht.
 
