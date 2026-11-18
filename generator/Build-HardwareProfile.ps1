@@ -309,3 +309,5 @@ finally {
   Stop-ProgressSpinner
   if (Test-Path $script:TempDir) { Remove-Item -Recurse -Force $script:TempDir -ErrorAction SilentlyContinue }
 }
+# a regular run: exit code 0 for the caller, not the one of the last native call (pio, compiler probe, preprocessor)
+exit 0
