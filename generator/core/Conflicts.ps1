@@ -107,7 +107,7 @@ function Resolve-Conflicts($M, $Boards) {
   for ($i = 0; $i -lt $cf.Uses.Count; $i++) {
     $u = $cf.Uses[$i]
     if ($cf.Channels.Count -eq 0) { $u.FlagNum = "{0:D5}" -f ($cf.Number + $i) }
-    elseif ($u.ContainsKey("Channel")) { $u.FlagNum = "{0:D5}" -f ($cf.Number + 10 * $u.Channel.Group + $u.Channel.N) }
+    elseif ($u.ContainsKey("Channel")) { $u.FlagNum = "{0:D5}" -f ($cf.Number + $cf.ChannelStep * $u.Channel.Group + $u.Channel.N) }
     else { $u.FlagNum = "{0:D5}" -f ($cf.Number + $free); $free++ }
     $u.FlagRef = "%AID%_P-%TT%{0}_R-%TT%{0}01" -f $u.FlagNum
   }
@@ -314,8 +314,9 @@ function New-ConflictsXml($M, $Boards) {
     [void]$sb.AppendLine('  </Block>')
   }
   foreach ($ch in $cf.Channels) {
-    # in a channel template: %C% (channel n) completes the flag number of the n-th use (number + 10 k + n)
-    $ref = "%AID%_P-%TT%{0:D4}%C%_R-%TT%{0:D4}%C%01" -f [int](($cf.Number + 10 * $ch.Index) / 10)
+    # in a channel template: the channel token (channel n, w digits) completes the flag number of the n-th use (number + 10^w k + n)
+    $head = ([string][int](($cf.Number + $cf.ChannelStep * $ch.Index) / $cf.ChannelStep)).PadLeft(5 - $cf.ChannelWidth, '0')
+    $ref = "%AID%_P-%TT%{0}{1}_R-%TT%{0}{1}01" -f $head, $cf.ChannelToken
     [void]$sb.AppendLine(("  <Block name=`"ConflictChannel_{0}`">" -f $ch.Name))
     [void]$sb.AppendLine(("    <ParameterRefRef RefId=`"{0}`" />" -f $ref))
     [void]$sb.AppendLine(("    <choose ParamRefId=`"{0}`">" -f $ref))
@@ -349,9 +350,11 @@ function Get-StaleConflictFiles($M, [string[]]$Outputs) {
   return ,$stale
 }
 # @brief Flag and calculation numbers of <Conflicts> against the IDs of the XML files next to its output (the module that
-#        includes the parts usually sits there): a hit is a warning naming the file. A hint only: %TT% (the module) is not
-#        compared, IDs built with %C% or {{ }} and files in other folders are not seen; files this run writes and parts
-#        files of earlier runs (marker line) are not searched. The application keeps the numbers free in its module.
+#        includes the parts usually sits there): a hit is a warning naming the file. Channel template IDs %TT%%C%nnnn /
+#        %TT%%CC%nnn / %TT%%CCC%nn count for every channel number (channel n = the leading digits of the 5-digit number). A hint
+#        only: %TT% (the module) is not compared, IDs of parts (%PPP+n%) or {{ }} and files in other folders are not seen; files
+#        this run writes and parts files of earlier runs (marker line) are not searched. The application keeps the numbers free
+#        in its module.
 function Test-ConflictNumbers($M, [string[]]$Outputs) {
   $cf = $M.Conflicts
   $flags = @{}
@@ -369,6 +372,16 @@ function Test-ConflictNumbers($M, [string[]]$Outputs) {
       $kind = $mt.Groups[1].Value; $num = $mt.Groups[2].Value
       if ($kind -ne "PC" -and $flags.ContainsKey($num)) { $hits["P-%TT%" + $num + " (flag of " + $flags[$num] + ")"] = $true }
       if ($kind -eq "PC" -and $num -eq $calc) { $hits["PC-%TT%" + $num + " (calculation)"] = $true }
+    }
+    # channel template: %TT% + channel token (w digits) + 5 - w digits; flag f is channel f / 10^(5-w), number f % 10^(5-w)
+    foreach ($mt in [regex]::Matches($text, '_U?P-%TT%%(C{1,3})%(\d+)["_]')) {
+      $w = $mt.Groups[1].Value.Length; $rest = $mt.Groups[2].Value
+      if ($rest.Length -ne 5 - $w) { continue }
+      $div = [int][math]::Pow(10, 5 - $w)
+      foreach ($fn in $flags.Keys) {
+        $fv = [int]$fn; $ch = [math]::Floor($fv / $div)
+        if ($ch -ge 1 -and ($fv % $div) -eq [int]$rest) { $hits[("P-%TT%%{0}%{1} (channel {2} = flag {3} of {4})" -f $mt.Groups[1].Value, $rest, $ch, $fn, $flags[$fn])] = $true }
+      }
     }
     if ($hits.Count -gt 0) {
       Write-Warn (T "<Conflicts number={0}>: {1} uses {2} - if that file is the module that includes the parts, choose another number" $cf.Number $f.Name ((Get-OrdinalSorted @($hits.Keys)) -join ", "))

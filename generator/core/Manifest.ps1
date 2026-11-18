@@ -593,13 +593,17 @@ function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
       if ($fc -and @($m.Capabilities | Where-Object { $_.Name -ceq $fc }).Count -eq 0) { Stop-WithError (T "<Fix name=`"{0}`">: capability {1} is not defined (names are case-sensitive)" $fn $fc) }
       if ($fm -and $fm -cnotmatch '^[A-Za-z_][A-Za-z0-9_]*$') { Stop-WithError (T "<Fix name=`"{0}`">: valueMacro must be a macro name: {1}" $fn $fm) }
       $fr = "$($f.GetAttribute('ref'))"
-      if ($fr -notmatch '^%AID%_(UP|P)-(\d{2})(\d{5})_R-(\d{2})(\d{5})(\d{2})$' -or $Matches[2] -ne $Matches[4] -or $Matches[3] -ne $Matches[5]) {
-        Stop-WithError (T "<Fix name=`"{0}`">: ref must be a ParameterRef id like %AID%_P-1401001_R-140100100 (module digits instead of %TT%), got {1}" $fn $fr)
+      # module digits (%AID%_P-1401001_R-140100100: the shared ParameterRefs block may serve several modules) or producer tokens of
+      # the module, a channel template or a part (%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701: own block Fix_<name>_ParameterRefs)
+      $fid = Split-FilterRef $fr
+      if (-not $fid) {
+        Stop-WithError (T "<Fix name=`"{0}`">: ref must be a ParameterRef id with module digits (%AID%_P-1401001_R-140100100) or producer tokens (%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701), got {1}" $fn $fr)
       }
-      if ($Matches[6] -eq "99") { Stop-WithError (T "<Fix name=`"{0}`">: ref index 99 is used for the read-only row - take the ParameterRef of the setting" $fn) }
+      if ($fid.Suffix -eq "99") { Stop-WithError (T "<Fix name=`"{0}`">: ref index 99 is used for the read-only row - take the ParameterRef of the setting" $fn) }
       if (@($m.Fixes.Items | Where-Object { $_.Ref -ceq $fr }).Count -gt 0) { Stop-WithError (T "<Fix name=`"{0}`">: ref {1} is already fixed by another <Fix>" $fn $fr) }
-      $fParam = "%AID%_{0}-{1}{2}" -f $Matches[1], $Matches[2], $Matches[3]
-      $fRo = "{0}_R-{1}{2}99" -f $fParam, $Matches[2], $Matches[3]
+      $fParam = $fid.Param
+      $fRo = "{0}_R-{1}{2}99" -f $fParam, $fid.Prefix, $fid.Number
+      $fTok = [bool]($fid.Token -or $fid.Prefix.Contains('%'))
       $fv = "$($f.GetAttribute('value'))"
       # value: one raw value for every board; valueMacro: the integer value of the macro per board (boards without it: no fix)
       if ($fm -and $f.HasAttribute('value')) { Stop-WithError (T "<Fix name=`"{0}`">: value and valueMacro exclude each other" $fn) }
@@ -610,7 +614,7 @@ function Read-ManifestFixes($root, $m, $baseDir, $capIndex) {
       if ($fi -and ($fi -notmatch '^\d{1,2}$')) { Stop-WithError (T "<Fix name=`"{0}`">: indent must be a number" $fn) }
       $fh = "$($f.GetAttribute('help'))"
       if ($fh -and $fh -notmatch '^[A-Za-z0-9_-]+$') { Stop-WithError (T "<Fix name=`"{0}`">: help must be a help context name" $fn) }
-      $m.Fixes.Items += @{ Name = $fn; Capability = $fc; Ref = $fr; Param = $fParam; ReadOnlyRef = $fRo; Value = $fv; ValueMacro = $fm; Show = $fs; Indent = $fi; Help = $fh }
+      $m.Fixes.Items += @{ Name = $fn; Capability = $fc; Ref = $fr; Param = $fParam; ReadOnlyRef = $fRo; Tokens = $fTok; Value = $fv; ValueMacro = $fm; Show = $fs; Indent = $fi; Help = $fh }
     }
     if ($m.Fixes.Items.Count -eq 0) { Stop-WithError (T "<Fixes> without <Fix>") }
   }
@@ -804,7 +808,7 @@ function ConvertFrom-ConflictCondition([string]$Text, [hashtable]$Params, [strin
 #        wiredRelay error><Manual ref when/></Use></Conflicts>; board-dependent checks follow in Resolve-Conflicts
 function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
   $w = "<Conflicts>"
-  $allowed = @("output", "number", "value", "error", "reserved", "reservedError", "tpError")
+  $allowed = @("output", "number", "value", "error", "reserved", "reservedError", "tpError", "channelToken")
   foreach ($at in $Node.Attributes) { if ($allowed -cnotcontains $at.Name) { Stop-WithError (T "{0}: attribute {1} is not supported (allowed: {2})" $w $at.Name ($allowed -join ", ")) } }
   if (-not $M.Outputs.ContainsKey("share") -or -not $M.Outputs.ContainsKey("script")) { Stop-WithError (T "<Conflicts> needs <Output share=... script=...> (the check function is part of the generated script)") }
   $out = "$($Node.GetAttribute('output'))"
@@ -886,9 +890,16 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
     $cf.Uses.Add($u)
   }
   if ($cf.Uses.Count -lt 2) { Stop-WithError (T "<Conflicts> needs at least two <Use> entries") }
-  # <ChannelBlock name text uses>: one UI block for a channel template of the OpenKNXproducer (%C% = channel 1..9): the n-th
-  # use of "uses" is channel n; its flag number ends in n, so the block names the flag of its channel through %C%
-  # (the producer substitutes %C% in the included content, not in an op:include xpath)
+  # <ChannelBlock name text uses>: one UI block for a channel template of the OpenKNXproducer: the n-th use of "uses" is channel
+  # n; its flag number ends in n, so the block names the flag of its channel through the channel token (channelToken: %C% =
+  # channel 1..9, default; %CC% = 1..99; %CCC% = 1..999; the producer substitutes it in the included content, not in an
+  # op:include xpath); the token width w sets the step 10^w between the blocks
+  $ct = "$($Node.GetAttribute('channelToken'))"; if (-not $ct) { $ct = "%C%" }
+  if (@("%C%", "%CC%", "%CCC%") -cnotcontains $ct) { Stop-WithError (T "<Conflicts>: channelToken must be %C%, %CC% or %CCC% (the channel number of the producer with 1, 2 or 3 digits)") }
+  $cf.ChannelToken = $ct
+  $cf.ChannelWidth = $ct.Length - 2
+  $cf.ChannelStep = [int][math]::Pow(10, $cf.ChannelWidth)
+  $cMax = $cf.ChannelStep - 1
   $cf.Channels = New-Object System.Collections.Generic.List[object]
   foreach ($cn in $Node.SelectNodes("ChannelBlock")) {
     $cName = $cn.GetAttribute("name")
@@ -896,9 +907,9 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
     if ($cName -notmatch '^[A-Za-z][A-Za-z0-9]*$') { Stop-WithError (T "{0}: name=... is required, alphanumeric" $cw) }
     if (@($cf.Channels | Where-Object { $_.Name -eq $cName }).Count -gt 0) { Stop-WithError (T "{0}: name is used twice" $cw) }
     $cText = ($cn.GetAttribute("text") -replace '\s+', ' ').Trim()
-    if (-not $cText) { Stop-WithError (T "{0}: needs text=... (e.g. with %C%)" $cw) }
+    if (-not $cText) { Stop-WithError (T "{0}: needs text=... (e.g. with {1})" $cw $ct) }
     $names = @($cn.GetAttribute("uses") -split '\s+' | Where-Object { $_ })
-    if ($names.Count -lt 1 -or $names.Count -gt 9) { Stop-WithError (T "{0}: uses must name 1..9 <Use> entries (channel 1..9, %C% is one digit)" $cw) }
+    if ($names.Count -lt 1 -or $names.Count -gt $cMax) { Stop-WithError (T "{0}: uses must name 1..{1} <Use> entries (channel 1..{1}, {2} has {3} digit(s))" $cw $cMax $ct $cf.ChannelWidth) }
     $ch = @{ Name = $cName; Text = $cText; Index = $cf.Channels.Count + 1; Uses = @() }
     for ($n = 0; $n -lt $names.Count; $n++) {
       $hit = @($cf.Uses | Where-Object { $_.Name -eq $names[$n] })
@@ -919,11 +930,12 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
     $cf.Channels.Add($ch)
   }
   if ($cf.Channels.Count -gt 0) {
-    # flag numbers: uses outside a channel block number + 0..9, channel block k use n number + 10 k + n
-    if ($cf.Number % 10 -ne 0) { Stop-WithError (T "<Conflicts>: number must be a multiple of 10 with <ChannelBlock> (flag number of channel n ends in n), not {0}" $cf.Number) }
+    # flag numbers (step s = 10^w): uses outside a channel block number + 0..s-1, channel block k use n number + s k + n
+    $st = $cf.ChannelStep
+    if ($cf.Number % $st -ne 0) { Stop-WithError (T "<Conflicts>: number must be a multiple of {1} with <ChannelBlock> and channelToken {2} (flag number of channel n ends in n), not {0}" $cf.Number $st $ct) }
     $free = @($cf.Uses | Where-Object { -not $_.ContainsKey("Channel") }).Count
-    if ($free -gt 10) { Stop-WithError (T "<Conflicts>: with <ChannelBlock> at most 10 <Use> entries outside a channel block (number + 0..9), not {0}" $free) }
-    if ($cf.Channels.Count -gt 9 -or $cf.Number + 10 * $cf.Channels.Count + 9 -gt 99999) { Stop-WithError (T "<Conflicts>: at most 9 <ChannelBlock> entries, and number + 10 x blocks + 9 must stay within 99999") }
+    if ($free -gt $st) { Stop-WithError (T "<Conflicts>: with <ChannelBlock> at most {1} <Use> entries outside a channel block (number + 0..{2}), not {0}" $free $st ($st - 1)) }
+    if ($cf.Channels.Count -gt 9 -or $cf.Number + $st * $cf.Channels.Count + $st - 1 -gt 99999) { Stop-WithError (T "<Conflicts>: at most 9 <ChannelBlock> entries, and number + {0} x blocks + {1} must stay within 99999" $st ($st - 1)) }
   }
   if ($cf.Channels.Count -eq 0 -and $cf.Number + $cf.Uses.Count - 1 -gt 99999) { Stop-WithError (T "<Conflicts>: number {0} + {1} flags exceeds 99999" $cf.Number $cf.Uses.Count) }
   return $cf

@@ -327,7 +327,12 @@ einen festen Wert:
 </Fixes>
 ```
 
-- `ref`: ParameterRef der Einstellung mit den Ziffern des Moduls statt `%TT%`; `value`: der Rohwert.
+- `ref`: ParameterRef der Einstellung, entweder mit den Ziffern des Moduls statt `%TT%` (`%AID%_P-1401001_R-140100100`: die
+  schreibgeschützte Zeile steht im gemeinsamen Block `ParameterRefs`, den ein beliebiges Modul einbindet) oder mit den Tokens
+  des Producers, auch einer Kanal-Vorlage oder eines Bausteins (`%AID%_UP-%TT%%CC%001_R-%TT%%CC%00101`, `%PPP+3%`): dann steht
+  die schreibgeschützte Zeile (Ref-Endung `99`) im eigenen Block `Fix_<name>_ParameterRefs`, den das Produkt in die
+  ParameterRefs derselben Vorlage bzw. desselben Bausteins einbindet, und `Fix_<name>` gilt dort für jeden Kanal bzw. jede
+  Instanz (Demo: „Betriebsart“ der Kanal-Vorlage). `value`: der Rohwert.
 - `valueMacro` statt `value`: der Wert kommt je Board aus diesem Makro des Board-Headers (Präprozessor wie `<Capability expr>`,
   eine ganze Zahl 0..2147483647; ein Name, den nur die Firmware kennt, z. B. `OPENKNX_LEDFUNC_BASE_KNX` aus OGM-Common, bricht
   ab: im Header die Zahl schreiben). Boards ohne das Makro bekommen keinen Fix, Boards mit demselben Wert ein gemeinsames
@@ -389,8 +394,10 @@ Applikation lässt das Modul diese Kopie statt seines eigenen Bausteins laden (b
 ```
 
 - `source`: der Baustein, relativ zum Manifest; `output`: die Kopie (nicht die Quelle, nicht zweimal). Mehrere `<PartRows>`
-  sind erlaubt.
-- `<Row ref>`: wählt eine Zeile über die RefId einer `ParameterRefRef` des Bausteins, so wie sie dort steht (mit `%TT%`).
+  sind erlaubt. Auch eine Kanal-Vorlage geht: das Produkt nennt dann die Kopie als `template=` des `op:define` und bindet ihre
+  Seiten aus der Kopie ein (Demo: `HardwareProfile.channel.gen.xml`, Zeile „Status-LED“ je Kanal).
+- `<Row ref>`: wählt eine Zeile über die RefId einer `ParameterRefRef` des Bausteins, so wie sie dort steht (mit `%TT%`, in
+  einer Vorlage oder einem Baustein mit allen Tokens, z. B. `%AID%_UP-%TT%%CC%003_R-%TT%%CC%00301`).
   Die Zeile ist der `ParameterBlock` mit `Inline="true"`, in dem diese `ParameterRefRef` direkt steht. Abbruch, wenn der
   Baustein keine oder mehr als eine solche `ParameterRefRef` hat, wenn sie nicht direkt in einem Inline-Block steht oder
   wenn zwei `<Row>` dieselbe Zeile treffen: ein geänderter Baustein ergibt so nie still eine falsche Seite.
@@ -718,8 +725,9 @@ Parameter, deren IDs bleiben. Ohne `<Conflicts>` ändert sich keine Ausgabe.
 | Element / Attribut | Bedeutung |
 |---|---|
 | `<Conflicts output>` | Datei mit den Teilen, die die Applikation in **ein** eigenes Modul einbindet (`%TT%` dieses Moduls) |
-| `number` | erste Parameter-Nummer der Flags (`%AID%_P-%TT%<number + i>`, i = Position der `<Use>`; mit `<ChannelBlock>` siehe dort) und Nummer der Berechnung (`%AID%_PC-%TT%<number>`). **Die Applikation hält `number` bis `number` + Anzahl der Flags − 1 (mit `<ChannelBlock>`: bis `number` + 10 × Blöcke + 9) und `PC-%TT%<number>` im einbindenden Modul frei.** Als Hinweis sucht der Generator die Nummern in den XML-Dateien neben `output` (ohne seine eigenen Ausgaben, frühere Teile-Dateien und `*.debug.xml`) und warnt mit dem Dateinamen; er vergleicht `%TT%` nicht (eine Datei eines anderen Moduls kann warnen) und sieht keine IDs mit `%C%` oder `{{ }}` und keine Dateien in anderen Ordnern |
+| `number` | erste Parameter-Nummer der Flags (`%AID%_P-%TT%<number + i>`, i = Position der `<Use>`; mit `<ChannelBlock>` siehe dort) und Nummer der Berechnung (`%AID%_PC-%TT%<number>`). **Die Applikation hält `number` bis `number` + Anzahl der Flags − 1 (mit `<ChannelBlock>`: bis `number` + 10^w × Blöcke + 10^w − 1, w = Stellen von `channelToken`) und `PC-%TT%<number>` im einbindenden Modul frei.** Als Hinweis sucht der Generator die Nummern in den XML-Dateien neben `output` (ohne seine eigenen Ausgaben, frühere Teile-Dateien und `*.debug.xml`) und warnt mit dem Dateinamen; IDs einer Kanal-Vorlage (`%TT%%CC%nnn`, auch `%C%`/`%CCC%`) zählen für jede Kanalnummer (`%TT%%CC%001` trifft Flag 01001); er vergleicht `%TT%` nicht (eine Datei eines anderen Moduls kann warnen) und sieht keine IDs eines Bausteins (`%PPP+n%`) oder mit `{{ }}` und keine Dateien in anderen Ordnern. Eine Vorlage, deren Modul dasselbe `%TT%` hat wie das Modul der Flags, belegt `%TT%<Kanal><Nummer>`: Flags mit `channelToken` dort nicht hineinlegen |
 | `value` | Standard der `<Use value>`: `port` (Standard) oder `gpio` |
+| `channelToken` | Kanal-Token der `<ChannelBlock>`: `%C%` (Standard, Kanal 1..9), `%CC%` (1..99) oder `%CCC%` (1..999); seine Stellenzahl w setzt den Abstand 10^w der Flag-Nummern je Kanalblock (siehe `<ChannelBlock>`). In NeoPixel mit `%CC%` im Viewer geprüft (Konflikt zweier Streifen: Meldung auf beiden Streifen-Seiten, weg nach dem Ändern) |
 | `error` | Fehlertext, `{text}` = Text der Nutzung (höchstens 255 Zeichen); Standard „GPIO-Konflikt: {text} nutzt denselben GPIO wie …“ |
 | `reserved` | `true`: eine Nutzung auf einem GPIO, den das gewählte Board selbst belegt, bekommt Flag 2 bzw. 3, siehe [Reservierte GPIOs](#reservierte-gpios-conflicts-reservedtrue); Standard `false` (Ausgabe wie ohne das Attribut) |
 | `reservedError`, `tpError` | Texte zu Flag 2 (Fehler) und 3 (Information), `{text}` wie bei `error`, höchstens 255 Zeichen; nur mit `reserved="true"` |
@@ -730,7 +738,7 @@ Parameter, deren IDs bleiben. Ohne `<Conflicts>` ändert sich keine Ausgabe.
 | `<Use value>` | `port`: Port-Wert (0..n-1 = Port n des Boards aus seinen angebotenen Ports, `portManualValue`, `portNoneValue`, jeder andere Wert = kein GPIO); `gpio`: der Wert ist der GPIO (0..254, 255 = keiner), z. B. eine GPIO-Rolle |
 | `<Use wiredRelay="n">` | auf Boards mit mindestens n fest verdrahteten Relais (`HW_RELAY_<n>_GPIO`) ist die Nutzung dieses Relais: GPIO fest, **immer** belegt (auch ohne `when`), kein Port-Parameter; auf den übrigen Boards gilt `port` (fehlt `port`, ist sie dort nicht belegt). Hat ein Board mehr feste Relais, als `wiredRelay` nennt, gibt es eine Warnung |
 | `<Manual ref when>` | manueller GPIO bei `portManualValue`: der erste `<Manual>`, dessen `when` gilt; ein `<Manual>` ohne `when` ist der letzte. Wert 255 = kein GPIO. Braucht `value="port"` und `portManualValue` |
-| `<ChannelBlock name text uses>` | ein UI-Block `ConflictChannel_<name>` für eine Kanalvorlage des OpenKNXproducers (`%C%` = Kanal 1..9): die n-te Nutzung in `uses` ist Kanal n; `text` (mit `%C%`) ersetzt `{text}` im Fehlertext der Nutzungen; die Nutzungen eines Blocks brauchen denselben `error` (sonst Abbruch). Der OpenKNXproducer ersetzt `%C%` im eingebundenen Inhalt, nicht im `xpath` eines `op:include` (`Conflict_Strip%C%Data` fände nichts, ohne Meldung). Nummern dann: `number` ein Vielfaches von 10, Nutzungen außerhalb eines Kanalblocks `number` + 0..9 (höchstens 10), Kanalblock k Nutzung n `number` + 10 k + n (höchstens 9 Blöcke); der Block nennt das Flag `%AID%_P-%TT%<(number + 10 k) / 10>%C%_R-…` |
+| `<ChannelBlock name text uses>` | ein UI-Block `ConflictChannel_<name>` für eine Kanalvorlage des OpenKNXproducers (Kanal-Token aus `channelToken`, Standard `%C%` = Kanal 1..9): die n-te Nutzung in `uses` ist Kanal n (höchstens 10^w − 1); `text` (z. B. mit `%C%`) ersetzt `{text}` im Fehlertext der Nutzungen; die Nutzungen eines Blocks brauchen denselben `error` (sonst Abbruch). Der OpenKNXproducer ersetzt das Token im eingebundenen Inhalt, nicht im `xpath` eines `op:include` (`Conflict_Strip%C%Data` fände nichts, ohne Meldung). Nummern dann (s = 10^w): `number` ein Vielfaches von s, Nutzungen außerhalb eines Kanalblocks `number` + 0..s−1 (höchstens s), Kanalblock k Nutzung n `number` + s k + n (höchstens 9 Blöcke); der Block nennt das Flag `%AID%_P-%TT%<(number + s k) / s>`, auf 5 − w Stellen, + Token (`%C%`: `%TT%0091%C%`, `%CC%` mit number 90000: `%TT%901%CC%`). Achtung bei `%CC%`: die Flags `%TT%<k><nn>` dürfen keine IDs einer Kanal-Vorlage desselben Moduls treffen (`%TT%%CC%nnn` = `%TT%01001` …); dafür `number` hoch legen (90000) |
 
 Erzeugte Teile (`output`): ParameterType (`//ApplicationProgram/Static/ParameterTypes/ParameterType`), Blöcke `Parameters`,
 `ParameterRefs`, `Calculation` (in `<ParameterCalculations>`) und je Nutzung `Conflict_<name>` (unter der Auswahl, auf

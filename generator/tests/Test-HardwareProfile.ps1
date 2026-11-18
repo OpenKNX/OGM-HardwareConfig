@@ -326,6 +326,24 @@ Add-Test "fixes-twice" (T "Fixes: the same ref twice stops") {
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'already fixed' (T "stop message")
 }
 
+Add-Test "fixes-tokens" (T "Fixes: ref with tokens of a channel template or part gets its own ParameterRefs block, module digits stay in the shared block") {
+  $d = Copy-Base "fixes-tokens"
+  $tok = '<Fix name="Ch" capability="Lan" ref="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701" value="2" />' +
+         '<Fix name="Sc" capability="Lan" ref="%AID%_UP-%TT%%CC%%PPP+3%_R-%TT%%CC%%PPP+3%01" value="5" />'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">$FixLine$tok</Fixes>`n</HardwareProfile>")
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.fixes.gen.xml"))
+  $shared = $f.Substring($f.IndexOf('<Block name="ParameterRefs">')); $shared = $shared.Substring(0, $shared.IndexOf('</Block>'))
+  Assert-True ($shared.Contains('%AID%_P-1401001_R-140100199') -and -not $shared.Contains('%CC%')) (T "shared block: only the read-only ref with module digits")
+  Assert-True ($f -match '<Block name="Fix_Ch_ParameterRefs">\s*<ParameterRef Id="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05799" RefId="%AID%_UP-%TT%%CC%057" Access="Read" />\s*</Block>') (T "template fix: own ParameterRefs block with the read-only ref 99 missing")
+  Assert-True ($f -match '<Block name="Fix_Sc_ParameterRefs">\s*<ParameterRef Id="%AID%_UP-%TT%%CC%%PPP\+3%_R-%TT%%CC%%PPP\+3%99" RefId="%AID%_UP-%TT%%CC%%PPP\+3%" Access="Read" />') (T "part fix: own ParameterRefs block with the read-only ref 99 missing")
+  Assert-True ($f.Contains('<Assign TargetParamRefRef="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05701" Value="2" />') -and $f.Contains('<Assign TargetParamRefRef="%AID%_UP-%TT%%CC%057_R-%TT%%CC%05799" Value="2" />')) (T "template fix: Assigns of the setting and the read-only row missing")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
+  $d = Copy-Base "fixes-badref"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '</HardwareProfile>' ("  <Fixes output=`"src/T.fixes.gen.xml`">" + $FixLine.Replace('_R-140100100', '_R-140200100') + "</Fixes>`n</HardwareProfile>")
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'or producer tokens' (T "stop message")
+}
+
 # @brief <PartRows> / <Fix valueMacro> test project: base copy with a board header on top of the real ones (labels and values per
 #        board: REG1 LAN+TP 0x1021 = 4129, REG1 LAN 0x1022 = 4130, UP1 Taster 0x1203 = 4611) and a small part file
 function Copy-BaseWithBoardMacros([string]$Name, [string]$ManifestLines) {
@@ -396,6 +414,16 @@ Add-Test "partrows-nohit" (T "PartRows: a selection without a row stops") {
   $d = Copy-BaseWithBoardMacros "partrows-nohit" ($RowsSrc + '<Row ref="%AID%_UP-%TT%00099_R-%TT%0009901" expr="1" /></PartRows>')
   $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'has no ParameterRefRef with this RefId' (T "stop message")
   Assert-True (-not (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, "src", "T.rows.gen.xml")))) (T "a parts file was written")
+}
+
+Add-Test "partrows-tokens" (T "PartRows: a row with tokens of a channel template and a part") {
+  $tr = '%AID%_UP-%TT%%CC%%PPP+2%_R-%TT%%CC%%PPP+2%01'
+  $d = Copy-BaseWithBoardMacros "partrows-tokens" ($RowsSrc + '<Row ref="' + $tr + '" expr="defined(DEVICE_UP1_TAS_4X)" /></PartRows>')
+  Edit-File ([System.IO.Path]::Combine($d, "src", "P.part.xml")) '%AID%_UP-%TT%00021_R-%TT%0002101' $tr
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.rows.gen.xml"))
+  Assert-True ($f -match '<when test="4611">\s*<ParameterBlock[^>]*>\s*<ParameterSeparator[^>]*Text="Row B"[^>]*/>\s*<ParameterRefRef RefId="%AID%_UP-%TT%%CC%%PPP\+2%_R-%TT%%CC%%PPP\+2%01"') (T "row with tokens: board 4611 row missing")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-Out $r 'Check: up to date' "-Check"
 }
 
 Add-Test "partrows-twohits" (T "PartRows: a selection with two rows stops") {
@@ -694,6 +722,33 @@ Add-Test "reserved-serialled-header" (T "Reserved: isReservedGpio of the firmwar
   }
   finally { $ErrorActionPreference = $prev }
 } "cxxstd"
+
+Add-Test "conflicts-channeltoken" (T "Conflicts: <ChannelBlock> with channelToken %C% (default) and %CC% (flag numbers, template ref), wrong token or number stops") {
+  $cb = '    <ChannelBlock name="Ch" text="Kanal {0}" uses="A B" />' + "`n  </Conflicts>"
+  $d = Copy-BaseWithLedBoards "conflicts-ctok1"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  </Conflicts>' ($cb -f '%C%')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.conflicts.gen.xml"))
+  Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%00911"') -and $f.Contains('<Parameter Id="%AID%_P-%TT%00912"') -and $f.Contains('<ParameterRefRef RefId="%AID%_P-%TT%0091%C%_R-%TT%0091%C%01" />')) (T "%C%: flags 911/912 and template ref %TT%0091%C% expected")
+  $d = Copy-BaseWithLedBoards "conflicts-ctok2"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="900" reserved="true" channelToken="%CC%">'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  </Conflicts>' ($cb -f '%CC%')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  $f = Read-Text ([System.IO.Path]::Combine($d, "src", "T.conflicts.gen.xml"))
+  Assert-True ($f.Contains('<Parameter Id="%AID%_P-%TT%01001"') -and $f.Contains('<Parameter Id="%AID%_P-%TT%01002"') -and $f.Contains('<ParameterRefRef RefId="%AID%_P-%TT%010%CC%_R-%TT%010%CC%01" />')) (T "%CC%: flags 1001/1002 and template ref %TT%010%CC% expected")
+  $d = Copy-BaseWithLedBoards "conflicts-ctok3"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="950" reserved="true" channelToken="%CC%">'
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) '  </Conflicts>' ($cb -f '%CC%')
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'must be a multiple of 100' (T "stop message")
+  $d = Copy-BaseWithLedBoards "conflicts-ctok4"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="900" reserved="true" channelToken="%N%">'
+  $r = Invoke-Generator $d @(); Assert-Exit $r 1; Assert-Out $r 'channelToken must be' (T "stop message")
+  # a channel template next to the output: %TT%%CC%001 of channel 1 is the 5-digit number 01001 = flag B of number 1000
+  $d = Copy-BaseWithLedBoards "conflicts-ctok5"
+  Edit-File ([System.IO.Path]::Combine($d, "HardwareProfile.xml")) 'number="900" reserved="true">' 'number="1000" reserved="true">'
+  Write-Text ([System.IO.Path]::Combine($d, "src", "X.templ.xml")) '<KNX><Parameter Id="%AID%_UP-%TT%%CC%001" Name="Ch%C%A" /></KNX>'
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0; Assert-Out $r 'channel 1 = flag 01001 of B' (T "warning on a template id")
+}
 
 Add-Test "init-second" (T "-Init: a second hardware module is refused") {
   $d = [System.IO.Path]::Combine($Work, "init-second")

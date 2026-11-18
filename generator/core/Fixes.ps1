@@ -41,8 +41,9 @@ function Get-FixGroups($M, $Boards, $Fix) {
   return , @($groups.ToArray())
 }
 
-# @brief Parts file of <Fixes>: block ParameterRefs (the read-only rows, into the ParameterRefs of any module) and per <Fix> a
-#        block Fix_<name> that replaces the row of the setting: on boards with the capability (or the value macro) the value is
+# @brief Parts file of <Fixes>: block ParameterRefs (the read-only rows of refs with module digits, into the ParameterRefs of any
+#        module), per <Fix> with producer tokens in ref a block Fix_<name>_ParameterRefs (its read-only row, into the ParameterRefs
+#        of the module, template or part of the setting) and per <Fix> a block Fix_<name> that replaces the row of the setting: on boards with the capability (or the value macro) the value is
 #        assigned and the row is read-only, hidden or editable; otherwise (also not selected) the normal row. show="assign": only
 #        the Assigns, the setting keeps its own row
 function New-FixesXml($M, $Boards) {
@@ -54,9 +55,15 @@ function New-FixesXml($M, $Boards) {
   [void]$sb.AppendLine("  <!-- include: block ParameterRefs into the ParameterRefs of a module, block Fix_<name> in place of the row of the setting -->")
   [void]$sb.AppendLine('  <Block name="ParameterRefs">')
   foreach ($f in $M.Fixes.Items) {
-    if ($f.Show -eq "readonly") { [void]$sb.AppendLine(("    <ParameterRef Id=`"{0}`" RefId=`"{1}`" Access=`"Read`" />" -f $f.ReadOnlyRef, $f.Param)) }
+    if ($f.Show -eq "readonly" -and -not $f.Tokens) { [void]$sb.AppendLine(("    <ParameterRef Id=`"{0}`" RefId=`"{1}`" Access=`"Read`" />" -f $f.ReadOnlyRef, $f.Param)) }
   }
   [void]$sb.AppendLine('  </Block>')
+  foreach ($f in $M.Fixes.Items) {
+    if ($f.Show -ne "readonly" -or -not $f.Tokens) { continue }
+    [void]$sb.AppendLine(("  <Block name=`"Fix_{0}_ParameterRefs`">" -f $f.Name))
+    [void]$sb.AppendLine(("    <ParameterRef Id=`"{0}`" RefId=`"{1}`" Access=`"Read`" />" -f $f.ReadOnlyRef, $f.Param))
+    [void]$sb.AppendLine('  </Block>')
+  }
   foreach ($f in $M.Fixes.Items) {
     $groups = Get-FixGroups $M $Boards $f
     $attrs = ""
