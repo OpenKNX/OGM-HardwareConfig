@@ -80,8 +80,9 @@ $script:ManifestNodes = @{
   PartRows        = @("source output", "Row")
   "PartRows/Row"  = @("ref expr label", "")
   Filters         = @("output", "Filter")
-  Filter          = @("name ref source value number indent", "Allow")
-  "Filter/Allow"  = @("board capability values", "")
+  Filter          = @("name ref source value number slots indent help", "Allow Row")
+  "Filter/Allow"  = @("board capability values except", "")
+  "Filter/Row"    = @("name ref indent help cell", "")
 }
 function Test-ManifestNodes($Node, [string]$File) {
   $spec = $null
@@ -669,9 +670,10 @@ function Read-ManifestPartRows($root, $m, $baseDir) {
 }
 # @brief Read-Manifest: <Filters>: selection lists that offer only the values the selected board allows
 function Read-ManifestFilters($root, $m, $baseDir) {
-  # <Filters output><Filter name ref source value number indent><Allow board|capability values/></Filter></Filters>: the dropdown
-  # of the parameter ref (the carrier, defined in source) offers per board the values of the first matching <Allow> (manifest
-  # order: board define/pattern or capability), else the items up to the manifest <Value> value; absent = no output changes
+  # <Filters output><Filter name ref source number value indent help><Allow board|capability values|except/><Row name ref indent
+  # help cell/></Filter></Filters>: the dropdown of the parameter ref (the carrier, defined in source; ids may hold producer tokens
+  # of a channel template or part) offers per board the values of the first matching <Allow> (manifest order), else the items up
+  # to the manifest <Value> value, else all items; absent = no output changes
   $m.Filters = $null
   $flNodes = @($root.SelectNodes("Filters"))
   if ($flNodes.Count -gt 1) { Stop-WithError (T "<Filters> may appear only once") }
@@ -686,44 +688,71 @@ function Read-ManifestFilters($root, $m, $baseDir) {
     if (@($m.Filters.Items | Where-Object { $_.Name -eq $fn }).Count -gt 0) { Stop-WithError (T "<Filter name=`"{0}`"> is listed twice (names are compared without case)" $fn) }
     $w = "<Filter name=`"$fn`">"
     $fr = "$($f.GetAttribute('ref'))"
-    if ($fr -cnotmatch '^%AID%_(UP|P)-(%TT%|\d{2})(\d{5})_R-(%TT%|\d{2})(\d{5})\d{2}$' -or $Matches[2] -cne $Matches[4] -or $Matches[3] -ne $Matches[5]) {
-      Stop-WithError (T "{0}: ref must be a ParameterRef id like %AID%_UP-%TT%00130_R-%TT%0013001, got {1}" $w $fr)
-    }
-    $kind = $Matches[1]; $tt = $Matches[2]; $pnum = $Matches[3]
+    $id = Split-FilterRef $fr
+    if (-not $id) { Stop-WithError (T "{0}: ref must be a ParameterRef id like %AID%_UP-%TT%00130_R-%TT%0013001 or %AID%_UP-%TT%%CC%057_R-%TT%%CC%05701, got {1}" $w $fr) }
     if (@($m.Filters.Items | Where-Object { $_.Ref -ceq $fr }).Count -gt 0) { Stop-WithError (T "{0}: ref {1} is already filtered by another <Filter>" $w $fr) }
-    $src = "$($f.GetAttribute('source'))"
-    if (-not $src) { Stop-WithError (T "{0}: source=... is missing (the XML file that defines the parameter and its type)" $w) }
-    $srcFull = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $src))
-    if (-not (Test-Path -LiteralPath $srcFull -PathType Leaf)) { Stop-WithError (T "{0}: source not found: {1}" $w $srcFull) }
+    $src = "$($f.GetAttribute('source'))".Trim()
+    if (-not $src) { Stop-WithError (T "{0}: source=... is missing (the XML file(s) that define the parameter and its type)" $w) }
+    $srcFiles = @()
+    foreach ($sf in ($src -split '\s+')) {
+      $full = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($baseDir, $sf))
+      if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { Stop-WithError (T "{0}: source not found: {1}" $w $full) }
+      $srcFiles += @{ Attr = $sf; Full = $full }
+    }
     $fv = "$($f.GetAttribute('value'))"
     if ($fv -and @($m.Values | Where-Object { $_.Name -ceq $fv }).Count -eq 0) { Stop-WithError (T "{0}: value {1} is no <Value> of the manifest (names are case-sensitive)" $w $fv) }
     $fnum = "$($f.GetAttribute('number'))"
-    if ($fnum -notmatch '^\d{1,5}$' -or [int]$fnum -lt 2) { Stop-WithError (T "{0}: number=... must be the first free parameter number 2..99999 of the module (one per value set)" $w) }
+    $num = $null
+    if ($fnum -match '^\d{1,5}$' -and [int]$fnum -ge 1) {
+      if ($id.Token) { Stop-WithError (T "{0}: the parameter number of ref is the token {1} - number=... must be a token too (e.g. %PPP+19%)" $w $id.Number) }
+      if ($fnum.Length -gt $id.Width) { Stop-WithError (T "{0}: number {1} has more digits than the parameter number of ref ({2})" $w $fnum $id.Width) }
+      $num = @{ Token = $null; Base = [int]$fnum }
+    }
+    elseif ($fnum -cmatch '^%([A-Za-z_][A-Za-z0-9_]*)(\+(\d+))?%$') { $num = @{ Token = $Matches[1]; Base = [int]("0" + $Matches[3]) } }
+    if (-not $num) { Stop-WithError (T "{0}: number=... must be the first free parameter number of the module (digits) or a token like %PPP+19% (one per value set)" $w) }
+    # slots: how many lists the ids have room for; a token number (%PPP+19%) lies between the numbers of the next instance: 1
+    $fsl = "$($f.GetAttribute('slots'))"
+    if ($fsl -and $fsl -notmatch '^[1-9]\d{0,3}$') { Stop-WithError (T "{0}: slots must be a number 1..9999" $w) }
+    if ($fsl -and $num.Token -and [int]$fsl -gt 1) { Stop-WithError (T "{0}: slots=`"{1}`" with the token number {2}: the ids of the next instance follow it (%PPP+20% may be the next instance's %PPP+0%) - one list per filter, or a digit number" $w $fsl $fnum) }
+    $slotsMax = $(if ($fsl) { [int]$fsl } elseif ($num.Token) { 1 } else { 0 })
     $fi = "$($f.GetAttribute('indent'))"; if (-not $fi) { $fi = "1" }
     if ($fi -notmatch '^\d{1,2}$') { Stop-WithError (T "{0}: indent must be a number" $w) }
+    $fh = "$($f.GetAttribute('help'))"
+    if ($fh -and $fh -notmatch '^[A-Za-z0-9_-]+$') { Stop-WithError (T "{0}: help must be a help context name" $w) }
     $allows = @()
     foreach ($a in $f.SelectNodes("Allow")) {
-      $ab = "$($a.GetAttribute('board'))"; $ac = "$($a.GetAttribute('capability'))"; $avt = "$($a.GetAttribute('values'))".Trim()
+      $ab = "$($a.GetAttribute('board'))"; $ac = "$($a.GetAttribute('capability'))"
       if ([bool]$ab -eq [bool]$ac) { Stop-WithError (T "{0}: <Allow> needs either board=... (board define, * and ? allowed) or capability=..." $w) }
+      # the rule is the key of its slot line (board:<pattern>): no blanks
+      if ($ab -match '\s') { Stop-WithError (T "{0}: <Allow board=`"{1}`">: a board pattern has no blanks" $w $ab) }
       $aci = -1
       if ($ac) {
         for ($i = 0; $i -lt $m.Capabilities.Count; $i++) { if ($m.Capabilities[$i].Name -ceq $ac) { $aci = $i } }
         if ($aci -lt 0) { Stop-WithError (T "{0}: <Allow capability=`"{1}`">: no such capability (names are case-sensitive)" $w $ac) }
         $ab = "capability " + $ac
       }
-      $vals = @()
-      foreach ($tok in ($avt -split '\s+' | Where-Object { $_ })) {
-        if ($tok -match '^(\d+)-(\d+)$' -and [int]$Matches[1] -le [int]$Matches[2]) { $vals += @([int]$Matches[1]..[int]$Matches[2]) }
-        elseif ($tok -match '^\d+$') { $vals += [int]$tok }
-        else { Stop-WithError (T "{0}: <Allow board=`"{1}`">: values must be numbers or ranges a-b separated by blanks, got '{2}'" $w $ab $tok) }
-      }
-      if ($vals.Count -eq 0) { Stop-WithError (T "{0}: <Allow board=`"{1}`"> without values" $w $ab) }
-      if (@($allows | Where-Object { $_.Board -ceq $ab }).Count -gt 0) { Stop-WithError (T "{0}: <Allow board=`"{1}`"> is listed twice" $w $ab) }
-      $allows += @{ Board = $ab; Capability = $ac; CapIndex = $aci; Values = @($vals | Sort-Object -Unique); Pattern = ($ab -match '[\*\?]') }
+      $hasV = $a.HasAttribute('values'); $hasE = $a.HasAttribute('except')
+      if ($hasV -eq $hasE) { Stop-WithError (T "{0}: <Allow board=`"{1}`"> needs either values=... or except=..." $w $ab) }
+      $attr = $(if ($hasV) { 'values' } else { 'except' })
+      $vals = ConvertFrom-FilterValueList "$($a.GetAttribute($attr))" $baseDir ("{0}: <Allow board=`"{1}`"> {2}" -f $w, $ab, $attr)
+      if ($hasV -and $vals.Count -eq 0) { Stop-WithError (T "{0}: <Allow board=`"{1}`"> without values" $w $ab) }
+      if (@($allows | Where-Object { $_.Board -eq $ab }).Count -gt 0) { Stop-WithError (T "{0}: <Allow board=`"{1}`"> is listed twice" $w $ab) }
+      $allows += @{ Board = $ab; Capability = $ac; CapIndex = $aci; Values = @($vals | Sort-Object -Unique); Except = $hasE; Pattern = ($ab -match '[\*\?]') }
     }
     if (-not $fv -and $allows.Count -eq 0) { Stop-WithError (T "{0}: needs value=... or <Allow> entries (else every board has the full list)" $w) }
-    $item = @{ Name = $fn; Ref = $fr; Kind = $kind; TT = $tt; Param = ("%AID%_{0}-{1}{2}" -f $kind, $tt, $pnum); SourceAttr = $src; Source = $srcFull
-               Value = $fv; Number = [int]$fnum; Indent = $fi; Allows = $allows; SetSlots = @{} }
+    $rows = @()
+    foreach ($r in $f.SelectNodes("Row")) {
+      $rn = "$($r.GetAttribute('name'))"; $rr = "$($r.GetAttribute('ref'))"
+      if ($rn -cnotmatch '^[A-Za-z][A-Za-z0-9]*$') { Stop-WithError (T "{0}: <Row name=`"{1}`">: name must be letters and digits (it names the block Filter_{2}_<name>)" $w $rn $fn) }
+      if (@($rows | Where-Object { $_.Name -ceq $rn }).Count -gt 0) { Stop-WithError (T "{0}: <Row name=`"{1}`"> is listed twice" $w $rn) }
+      $ri = "$($r.GetAttribute('indent'))"; $rh = "$($r.GetAttribute('help'))"; $rc = "$($r.GetAttribute('cell'))"
+      if ($ri -and $ri -notmatch '^\d{1,2}$') { Stop-WithError (T "{0}: <Row name=`"{1}`">: indent must be a number" $w $rn) }
+      if ($rh -and $rh -notmatch '^[A-Za-z0-9_-]+$') { Stop-WithError (T "{0}: <Row name=`"{1}`">: help must be a help context name" $w $rn) }
+      if ($rc -and $rc -notmatch '^(\d+|%[A-Za-z_][A-Za-z0-9_+]*%),(\d+|%[A-Za-z_][A-Za-z0-9_+]*%)$') { Stop-WithError (T "{0}: <Row name=`"{1}`">: cell must be row,column (numbers or producer tokens)" $w $rn) }
+      $rows += @{ Name = $rn; Ref = $rr; Indent = $ri; Help = $rh; Cell = $rc }
+    }
+    $item = @{ Name = $fn; Ref = $fr; Id = $id; Param = $id.Param; Sources = $srcFiles; SourceAttr = $src
+               Value = $fv; Num = $num; Slots = $slotsMax; Indent = $fi; Help = $fh; Allows = $allows; Rows = $rows; SetSlots = @{} }
     Read-FilterSource $item
     # the generated type ids are <carrier type name>F<slot>: two filters on one type would give the same id
     $same = @($m.Filters.Items | Where-Object { $_.Carrier.TypeName -ceq $item.Carrier.TypeName })

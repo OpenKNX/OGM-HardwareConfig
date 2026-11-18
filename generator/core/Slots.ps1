@@ -88,11 +88,11 @@ function Update-BoardSlots($M, $Boards) {
       $bitRec[$kind][$bi] = $Matches[3]
       continue
     }
-    if ($l -match '^\s*filter\s+([A-Za-z][A-Za-z0-9]*)\s+(\d+(?:,\d+)*)\s*=\s*(\d+)\s*$') {
+    if ($l -match '^\s*filter\s+([A-Za-z][A-Za-z0-9]*)\s+((?:board|capability|value):\S+)\s*=\s*(\d+)\s*$') {
       $fName = $Matches[1]; $fKey = $Matches[2]; $fSlot = [int]$Matches[3]
       if (-not $filterRec.ContainsKey($fName)) { $filterRec[$fName] = @{} }
-      if ($filterRec[$fName].ContainsKey($fKey) -and $filterRec[$fName][$fKey] -ne $fSlot) { Stop-WithError (T "Slot file {0}, line {1}: filter {2} values {3} has two slots" $path ($ln + 1) $fName $fKey) }
-      if (@($filterRec[$fName].Keys | Where-Object { $_ -cne $fKey -and $filterRec[$fName][$_] -eq $fSlot }).Count -gt 0) { Stop-WithError (T "Slot file {0}, line {1}: filter {2} slot {3} is used by two value sets - give the newer one the next free slot" $path ($ln + 1) $fName $fSlot) }
+      if ($filterRec[$fName].ContainsKey($fKey) -and $filterRec[$fName][$fKey] -ne $fSlot) { Stop-WithError (T "Slot file {0}, line {1}: filter {2} rule {3} has two slots" $path ($ln + 1) $fName $fKey) }
+      if (@($filterRec[$fName].Keys | Where-Object { $_ -ne $fKey -and $filterRec[$fName][$_] -eq $fSlot }).Count -gt 0) { Stop-WithError (T "Slot file {0}, line {1}: filter {2} slot {3} is used by two rules - give the newer one the next free slot" $path ($ln + 1) $fName $fSlot) }
       $filterRec[$fName][$fKey] = $fSlot
       continue
     }
@@ -118,7 +118,7 @@ function Update-BoardSlots($M, $Boards) {
     }
     else {
       # a line that does not parse would give its board a new slot (all its IDs move)
-      Stop-WithError (T "Slot file {0}, line {1}: '{2}' is no slot line (0x<HW-ID> = <slot> [removed], cap <n> = <Name>, val <n> = <Name>, filter <Name> <v,v,...> = <slot>, ets `"<product xml>`" <version> <fingerprint>)" $path ($ln + 1) $l)
+      Stop-WithError (T "Slot file {0}, line {1}: '{2}' is no slot line (0x<HW-ID> = <slot> [removed], cap <n> = <Name>, val <n> = <Name>, filter <Name> <rule> = <slot>, ets `"<product xml>`" <version> <fingerprint>)" $path ($ln + 1) $l)
     }
   }
   # a merge of two branches can give two boards the same slot -> two parameters with one ID
@@ -154,40 +154,48 @@ function Update-BoardSlots($M, $Boards) {
     }
     for ($i = $recCount; $i -lt $cur[$kind].Count; $i++) { $bitRec[$kind][$i] = $cur[$kind][$i]; $bitsAdded += ("{0} {1} = {2}" -f $kind, $i, $cur[$kind][$i]) }
   }
-  # <Filters>: the value set of every board; a set that is not the full list keeps its recorded slot, a new one the next free
+  # <Filters>: the rule of every board (the <Allow> that matched, or value:<n>); a rule whose list is not the full one keeps its
+  # recorded slot, a new rule takes the next free; the list of a rule may change (an item added) without moving its id
   $filtersAdded = @()
   if ($M.Filters) {
     foreach ($f in $M.Filters.Items) {
       if (-not $filterRec.ContainsKey($f.Name)) { $filterRec[$f.Name] = @{} }
       $rec = $filterRec[$f.Name]
-      $fAll = Get-FilterKey (Get-FilterValues $f)
+      $f.KeySets = @{}; $hitRules = @{}
       $fNext = 0; foreach ($v in $rec.Values) { if ($v -ge $fNext) { $fNext = $v + 1 } }
       foreach ($b in $Boards) {
         if (-not $b.ContainsKey("FilterKeys")) { $b.FilterKeys = @{} }
-        $key = Get-FilterKey (Get-FilterBoardSet $f $b)
-        $b.FilterKeys[$f.Name] = $key
-        if ($key -cne $fAll -and -not $rec.ContainsKey($key)) { $rec[$key] = $fNext; $fNext++; $filtersAdded += ("filter {0} {1}" -f $f.Name, $key) }
+        $ch = Get-FilterBoardChoice $f $b
+        $b.FilterKeys[$f.Name] = $ch.Key
+        if ($ch.Rule) { $hitRules[$ch.Rule] = $true }
+        if (-not $ch.Key) { continue }
+        $f.KeySets[$ch.Key] = $ch.Set
+        if (-not $rec.ContainsKey($ch.Key)) { $rec[$ch.Key] = $fNext; $fNext++; $filtersAdded += ("filter {0} {1}" -f $f.Name, $ch.Key) }
       }
       foreach ($k in $rec.Keys) {
-        if ($f.Number + $rec[$k] -gt 99999) { Stop-WithError (T "<Filter name=`"{0}`">: number {1} + slot {2} is above 99999" $f.Name $f.Number $rec[$k]) }
+        if (-not $f.Num.Token -and ([string]($f.Num.Base + $rec[$k])).Length -gt $f.Id.Width) { Stop-WithError (T "<Filter name=`"{0}`">: number {1} + slot {2} has more digits than the parameter number of ref ({3})" $f.Name $f.Num.Base $rec[$k] $f.Id.Width) }
+        if ($f.Slots -gt 0 -and $rec[$k] -ge $f.Slots) { Stop-WithError (T "<Filter name=`"{0}`">: rule {1} needs slot {2}, slots=`"{3}`" leaves room for {3} list(s) - when it replaces a rule no board uses any more, write its key into that rule's line of the slot file (the id stays); raise slots only where the ids have room (never for a token number)" $f.Name $k $rec[$k] $f.Slots) }
       }
       $f.SetSlots = $rec
+      $orphans = @($rec.Keys | Where-Object { -not $hitRules.ContainsKey($_) } | Sort-Object { $rec[$_] } | ForEach-Object { "{0} = {1}" -f $_, $rec[$_] })
+      if ($orphans.Count -gt 0) { Write-Warn (T "<Filter name=`"{0}`">: rule(s) {1} in the slot file match no board - an edited rule: write its new key into that line (the id stays), else the slot stays reserved" $f.Name ($orphans -join ", ")) }
     }
     # every recorded slot (also of a set no board uses now) owns its parameter id: no overlap with another filter or the source
     $idOwner = @{}
     foreach ($f in $M.Filters.Items) {
       foreach ($k in $f.SetSlots.Keys) {
-        $fpid = "%AID%_P-{0}{1:D5}" -f $f.TT, ($f.Number + $f.SetSlots[$k])
-        if ($idOwner.ContainsKey($fpid)) { Stop-WithError (T "<Filter name=`"{0}`">: parameter {1} (number + slot {2}) is also used by <Filter name=`"{3}`"> - move number so the ranges do not overlap" $f.Name $fpid $f.SetSlots[$k] $idOwner[$fpid]) }
-        if ($f.SourceIds.ContainsKey($fpid)) { Stop-WithError (T "<Filter name=`"{0}`">: parameter {1} (number + slot {2}) already exists in {3} - choose a free number" $f.Name $fpid $f.SetSlots[$k] $f.SourceAttr) }
-        $idOwner[$fpid] = $f.Name
+        $fpid = Get-FilterOwnId $f $f.SetSlots[$k] $f.Id.Prefix
+        $fbody = Get-FilterIdBody $fpid
+        if ($idOwner.ContainsKey($fbody)) { Stop-WithError (T "<Filter name=`"{0}`">: parameter {1} (number + slot {2}) is also used by <Filter name=`"{3}`"> - move number so the ranges do not overlap" $f.Name $fpid $f.SetSlots[$k] $idOwner[$fbody]) }
+        if ($f.SourceBodies.ContainsKey((Get-FilterIdBody $fpid))) { Stop-WithError (T "<Filter name=`"{0}`">: parameter {1} (number + slot {2}) already exists in {3} - choose a free number" $f.Name $fpid $f.SetSlots[$k] $f.SourceAttr) }
+        $idOwner[$fbody] = $f.Name
       }
     }
     # a filter name in the slot file that the manifest no longer has: renamed or removed - its ids may come back under the new name
     $gone = @($filterRec.Keys | Where-Object { $n = $_; @($M.Filters.Items | Where-Object { $_.Name -ceq $n }).Count -eq 0 })
     if ($gone.Count -gt 0) { Write-Warn (T "Slot file {0}: filter(s) {1} are not in the manifest - a renamed filter starts again at slot 0; keep the old name or give it a number range of its own" $path ($gone -join ", ")) }
   }
-  if ($filtersAdded.Count -gt 0) { Write-Warn (T "Filter value set(s) added: {0}" ($filtersAdded -join ", ")) }
+  if ($filtersAdded.Count -gt 0) { Write-Warn (T "Filter rule(s) with an own list added: {0}" ($filtersAdded -join ", ")) }
   # the board list of the ETS product changed (a pattern can do that without a manifest change)
   $hex = { param($list) ($list | ForEach-Object { "0x{0:X4}" -f $_ }) -join ", " }
   if ($added.Count -gt 0) { Write-Warn (T "Board(s) added: {0}" (& $hex $added)) }
@@ -209,7 +217,7 @@ function Update-BoardSlots($M, $Boards) {
     foreach ($i in @($bitRec[$kind].Keys | Sort-Object)) { [void]$out.AppendLine(("{0} {1} = {2}" -f $kind, $i, $bitRec[$kind][$i])) }
   }
   if ($filterRec.Count -gt 0) {
-    [void]$out.AppendLine("# Value sets of <Filters>: the slot is part of the ETS parameter ID of that list; never edit, reuse or remove a line.")
+    [void]$out.AppendLine("# Rules of <Filters> with an own list: the slot is part of the ETS parameter ID of that list; never change, reuse or remove a slot (an edited rule: write its new key into its line).")
     foreach ($fName in @($filterRec.Keys | Sort-Object)) {
       foreach ($k in @($filterRec[$fName].Keys | Sort-Object { $filterRec[$fName][$_] })) { [void]$out.AppendLine(("filter {0} {1} = {2}" -f $fName, $k, $filterRec[$fName][$k])) }
     }

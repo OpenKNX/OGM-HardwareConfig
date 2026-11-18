@@ -195,6 +195,7 @@ function Update-SlotsAndPorts($m, $boards) {
     }
   }
   if ($m.Conflicts) { Resolve-Conflicts $m $boards }
+  if ($m.Conflicts -and $m.Filters) { Test-FilterConflictIds $m }
   return $slotFile
 }
 

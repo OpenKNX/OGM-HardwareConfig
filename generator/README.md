@@ -126,7 +126,7 @@ flowchart LR
 `Build-HardwareProfile.ps1 -SelfTest` (oder `tests/Test-HardwareProfile.ps1`, dort mit `-Only <Muster>`, `-Full`,
 `-KeepWork`) lässt den Generator auf kleinen Test-Manifesten laufen, jedes in einem eigenen Wegwerf-Ordner (das Repo bleibt
 unberührt), und prüft, was er tun und was er ablehnen muss: stabile Ausgaben, Bit-Reihenfolge, Versionswache,
-Manifest-Prüfung, `<Fixes>` (auch Wert aus einem Board-Makro), `<PartRows>` (Zeilen je Board, Label-Gruppen, Abbruch bei keiner Zeile, zwei Zeilen oder ohne Inline-Block), `<Filters>` (Menge je Board aus Define, Muster, Fähigkeit; Texte, Träger, feste Slots; Abbruch bei Wert außerhalb der Liste oder fehlendem Parameter), `-Init`, Sprache (deutsche Tabelle vollständig, Standard Deutsch), ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
+Manifest-Prüfung, `<Fixes>` (auch Wert aus einem Board-Makro), `<PartRows>` (Zeilen je Board, Label-Gruppen, Abbruch bei keiner Zeile, zwei Zeilen oder ohne Inline-Block), `<Filters>` (Menge je Board aus Define, Muster, Fähigkeit; Texte, Träger, feste Slots; Kanal-Vorlage und Baustein mit Tokens, gespiegelte Refs, Zeilen, `except` aus einer Datei; Abbruch bei Wert außerhalb der Liste, fehlendem Parameter, gleichem Typ, überlappenden Nummern, fremder Zeile), `-Init`, Sprache (deutsche Tabelle vollständig, Standard Deutsch), ordinale Sortierung, PNG, `HardwarePorts.h` (mit g++/clang++, sonst übersprungen),
 `-Check` der Demo (mit PlatformIO und den `lib/`-Links der Demo) und mit `-Full` den Update-Test der Demo (mit dem
 OpenKNXproducer). Je Test eine Zeile mit ✓/✗/– und Dauer, am Ende eine Zusammenfassung; Exit-Code 1, wenn ein Test
 scheitert.
@@ -260,7 +260,7 @@ Eigene Fähigkeiten der Applikation (`<Capability>`) trägt der Entwickler danac
 | `<BoardTable name header scan>` | Zahlen-Tabelle je Board im ETS-Skript aus einem Header der OAM, siehe [Board-Tabellen](#board-tabellen-boardtable) |
 | `<Fixes output>` mit `<Fix name capability ref value valueMacro show indent help>` | Einstellung eines anderen Moduls je Fähigkeit oder mit dem Wert eines Board-Makros festlegen, siehe [Einstellungen festlegen](#einstellungen-festlegen-fixes) |
 | `<PartRows source output>` mit `<Row ref expr label>` | Zeilen eines Bausteins (Part) eines anderen Moduls nur auf den Geräten zeigen, die sie haben, mit Label aus dem Board-Header, siehe [Zeilen je Gerät](#zeilen-je-gerät-partrows) |
-| `<Filters output>` mit `<Filter name ref source value number indent>` und `<Allow board capability values>` | eine Auswahlliste je Gerät auf eine beliebige Teilmenge ihrer Einträge beschränken, siehe [Auswahl je Gerät filtern](#auswahl-je-gerät-filtern-filters) |
+| `<Filters output>` mit `<Filter name ref source value number slots indent help>`, `<Allow board capability values except>` und `<Row name ref cell indent help>` | eine Auswahlliste je Gerät auf eine beliebige Teilmenge ihrer Einträge beschränken, siehe [Auswahl je Gerät filtern](#auswahl-je-gerät-filtern-filters) |
 
 ### Board-Tabellen (`<BoardTable>`)
 
@@ -437,22 +437,50 @@ Träger hat Speicher: Firmware, `choose` auf dem Träger und die Konfliktprüfun
 </Filters>
 ```
 
-- `ref`: ParameterRef des Trägers; `source`: die XML-Datei, die den Parameter **und** seinen Typ (`TypeRestriction Base="Value"`
-  mit `<Enumeration>`) definiert. Die Einträge und Texte übernimmt der Generator von dort.
+- `ref`: ParameterRef des Trägers; `source`: eine oder mehrere XML-Dateien (mit Leerzeichen getrennt), die den Parameter, seinen
+  Typ (`TypeRestriction Base="Value"` mit `<Enumeration>`) und seine ParameterRefs definieren. Einträge und Texte übernimmt der
+  Generator vom Typ (Producer-Attribute wie `op:headerName` nicht), jede ParameterRef des Trägers (Endung und Attribute, z. B.
+  `R-…02` mit `Access="Read"`) spiegelt er für die gefilterten Parameter.
 - Menge je Board: die **erste passende** `<Allow>` in Manifest-Reihenfolge (`board` = Define, `*`/`?` erlaubt, oder `capability`);
   ohne Treffer mit `value="<Value>"` die Einträge bis zum Wert des Boards, sonst alle. Genaues vor allgemeinem eintragen,
-  `board="*"` zuletzt. `values`: Zahlen und Bereiche (`"0-2 4"`), nur Werte der Trägerliste.
+  `board="*"` zuletzt. `values`: Zahlen und Bereiche (`"0-2 4"`), nur Werte der Trägerliste; `except`: alle Einträge außer
+  diesen. Beide nehmen mit `@datei` die Werte aus einer Datei (relativ zum Manifest, `#` = Kommentar), z. B. eine Liste, die ein
+  anderes Skript schreibt.
 - Boards mit allen Einträgen und „nicht gewählt“ zeigen den Träger selbst; jede andere Menge ihre Liste (Vorgabe: die des
   Trägers, wenn enthalten, sonst ihr erster Wert); eine Menge mit einem Wert ist schreibgeschützt.
-- Parameter-IDs: `%AID%_P-<TT><number + Slot>`; der Slot jeder Menge steht als `filter <name> <v,v,...> = <Slot>` in der
-  [Slot-Datei](#slot-datei-hardwareprofileslots) und wird nie neu vergeben. `number` = erste freie Nummer des Moduls, Platz für
-  so viele Mengen, wie es geben kann.
+- Parameter-IDs: `%AID%_P-<Präfix><Nummer>`, Präfix wie beim Träger (Modul, auch Producer-Tokens einer Kanal-Vorlage, z. B.
+  `%TT%%CC%`); Nummer = `number` + Slot mit der Stellenzahl des Trägers (`058`) oder ein Token, dessen Offset um den Slot steigt
+  (`%PPP+19%` für einen Baustein mit `op:param`). Der Slot gehört zur **Regel**, nicht zur Wertemenge: `filter <name> <Regel> =
+  <Slot>` in der [Slot-Datei](#slot-datei-hardwareprofileslots), Regel = `board:<Muster>`, `capability:<Name>` oder `value:<n>`;
+  bekommt eine Liste einen Eintrag dazu (z. B. ein neuer Effekt), bleibt ihre Id. Ein Slot wird nie neu vergeben. Schlüssel
+  vergleicht der Generator ohne Groß-/Kleinschreibung; ein Board-Muster hat keine Leerzeichen. `slots="n"` begrenzt die Zahl der
+  Listen, für die die Ids Platz haben (Vorgabe unbegrenzt); eine Token-Nummer hat genau einen Slot (`%PPP+19%` + 1 kann
+  `%PPP+0%` der nächsten Instanz sein), `slots` > 1 bricht dort ab. Eine Regel, die kein Board mehr trifft, meldet eine Warnung
+  und behält ihren Slot; wurde sie nur geändert, ihren neuen Schlüssel in ihre Zeile der Slot-Datei schreiben (die Id bleibt) -
+  bei einer Token-Nummer der einzige Weg, sonst bricht der Lauf mit „slots lässt Platz für 1 Liste" ab. Abbruch auch, wenn eine
+  eigene Id schon in der Quelle steht (auch als `UP-` statt `P-`, `%X+0%` = `%X%`), bei einem anderen Filter oder bei einem
+  Konflikt-Flag von `<Conflicts>`, dessen Bausteindatei die Quelle mit dem Block `Parameters` einbindet (bindet eine andere Datei
+  des Moduls sie ein, meldet erst der Producer die doppelte Id). Eine Regel, deren Liste wieder voll ist, trifft ihre Boards weiter
+  (keine Warnung, der Slot bleibt).
 - Einbinden (Ausgabe `output`): `//ApplicationProgram/Static/ParameterTypes/ParameterType` in die ParameterTypes (der Producer
-  nimmt Typen nur über diesen Pfad), `//Block[@name='Filter_<name>_Parameters']/*` zu den Parametern,
-  `Filter_<name>_ParameterRefs` zu den ParameterRefs, `Filter_<name>` an die Stelle der `ParameterRefRef` des Trägers.
+  nimmt Typen nur über diesen Pfad); `//Block[@name='Filter_<name>_Parameters']/*` und `…_ParameterRefs` in die Datei des
+  Trägers (Modul, Kanal-Vorlage oder Baustein: die Tokens bleiben stehen); `Filter_<name>` an die Stelle der `ParameterRefRef`
+  des Trägers. Ein Baustein, dessen Parameter die Vorlage in eine Union holt (`op:usePart xpath="//Parameters/*"`), legt die
+  gefilterten Parameter (ohne Speicher) in einen eigenen Behälter, z. B. `<FilterParameters>`, und die Vorlage holt diesen
+  außerhalb der Union (`op:usePart xpath="//FilterParameters/*"`).
+- `<Row name ref cell indent help>`: weitere Stellen derselben Auswahl, je ein Block `Filter_<name>_<row>`: eine andere
+  ParameterRef des Trägers (andere Endung) und/oder ein fester Kanal statt der Tokens (`%AID%_UP-%TT%01057_R-%TT%0105702` für
+  Kanal 1 einer Übersichtstabelle), `cell` (auch mit Tokens, z. B. `%CUE_NR%,3`), `indent`, `help`. Eine Zeile mit einer
+  anderen Endung als `ref` hält deren Wert per `<Assign>` gleich (ETS führt einen Wert je ParameterRef).
+- Gemessen in ETS6: ein Wert, den `<Assign>` setzt, löst die Berechnungen (`ParameterCalculation`) des Trägers aus; `choose` auf
+  dem Träger folgt. Eine Berechnung braucht darum nur den Träger als Eingang.
+- Ein ETS-Skript, das den Träger schreibt (Import, Studio), muss auch die gefilterten Listen schreiben (Name des Trägers +
+  `F<Slot>`): sonst kopiert die sichtbare Liste ihren alten Wert per `<Assign>` zurück.
 - App-Update: der Träger behält seinen Wert (gleiche ParameterRef); ein Board mit eigener Liste steht danach auf deren Vorgabe
-  (neue ParameterRef) - in der CHANGELOG des Produkts nennen.
-- Beispiele: [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml) Seite „3 Listen je Hardware“, NeoPixel „Externe Relais“.
+  (neue ParameterRef) - bei ausgelieferten Versionen in der CHANGELOG des Produkts nennen.
+- Beispiele: [Demo](../examples/HardwareProfileDemo/HardwareProfile.xml) Seite „3 Listen je Hardware“; NeoPixel „Externe Relais“
+  (Modul) und die Effektlisten ohne 2D-Effekte (Segment-Vorlage mit Übersichtszeilen, Szenen- und Cue-Baustein,
+  `except="@src/NeoPixel.Effects2D.values"`).
 
 ## Hardware-Seite (Gerätekarte)
 
@@ -937,7 +965,7 @@ Das App-Update selbst übernimmt die Werte über die ParameterRef-Nummer; eingep
 Die GPIO-Parameter haben pro Board eine eigene ETS-ID. Damit ein App-Update die Pinauswahl nicht
 verliert, hängt diese ID nicht am Listenplatz, sondern an einem Slot pro `DEVICE_HW_ID`. Der Generator
 legt neue Slots selbst an und vergibt nie eine Nummer neu. **Die Datei gehört ins Repo.** Erlaubt sind Zeilen
-`0x<HW-ID> = <Slot>` (optional `removed`), `cap <n> = <Name>`, `val <n> = <Name>`, `filter <Name> <v,v,...> = <Slot>` (Mengen von `<Filters>`), `ets "<Produkt-XML>" <Version> <Fingerabdruck>`,
+`0x<HW-ID> = <Slot>` (optional `removed`), `cap <n> = <Name>`, `val <n> = <Name>`, `filter <Name> <Regel> = <Slot>` (Regeln von `<Filters>` mit eigener Liste), `ets "<Produkt-XML>" <Version> <Fingerabdruck>`,
 Kommentare (`#`) und Leerzeilen; jede andere Zeile bricht den Lauf mit Datei, Zeilennummer und Zeile ab (sonst bekäme ihr
 Board einen neuen Slot und alle seine IDs). Der Generator schreibt die Datei in seiner eigenen Form (eigene Kommentare gehen verloren).
 
