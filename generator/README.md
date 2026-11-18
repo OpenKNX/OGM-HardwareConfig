@@ -388,15 +388,17 @@ einen festen Wert:
   die normale Zeile (`show="assign"`: nichts). Die Envs eines Boards müssen denselben Wert ergeben, sonst Abbruch.
 - `show`: `readonly` (Standard, Zeile sichtbar, nicht änderbar; in ETS6 gemessen), `hidden` (keine Zeile; nur für
   Einstellungen ohne Speicher: für einen unsichtbaren Parameter mit Speicher schreibt ETS beim Download den Standardwert,
-  laut ETS-DLLs, nicht gemessen), `editable` (Zeile änderbar, der Wert wird beim Wählen des Boards nur gesetzt; nicht
-  gemessen), `assign` (nur das `<Assign>`, keine Zeile im Block: die Einstellung behält ihre eigene Zeile in ihrem Modul,
+  laut ETS-DLLs, nicht gemessen), `editable` (Zeile änderbar, der Wert wird beim Wählen des Boards gesetzt; in ETS6
+  gemessen, siehe unten), `assign` (nur das `<Assign>`, keine Zeile im Block: die Einstellung behält ihre eigene Zeile in ihrem Modul,
   z. B. in einem Baustein, den der Block nicht ersetzen kann; nicht gemessen). Ohne Auswahl und auf Boards ohne die
   Fähigkeit: die normale Zeile. Zwei `<Fix>` auf dieselbe `ref` brechen ab.
 - Ein `<Assign>` darf laut ETS-Schema nur in einem `<when>` innerhalb eines `ParameterBlock` stehen (direkt unter `Channel`
   lehnt der OpenKNXproducer es ab): den Block also in eine Seite einbinden, z. B. in die Hardware-Seite.
-- Ob ETS einen geänderten Wert einer änderbaren Zeile (`editable`, `assign`) behält oder beim nächsten Auswerten wieder auf
-  den `<Assign>`-Wert setzt, ist nicht gemessen: vor dem Ausliefern in ETS prüfen (Board wählen, Wert ändern, andere Seite,
-  zurück, Download).
+- `editable` in ETS6 gemessen (IP-Interface, Info-LEDs auf REG1, 2026-11-19): beim Wählen des Boards stehen die Werte
+  des `<Fix>`, die Zeile bleibt im Dialog änderbar, ein geänderter Wert bleibt gespeichert (auch nach Seitenwechsel); ein
+  anderes Board ohne den Fix zeigt wieder den eigenen Wert, zurück auf das Board setzt den Fix-Wert neu. Nicht gemessen: ob
+  der Download den geänderten Wert schreibt, und das Verhalten von `assign` mit eigener Zeile: vor dem Ausliefern in ETS
+  prüfen (Board wählen, Wert ändern, andere Seite, zurück, Download).
 - Der Generator schreibt eine Bausteindatei: Block `ParameterRefs` (für `readonly` eine zweite ParameterRef derselben
   Einstellung mit `Access="Read"`, Index 99: `…_R-<TT><nnnnn>99`) in die ParameterRefs eines Moduls einbinden, Block
   `Fix_<name>` an der Stelle der Zeile. Die Applikation nimmt die Originalzeile aus dem Include des Moduls heraus, z. B.
