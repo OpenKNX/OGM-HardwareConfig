@@ -179,6 +179,7 @@
   'device card {0}: {1}x{2} px, QR version {3}-{4} {5} px, caption {6:N1} px: {7}, {8} board(s)' = 'Gerätekarte {0}: {1}x{2} px, QR-Version {3}-{4} {5} px, Beschriftung {6:N1} px: {7}, {8} Board(s)'
   'logo {0} is {1}x{2} px, at most {3}x{4} px (left card column, QR code height)' = 'Logo {0} ist {1}x{2} px, höchstens {3}x{4} px (linke Spalte der Gerätekarte, Höhe des QR-Codes)'
   'badge {0} is {1} px wide, at most {2} px (left card column)' = 'Stempel {0} ist {1} px breit, höchstens {2} px (linke Spalte der Gerätekarte)'
+  '<PartRows source="{0}">: no Static/{1} in the source and no product XML includes block {2} - include it in the {1} of the module, else the producer reports its refs as not defined' = '<PartRows source="{0}">: kein Static/{1} in der Quelle, und keine Produkt-XML bindet Block {2} ein - ihn in die {1} des Moduls einbinden, sonst meldet der Producer seine Refs als nicht definiert'
   'device card {0}.png stands next to QR codes of different size ({1}): padded for the largest' = 'Gerätekarte {0}.png steht neben QR-Codes verschiedener Größe ({1}): für den größten aufgefüllt'
   '0x{0:X4}: env {1} has another HW_INFO_TEXT2 than env {2}' = '0x{0:X4}: env {1} hat einen anderen HW_INFO_TEXT2 als env {2}'
   '0x{0:X4}: env {1} has another HW_INFO_LOGO than env {2}' = '0x{0:X4}: env {1} hat ein anderes HW_INFO_LOGO als env {2}'

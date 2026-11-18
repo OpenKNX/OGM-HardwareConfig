@@ -290,7 +290,7 @@ function New-PartRowsXml($M, $Boards, $Pr) {
     }
     # parameters and refs of the blocks into the Static of the copy, once (used where the product takes the copy as template=;
     # with the copy as Dynamic include only, a module of the same ModuleType includes the blocks instead); types stay with the product
-    $statics = @(@{ Section = "Parameters"; Nodes = @() }, @{ Section = "ParameterRefs"; Nodes = @() })
+    $statics = @(@{ Section = "Parameters"; Nodes = @(); Blocks = @() }, @{ Section = "ParameterRefs"; Nodes = @(); Blocks = @() })
     # a block the source already takes by op:include (xpath naming the block) is not inserted a second time
     $included = { param($blockName) @($doc.SelectNodes("//*[local-name()='include']") | Where-Object { $x = $_.GetAttribute("xpath"); $x.Contains("'" + $blockName + "'") -or $x.Contains('"' + $blockName + '"') }).Count -gt 0 }
     foreach ($bk in @($Pr.Blocks)) {
@@ -304,17 +304,32 @@ function New-PartRowsXml($M, $Boards, $Pr) {
       if ($bk.Kind -ceq "Fix") {
         $fx = @($M.Fixes.Items | Where-Object { $_.Name -ceq $bk.Name })[0]
         # module digits: the read-only ref comes from the shared block ParameterRefs, which the product includes once
-        if ($fx.Show -ceq "readonly" -and $fx.Tokens -and -not (& $included ("Fix_" + $bk.Name + "_ParameterRefs"))) { $statics[1].Nodes += (& $pick ("Fix_" + $bk.Name + "_ParameterRefs") $null) }
+        if ($fx.Show -ceq "readonly" -and $fx.Tokens -and -not (& $included ("Fix_" + $bk.Name + "_ParameterRefs"))) { $statics[1].Nodes += (& $pick ("Fix_" + $bk.Name + "_ParameterRefs") $null); $statics[1].Blocks += ("Fix_" + $bk.Name + "_ParameterRefs") }
       }
       elseif (-not $bk.Row) {
-        if (-not (& $included ("Filter_" + $bk.Name + "_Parameters"))) { $statics[0].Nodes += (& $pick ("Filter_" + $bk.Name + "_Parameters") $null) }
-        if (-not (& $included ("Filter_" + $bk.Name + "_ParameterRefs"))) { $statics[1].Nodes += (& $pick ("Filter_" + $bk.Name + "_ParameterRefs") $null) }
+        if (-not (& $included ("Filter_" + $bk.Name + "_Parameters"))) { $statics[0].Nodes += (& $pick ("Filter_" + $bk.Name + "_Parameters") $null); $statics[0].Blocks += ("Filter_" + $bk.Name + "_Parameters") }
+        if (-not (& $included ("Filter_" + $bk.Name + "_ParameterRefs"))) { $statics[1].Nodes += (& $pick ("Filter_" + $bk.Name + "_ParameterRefs") $null); $statics[1].Blocks += ("Filter_" + $bk.Name + "_ParameterRefs") }
       }
     }
     foreach ($st in $statics) {
       if ($st.Nodes.Count -eq 0) { continue }
       $sec = $doc.SelectSingleNode("//*[local-name()='Static']/*[local-name()='" + $st.Section + "']")
-      if (-not $sec) { continue }
+      if (-not $sec) {
+        # the source has no such section (e.g. an op:part, whose Static the producer does not read): the product includes the
+        # blocks itself (op:include xpath naming the block, e.g. in the share of a second op:define with the same ModuleType);
+        # warn for a block no XML of the product src folder names
+        $mDir = [System.IO.Path]::GetDirectoryName($M.ManifestPath)
+        $srcDir = $mDir; if ([System.IO.Path]::GetFileName($mDir) -cne "src") { $srcDir = [System.IO.Path]::Combine($mDir, "src") }
+        $texts = @()
+        if (Test-Path -LiteralPath $srcDir -PathType Container) {
+          $texts = @(Get-ChildItem -LiteralPath $srcDir -Filter "*.xml" -File -Recurse | Where-Object { $_.Name -notmatch '\.(gen|debug)\.xml$' } | ForEach-Object { [System.IO.File]::ReadAllText($_.FullName) })
+        }
+        foreach ($bn in @($st.Blocks)) {
+          $named = @($texts | Where-Object { $_.Contains("'" + $bn + "'") -or $_.Contains('"' + $bn + '"') }).Count -gt 0
+          if (-not $named) { Write-Warn (T "<PartRows source=`"{0}`">: no Static/{1} in the source and no product XML includes block {2} - include it in the {1} of the module, else the producer reports its refs as not defined" $Pr.SourceAttr $st.Section $bn) }
+        }
+        continue
+      }
       $last = @($sec.ChildNodes | Where-Object { $_.NodeType -eq [System.Xml.XmlNodeType]::Element -or $_.NodeType -eq [System.Xml.XmlNodeType]::Comment }) | Select-Object -Last 1
       $indent = "      "
       if ($last -and $last.PreviousSibling -and $last.PreviousSibling.NodeType -eq [System.Xml.XmlNodeType]::Whitespace) { $indent = $last.PreviousSibling.Value.Substring($last.PreviousSibling.Value.LastIndexOf("`n") + 1) }
