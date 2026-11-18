@@ -311,6 +311,27 @@ Add-Test "manifest-oldname" (T "Manifest: the old name HardwareProfile.xml and t
   $r = Invoke-Generator $d @() ""; Assert-Exit $r 0
 }
 
+Add-Test "board-cache" (T "Board cache: a second run reuses the boards and their warnings; a changed input, -Check and -NoCache read again") {
+  $d = Copy-Base "board-cache"
+  [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::Combine($d, ".pio"))
+  $mf = [System.IO.Path]::Combine($d, "HardwareManifest.xml")
+  # a warning of the board step: <Ports> that matches no board
+  Edit-File $mf '</HardwareManifest>' ('  <Ports board="DEVICE_NOPE_*" use="1" />' + "`n</HardwareManifest>")
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  Assert-NoOut $r 'cache, inputs unchanged' (T "board cache: the first run must read the boards")
+  Assert-Out $r 'matches no board' (T "board cache: warning of the board step")
+  Assert-True (Test-Path -LiteralPath ([System.IO.Path]::Combine($d, ".pio", "hw-profiler", "HardwareManifest.boards.xml"))) (T "board cache: no cache file")
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  Assert-Out $r 'cache, inputs unchanged' (T "board cache: the second run must reuse the boards")
+  Assert-Out $r 'matches no board' (T "board cache: warning of the board step")
+  Assert-Out $r 'unchanged' (T "board cache: the outputs changed")
+  $r = Invoke-Generator $d @("-Check"); Assert-Exit $r 0; Assert-NoOut $r 'cache, inputs unchanged' "-Check"
+  $r = Invoke-Generator $d @("-NoCache"); Assert-Exit $r 0; Assert-NoOut $r 'cache, inputs unchanged' "-NoCache"
+  Edit-File $mf 'text="Own A"' 'text="Own A2"'
+  $r = Invoke-Generator $d @(); Assert-Exit $r 0
+  Assert-NoOut $r 'cache, inputs unchanged' (T "board cache: a changed manifest must read the boards")
+}
+
 Add-Test "bits-insert" (T "Bit order: new capability in front, every bit stays") {
   $d = Copy-Base "bits-insert"; $slots = [System.IO.Path]::Combine($d, "HardwareManifest.slots")
   $before = @((Read-Text $slots) -split "`n" | Where-Object { $_ -match '^(cap|val) ' })

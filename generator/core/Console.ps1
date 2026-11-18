@@ -135,7 +135,8 @@ function Write-Step([string]$Text) {
 function Write-Ok([string]$Text) { if (-not $script:Compact) { Write-Host ("  + " + $Text) -ForegroundColor Green } }
 # @brief Plain log line, only with -Detailed (or -ListIds / -Init / -DryRun)
 function Write-Detail([string]$Text) { if (-not $script:Compact) { Write-Host $Text } }
-function Write-Warn([string]$Text) { Clear-Activity; Write-Host ("  ! " + $Text) -ForegroundColor Yellow; $script:WarningCount++; Resume-ProgressLine }
+# the board step collects its warnings for the board cache ($script:WarnCapture), a cache hit shows them again
+function Write-Warn([string]$Text) { Clear-Activity; Write-Host ("  ! " + $Text) -ForegroundColor Yellow; $script:WarningCount++; if ($null -ne $script:WarnCapture) { [void]$script:WarnCapture.Add($Text) }; Resume-ProgressLine }
 # @brief Core steps of a run: one numbered line per step with a mark and the time, in every mode; the progress line shows the
 #        running step (compact mode). Marks: Get-PhaseMark
 $script:PhaseCount = 7

@@ -11,7 +11,7 @@ FILEPATH: OGM-HardwareConfig/generator/core/Boards.ps1
 
 .DESCRIPTION
     Part of Build-HardwareProfile.ps1, dot-sourced into its script scope (uses its constants and $script: state).
-    Functions: Invoke-BoardTablePreprocessor, Get-BoardTableValues, Split-PioFlagLine, ConvertFrom-PioFlagLine, Get-PioBoardJson, Get-PioMcuName, ConvertTo-PioSections, Get-PlatformIOBoards, Get-VariantPinConstants, Resolve-VariantPin, Resolve-Board, Set-BoardMaps.
+    Functions: Invoke-BoardTablePreprocessor, Get-BoardTableValues, Split-PioFlagLine, ConvertFrom-PioFlagLine, Get-PioBoardJson, Get-PioMcuName, ConvertTo-PioSections, Get-PioCommand, Get-PlatformIOBoards, Get-VariantPinConstants, Resolve-VariantPin, Resolve-Board, Set-BoardMaps.
 
 .NOTES
     AUTHOR : Erkan Colak
@@ -144,6 +144,7 @@ function Get-PioBoardJson([string]$BoardId, [string]$ProjectDir) {
   if (Test-Path -LiteralPath $plat) { $dirs += @(Get-OrdinalSorted @(Get-ChildItem -LiteralPath $plat -Directory) { $_.Name } | ForEach-Object { [System.IO.Path]::Combine($_.FullName, "boards") }) }
   foreach ($d in $dirs) {
     $f = [System.IO.Path]::Combine($d, $BoardId + ".json")
+    Add-BoardCacheInput $f
     if (-not (Test-Path -LiteralPath $f -PathType Leaf)) { continue }
     try {
       $bj = [System.IO.File]::ReadAllText($f) | ConvertFrom-Json
@@ -184,7 +185,9 @@ function ConvertTo-PioSections($Parsed) {
   if ($Parsed -is [array] -and $Parsed.Count -eq 2 -and $Parsed[0] -is [string]) { return , @(, $Parsed) }
   return , @($Parsed)
 }
-function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [string[]]$Exclude = @()) {
+# @brief Path of the PlatformIO command (PATH, else the virtual environment of PlatformIO IDE); stops without one
+function Get-PioCommand {
+  if ($script:PioCommand) { return $script:PioCommand }
   $pio = Get-Command "pio" -ErrorAction SilentlyContinue
   if (-not $pio) { $pio = Get-Command "platformio" -ErrorAction SilentlyContinue }
   if (-not $pio) {
@@ -195,21 +198,12 @@ function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [str
     }
   }
   if (-not $pio) { Stop-WithError (T "<Boards platformio=...> needs PlatformIO: pio in PATH or in <PLATFORMIO_CORE_DIR or ~/.platformio>/penv") }
+  $script:PioCommand = $pio.Source
+  return $script:PioCommand
+}
+function Get-PlatformIOBoards($M, [string]$EnvPattern, [string]$ProjectDir, [string[]]$Exclude = @()) {
   Write-Activity (T "Read the PlatformIO envs (pio project config) ...")
-  $prevEap = $ErrorActionPreference
-  $ErrorActionPreference = "Continue"
-  # the JSON is ASCII (json.dumps escapes every other character), so the console code page does not matter
-  try {
-    $raw = @(& $pio.Source project config --json-output -d $ProjectDir 2>&1)
-    $exitCode = $LASTEXITCODE
-  }
-  finally { $ErrorActionPreference = $prevEap }
-  $json = @($raw | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | ForEach-Object { "$_" })
-  if ($exitCode -ne 0) {
-    $why = (@($raw | ForEach-Object { "$_" }) | Where-Object { $_ } | Select-Object -Last 3) -join " | "
-    Stop-WithError (T "pio project config failed in {0}: {1}" $ProjectDir $why)
-  }
-  $cfg = ConvertTo-PioSections ((@($json) -join "`n") | ConvertFrom-Json)
+  $cfg = ConvertTo-PioSections ((Get-PioProjectConfigText $ProjectDir (Get-PioCommand)) | ConvertFrom-Json)
   $result = @()
   $envTotal = @($cfg | Where-Object { ([string]$_[0]).StartsWith("env:") -and ([string]$_[0]).Substring(4) -like $EnvPattern }).Count
   $envIndex = 0
@@ -328,6 +322,7 @@ function Get-VariantPinConstants([string]$Mcu, [string]$Variant) {
   $key = "$pkg|$Variant"
   if ($script:VariantConsts.ContainsKey($key)) { return $script:VariantConsts[$key] }
   $f = [System.IO.Path]::Combine((Get-PioCoreDir), "packages", $pkg, "variants", $Variant, "pins_arduino.h")
+  Add-BoardCacheInput $f
   if (Test-Path -LiteralPath $f -PathType Leaf) {
     foreach ($l in [System.IO.File]::ReadAllLines($f)) {
       if ($l -match '^\s*static\s+const\s+(?:uint8_t|int|uint16_t|unsigned\s+int)\s+(\w+)\s*=\s*(0[xX][0-9a-fA-F]+|\d+)\s*;') {

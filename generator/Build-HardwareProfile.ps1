@@ -120,6 +120,7 @@ param(
   [switch]$Check,
   [Alias("h")][switch]$Help,
   [switch]$Detailed,
+  [switch]$NoCache,
   [switch]$SelfTest,
   [ValidateSet("de", "en")][string]$Language = "de"
 )
@@ -171,7 +172,7 @@ $CHIP_RESERVED = @{
 
 # the generator itself, one file per area (dot-sourced: same script scope, constants and $script: state above)
 $script:GeneratorDir = $PSScriptRoot
-foreach ($corePart in @("Console", "Text", "Toolchain", "BoardIds", "Manifest", "Boards", "Slots", "AppModule", "AppScript",
+foreach ($corePart in @("Console", "Text", "Toolchain", "BoardIds", "Manifest", "Boards", "BoardCache", "Slots", "AppModule", "AppScript",
                         "Conflicts", "Fixes", "PartRows", "Filters", "ValueNotices", "Header", "Init", "Generate", "Language")) {
   . ([System.IO.Path]::Combine($PSScriptRoot, "core", $corePart + ".ps1"))
 }
@@ -190,6 +191,7 @@ function Show-Help {
   Write-Host (T "  -Check              Compare every output with the file on disk, write nothing; exit 1 when one is out of date (CI)")
   Write-Host (T "  -Detailed           Full log: manifest, boards with capabilities and values, every output (default: summary)")
   Write-Host (T "  -DryRun             Evaluate and print, write no file")
+  Write-Host (T "  -NoCache            Read the boards again even when no input changed (-Check and -Detailed always do)")
   Write-Host (T "  -ListIds            Every DEVICE_HW_ID of OGM-HardwareConfig; stops on a duplicate ID (no manifest needed)")
   Write-Host (T "  -Markdown           With -ListIds: print a Markdown table")
   Write-Host (T "  -NextId <group>     Next free DEVICE_HW_ID of a group (0x21 = 0x2100..0x21FF, 0x213 = 0x2130..0x213F)")
@@ -280,9 +282,31 @@ try {
   Write-Step (T "Manifest: {0} board(s), {1} capabilities, {2} values, {3} GPIO role(s), unselected={4}" $m.Boards.Count $m.Capabilities.Count $m.Values.Count $m.Roles.Count $m.Unselected)
   Complete-Phase (T "{0} capabilities, {1} values" $m.Capabilities.Count $m.Values.Count)
   Start-Phase (T "Find the boards (PlatformIO, board headers)")
-  $found = Get-ProductBoards $m
+  # board cache (.pio/hw-profiler): the step is skipped while none of its inputs changed; -Check, -Detailed and -NoCache read again
+  $cachePath = $null; $cacheKey = $null; $cached = $null
+  if (-not ($script:CheckMode -or $Detailed -or $NoCache)) { $cachePath = Get-BoardCachePath $m.ManifestPath }
+  if ($cachePath) {
+    $cacheKey = Get-BoardCacheKey $m $m.ManifestPath
+    $cached = Read-BoardCache $cachePath $cacheKey
+  }
+  if ($cached) {
+    # the warnings of the step as they were when it ran
+    foreach ($w in $cached.Warnings) { Write-Warn $w }
+    $found = @{ Boards = $cached.Boards; EnvCount = $cached.EnvCount }
+  }
+  else {
+    $script:WarnCapture = New-Object System.Collections.Generic.List[string]
+    $script:BoardCacheInputs = New-Object System.Collections.Generic.List[string]
+    $found = Get-ProductBoards $m
+    $stepWarnings = @($script:WarnCapture)
+    $stepInputs = @($script:BoardCacheInputs)
+    $script:WarnCapture = $null; $script:BoardCacheInputs = $null
+    # -DryRun writes no file, the cache neither
+    if ($cachePath -and -not $DryRun) { Save-BoardCache $cachePath $cacheKey $found $stepWarnings $stepInputs }
+  }
   $boards = $found.Boards; $envCount = $found.EnvCount
-  if ($envCount -gt 0) { Complete-Phase (T "{0} Envs, {1} Boards" $envCount $boards.Count) } else { Complete-Phase (T "{0} Boards" $boards.Count) }
+  $fromCache = ""; if ($cached) { $fromCache = " " + (T "(cache, inputs unchanged)") }
+  if ($envCount -gt 0) { Complete-Phase ((T "{0} Envs, {1} Boards" $envCount $boards.Count) + $fromCache) } else { Complete-Phase ((T "{0} Boards" $boards.Count) + $fromCache) }
   Start-Phase (T "Slot file, port values, conflict check")
   $slotFile = Update-SlotsAndPorts $m $boards
   Complete-Phase

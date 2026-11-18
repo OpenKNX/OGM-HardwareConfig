@@ -167,6 +167,19 @@ Windows PowerShell 5.1 zeigt statt ✓/✗ die Zeichen √/x (Konsolenschrift). 
 dem letzten Schritt davor) erscheinen immer. `-Detailed` zeigt das volle Protokoll (Manifest, Boards mit Fähigkeiten und
 Werten, jede Ausgabe); `-ListIds`, `-Init` und `-DryRun` geben immer alles aus.
 
+### Zwischenspeicher der Boards
+
+Schritt 2 (PlatformIO-Envs und Board-Header, bei NeoPixel 15 s) läuft nur, wenn sich einer seiner Eingänge geändert hat; sonst
+nimmt der Generator das Ergebnis des letzten Laufs (gemessen: NeoPixel 0,8 s, Zeile „(Zwischenspeicher, Eingänge unverändert)“,
+Ausgaben byteweise gleich). Eingänge: Manifest, Slot-Datei, `<Import>`, Generator, jede Datei der Include-Ordner (ohne die
+eigenen Ausgaben), die Header-Ordner der `<BoardTable>`, die Ausgabe von `pio project config`, der `boards`-Ordner des
+Projekts, Pakete und Plattformen von PlatformIO, der Präprozessor, Sprache und Schalter; Board-Manifeste und Arduino-Varianten,
+die der Schritt unter `~/.platformio` liest, prüft er je Datei nach. Verglichen werden Pfad, Größe und Änderungszeit (keine
+Prüfsumme). Ablage: `<Projekt>/.pio/hw-profiler/<Manifest>.boards.xml`, nur wenn das Projekt einen `.pio`-Ordner hat.
+`-Check` (CI), `-Detailed` und `-NoCache` werten immer neu aus, `-DryRun` schreibt keinen Zwischenspeicher. Nicht erkannt wird
+eine Änderung, die Größe und Änderungszeit einer Datei behält (`cp -p`, Entpacken), und ein Header, den ein `<BoardTable>`-Header
+aus einem anderen Ordner einbindet: dann `-NoCache`.
+
 ### Sprache der Ausgabe
 
 `-Language de|en` wählt die Sprache der Konsolenausgabe, ohne Angabe Deutsch; die erzeugten Dateien hängen nicht davon ab.
