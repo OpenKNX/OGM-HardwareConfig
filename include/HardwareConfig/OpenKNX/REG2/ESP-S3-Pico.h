@@ -36,8 +36,6 @@
     #define OKNXHW_REG2_ESPS3PICO_V1_SAVE_INTERRUPT
     // #define OKNHW_HAS_SERIALLED_COLOR
     // #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_ESP_USING_APP_BOARD
     #define OKNXHW_REG2_ESPS3PICO_APP_ETH
 #endif
@@ -53,8 +51,6 @@
     #define OKNXHW_REG2_ESPS3PICO_V1_SAVE_INTERRUPT
     #define OKNHW_HAS_SERIALLED_COLOR
     // #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_ESP_DEVICE_DISPLAY      // Device Display Support
     #define OKNXHW_REG2_ESP_USING_APP_BOARD
     #define OKNXHW_REG2_ESPS3PICO_APP_ETH
@@ -186,8 +182,8 @@
     #define PIN_SDCARD_MOSI (REG2_APP_PIN15)    // Master Out Slave In - GPIO11 SPI1 TX UART1 RTS I2C1 SCL PWM7_B SIO PIO0 PIO1
 #endif
 
-// REG2-ESP-S3-Pico FwF: Device Display Support
-#if defined(OKNXHW_REG2_ESP_DEVICE_DISPLAY) || defined(OKNXHW_REG2_ESP_USING_APP_BOARD)
+// REG2-ESP-S3-Pico FwF: Device Display Support (display front board: display, PCA9557 with buttons and the red/green LEDs)
+#ifdef OKNXHW_REG2_ESP_DEVICE_DISPLAY
     // Default pins for the I2C bus to connect the hardware display
     #ifdef ARDUINO_ARCH_ESP32
         #define OPENKNX_I2C_SCHEDULER // I2C port 1 is owned by OGM-Common's ScheduledWire: PCA9557 LED soft-PWM edges, display and buttons share it

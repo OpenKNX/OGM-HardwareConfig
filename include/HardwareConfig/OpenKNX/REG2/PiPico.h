@@ -114,8 +114,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1   // LED1
-// #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2
-// #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3
 #endif
 
 // REG2-Pi-Pico2 V1 (RP2350)
@@ -127,8 +125,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1   // LED1
-// #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2
-// #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3
 #endif
 
 // REG2-Pi-Pico V1 (Device Display, RP2040)
@@ -140,8 +136,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
 #endif
 
@@ -154,8 +148,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
 #endif
 
@@ -168,8 +160,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
     #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
 #endif
@@ -183,8 +173,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON                 // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                   // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
     #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
 #endif
@@ -198,8 +186,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON                   // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                     // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
     #define OKNXHW_REG2_METER          // Meter Support
     #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
@@ -214,8 +200,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON                   // Common pins for all REG2-Pi-Pico
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1                     // LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_DEVICE_DISPLAY // Device Display Support
     #define OKNXHW_REG2_METER          // Meter Support
     #define OKNXHW_REG2_DEVICE_RTC     // RTC Support
@@ -230,8 +214,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
@@ -245,8 +227,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // #define OKNXHW_REG2_PIPICO_V1_LED2   // LED2 ToDo: Set Device Display Front Control LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED3   // LED3 ToDo: Set Device Display Front Control LED
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
@@ -261,7 +241,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // LED2/LED3 (front-panel LEDs) are enabled centrally in the Device-Display/App-Board block below
+    // front LEDs (INFO1 red, INFO2 green) and INFO3 = GP25 come from the Device-Display block below
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
@@ -276,7 +256,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     //#define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_PIPICO_V1_LED1
-    // LED2/LED3 (front-panel LEDs) are enabled centrally in the Device-Display/App-Board block below
+    // front LEDs (INFO1 red, INFO2 green) and INFO3 = GP25 come from the Device-Display block below
     #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
@@ -295,8 +275,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
 #endif
 
 // REG2-Pi-Pico2 Wi-Fi V1 (RP2350)
@@ -308,8 +286,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
 #endif
 
 // REG2-Pi-Pico Wi-Fi V1 (Device Display, RP2040)
@@ -321,8 +297,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED2
-    // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
 #endif
 
@@ -335,8 +309,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    // #define OKNXHW_REG2_PIPICO_V1_LED2
-    // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
 #endif
 
@@ -349,8 +321,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_DEVICE_RTC
 #endif
@@ -364,8 +334,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_DEVICE_RTC
 #endif
@@ -379,8 +347,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_METER
 #endif
@@ -394,8 +360,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
     #define OKNXHW_REG2_METER
 #endif
@@ -409,8 +373,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
+    #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
 
@@ -423,8 +386,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    //#define OKNXHW_REG2_PIPICO_V1_LED3
+    #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
 
@@ -437,9 +399,8 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
+    #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
 
@@ -452,9 +413,8 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_REG2_PIPICO_V1_COMMON
     #define OKNXHW_REG2_PIPICO_V1_SAVE_INTERRUPT
     #define OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
-    //#define OKNXHW_REG2_PIPICO_V1_LED2
-    // #define OKNXHW_REG2_PIPICO_V1_LED3
     #define OKNXHW_REG2_DEVICE_DISPLAY
+    #define OKNXHW_REG2_USING_APP_BOARD
     #define OKNXHW_REG2_PIPICO_APP_ETH
 #endif
 
@@ -463,8 +423,8 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
  * OpenKNX REG2-Pi-Pico
  */
 
-// REG2-Pi-Pico FwF: Device Display Support
-#if defined(OKNXHW_REG2_DEVICE_DISPLAY) || defined(OKNXHW_REG2_USING_APP_BOARD)
+// REG2-Pi-Pico FwF: Device Display Support (display front board: display, PCA9557 with buttons and the red/green LEDs)
+#ifdef OKNXHW_REG2_DEVICE_DISPLAY
     // Default pins for the I2C bus to connect the hardware display
     #define OPENKNX_I2C_SCHEDULER // I2C1 is owned by OGM-Common's ScheduledWire: PCA9557 LED soft-PWM edges, display and buttons share it
     #define OKNXHW_REG2_HWDISPLAY_I2C_INST openknxScheduledWire // TwoWire object for display + PCA9557 (same bus as OPENKNX_GPIO_WIRE)
@@ -495,13 +455,8 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define FRONT_CTRL_OK     0x106   // PIN 6 (OK / SELECT)
     #define FRONT_CTRL_UP     0x107   // PIN 7 (UP)
 
-    // Front-panel status LEDs sit on this PCA9557 (identical front board on ESP32-S3 and RP2040).
-    #ifdef OKNXHW_REG2_DEVICE_DISPLAY
-        #define OKNXHW_REG2_DD_FRONT_LEDS // with display: INFO1 = red (left), INFO2 = green (right), no INFO3
-    #else
-        #define OKNXHW_REG2_PIPICO_V1_LED2
-        #define OKNXHW_REG2_PIPICO_V1_LED3
-    #endif
+    // Front-panel status LEDs sit on this PCA9557 (identical display front board on ESP32-S3 and RP2040)
+    #define OKNXHW_REG2_DD_FRONT_LEDS // INFO1 = red (left), INFO2 = green (right)
 
     #define OPENKNX_PCA9557_PINS_COUNT 8
     #define OPENKNX_PCA9557_PINS \
@@ -578,6 +533,12 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define INFO1_LED_PIN_ACTIVE_ON HIGH
     #define INFO2_LED_PIN FRONT_CTRL_LED2_G // PCA9557 pin 2 (green, right)
     #define INFO2_LED_PIN_ACTIVE_ON HIGH
+    // Pico / Pico 2: onboard LED GP25 as INFO3 (Pico W / Pico 2 W: the LED sits on the WiFi chip, see OPENKNX_WIFI_LED_PIN)
+    #ifdef OKNXHW_REG2_PIPICO_V1_LED1
+        #define INFO3_LED_PIN 25
+        #define INFO3_LED_PIN_ACTIVE_ON HIGH
+        #define INFO3_LED_LABEL "Pico-LED"
+    #endif
 // REG2-Pi-Pico V1: Info1 LED
 #elif defined(OKNXHW_REG2_PIPICO_V1_LED1)
     #define INFO1_LED_PIN 25 // PiPico Onboard LED
@@ -587,17 +548,6 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 // REG2-Pi-Pico Wifi V1: Info1 LED
 #ifdef OKNXHW_REG2_PIPICO_W_V1_WIFI_LED
     #define OPENKNX_WIFI_LED_PIN LED_BUILTIN // Pico W / Pico 2 W onboard LED at the WiFi chip (pin 64): fixed WiFi state, no info LED, no dimming
-#endif
-
-// REG2-Pi-Pico V1: Info2 LED -> green front LED on PCA9557 (via openknx.gpio, like ESP32-S3 REG2)
-#ifdef OKNXHW_REG2_PIPICO_V1_LED2
-    #define INFO2_LED_PIN FRONT_CTRL_LED2_G // PCA9557 pin 2 (green)
-    #define INFO2_LED_PIN_ACTIVE_ON HIGH
-#endif
-// REG2-Pi-Pico V1: Info3 LED -> red front LED on PCA9557 (via openknx.gpio, like ESP32-S3 REG2)
-#ifdef OKNXHW_REG2_PIPICO_V1_LED3
-    #define INFO3_LED_PIN FRONT_CTRL_LED1_R // PCA9557 pin 1 (red)
-    #define INFO3_LED_PIN_ACTIVE_ON HIGH
 #endif
 
 // REG2-Pi-Pico V1: Interrupt Pin
