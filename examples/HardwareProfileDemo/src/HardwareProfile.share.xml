@@ -16,14 +16,14 @@
             <Enumeration Text="OpenKNXiao V1 KNeoPix ESP32S3" Value="4896" Id="%ENID%" />
             <Enumeration Text="QuinLED Dig-Quad V3 (Ethernet)" Value="8481" Id="%ENID%" />
             <Enumeration Text="AB-SmartHouse Push Buttons for Gira" Value="9216" Id="%ENID%" />
-            <Enumeration Text="Demo Raumcontroller Basic" Value="16128" Id="%ENID%" />
-            <Enumeration Text="Demo Raumcontroller Plus" Value="16129" Id="%ENID%" />
-            <Enumeration Text="Demo Raumcontroller Pro" Value="16130" Id="%ENID%" />
-            <Enumeration Text="Demo Shelly Plus 1" Value="16144" Id="%ENID%" />
-            <Enumeration Text="Demo Shelly Plus 1PM" Value="16145" Id="%ENID%" />
-            <Enumeration Text="Demo Shelly Plus 2PM" Value="16146" Id="%ENID%" />
-            <Enumeration Text="Demo Shelly Plus i4" Value="16147" Id="%ENID%" />
-            <Enumeration Text="Demo Shelly Plug S" Value="16148" Id="%ENID%" />
+            <Enumeration Text="Demo Raumcontroller Basic – Temp./Feuchte" Value="16128" Id="%ENID%" />
+            <Enumeration Text="Demo Raumcontroller Plus – CO2, Lux, 2 Info-LEDs" Value="16129" Id="%ENID%" />
+            <Enumeration Text="Demo Raumcontroller Pro – Präsenz, Steckplatz, Info 3 fest" Value="16130" Id="%ENID%" />
+            <Enumeration Text="Demo Shelly Plus 1 – 1 Relais, WLAN" Value="16144" Id="%ENID%" />
+            <Enumeration Text="Demo Shelly Plus 1PM – 1 Relais, Messung" Value="16145" Id="%ENID%" />
+            <Enumeration Text="Demo Shelly Plus 2PM – 2 Relais, Messung" Value="16146" Id="%ENID%" />
+            <Enumeration Text="Demo Shelly Plus i4 – 4 Eingänge, kein Relais" Value="16147" Id="%ENID%" />
+            <Enumeration Text="Demo Shelly Plug S – Stecker, Messung, Front" Value="16148" Id="%ENID%" />
           </TypeRestriction>
         </ParameterType>
         <ParameterType Id="%AID%_PT-HWPOnOff" Name="HWPOnOff">
@@ -40,13 +40,16 @@
           </TypeRestriction>
         </ParameterType>
         <ParameterType Id="%AID%_PT-HWPLogo" Name="HWPLogo"><TypePicture RefId="%FILE-HWPLogo%" HorizontalAlignment="Left" /></ParameterType>
-        <ParameterType Id="%AID%_PT-HWPBadge" Name="HWPBadge"><TypePicture RefId="%FILE-HWPBadge%" HorizontalAlignment="Left" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPLogo1" Name="HWPLogo1"><TypePicture RefId="%FILE-HWPLogo1%" HorizontalAlignment="Left" /></ParameterType>
+        <ParameterType Id="%AID%_PT-HWPBadge" Name="HWPBadge"><TypePicture RefId="%FILE-HWPBadge%" HorizontalAlignment="Left" /></ParameterType>
+        <ParameterType Id="%AID%_PT-HWPBadgeLogo" Name="HWPBadgeLogo"><TypePicture RefId="%FILE-HWPBadgeLogo%" HorizontalAlignment="Left" /></ParameterType>
+        <ParameterType Id="%AID%_PT-HWPLogo2" Name="HWPLogo2"><TypePicture RefId="%FILE-HWPLogo2%" HorizontalAlignment="Left" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo0" Name="HWPInfo0"><TypePicture RefId="%FILE-HWPInfo0%" HorizontalAlignment="Right" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo9" Name="HWPInfo9"><TypePicture RefId="%FILE-HWPInfo9%" HorizontalAlignment="Right" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPInfo15" Name="HWPInfo15"><TypePicture RefId="%FILE-HWPInfo15%" HorizontalAlignment="Right" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPSteps" Name="HWPSteps"><TypePicture RefId="%FILE-HWPSteps%" HorizontalAlignment="Left" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPPageTitle" Name="HWPPageTitle"><TypeText SizeInBit="2040" /></ParameterType>
+        <ParameterType Id="%AID%_PT-HWPCount" Name="HWPCount"><TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="255" /></ParameterType>
         <ParameterType Id="%AID%_PT-HWPPin1B3" Name="HWPPin1B3">
           <TypeRestriction Base="Value" SizeInBit="8">
             <Enumeration Text="nicht verwendet" Value="255" Id="%ENID%" />
@@ -212,13 +215,16 @@
         </Parameter>
         <Parameter Id="%AID%_P-%TT%00216" Name="SensorModuleFw" ParameterType="%AID%_PT-HWPReported" Text="Firmware" Value="0" />
         <Parameter Id="%AID%_P-%TT%00900" Name="Logo" ParameterType="%AID%_PT-HWPLogo" Text="" Access="Read" Value="" />
+        <Parameter Id="%AID%_P-%TT%00911" Name="Logo1" ParameterType="%AID%_PT-HWPLogo1" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%00901" Name="Badge" ParameterType="%AID%_PT-HWPBadge" Text="" Access="Read" Value="" />
-        <Parameter Id="%AID%_P-%TT%00910" Name="Logo1" ParameterType="%AID%_PT-HWPLogo1" Text="" Access="Read" Value="" />
+        <Parameter Id="%AID%_P-%TT%00905" Name="BadgeLogo" ParameterType="%AID%_PT-HWPBadgeLogo" Text="" Access="Read" Value="" />
+        <Parameter Id="%AID%_P-%TT%00912" Name="Logo2" ParameterType="%AID%_PT-HWPLogo2" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01000" Name="Info0" ParameterType="%AID%_PT-HWPInfo0" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01009" Name="Info9" ParameterType="%AID%_PT-HWPInfo9" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%01015" Name="Info15" ParameterType="%AID%_PT-HWPInfo15" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%00902" Name="Steps" ParameterType="%AID%_PT-HWPSteps" Text="" Access="Read" Value="" />
         <Parameter Id="%AID%_P-%TT%00903" Name="PageTitle" ParameterType="%AID%_PT-HWPPageTitle" Text="" Access="None" Value="Gerät (nicht gewählt)" />
+        <Parameter Id="%AID%_P-%TT%00303" Name="RelaysCount" ParameterType="%AID%_PT-HWPCount" Text="Relays" Access="None" Value="255" />
       </Parameters>
       <ParameterRefs>
         <ParameterRef Id="%AID%_UP-%TT%00001_R-%TT%0000101" RefId="%AID%_UP-%TT%00001" />
@@ -257,13 +263,16 @@
         <ParameterRef Id="%AID%_P-%TT%00116_R-%TT%0011601" RefId="%AID%_P-%TT%00116" />
         <ParameterRef Id="%AID%_P-%TT%00216_R-%TT%0021601" RefId="%AID%_P-%TT%00216" Access="Read" />
         <ParameterRef Id="%AID%_P-%TT%00900_R-%TT%0090001" RefId="%AID%_P-%TT%00900" />
+        <ParameterRef Id="%AID%_P-%TT%00911_R-%TT%0091101" RefId="%AID%_P-%TT%00911" />
         <ParameterRef Id="%AID%_P-%TT%00901_R-%TT%0090101" RefId="%AID%_P-%TT%00901" />
-        <ParameterRef Id="%AID%_P-%TT%00910_R-%TT%0091001" RefId="%AID%_P-%TT%00910" />
+        <ParameterRef Id="%AID%_P-%TT%00905_R-%TT%0090501" RefId="%AID%_P-%TT%00905" />
+        <ParameterRef Id="%AID%_P-%TT%00912_R-%TT%0091201" RefId="%AID%_P-%TT%00912" />
         <ParameterRef Id="%AID%_P-%TT%01000_R-%TT%0100001" RefId="%AID%_P-%TT%01000" />
         <ParameterRef Id="%AID%_P-%TT%01009_R-%TT%0100901" RefId="%AID%_P-%TT%01009" />
         <ParameterRef Id="%AID%_P-%TT%01015_R-%TT%0101501" RefId="%AID%_P-%TT%01015" />
         <ParameterRef Id="%AID%_P-%TT%00902_R-%TT%0090201" RefId="%AID%_P-%TT%00902" />
         <ParameterRef Id="%AID%_P-%TT%00903_R-%TT%0090301" RefId="%AID%_P-%TT%00903" />
+        <ParameterRef Id="%AID%_P-%TT%00303_R-%TT%0030301" RefId="%AID%_P-%TT%00303" />
       </ParameterRefs>
       <ParameterCalculations>
         <ParameterCalculation Id="%AID%_PC-%TT%00903" Language="JavaScript" Name="HWPPageTitle" LRTransformationFunc="HWP_pageTitle" RLTransformationFunc="HWP_pageTitleNone">
@@ -294,106 +303,400 @@
               </ParameterBlock>
             </when>
             <when default="true">
-              <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101"><when test="4129 4130 4402 4611 4880 4896 16128 16130 8481 16144 16145 16146 16147 16148 16129">
-                <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileMark" Inline="true" Layout="Grid">
-                  <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
-                  <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="100%" /></Columns>
-                  <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
-                    <when test="4129 4130 4402 4611 4880 4896 16128 16130"><ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" /></when>
-                    <when test="8481 16144 16145 16146 16147 16148"><ParameterRefRef RefId="%AID%_P-%TT%00901_R-%TT%0090101" Cell="1,1" /></when>
-                    <when test="16129"><ParameterRefRef RefId="%AID%_P-%TT%00910_R-%TT%0091001" Cell="1,1" /></when>
-                  </choose>
-                </ParameterBlock>
-              </when></choose>
               <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
                 <when test="4129">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG1 Basismodul LAN+TP" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), komplett busversorgt, für die Verbindung von KNX und IP." />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-TP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), komplett busversorgt, für die Verbindung von KNX und IP." Cell="1,2" />
+                  </ParameterBlock>
                 </when>
                 <when test="4130">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG1 Basismodul LAN" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-IP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), für die Verbindung von KNX und IP." />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-IP-Reiheneinbaugerät für die 35-mm-Hutschiene mit 10/100Base-T Ethernet (ESP32), für die Verbindung von KNX und IP." Cell="1,2" />
+                  </ParameterBlock>
                 </when>
                 <when test="4402">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG2 PiPico2 V1 WiFi Display RTC" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231)." />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX REG2 mit Raspberry Pi Pico 2 W (RP2350), KNX über TP oder IP über WLAN (je nach Firmware), Klemmleiste mit 7 GPIOs, Gerätedisplay 128×64 (I2C) mit Navigationstasten und zwei Front-LEDs, Echtzeituhr (DS3231)." Cell="1,2" />
+                  </ParameterBlock>
                 </when>
                 <when test="4611">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX UP1 Taster" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-TP-Gerät für 60-mm-UP-Dosen und 55-mm-Programme mit Tastwippen: 4 Taster, 2 RGB-Status-LEDs, erweiterbar um ein zweites 55-mm-Feld (insgesamt 8 Taster, 4 LEDs); 2 Binäreingänge, I2C-Anschluss für Temperatur-/Feuchtesensor." />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX-TP-Gerät für 60-mm-UP-Dosen und 55-mm-Programme mit Tastwippen: 4 Taster, 2 RGB-Status-LEDs, erweiterbar um ein zweites 55-mm-Feld (insgesamt 8 Taster, 4 LEDs); 2 Binäreingänge, I2C-Anschluss für Temperatur-/Feuchtesensor." Cell="1,2" />
+                  </ParameterBlock>
                 </when>
                 <when test="4880">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNXiao V1 KNeoPix RP2350" UIHint="Headline" />
                   <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
                     <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
-                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="71%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="29%" /></Columns>
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX-Controller für adressierbare LED-Streifen auf Basis eines XIAO-Moduls: 8 LED-Ports mit Pegelwandler (TXS0108E), KNX über TP." Cell="1,1" />
-                    <ParameterRefRef RefId="%AID%_P-%TT%01000_R-%TT%0100001" Cell="1,2" />
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="60%" /><Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="20%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX-Controller für adressierbare LED-Streifen auf Basis eines XIAO-Moduls: 8 LED-Ports mit Pegelwandler (TXS0108E), KNX über TP." Cell="1,2" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%01000_R-%TT%0100001" Cell="1,3" />
                   </ParameterBlock>
                 </when>
                 <when test="4896">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNXiao V1 KNeoPix ESP32S3" UIHint="Headline" />
                   <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
                     <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
-                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="71%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="29%" /></Columns>
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX-Controller für adressierbare LED-Streifen auf Basis eines XIAO-Moduls: 8 LED-Ports mit Pegelwandler (TXS0108E), KNX über TP oder IP über WLAN (je nach Firmware-Variante)." Cell="1,1" />
-                    <ParameterRefRef RefId="%AID%_P-%TT%01000_R-%TT%0100001" Cell="1,2" />
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="60%" /><Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="20%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="OpenKNX-Controller für adressierbare LED-Streifen auf Basis eines XIAO-Moduls: 8 LED-Ports mit Pegelwandler (TXS0108E), KNX über TP oder IP über WLAN (je nach Firmware-Variante)." Cell="1,2" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%01000_R-%TT%0100001" Cell="1,3" />
                   </ParameterBlock>
                 </when>
                 <when test="8481">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="QuinLED Dig-Quad V3 (Ethernet)" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /><Row Id="%AID%_PB-nnn_R-2" Name="Row2" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00911_R-%TT%0091101" Cell="1,1" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%00901_R-%TT%0090101" Cell="2,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." Cell="1,2" />
+                  </ParameterBlock>
                 </when>
                 <when test="9216">
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="AB-SmartHouse Push Buttons for Gira" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
-                </when>
-                <when test="16128">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Basic" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo: Raumcontroller mit Temperatur- und Feuchtesensor." />
-                </when>
-                <when test="16129">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Plus" UIHint="Headline" />
                   <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
                     <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
-                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="71%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="29%" /></Columns>
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo: Raumcontroller mit Temperatur/Feuchte, CO2 und Helligkeit, 2 Tasteneingänge und 2 Status-LEDs." Cell="1,1" />
-                    <ParameterRefRef RefId="%AID%_P-%TT%01009_R-%TT%0100901" Cell="1,2" />
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00905_R-%TT%0090501" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." Cell="1,2" />
+                  </ParameterBlock>
+                </when>
+                <when test="16128">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Basic – Temp./Feuchte" UIHint="Headline" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: Temperatur/Feuchte, kein Relais, keine Info-LED. Zeigt: Seite 4 nur Temperatur/Feuchte; Zeitquelle nur keine/KNX-Bus; Kanäle mit voller Liste, ohne „Schaltzustand senden“; keine Info-LED-Zeile." Cell="1,2" />
+                  </ParameterBlock>
+                </when>
+                <when test="16129">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Plus – CO2, Lux, 2 Info-LEDs" UIHint="Headline" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="60%" /><Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="20%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00912_R-%TT%0091201" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: Temp./Feuchte, CO2, Helligkeit, 2 Eingänge, 2 Status-LEDs, Info-LEDs links/rechts. Zeigt: eigenes Logo; Info LEDs: Info 1 Busstatus, Info 2 Zeitstatus (änderbar); Kanäle: Zeile „Status-LED“; kein Relais." Cell="1,2" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%01009_R-%TT%0100901" Cell="1,3" />
                   </ParameterBlock>
                 </when>
                 <when test="16130">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Pro" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
-                </when>
-                <when test="16144">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 1" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
-                </when>
-                <when test="16145">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 1PM" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
-                </when>
-                <when test="16146">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 2PM" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo: 2 Relais (auch als 1 Jalousie), 2 Eingänge, Leistungsmessung, Gerätetemperatur." />
-                </when>
-                <when test="16147">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus i4" UIHint="Headline" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." />
-                </when>
-                <when test="16148">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plug S" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Raumcontroller Pro – Präsenz, Steckplatz, Info 3 fest" UIHint="Headline" />
                   <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
                     <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
-                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="71%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="29%" /></Columns>
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die Einstellungen dieser Applikation sind auf dieses Gerät abgestimmt." Cell="1,1" />
-                    <ParameterRefRef RefId="%AID%_P-%TT%01015_R-%TT%0101501" Cell="1,2" />
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00900_R-%TT%0090001" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: Temp./Feuchte, CO2, Helligkeit, Präsenz, Steckplatz, 4 Eingänge, Info-LEDs links/mitte. Zeigt: Schalter „Steckmodul“; Info LEDs: Info 1 Busstatus, Info 3 fest „Gerätestatus“ (nur lesbar); Modul „Demo-Präsenz“ nur hier; kein Relais." Cell="1,2" />
+                  </ParameterBlock>
+                </when>
+                <when test="16144">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 1 – 1 Relais, WLAN" UIHint="Headline" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00905_R-%TT%0090501" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: 1 Relais (fest an GPIO 26), 1 Eingang, Gerätetemperatur, WLAN. Zeigt: Schaltfunktion ohne Jalousie/Messung; Zeitquelle mit NTP; Kanalfunktion nur nicht genutzt/Schalten; nur Kanal 1 „Schaltzustand senden“." Cell="1,2" />
+                  </ParameterBlock>
+                </when>
+                <when test="16145">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 1PM – 1 Relais, Messung" UIHint="Headline" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00905_R-%TT%0090501" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: 1 Relais, 1 Eingang, Leistungsmessung, Gerätetemperatur, WLAN. Zeigt: Schaltfunktion mit Leistung messen; Betriebsart fest „Leistung messen“ (nur lesbar); Kanalfunktion 0/1/3; nur Kanal 1 „Schaltzustand senden“." Cell="1,2" />
+                  </ParameterBlock>
+                </when>
+                <when test="16146">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus 2PM – 2 Relais, Messung" UIHint="Headline" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00905_R-%TT%0090501" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: 2 Relais (auch 1 Jalousie), 2 Eingänge, Leistungsmessung, Gerätetemperatur, WLAN. Zeigt: Schaltfunktion mit Jalousie; Betriebsart fest „Leistung messen“; Kanal 1 und 2 „Schaltzustand senden“." Cell="1,2" />
+                  </ParameterBlock>
+                </when>
+                <when test="16147">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plus i4 – 4 Eingänge, kein Relais" UIHint="Headline" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="80%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00905_R-%TT%0090501" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: 4 Eingänge, WLAN, kein Relais. Zeigt: Schaltfunktion nur nicht genutzt/„Taster auswerten“; Kanalfunktion nur nicht genutzt/Schalten; keine Zeile „Schaltzustand senden“." Cell="1,2" />
+                  </ParameterBlock>
+                </when>
+                <when test="16148">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Demo Shelly Plug S – Stecker, Messung, Front" UIHint="Headline" />
+                  <ParameterBlock Id="%AID%_PB-nnn" Name="ProfileCard" Inline="true" Layout="Grid">
+                    <Rows><Row Id="%AID%_PB-nnn_R-1" Name="Row1" /></Rows>
+                    <Columns><Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="20%" /><Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="60%" /><Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="20%" /></Columns>
+                    <ParameterRefRef RefId="%AID%_P-%TT%00905_R-%TT%0090501" Cell="1,1" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Hat: 1 Relais (fest an GPIO 4), Leistungsmessung, Gerätetemperatur, Taste/LED-Ring, WLAN. Zeigt: Schaltfunktion Schalten/Leistung messen; Betriebsart fest „Leistung messen“; nur Kanal 1 „Schaltzustand senden“." Cell="1,2" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%01015_R-%TT%0101501" Cell="1,3" />
                   </ParameterBlock>
                 </when>
               </choose>
               <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
                 <when test="4880"><ParameterSeparator Id="%AID%_PS-nnn" Text="Firmware: release_OKNXHW_OPENKNXIAO_KNEOPIX_RP2350_V1" /></when>
                 <when test="4896"><ParameterSeparator Id="%AID%_PS-nnn" Text="Firmware: release_OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1" /></when>
+              </choose>
+              <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
+                <when test="4129">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="4130 8481">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="4402">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="4611">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 2" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: 4" />
+                </when>
+                <when test="4880 4896">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="9216">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 4" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: 2" />
+                </when>
+                <when test="16128">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="16129">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 2" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: 2" />
+                </when>
+                <when test="16130">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 4" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: 4" />
+                </when>
+                <when test="16144">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: 1" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 1" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="16145">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: 1" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 1" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="16146">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: 2" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 2" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="16147">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: 4" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
+                <when test="16148">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionen des Geräts" UIHint="Headline" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="KNX TP: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="LAN: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="WLAN: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Leistungsmessung: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Gerätetemperatur: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Frontbedienung: ja" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="CO2: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Helligkeit: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Präsenz: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Steckmodul Sensor: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Relais: 1" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Binäreingänge: nein" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Status-LEDs: nein" />
+                </when>
               </choose>
               <ParameterSeparator Id="%AID%_PS-nnn" Text="Nach einem Wechsel der Hardware die Kanäle und Werte der Applikation prüfen." UIHint="Information" />
               <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
@@ -403,8 +706,8 @@
                 </when>
               </choose>
               <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
-                <when test="8481 16144 16145 16146 16147 16148">
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Produkt eines Drittanbieters: OpenKNX stellt nur eine kompatible Firmware bereit. Gewährleistung, Support und Produktsicherheit liegen beim Hersteller." UIHint="Information" />
+                <when test="8481 9216 16144 16145 16146 16147 16148">
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="Hardware eines Drittanbieters. OpenKNX ist ein Open-Source-Projekt ohne geschäftliche Verbindung zum Hersteller und liefert nur die Firmware. Gewährleistung, Support und Produktsicherheit liegen beim Hersteller. Nutzung auf eigene Verantwortung." UIHint="Information" />
                 </when>
               </choose>
             </when>
@@ -428,14 +731,22 @@
             <when test="4896"><ParameterRefRef RefId="%AID%_UP-%TT%12001_R-%TT%1200101" IndentLevel="1" /></when>
             <when test="8481"><ParameterRefRef RefId="%AID%_UP-%TT%12007_R-%TT%1200701" IndentLevel="1" /></when>
           </choose>
+          <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
+            <when test="0"><Assign TargetParamRefRef="%AID%_P-%TT%00303_R-%TT%0030301" Value="255" /></when>
+            <when test="4129 4130 4402 4611 4880 4896 8481 9216 16128 16129 16130 16147"><Assign TargetParamRefRef="%AID%_P-%TT%00303_R-%TT%0030301" Value="0" /></when>
+            <when test="16144 16145 16148"><Assign TargetParamRefRef="%AID%_P-%TT%00303_R-%TT%0030301" Value="1" /></when>
+            <when test="16146"><Assign TargetParamRefRef="%AID%_P-%TT%00303_R-%TT%0030301" Value="2" /></when>
+          </choose>
         </ParameterBlock>
       </Channel>
     </Dynamic>
   </ApplicationProgram></ApplicationPrograms>
   <Baggages>
     <Baggage TargetPath="HWPInfo" Name="Logo.png" Id="%FILE-HWPLogo%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
-    <Baggage TargetPath="HWPInfo" Name="Badge.png" Id="%FILE-HWPBadge%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Logo1.png" Id="%FILE-HWPLogo1%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+    <Baggage TargetPath="HWPInfo" Name="Badge.png" Id="%FILE-HWPBadge%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+    <Baggage TargetPath="HWPInfo" Name="BadgeLogo.png" Id="%FILE-HWPBadgeLogo%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+    <Baggage TargetPath="HWPInfo" Name="Logo2.png" Id="%FILE-HWPLogo2%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info0.png" Id="%FILE-HWPInfo0%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info9.png" Id="%FILE-HWPInfo9%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
     <Baggage TargetPath="HWPInfo" Name="Info15.png" Id="%FILE-HWPInfo15%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>

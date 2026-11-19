@@ -67,11 +67,13 @@
        optional texts firmware / changeInfo, third-party notice, developer view (dev, features), help = context help -->
   <Page text="Gerät" icon="memory" help="DEMO-Hardware" dev="src/HardwareProfile.dev.gen.xml"
         features="Tp Lan Wifi PowerMeter Temperature FrontControls TempHum Co2 Lux Presence SensorModule Relays BinaryInputs StatusLeds"
+        cardFeatures="true"
         firmware="Firmware: {env}"
         changeInfo="Nach einem Wechsel der Hardware die Kanäle und Werte der Applikation prüfen." />
-  <Notice when="ThirdParty" title="Produkt eines Drittanbieters: OpenKNX stellt nur eine kompatible Firmware bereit. Gewährleistung, Support und Produktsicherheit liegen beim Hersteller." />
-  <!-- picture above the device card name: OpenKNX logo, third-party badge (DEVICE_THIRD_PARTY) or, per <Logo>, an own picture
-       or none (file=""); logo="" / badge="" on <InfoImage> switch the default off for all boards -->
+  <Notice when="ThirdParty" title="Hardware eines Drittanbieters. OpenKNX ist ein Open-Source-Projekt ohne geschäftliche Verbindung zum Hersteller und liefert nur die Firmware. Gewährleistung, Support und Produktsicherheit liegen beim Hersteller. Nutzung auf eigene Verantwortung." />
+  <!-- left column of the device card: HW_INFO_LOGO or the OpenKNX logo, below it the badge on third-party boards
+       (DEVICE_THIRD_PARTY); per <Logo> an own picture or none (file="", a third-party board then shows the badge in its place);
+       logo="" / badge="" on <InfoImage> switch the default off for all boards -->
   <InfoImage style="card">
     <Logo board="DEVICE_AB_BUT_GIR" file="" />
     <Logo board="DEMO_RAUMCONTROLLER_PLUS" file="src/hw/logo-retro.png" />
@@ -86,11 +88,38 @@
   <ReservedPins macros="KNX_UART_RX_PIN KNX_UART_TX_PIN PROG_BUTTON_PIN PROG_LED_PIN SAVE_INTERRUPT_PIN INFO_LED_PIN INFO1_LED_PIN INFO2_LED_PIN INFO3_LED_PIN OPENKNX_SERIALLED_PIN" />
   <ReservedPins macros="PIN_ETH_SS PIN_ETH_SCK PIN_ETH_MOSI PIN_ETH_MISO PIN_ETH_INT PIN_ETH_RES ETH_PHY_RST ETH_PHY_POWER ETH_PHY_MDC ETH_PHY_MDIO ETH_PHY_CS ETH_PHY_IRQ ETH_PHY_SPI_SCK ETH_PHY_SPI_MISO ETH_PHY_SPI_MOSI" />
   <ReservedPins macros="PIN_SDCARD_SCK PIN_SDCARD_MOSI PIN_SDCARD_MISO PIN_SDCARD_CS PIN_SDCARD_CD I2C_SDA_PIN I2C_SCL_PIN" />
+  <!-- REG1 ControllerESP: RMII Ethernet and USB serial use fixed GPIOs without a driver macro; the board header names them -->
+  <ReservedPins macros="OKNXHW_REG1_ETH_RMII_CLK_PIN OKNXHW_REG1_ETH_RMII_RXD0_PIN OKNXHW_REG1_ETH_RMII_RXD1_PIN OKNXHW_REG1_ETH_RMII_CRS_PIN OKNXHW_REG1_ETH_RMII_TXEN_PIN OKNXHW_REG1_ETH_RMII_TXD0_PIN OKNXHW_REG1_ETH_RMII_TXD1_PIN OKNXHW_REG1_USB_UART_TX_PIN OKNXHW_REG1_USB_UART_RX_PIN" />
   <GpioRole name="Pin" number="1" text="Freier Anschluss" count="2">
     <Pins board="OKNXHW_OPENKNXIAO_*" scan="^OKNXHW_OPENKNXIAO_D(\d+)$" label="D$1" />
     <Pins board="DEVICE_QUINLED_*"    scan="^QUINLED_(Q\d|EXTRA\d)_GPIO$" label="$1" />
     <Pins board="DEVICE_REG1_*"       scan="^REG1_APP_PIN(\d+)$" label="APP-Pin $1" />
   </GpioRole>
+
+  <!-- dropdowns filtered per board (page "3 Listen je Hardware"): the first matching <Allow> wins (board define or pattern, or
+       capability), a board without match gets the items up to value=... or the full list (then the carrier itself is shown) -->
+  <Filters output="src/HardwareProfile.filters.gen.xml">
+    <!-- any subset per board: the Shelly models offer only what their hardware can -->
+    <Filter name="Function" ref="%AID%_P-%TT%00032_R-%TT%0003201" source="src/HardwareProfileDemo.share.xml" number="600">
+      <Allow board="DEMO_SHELLY_PLUS_I4" values="0 5" />
+      <Allow board="DEMO_SHELLY_PLUG_S" values="0 1 4" />
+      <Allow board="DEMO_SHELLY_PLUS_2PM" values="0-4" />
+      <Allow board="DEMO_SHELLY_PLUS_1PM" values="0-2 4" />
+      <Allow board="DEMO_SHELLY_*" values="0-2" />
+    </Filter>
+    <!-- by capability, in this order; board="*" catches every other board -->
+    <Filter name="TimeSource" ref="%AID%_P-%TT%00033_R-%TT%0003301" source="src/HardwareProfileDemo.share.xml" number="650">
+      <Allow capability="Rtc" values="0-3" />
+      <Allow capability="Lan" values="0 1 3" />
+      <Allow capability="Wifi" values="0 1 3" />
+      <Allow board="*" values="0 1" />
+    </Filter>
+    <!-- a list of the channel template (ids with %TT%%CC%): boards with a power meter switch or measure, other Shelly boards only switch -->
+    <Filter name="ChFunction" ref="%AID%_UP-%TT%%CC%002_R-%TT%%CC%00201" source="src/HardwareProfileDemo.Channel.templ.xml src/HardwareProfileDemo.Channel.share.xml" number="010">
+      <Allow capability="PowerMeter" values="0 1 3" />
+      <Allow board="DEMO_SHELLY_*" values="0 1" />
+    </Filter>
+  </Filters>
 
   <!-- port selections per board of the demo module (src/hw/Outputs.xml, values: port number - 1, 10 = manual, 15 = none) -->
   <Generate template="src/hw/Outputs.xml" output="src/HardwareProfile.outputs.gen.xml" />
@@ -129,4 +158,48 @@
     <Use name="Relay1" text="Relais 1" wiredRelay="1" />
     <Use name="Relay2" text="Relais 2" wiredRelay="2" />
   </Conflicts>
+
+  <!-- page "Info LEDs" of OGM-Common per device (<PartRows>): a copy of lib/OGM-Common/src/InfoLed.part.xml in which row "Info <n>"
+       (selected by the RefId of its function parameter) appears only on boards whose header defines the LED; INFO<n>_LED_LABEL of
+       the board header goes into the row text ("Info 1 (links)"). Not selected: the original rows. src/HardwareProfileDemo.xml
+       points %BASE_InfoLedPart% of OGM-Common to the output; INFO_LED_PIN is the old name of INFO1 (OGM-Common defines.h); a board
+       that creates its LEDs in LED_INIT has no INFO<n>_LED_PIN and shows the row with its INFO<n>_LED_LABEL -->
+  <PartRows source="lib/OGM-Common/src/InfoLed.part.xml" output="src/HardwareProfile.infoled.gen.xml">
+    <Row ref="%AID%_UP-%TT%00020_R-%TT%0002001" expr="defined(INFO1_LED_PIN) || defined(INFO_LED_PIN) || defined(INFO1_LED_LABEL)" label="INFO1_LED_LABEL" />
+    <Row ref="%AID%_UP-%TT%00021_R-%TT%0002101" expr="defined(INFO2_LED_PIN) || defined(INFO2_LED_LABEL)" label="INFO2_LED_LABEL" />
+    <Row ref="%AID%_UP-%TT%00022_R-%TT%0002201" expr="defined(INFO3_LED_PIN) || defined(INFO3_LED_LABEL)" label="INFO3_LED_LABEL" />
+    <!-- a setting of another module, fixed inside its own row: the copy shows block Fix_InfoLed3 in place of the function of
+         Info 3 (also in every copy of that row); the read-only row needs its ParameterRef in the module BASE: src/HardwareProfileDemo.xml
+         defines BASEHW with the ModuleType of BASE, its share includes block Fix_InfoLed3_ParameterRefs -->
+    <Fix name="InfoLed3" />
+  </PartRows>
+
+  <!-- value from a board macro (<Fix valueMacro>): the function of Info 1 / Info 2 (OGM-Common Info1LedFunc / Info2LedFunc, BASE =
+       ModuleType 10) is set to OPENKNX_INFOLED<n>_DEFAULT of the board header when such a board is selected; show="assign": the
+       row stays on the page "Info LEDs" and can be changed. Boards without the macro: no Assign. Blocks Fix_InfoLed<n>: included
+       in the hardware page of src/HardwareProfileDemo.xml (an Assign must sit in a ParameterBlock) -->
+  <Fixes output="src/HardwareProfile.fixes.gen.xml">
+    <Fix name="InfoLed1" ref="%AID%_UP-1000020_R-100002001" valueMacro="OPENKNX_INFOLED1_DEFAULT" show="assign" />
+    <Fix name="InfoLed2" ref="%AID%_UP-1000021_R-100002101" valueMacro="OPENKNX_INFOLED2_DEFAULT" show="assign" />
+    <!-- function of Info 3 fixed and read-only on boards with OPENKNX_INFOLED3_DEFAULT; ref with %TT%: the block sits in the copy
+         of the OGM-Common part (<PartRows><Fix name="InfoLed3">), which the module BASE includes -->
+    <Fix name="InfoLed3" ref="%AID%_UP-%TT%00022_R-%TT%0002201" valueMacro="OPENKNX_INFOLED3_DEFAULT" show="readonly" />
+    <!-- hide a whole module on devices that do not support it: the OpenKNX module switch BASE_ModuleEnabled_DEMOPM (ModuleType
+         49: %AID%_UP-00998<ModuleType>) is 0 on every device without a presence sensor (capability="!Presence"); show="assign":
+         the switch keeps its row on OpenKNX -> Module, the block sits in the hardware page (src/HardwareProfileDemo.xml) -->
+    <Fix name="ModPresence" capability="!Presence" ref="%AID%_UP-0099849_R-009984901" value="0" show="assign" />
+    <!-- a setting of the channel template (producer tokens %TT%%CC% in ref): "Betriebsart" of every channel is "Leistung messen"
+         and read-only on boards with a power meter; its read-only row comes from block Fix_ChMode_ParameterRefs, which the
+         template includes into its ParameterRefs -->
+    <Fix name="ChMode" capability="PowerMeter" ref="%AID%_UP-%TT%%CC%001_R-%TT%%CC%00101" value="2" show="readonly" indent="1" />
+  </Fixes>
+
+  <!-- rows of the channel template per device (<PartRows> on a template): row "Status-LED" of every channel only on boards with
+       a second info LED; row "Schaltzustand senden" of channel n only on boards with at least n relays (count: the generated
+       module keeps the relay count of the selected board, 255 when none is selected); src/HardwareProfileDemo.xml uses the copy
+       as template of the module DEMOCH -->
+  <PartRows source="src/HardwareProfileDemo.Channel.templ.xml" output="src/HardwareProfile.channel.gen.xml">
+    <Row ref="%AID%_UP-%TT%%CC%003_R-%TT%%CC%00301" expr="defined(INFO2_LED_PIN)" />
+    <Row ref="%AID%_UP-%TT%%CC%004_R-%TT%%CC%00401" count="Relays" />
+  </PartRows>
 </HardwareManifest>

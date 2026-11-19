@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+  <!--
+    Demo module DEMOPM (hand-written): a module that only some devices support. HardwareManifest.xml <Fix name="ModPresence"
+    capability="!Presence"> sets its OpenKNX module switch (BASE_ModuleEnabled_DEMOPM, OpenKNX -> Module) to 0 on every device
+    without a presence sensor, so the whole module leaves the tree; this file knows nothing about the hardware.
+  -->
+  <ManufacturerData>
+    <Manufacturer>
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <ParameterTypes>
+              <ParameterType Id="%AID%_PT-DemoPmDelay" Name="DemoPmDelay">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="1" maxInclusive="60" />
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="%AID%_P-%TT%00001" Name="Delay" ParameterType="%AID%_PT-DemoPmDelay" Text="Nachlaufzeit (min)" Value="5">
+                <Memory CodeSegment="%MID%" Offset="0" BitOffset="0" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="%AID%_P-%TT%00001_R-%TT%0000101" RefId="%AID%_P-%TT%00001" />
+            </ParameterRefs>
+          </Static>
+          <Dynamic>
+            <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="DemoPresence" Text="Demo-Präsenz" Icon="puzzle-outline">
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Presence" Text="Präsenz" Icon="puzzle-outline" HelpContext="DEMO-Praesenz">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Dieses Modul gibt es nur auf Geräten mit Präsenzsensor. Auf allen anderen Geräten blendet die Geräteauswahl das ganze Modul aus." UIHint="Information" />
+                <ParameterRefRef RefId="%AID%_P-%TT%00001_R-%TT%0000101" IndentLevel="1" />
+              </ParameterBlock>
+            </Channel>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

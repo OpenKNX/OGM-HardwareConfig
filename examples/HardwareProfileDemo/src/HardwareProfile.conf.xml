@@ -14,9 +14,9 @@
   <op:config name="%HWP_PageIcon%" value="memory" />
   <op:config name="%HWP_PageHelp%" value="DEMO-Hardware" />
   <op:config name="%HWP_PageTextRef%" value="%AID%_P-4500903_R-450090301" />
-  <op:config name="%HWP_CAP_ThirdParty%" value="0 8481 16144 16145 16146 16147 16148" />
-  <op:config name="%HWP_NOCAP_ThirdParty%" value="4129 4130 4402 4611 4880 4896 9216 16128 16129 16130" />
-  <op:config name="%HWP_CAP_ThirdParty_OR_NONE%" value="0 8481 16144 16145 16146 16147 16148" />
+  <op:config name="%HWP_CAP_ThirdParty%" value="0 8481 9216 16144 16145 16146 16147 16148" />
+  <op:config name="%HWP_NOCAP_ThirdParty%" value="4129 4130 4402 4611 4880 4896 16128 16129 16130" />
+  <op:config name="%HWP_CAP_ThirdParty_OR_NONE%" value="0 8481 9216 16144 16145 16146 16147 16148" />
   <op:config name="%HWP_CAP_Tp%" value="0 4129 4402 4611 4880 4896 9216 16128 16129 16130" />
   <op:config name="%HWP_NOCAP_Tp%" value="4130 8481 16144 16145 16146 16147 16148" />
   <op:config name="%HWP_CAP_Tp_OR_NONE%" value="0 4129 4402 4611 4880 4896 9216 16128 16129 16130" />

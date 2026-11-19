@@ -258,7 +258,7 @@ constexpr bool ROLE_Pin_ON_OWN_BOARD = contains(ROLE_Pin_HW_IDS, 5, OWN_HW_ID);
 #define HWP_ROLE_Pin_1 ParamHWP_Pin1B3
 #define HWP_ROLE_Pin_2 ParamHWP_Pin2B3
 
-// Port selections (HardwareProfile.xml portManualValue / portNoneValue, the same values as the ETS conflict check):
+// Port selections (HardwareManifest.xml portManualValue / portNoneValue, the same values as the ETS conflict check):
 // 0..n-1 = port n of the board (hwPortGpio), PORT_MANUAL = the manual GPIO parameter, PORT_NONE and every value that
 // is no port of the board = no GPIO; PORT_MANUAL and PORT_NONE are tested first, a described port on one of them is
 // never used (the generator stops when ETS offers such a port). Pass ParamHWP_HardwareSelect as 'selected': another
@@ -429,6 +429,33 @@ constexpr bool isReservedGpio(uint8_t gpio)
 #endif
 #ifdef I2C_SCL_PIN
         || ((int)(I2C_SCL_PIN) >= 0 && (int)(I2C_SCL_PIN) <= 254 && gpio == (uint8_t)(I2C_SCL_PIN))
+#endif
+#ifdef OKNXHW_REG1_ETH_RMII_CLK_PIN
+        || ((int)(OKNXHW_REG1_ETH_RMII_CLK_PIN) >= 0 && (int)(OKNXHW_REG1_ETH_RMII_CLK_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_ETH_RMII_CLK_PIN))
+#endif
+#ifdef OKNXHW_REG1_ETH_RMII_RXD0_PIN
+        || ((int)(OKNXHW_REG1_ETH_RMII_RXD0_PIN) >= 0 && (int)(OKNXHW_REG1_ETH_RMII_RXD0_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_ETH_RMII_RXD0_PIN))
+#endif
+#ifdef OKNXHW_REG1_ETH_RMII_RXD1_PIN
+        || ((int)(OKNXHW_REG1_ETH_RMII_RXD1_PIN) >= 0 && (int)(OKNXHW_REG1_ETH_RMII_RXD1_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_ETH_RMII_RXD1_PIN))
+#endif
+#ifdef OKNXHW_REG1_ETH_RMII_CRS_PIN
+        || ((int)(OKNXHW_REG1_ETH_RMII_CRS_PIN) >= 0 && (int)(OKNXHW_REG1_ETH_RMII_CRS_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_ETH_RMII_CRS_PIN))
+#endif
+#ifdef OKNXHW_REG1_ETH_RMII_TXEN_PIN
+        || ((int)(OKNXHW_REG1_ETH_RMII_TXEN_PIN) >= 0 && (int)(OKNXHW_REG1_ETH_RMII_TXEN_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_ETH_RMII_TXEN_PIN))
+#endif
+#ifdef OKNXHW_REG1_ETH_RMII_TXD0_PIN
+        || ((int)(OKNXHW_REG1_ETH_RMII_TXD0_PIN) >= 0 && (int)(OKNXHW_REG1_ETH_RMII_TXD0_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_ETH_RMII_TXD0_PIN))
+#endif
+#ifdef OKNXHW_REG1_ETH_RMII_TXD1_PIN
+        || ((int)(OKNXHW_REG1_ETH_RMII_TXD1_PIN) >= 0 && (int)(OKNXHW_REG1_ETH_RMII_TXD1_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_ETH_RMII_TXD1_PIN))
+#endif
+#ifdef OKNXHW_REG1_USB_UART_TX_PIN
+        || ((int)(OKNXHW_REG1_USB_UART_TX_PIN) >= 0 && (int)(OKNXHW_REG1_USB_UART_TX_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_USB_UART_TX_PIN))
+#endif
+#ifdef OKNXHW_REG1_USB_UART_RX_PIN
+        || ((int)(OKNXHW_REG1_USB_UART_RX_PIN) >= 0 && (int)(OKNXHW_REG1_USB_UART_RX_PIN) <= 254 && gpio == (uint8_t)(OKNXHW_REG1_USB_UART_RX_PIN))
 #endif
 #if defined(MSPI_IOMUX_PIN_NUM_CLK)
         || gpio == MSPI_IOMUX_PIN_NUM_CLK || gpio == MSPI_IOMUX_PIN_NUM_MISO || gpio == MSPI_IOMUX_PIN_NUM_MOSI

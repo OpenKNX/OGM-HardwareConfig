@@ -7,12 +7,15 @@
 
   <!-- Generated hardware profile feature flags: %HWP_SelectRef%, %HWP_CAP_<Name>%, %HWP_VAL_<Name>_GE_<n>% -->
   <op:config href="HardwareProfile.conf.xml" />
+  <!-- page "Info LEDs" of OGM-Common per device (HardwareManifest.xml <PartRows>); href relative to lib/OGM-Common/src, set before
+       Common.share.xml sets its default -->
+  <op:config name="%BASE_InfoLedPart%" value="../../../src/HardwareProfile.infoled.gen.xml" />
 
   <!-- Demo product. OpenKnxId/ApplicationNumber are placeholders: assign official numbers before shipping. -->
   <op:ETS
     OpenKnxId="0xAD"
     ApplicationNumber="240"
-    ApplicationVersion="2.2"
+    ApplicationVersion="3.1"
     ReplacesVersionsDownTo="0.1"
     ApplicationRevision="0"
     ProductName="OpenKNX Hardware-Profil Demo"
@@ -26,6 +29,11 @@
     share="../lib/OGM-Common/src/Common.share.xml">
     <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="%BASE_VerifyVersion%" />
   </op:define>
+
+  <!-- Static of BASE for the generated blocks in the copy of the OGM-Common part (read-only row of <Fix name="InfoLed3">): same
+       ModuleType as BASE, own share, no Dynamic, no configuration transfer -->
+  <op:define prefix="BASEHW" ModuleType="10" isSubmoduleOf="BASE" noConfigTransfer="true"
+    share="HardwareProfileDemo.Base.share.xml" />
 
   <!-- configuration transfer; also completes the module list of Common -->
   <op:define prefix="UCT" ModuleType="19"
@@ -41,6 +49,18 @@
   <op:define prefix="DEMO" ModuleType="46" configTransferName="Demo"
     share="HardwareProfileDemo.share.xml" />
 
+  <!-- hand-written channel module: settings per channel that depend on the hardware; template = the copy of
+       src/HardwareProfileDemo.Channel.templ.xml with the rows per device (HardwareManifest.xml <PartRows>) -->
+  <op:define prefix="DEMOCH" ModuleType="48" configTransferName="Demo-Kanäle"
+    share="HardwareProfileDemo.Channel.share.xml"
+    template="HardwareProfile.channel.gen.xml"
+    NumChannels="3" />
+
+  <!-- hand-written module that only devices with a presence sensor support: HardwareManifest.xml <Fix name="ModPresence"> hides it
+       on every other device through its OpenKNX module switch -->
+  <op:define prefix="DEMOPM" ModuleType="49" configTransferName="Demo-Präsenz"
+    share="HardwareProfileDemo.Presence.share.xml" />
+
   <!-- developer view of the hardware page (generated with the hardware module, HardwareManifest.xml <Page dev>) -->
   <op:define prefix="HWPDEV" ModuleType="47" share="HardwareProfile.dev.gen.xml" />
 
@@ -52,11 +72,16 @@
         <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/Channel/ParameterBlock[@Name='Basic']" prefix="BASE" />
         <ParameterBlock Id="%AID%_PB-nnn" Name="Hardware" Text="{{0:%HWP_PageText%}}" TextParameterRefId="%HWP_PageTextRef%" Icon="%HWP_PageIcon%" HelpContext="%HWP_PageHelp%">
           <op:include href="HardwareProfile.share.xml" xpath="//ApplicationProgram/Dynamic/Channel/ParameterBlock[@Name='Profile']/*" IsInner="true" prefix="HWP" />
+          <!-- info LED function per board (HardwareManifest.xml <Fix valueMacro show="assign">): set when the board is selected; an Assign
+               must sit in a ParameterBlock (ETS schema), so the blocks go into the hardware page -->
+          <op:include href="HardwareProfile.fixes.gen.xml" xpath="//Block[@name='Fix_InfoLed1' or @name='Fix_InfoLed2' or @name='Fix_ModPresence']/*" />
         </ParameterBlock>
         <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/Channel/*[not(self::ParameterBlock[@Name='Basic'])]" prefix="BASE" />
       </Channel>
       <op:include href="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="UCT" />
       <op:include href="HardwareProfileDemo.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="DEMO" />
+      <op:include href="HardwareProfileDemo.Channel.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="DEMOCH" />
+      <op:include href="HardwareProfileDemo.Presence.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="DEMOPM" />
       <op:include href="HardwareProfile.dev.gen.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HWPDEV" />
     </Dynamic>
   </generate>

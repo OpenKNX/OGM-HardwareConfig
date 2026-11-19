@@ -23,15 +23,15 @@ var HWP_boards = {
     4880: { name: "OpenKNXiao V1 KNeoPix RP2350", caps: 2, vary: 0, values: [0, 0, 2, 0] },
     4896: { name: "OpenKNXiao V1 KNeoPix ESP32S3", caps: 258, vary: 0, values: [0, 0, 8, 0] },
     8481: { name: "QuinLED Dig-Quad V3 (Ethernet)", caps: 5, vary: 0, values: [0, 0, 4, 0] },
-    9216: { name: "AB-SmartHouse Push Buttons for Gira", caps: 130, vary: 0, values: [4, 2, 0, 0] },
-    16128: { name: "Demo Raumcontroller Basic", caps: 4098, vary: 0, values: [0, 0, 0, 0] },
-    16129: { name: "Demo Raumcontroller Plus", caps: 28674, vary: 0, values: [2, 2, 0, 0] },
-    16130: { name: "Demo Raumcontroller Pro", caps: 126978, vary: 0, values: [4, 4, 0, 0] },
-    16144: { name: "Demo Shelly Plus 1", caps: 1033, vary: 0, values: [1, 0, 0, 1] },
-    16145: { name: "Demo Shelly Plus 1PM", caps: 1545, vary: 0, values: [1, 0, 0, 1] },
-    16146: { name: "Demo Shelly Plus 2PM", caps: 1545, vary: 0, values: [2, 0, 0, 2] },
-    16147: { name: "Demo Shelly Plus i4", caps: 9, vary: 0, values: [4, 0, 0, 0] },
-    16148: { name: "Demo Shelly Plug S", caps: 3593, vary: 0, values: [0, 0, 0, 1] }
+    9216: { name: "AB-SmartHouse Push Buttons for Gira", caps: 131, vary: 0, values: [4, 2, 0, 0] },
+    16128: { name: "Demo Raumcontroller Basic \u2013 Temp./Feuchte", caps: 4098, vary: 0, values: [0, 0, 0, 0] },
+    16129: { name: "Demo Raumcontroller Plus \u2013 CO2, Lux, 2 Info-LEDs", caps: 28674, vary: 0, values: [2, 2, 0, 0] },
+    16130: { name: "Demo Raumcontroller Pro \u2013 Pr\u00E4senz, Steckplatz, Info 3 fest", caps: 126978, vary: 0, values: [4, 4, 0, 0] },
+    16144: { name: "Demo Shelly Plus 1 \u2013 1 Relais, WLAN", caps: 1033, vary: 0, values: [1, 0, 0, 1] },
+    16145: { name: "Demo Shelly Plus 1PM \u2013 1 Relais, Messung", caps: 1545, vary: 0, values: [1, 0, 0, 1] },
+    16146: { name: "Demo Shelly Plus 2PM \u2013 2 Relais, Messung", caps: 1545, vary: 0, values: [2, 0, 0, 2] },
+    16147: { name: "Demo Shelly Plus i4 \u2013 4 Eing\u00E4nge, kein Relais", caps: 9, vary: 0, values: [4, 0, 0, 0] },
+    16148: { name: "Demo Shelly Plug S \u2013 Stecker, Messung, Front", caps: 3593, vary: 0, values: [0, 0, 0, 1] }
 };
 
 // switch="true" capabilities: on/off parameter, firmware state parameter, own bit, query bit, fixed-by bit (-1: none)
@@ -54,6 +54,9 @@ function HWP_detectHardware(device, online, progress, context) {
     var resp;
     try {
         resp = online.invokeFunctionProperty(158, 4, [0]);
+    } catch (e) {
+        // no answer (ETS: timeout): a firmware older than the application does not know the query, or the device is not reachable
+        throw new Error("Keine Antwort auf die Ger\u00E4teabfrage. Die Firmware des Ger\u00E4ts ist vermutlich \u00E4lter als diese Applikation (sie kennt die Abfrage nicht) oder das Ger\u00E4t ist nicht erreichbar. Firmware aktualisieren oder den Ger\u00E4tetyp oben von Hand w\u00E4hlen. (" + ((e && e.message) ? e.message : e) + ")");
     } finally {
         online.disconnect();
     }
@@ -147,8 +150,8 @@ var HWP_conflictBoards = {
     8481: { s: 7, ports: [16, 3, 1, 4, 15], relays: [], rsv: [0, 5, 18, 23], tp: [] },
     9216: { s: 6, ports: [], relays: [], rsv: [4, 5, 9, 10, 11, 20], tp: [16, 17] },
     16128: { s: 8, ports: [], relays: [], rsv: [], tp: [1] },
-    16129: { s: 9, ports: [], relays: [], rsv: [], tp: [1] },
-    16130: { s: 10, ports: [], relays: [], rsv: [], tp: [1] },
+    16129: { s: 9, ports: [], relays: [], rsv: [20, 21], tp: [1] },
+    16130: { s: 10, ports: [], relays: [], rsv: [20, 22], tp: [1] },
     16144: { s: 11, ports: [], relays: [26], rsv: [], tp: [] },
     16145: { s: 12, ports: [], relays: [26], rsv: [], tp: [] },
     16146: { s: 13, ports: [], relays: [12, 13], rsv: [], tp: [] },

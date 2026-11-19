@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20">
+  <!--
+    Module BASEHW (src/HardwareProfileDemo.xml): ModuleType 10 like BASE (OGM-Common), so %TT% gives the ids of BASE. It holds what
+    the generated blocks in the copy of the OGM-Common part need in the Static of BASE, without a change to OGM-Common: the
+    read-only row of HardwareManifest.xml <Fix name="InfoLed3">.
+  -->
+  <ManufacturerData>
+    <Manufacturer>
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <ParameterRefs>
+              <op:include href="HardwareProfile.fixes.gen.xml" xpath="//Block[@name='Fix_InfoLed3_ParameterRefs']/*" />
+            </ParameterRefs>
+          </Static>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

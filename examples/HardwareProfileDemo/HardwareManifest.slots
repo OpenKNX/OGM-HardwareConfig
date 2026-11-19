@@ -38,5 +38,16 @@ val 0 = BinaryInputs
 val 1 = StatusLeds
 val 2 = FlashMB
 val 3 = Relays
+# Rules of <Filters> with an own list: the slot is part of the ETS parameter ID of that list; never change, reuse or remove a slot (an edited rule: write its new key into its line).
+filter ChFunction board:DEMO_SHELLY_* = 0
+filter ChFunction capability:PowerMeter = 1
+filter Function board:DEMO_SHELLY_* = 0
+filter Function board:DEMO_SHELLY_PLUS_1PM = 1
+filter Function board:DEMO_SHELLY_PLUS_2PM = 2
+filter Function board:DEMO_SHELLY_PLUS_I4 = 3
+filter Function board:DEMO_SHELLY_PLUG_S = 4
+filter TimeSource capability:Lan = 0
+filter TimeSource board:* = 1
+filter TimeSource capability:Wifi = 2
 # ETS content per product XML: ets "<file>" <ApplicationVersion> <fingerprint>; kept until the version changes
-ets "HardwareProfileDemo.xml" 2.2 5D1D8CCCFD89C136
+ets "HardwareProfileDemo.xml" 3.1 9E5EAC14E2738141

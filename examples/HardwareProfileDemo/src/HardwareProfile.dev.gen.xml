@@ -37,14 +37,14 @@
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="0x1320  OpenKNXiao V1 KNeoPix ESP32S3 (Board-Nummer 1, OKNXHW_OPENKNXIAO_KNEOPIX_ESP32S3_V1)" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="0x2121  QuinLED Dig-Quad V3 (Ethernet) (Board-Nummer 7, DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET)" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="0x2400  AB-SmartHouse Push Buttons for Gira (Board-Nummer 6, DEVICE_AB_BUT_GIR)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F00  Demo Raumcontroller Basic (Board-Nummer 8, DEMO_RAUMCONTROLLER_BASIC)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F01  Demo Raumcontroller Plus (Board-Nummer 9, DEMO_RAUMCONTROLLER_PLUS)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F02  Demo Raumcontroller Pro (Board-Nummer 10, DEMO_RAUMCONTROLLER_PRO)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F10  Demo Shelly Plus 1 (Board-Nummer 11, DEMO_SHELLY_PLUS_1)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F11  Demo Shelly Plus 1PM (Board-Nummer 12, DEMO_SHELLY_PLUS_1PM)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F12  Demo Shelly Plus 2PM (Board-Nummer 13, DEMO_SHELLY_PLUS_2PM)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F13  Demo Shelly Plus i4 (Board-Nummer 14, DEMO_SHELLY_PLUS_I4)" />
-                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F14  Demo Shelly Plug S (Board-Nummer 15, DEMO_SHELLY_PLUG_S)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F00  Demo Raumcontroller Basic – Temp./Feuchte (Board-Nummer 8, DEMO_RAUMCONTROLLER_BASIC)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F01  Demo Raumcontroller Plus – CO2, Lux, 2 Info-LEDs (Board-Nummer 9, DEMO_RAUMCONTROLLER_PLUS)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F02  Demo Raumcontroller Pro – Präsenz, Steckplatz, Info 3 fest (Board-Nummer 10, DEMO_RAUMCONTROLLER_PRO)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F10  Demo Shelly Plus 1 – 1 Relais, WLAN (Board-Nummer 11, DEMO_SHELLY_PLUS_1)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F11  Demo Shelly Plus 1PM – 1 Relais, Messung (Board-Nummer 12, DEMO_SHELLY_PLUS_1PM)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F12  Demo Shelly Plus 2PM – 2 Relais, Messung (Board-Nummer 13, DEMO_SHELLY_PLUS_2PM)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F13  Demo Shelly Plus i4 – 4 Eingänge, kein Relais (Board-Nummer 14, DEMO_SHELLY_PLUS_I4)" />
+                  <ParameterSeparator Id="%AID%_PS-nnn" Text="0x3F14  Demo Shelly Plug S – Stecker, Messung, Front (Board-Nummer 15, DEMO_SHELLY_PLUG_S)" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Geräteabfrage 158/4" UIHint="Headline" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 0: ThirdParty - Gerät eines Drittanbieters" />
                   <ParameterSeparator Id="%AID%_PS-nnn" Text="Fähigkeit Bit 1: Tp - KNX TP" />

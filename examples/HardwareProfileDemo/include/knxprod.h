@@ -13,13 +13,15 @@
 #define ETS_ModuleId_UCT 2
 #define ETS_ModuleId_HWP 3
 #define ETS_ModuleId_DEMO 4
-#define ETS_ModuleId_HWPDEV 5
+#define ETS_ModuleId_DEMOCH 5
+#define ETS_ModuleId_DEMOPM 6
+#define ETS_ModuleId_HWPDEV 7
 #define MAIN_FirmwareName "OpenKNX Hardware-Profil Demo"
 #define MAIN_OpenKnxId 0xAD
 #define MAIN_ApplicationNumber 240
-#define MAIN_ApplicationVersion 32
+#define MAIN_ApplicationVersion 49
 #define MAIN_ApplicationEncoding iso-8859-15
-#define MAIN_ParameterSize 189
+#define MAIN_ParameterSize 204
 #define MAIN_MaxKoNumber 106
 #define MAIN_OrderNumber "HWProfileDemo"
 #define BASE_ModuleVersion 32
@@ -96,9 +98,15 @@
 #define BASE_ModuleEnabled_DEMO                  110      // 1 Bit, Bit 4
 #define     BASE_ModuleEnabled_DEMOMask 0x10
 #define     BASE_ModuleEnabled_DEMOShift 4
-#define BASE_ModuleEnabled_HWPDEV                110      // 1 Bit, Bit 3
-#define     BASE_ModuleEnabled_HWPDEVMask 0x08
-#define     BASE_ModuleEnabled_HWPDEVShift 3
+#define BASE_ModuleEnabled_DEMOCH                110      // 1 Bit, Bit 3
+#define     BASE_ModuleEnabled_DEMOCHMask 0x08
+#define     BASE_ModuleEnabled_DEMOCHShift 3
+#define BASE_ModuleEnabled_DEMOPM                110      // 1 Bit, Bit 2
+#define     BASE_ModuleEnabled_DEMOPMMask 0x04
+#define     BASE_ModuleEnabled_DEMOPMShift 2
+#define BASE_ModuleEnabled_HWPDEV                110      // 1 Bit, Bit 1
+#define     BASE_ModuleEnabled_HWPDEVMask 0x02
+#define     BASE_ModuleEnabled_HWPDEVShift 1
 
 // Zeitbasis
 #define ParamBASE_StartupDelayBase                    ((knx.paramByte(BASE_StartupDelayBase) & BASE_StartupDelayBaseMask) >> BASE_StartupDelayBaseShift)
@@ -161,6 +169,10 @@
 #define ParamBASE_ModuleEnabled_HWP                   ((bool)(knx.paramByte(BASE_ModuleEnabled_HWP) & BASE_ModuleEnabled_HWPMask))
 // DEMO
 #define ParamBASE_ModuleEnabled_DEMO                  ((bool)(knx.paramByte(BASE_ModuleEnabled_DEMO) & BASE_ModuleEnabled_DEMOMask))
+// DEMOCH
+#define ParamBASE_ModuleEnabled_DEMOCH                ((bool)(knx.paramByte(BASE_ModuleEnabled_DEMOCH) & BASE_ModuleEnabled_DEMOCHMask))
+// DEMOPM
+#define ParamBASE_ModuleEnabled_DEMOPM                ((bool)(knx.paramByte(BASE_ModuleEnabled_DEMOPM) & BASE_ModuleEnabled_DEMOPMMask))
 // HWPDEV
 #define ParamBASE_ModuleEnabled_HWPDEV                ((bool)(knx.paramByte(BASE_ModuleEnabled_HWPDEV) & BASE_ModuleEnabled_HWPDEVMask))
 
@@ -404,6 +416,8 @@
 #define DEMO_Out2DataGpio                        186      // uint8_t
 #define DEMO_Out2MosiGpio                        187      // uint8_t
 #define DEMO_Out2ClockGpio                       188      // uint8_t
+#define DEMO_Function                            189      // 8 Bits, Bit 7-0
+#define DEMO_TimeSource                          190      // 8 Bits, Bit 7-0
 
 // IP-Adresse per DHCP
 #define ParamDEMO_LanDhcp                             (knx.paramByte(DEMO_LanDhcp))
@@ -622,6 +636,10 @@
 #define ParamDEMO_Out2MosiGpio                        (knx.paramByte(DEMO_Out2MosiGpio))
 // Takt-GPIO
 #define ParamDEMO_Out2ClockGpio                       (knx.paramByte(DEMO_Out2ClockGpio))
+// Schaltfunktion
+#define ParamDEMO_Function                            (knx.paramByte(DEMO_Function))
+// Zeitquelle
+#define ParamDEMO_TimeSource                          (knx.paramByte(DEMO_TimeSource))
 
 #define DEMO_KoPower 101
 #define DEMO_KoDeviceTemp 102
@@ -642,6 +660,32 @@
 #define KoDEMO_Lux                                 (knx.getGroupObject(DEMO_KoLux))
 // Präsenz
 #define KoDEMO_Presence                            (knx.getGroupObject(DEMO_KoPresence))
+
+#define DEMOCH_ChannelCount 3
+
+// Parameter per channel
+#define DEMOCH_ParamBlockOffset 191
+#define DEMOCH_ParamBlockSize 4
+#define DEMOCH_ParamCalcIndex(index) (index + DEMOCH_ParamBlockOffset + _channelIndex * DEMOCH_ParamBlockSize)
+
+#define DEMOCH_ChMode                               0      // 8 Bits, Bit 7-0
+#define DEMOCH_ChFunction                           1      // 8 Bits, Bit 7-0
+#define DEMOCH_ChLed                                2      // 8 Bits, Bit 7-0
+#define DEMOCH_ChReport                             3      // 8 Bits, Bit 7-0
+
+// Betriebsart
+#define ParamDEMOCH_ChMode                              (knx.paramByte(DEMOCH_ParamCalcIndex(DEMOCH_ChMode)))
+// Kanalfunktion
+#define ParamDEMOCH_ChFunction                          (knx.paramByte(DEMOCH_ParamCalcIndex(DEMOCH_ChFunction)))
+// Status-LED zeigt den Kanal
+#define ParamDEMOCH_ChLed                               (knx.paramByte(DEMOCH_ParamCalcIndex(DEMOCH_ChLed)))
+// Schaltzustand senden
+#define ParamDEMOCH_ChReport                            (knx.paramByte(DEMOCH_ParamCalcIndex(DEMOCH_ChReport)))
+
+#define DEMOPM_Delay                               203      // uint8_t
+
+// Nachlaufzeit (min)
+#define ParamDEMOPM_Delay                               (knx.paramByte(DEMOPM_Delay))
 
 
 

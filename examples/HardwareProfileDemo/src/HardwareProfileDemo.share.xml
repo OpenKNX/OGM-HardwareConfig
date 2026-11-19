@@ -74,6 +74,26 @@
                   <Enumeration Text="Treppenlicht" Value="2" Id="%ENID%" />
                 </TypeRestriction>
               </ParameterType>
+              <!-- lists filtered per hardware (HardwareManifest.xml <Filters>): the full lists, the generator writes the shorter ones -->
+              <ParameterType Id="%AID%_PT-DemoFunction" Name="DemoFunction">
+                <TypeRestriction Base="Value" SizeInBit="8" UIHint="DropDown">
+                  <Enumeration Text="nicht genutzt" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Schalten" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Treppenlicht" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Jalousie" Value="3" Id="%ENID%" />
+                  <Enumeration Text="Leistung messen" Value="4" Id="%ENID%" />
+                  <Enumeration Text="Taster auswerten" Value="5" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoTimeSource" Name="DemoTimeSource">
+                <TypeRestriction Base="Value" SizeInBit="8" UIHint="DropDown">
+                  <Enumeration Text="keine" Value="0" Id="%ENID%" />
+                  <Enumeration Text="KNX-Bus" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Uhr im Gerät (RTC)" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Internet (NTP)" Value="3" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <op:include href="HardwareProfile.filters.gen.xml" xpath="//ApplicationProgram/Static/ParameterTypes/ParameterType" />
             </ParameterTypes>
             <Parameters>
               <Parameter Id="%AID%_P-%TT%00001" Name="LanDhcp" ParameterType="%AID%_PT-DemoYesNo" Text="IP-Adresse per DHCP" Value="1">
@@ -205,6 +225,15 @@
               <Parameter Id="%AID%_P-%TT%00031" Name="Out2ClockGpio" ParameterType="%AID%_PT-DemoGpio" Text="Takt-GPIO" Value="255">
                 <Memory CodeSegment="%MID%" Offset="69" BitOffset="0" />
               </Parameter>
+              <!-- lists filtered per hardware: the carriers (the firmware reads them) and the shorter lists without memory -->
+              <Parameter Id="%AID%_P-%TT%00032" Name="Function" ParameterType="%AID%_PT-DemoFunction" Text="Schaltfunktion" Value="1">
+                <Memory CodeSegment="%MID%" Offset="70" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="%AID%_P-%TT%00033" Name="TimeSource" ParameterType="%AID%_PT-DemoTimeSource" Text="Zeitquelle" Value="1">
+                <Memory CodeSegment="%MID%" Offset="71" BitOffset="0" />
+              </Parameter>
+              <op:include href="HardwareProfile.filters.gen.xml" xpath="//Block[@name='Filter_Function_Parameters']/*" />
+              <op:include href="HardwareProfile.filters.gen.xml" xpath="//Block[@name='Filter_TimeSource_Parameters']/*" />
               <!-- conflict flags without memory (written by the calculation) -->
               <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='Parameters']/*" />
             </Parameters>
@@ -243,6 +272,10 @@
               <ParameterRef Id="%AID%_P-%TT%00031_R-%TT%0003101" RefId="%AID%_P-%TT%00031" />
               <op:include href="HardwareProfile.outputs.gen.xml" xpath="//Block[@name='ParameterRefs']/*" />
               <op:include href="HardwareProfile.conflicts.gen.xml" xpath="//Block[@name='ParameterRefs']/*" />
+              <ParameterRef Id="%AID%_P-%TT%00032_R-%TT%0003201" RefId="%AID%_P-%TT%00032" />
+              <ParameterRef Id="%AID%_P-%TT%00033_R-%TT%0003301" RefId="%AID%_P-%TT%00033" />
+              <op:include href="HardwareProfile.filters.gen.xml" xpath="//Block[@name='Filter_Function_ParameterRefs']/*" />
+              <op:include href="HardwareProfile.filters.gen.xml" xpath="//Block[@name='Filter_TimeSource_ParameterRefs']/*" />
             </ParameterRefs>
             <ParameterCalculations>
               <!-- GPIO conflict check: one calculation, function and tables in the generated hardware script -->
@@ -300,6 +333,9 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Fester Wert der Hardware" UIHint="Headline" />
                 <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='ChnChoose']/*" />
                 <op:include href="HardwareProfile.ranges.gen.xml" xpath="//Block[@name='LedChoose']/*" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Auswahl gefiltert je Hardware" UIHint="Headline" />
+                <op:include href="HardwareProfile.filters.gen.xml" xpath="//Block[@name='Filter_Function']/*" />
+                <op:include href="HardwareProfile.filters.gen.xml" xpath="//Block[@name='Filter_TimeSource']/*" />
               </ParameterBlock>
               <ParameterBlock Id="%AID%_PB-nnn" Name="Sensors" Text="4 Sensoren" Icon="puzzle-outline" HelpContext="DEMO-Sensoren" ShowInComObjectTree="true">
                 <choose ParamRefId="%HWP_SelectRef%"><when test="%HWP_CAP_TempHum%"><ParameterSeparator Id="%AID%_PS-nnn" Text="Temperatur/Feuchte" UIHint="Headline" /><ParameterRefRef RefId="%AID%_P-%TT%00013_R-%TT%0001301" IndentLevel="1" /><ComObjectRefRef RefId="%AID%_O-%TT%00003_R-%TT%0000301" /></when></choose>

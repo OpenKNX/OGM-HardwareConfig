@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+  <!--
+    Demo channel module (hand-written, op:define DEMOCH): the types and the page of the channel template
+    src/HardwareProfileDemo.Channel.templ.xml. A module of its own: the template ids %TT%%CC%nnn must not meet the ids of the
+    GPIO role parameters of the module DEMO (%TT%01001...).
+  -->
+  <ManufacturerData>
+    <Manufacturer>
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <ParameterTypes>
+              <ParameterType Id="%AID%_PT-DemoChMode" Name="DemoChMode">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Aus" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Automatisch" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Leistung messen" Value="2" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DemoChFunction" Name="DemoChFunction">
+                <TypeRestriction Base="Value" SizeInBit="8" UIHint="DropDown">
+                  <Enumeration Text="nicht genutzt" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Schalten" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Treppenlicht" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Leistung messen" Value="3" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+            </ParameterTypes>
+          </Static>
+          <Dynamic>
+            <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="DemoChannels" Text="Demo-Kanäle" Icon="puzzle-outline">
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Channels" Text="Kanäle je Hardware" Icon="puzzle-outline" HelpContext="DEMO-Kanaele">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Einstellungen je Kanal, die von der Hardware abhängen. Die Kontexthilfe (F1) erklärt, wie sie entstehen." />
+                <op:include href="HardwareProfile.channel.gen.xml" xpath="//Dynamic/ChannelIndependentBlock/*" type="template" prefix="DEMOCH" IsInner="true" />
+              </ParameterBlock>
+            </Channel>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>
