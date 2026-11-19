@@ -155,8 +155,8 @@ function Get-ProductBoards($m) {
   # the "not selected" value is one more entry of the selection: it must not be a board's HW-ID
   $clash = @($boards | Where-Object { [int]$_.HwId -eq $m.UnselectedValue }) | Select-Object -First 1
   if ($clash) { Stop-WithError (T "{0} has DEVICE_HW_ID {1}, the value of not selected" $clash.Define $m.UnselectedValue) }
-  # an explicit entry can resolve to the same HW-ID as a pattern board (alias define + flags, e.g.
-  # DEVICE_QUINLED_DIG_QUAD_V3 + -DKNX_IP_LAN = 0x2121): the explicit one wins, two explicit ones stop
+  # an explicit entry can resolve to the same HW-ID as a pattern board (alias define + flags):
+  # the explicit one wins, two explicit ones stop
   $dups = $boards | Group-Object { $_.HwId } | Where-Object { $_.Count -gt 1 }
   foreach ($d in $dups) {
     # priority: a <Board> line of the manifest > a PlatformIO env (already merged per HW-ID) > a pattern
