@@ -143,6 +143,10 @@
         addLed(new OpenKNX::Led::GPIO(FRONT_CTRL_LED2_G, HIGH), OpenKNX::Led::LED_TYPE_INFO2); /* green (PCA9557 pin 2) */ \
         addLed(new OpenKNX::Led::Serial(0, NEOPIX_LED_PIN, OPENKNX_SERIALLED_COLOR_GREEN), OpenKNX::Led::LED_TYPE_INFO3); \
     } while (0)
+    // row texts in ETS; no INFOn_LED_PIN here (LED_INIT creates the LEDs), the manifest row checks the label as well
+    #define INFO1_LED_LABEL "rot, links"
+    #define INFO2_LED_LABEL "grün, rechts"
+    #define INFO3_LED_LABEL "RGB"
 #endif
 
 /**

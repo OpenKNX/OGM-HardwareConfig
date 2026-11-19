@@ -663,10 +663,12 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
         #ifdef OKNXHW_OPENKNXIAO_RP2040_V1_LED1 // OpenKNXiao RP2040 V1 LED1
             #define INFO1_LED_PIN OKNXHW_OPENKNXIAO_LED_1_GREEN
             #define INFO1_LED_PIN_ACTIVE_ON LOW
+            #define INFO1_LED_LABEL "grün" // color of the onboard RGB LED, row text in ETS
         #endif
         #ifdef OKNXHW_OPENKNXIAO_RP2040_V1_LED2 // OpenKNXiao RP2040 V1 LED2
             #define INFO2_LED_PIN OKNXHW_OPENKNXIAO_LED_1_BLUE
             #define INFO2_LED_PIN_ACTIVE_ON LOW
+            #define INFO2_LED_LABEL "blau" // color of the onboard RGB LED, row text in ETS
         #endif
     #endif
     #define PROG_BUTTON_PIN OKNXHW_OPENKNXIAO_D0      // GPIO26 | SPI1 SCK | UART0 CTS | I2C1 SDA | PWM5 A | ADC0

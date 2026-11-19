@@ -531,8 +531,10 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 #ifdef OKNXHW_REG2_DD_FRONT_LEDS
     #define INFO1_LED_PIN FRONT_CTRL_LED1_R // PCA9557 pin 1 (red, left)
     #define INFO1_LED_PIN_ACTIVE_ON HIGH
+    #define INFO1_LED_LABEL "rot, links" // row text in ETS
     #define INFO2_LED_PIN FRONT_CTRL_LED2_G // PCA9557 pin 2 (green, right)
     #define INFO2_LED_PIN_ACTIVE_ON HIGH
+    #define INFO2_LED_LABEL "grün, rechts"
     // Pico / Pico 2: onboard LED GP25 as INFO3 (Pico W / Pico 2 W: the LED sits on the WiFi chip, see OPENKNX_WIFI_LED_PIN)
     #ifdef OKNXHW_REG2_PIPICO_V1_LED1
         #define INFO3_LED_PIN 25
@@ -543,6 +545,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 #elif defined(OKNXHW_REG2_PIPICO_V1_LED1)
     #define INFO1_LED_PIN 25 // PiPico Onboard LED
     #define INFO1_LED_PIN_ACTIVE_ON HIGH
+    #define INFO1_LED_LABEL "Pico-LED"
 #endif
 
 // REG2-Pi-Pico Wifi V1: Info1 LED
