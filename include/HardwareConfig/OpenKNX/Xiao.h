@@ -68,9 +68,9 @@
 │  └─ 0x135x = XIAO ESP32C3  (0x1350-0x135F) → KNeoPix, Mini
 └─ ... to 0x1F (16 subgroups)
 
-Main Group 0x2 = OpenKNX-Ready (0x2000-0x2FFF)
-├─ 0x20 = Partner A
-├─ 0x21 = Partner B
+Main Group 0x2 = Third Party (0x2000-0x2FFF)
+├─ 0x20 = Vendor A
+├─ 0x21 = Vendor B
 └─ ...
 Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 ├─ 0x30 = Device A
