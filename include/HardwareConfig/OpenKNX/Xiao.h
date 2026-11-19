@@ -487,7 +487,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #define OKNXHW_OPENKNXIAO_LED_1_GREEN -1 // N/A
     #define OKNXHW_OPENKNXIAO_LED_1_RED   -1 // N/A
     #define OKNXHW_OPENKNXIAO_LED_1_BLUE  -1 // N/A
-    #define OKNXHW_OPENKNXIAO_LED_1_YELLOW 21 // Build-In LED YELLOW
+    #define OKNXHW_OPENKNXIAO_LED_1_YELLOW -1 // N/A: the XIAO ESP32-C3 has no user LED, GPIO21 is D6 (KNX TX)
 
     #define OKNXHW_OPENKNXIAO_NEOPIXEL_PWR -1 // N/A
     #define OKNXHW_OPENKNXIAO_NEOPIXEL -1   // N/A
@@ -688,7 +688,7 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
     #ifdef OKNXHW_OPENKNXIAO_V1_TERMINAL_MINI // OpenKNXiao RP2040 V1 Terminal Mini Connections
       #define KNXIAO_TERM_PIN4 OKNXHW_OPENKNXIAO_D4
       #define KNXIAO_TERM_PIN5 OKNXHW_OPENKNXIAO_D5
-    #elif defined(OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIXEL) // OpenKNXiao RP2040 V1 Terminal Isolated Connections
+    #elif defined(OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX) // OpenKNXiao RP2040 V1 Terminal Isolated Connections
       #define KNXIAO_TERM_PIN_NEOPIN1 OKNXHW_OPENKNXIAO_D4
       #define KNXIAO_TERM_PIN_NEOPIN2 OKNXHW_OPENKNXIAO_D5
     #endif
