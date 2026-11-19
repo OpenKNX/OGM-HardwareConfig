@@ -750,6 +750,7 @@
   'Conflicts: <ChannelBlock> with channelToken %C% (default) and %CC% (flag numbers, template ref), wrong token or number stops' = 'Conflicts: <ChannelBlock> mit channelToken %C% (Vorgabe) und %CC% (Flag-Nummern, Vorlagen-Ref), falsches Token oder falsche Nummer bricht ab'
   '%C%: flags 911/912 and template ref %TT%0091%C% expected' = '%C%: Flags 911/912 und Vorlagen-Ref %TT%0091%C% erwartet'
   '%CC%: flags 1001/1002 and template ref %TT%010%CC% expected' = '%CC%: Flags 1001/1002 und Vorlagen-Ref %TT%010%CC% erwartet'
+  '{0}: gone (shown only on removed boards)' = '{0}: weg (nur auf entfernten Boards gezeigt)'
   'warning on a template id' = 'Warnung bei einer Vorlagen-Id'
   'PartRows: <Fix> and <Filter> blocks in a copy of a foreign file, also inside a selected row, layout of the source kept, hrefs rewritten' = 'PartRows: <Fix>- und <Filter>-Blöcke in der Kopie einer fremden Datei, auch in einer gewählten Zeile, Layout der Quelle bleibt, hrefs umgeschrieben'
   'href of the copy not rewritten to ../lib/X/src/Other.part.xml' = 'href der Kopie nicht auf ../lib/X/src/Other.part.xml umgeschrieben'

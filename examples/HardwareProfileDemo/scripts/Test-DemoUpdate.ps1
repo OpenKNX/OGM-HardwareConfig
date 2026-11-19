@@ -357,9 +357,10 @@ function Read-KnxprodApp([string]$Path) {
 
 function Get-RNum([string]$Id) { if ($Id -match '_(R-[0-9A-Za-z-]+)$') { return $Matches[1] } return $Id }
 
-# @brief Types, parameters (with memory flag) and ParameterRefs of an application
+# @brief Types, parameters (with memory flag) and ParameterRefs of an application; Shown = per ParameterRef id the HW-ID lists of
+#        the hardware selection whens around each of its rows ($null for a row outside such a when)
 function Get-AppModel($Xml) {
-  $types = @{}; $params = @{}; $refs = @{}
+  $types = @{}; $params = @{}; $refs = @{}; $shown = @{}
   foreach ($t in $Xml.GetElementsByTagName("ParameterType")) {
     $d = @{ Kind = "other" }
     foreach ($c in $t.ChildNodes) {
@@ -382,7 +383,20 @@ function Get-AppModel($Xml) {
     $params[$p.GetAttribute("Id")] = @{ Type = $p.GetAttribute("ParameterType"); Name = $p.GetAttribute("Name"); Access = $p.GetAttribute("Access"); Mem = $mem; Value = $p.GetAttribute("Value") }
   }
   foreach ($r in $Xml.GetElementsByTagName("ParameterRef")) { $refs[(Get-RNum $r.GetAttribute("Id"))] = @{ Id = $r.GetAttribute("Id"); Param = $r.GetAttribute("RefId"); Access = $r.GetAttribute("Access") } }
-  return @{ Types = $types; Params = $params; Refs = $refs }
+  $selRefs = @{}
+  foreach ($k in $refs.Keys) { $sp = $params[$refs[$k].Param]; if ($sp -and $sp.Name -cmatch 'HardwareSelect$') { $selRefs[$refs[$k].Id] = $true } }
+  foreach ($rr in $Xml.GetElementsByTagName("ParameterRefRef")) {
+    $ids = $null
+    for ($a = $rr.ParentNode; $a -and $a.NodeType -eq [System.Xml.XmlNodeType]::Element; $a = $a.ParentNode) {
+      if ($a.LocalName -eq "when" -and $a.ParentNode.LocalName -eq "choose" -and $selRefs.ContainsKey($a.ParentNode.GetAttribute("ParamRefId"))) {
+        $ids = @($a.GetAttribute("test") -split '\s+' | Where-Object { $_ } | ForEach-Object { [int]$_ }); break
+      }
+    }
+    $rid = $rr.GetAttribute("RefId")
+    if (-not $shown.ContainsKey($rid)) { $shown[$rid] = New-Object System.Collections.ArrayList }
+    [void]$shown[$rid].Add($ids)
+  }
+  return @{ Types = $types; Params = $params; Refs = $refs; Shown = $shown }
 }
 
 # @brief Old values the new type rejects ($null: none)
@@ -410,6 +424,18 @@ function Compare-Apps([string]$OldPath, [string]$NewPath, $Exp) {
     foreach ($sl in $Exp.RemovedSlots) { if ($name -cmatch ('B' + $sl + '$')) { return $true } }
     return $false
   }
+  # a row shown only on removed boards (e.g. the own list of a <Filter> rule that matched only them): every row of the ref sits
+  # in a when of the hardware selection whose HW-IDs are all removed
+  $onlyOnRemoved = {
+    param($refId)
+    $rows = $o.Shown[$refId]
+    if (-not $rows -or $rows.Count -eq 0) { return $false }
+    foreach ($ids in $rows) {
+      if ($null -eq $ids -or $ids.Count -eq 0) { return $false }
+      foreach ($i in $ids) { if ($Exp.RemovedIds -notcontains $i) { return $false } }
+    }
+    return $true
+  }
   foreach ($rn in @($o.Refs.Keys | Sort-Object)) {
     $ref = $o.Refs[$rn]; $p = $o.Params[$ref.Param]
     if ($null -eq $p) { continue }
@@ -418,7 +444,9 @@ function Compare-Apps([string]$OldPath, [string]$NewPath, $Exp) {
     $label = ("{0} {1}" -f $rn, $p.Name)
     $nr = $n.Refs[$rn]
     if ($null -eq $nr) {
-      if (& $isRemoved $ref.Param $p.Name) { $expected += (T "{0}: gone (removed board)" $label) } else { $bad += (T "{0}: gone" $label) }
+      if (& $isRemoved $ref.Param $p.Name) { $expected += (T "{0}: gone (removed board)" $label) }
+      elseif (& $onlyOnRemoved $ref.Id) { $expected += (T "{0}: gone (shown only on removed boards)" $label) }
+      else { $bad += (T "{0}: gone" $label) }
       continue
     }
     $np = $n.Params[$nr.Param]
