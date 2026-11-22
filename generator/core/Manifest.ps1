@@ -48,7 +48,7 @@ function ConvertTo-FlagList([string]$Text) {
 #        to the default without a word.
 $script:ManifestNodes = @{
   HardwareManifest = @("prefix moduleType text unselected order ids portManualValue portNoneValue unselectedValue",
-                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows Filters ValueNotices")
+                      "Output Generate IncludePath Import Capability Value ReservedPins Board Boards Ports Inputs GpioRole Page Notice InfoImage Conflicts BoardTable Fixes PartRows Filters ValueNotices")
   CapabilityPack  = @("name", "Capability Value ReservedPins")
   Output          = @("conf share script header", "")
   Generate        = @("template output finalNewline", "Param")
@@ -63,6 +63,7 @@ $script:ManifestNodes = @{
   Board           = @("define flags", "")
   Boards          = @("platformio exclude project", "")
   Ports           = @("board use max excludeRelayPins", "")
+  Inputs          = @("board use max excludeRelayPins", "")
   GpioRole        = @("name number text count", "Pins")
   Pins            = @("board label scan", "Pin")
   Pin             = @("gpio label", "")
@@ -72,7 +73,7 @@ $script:ManifestNodes = @{
   Conflicts       = @("*", "Param Use ChannelBlock")
   Use             = @("*", "Manual")
   Manual          = @("ref when", "")
-  ChannelBlock    = @("name text uses", "")
+  ChannelBlock    = @("name text uses flagModuleType", "")
   InfoImage       = @("*", "Logo")
   Logo            = @("board file", "")
   BoardTable      = @("*", "")
@@ -399,6 +400,31 @@ function Read-ManifestPorts($root, $m) {
     }
     if ($mx -and @($nums | Where-Object { $_ -gt [int]$mx }).Count -gt 0) { Stop-WithError (T "<Ports board=`"{0}`">: use lists a port above max {1}" $pat $mx) }
     $m.PortSets.Add(@{ Board = $pat; Use = @($nums | Sort-Object); All = (-not $use); ExcludeRelayPins = ($xr -eq "true"); Max = $(if ($mx) { [int]$mx } else { 0 }); Hits = 0 })
+  }
+
+  $m.InputSets = New-Object System.Collections.Generic.List[object]
+  foreach ($ps in $root.SelectNodes("Inputs")) {
+    $pat = "$($ps.board)"; $use = "$($ps.use)"
+    # excludeRelayPins="true": a port whose GPIO is a relay of the board (HW_RELAY_<n>_GPIO) is not offered
+    $xr = "$($ps.excludeRelayPins)"
+    if ($xr -and $xr -ne "true" -and $xr -ne "false") { Stop-WithError (T "<Inputs board=`"{0}`">: excludeRelayPins must be true or false" $pat) }
+    # max="n": the highest port number the product can store (its value layout); a board with more ports stops the run
+    $mx = "$($ps.max)"
+    if ($mx -and ($mx -notmatch '^\d+$' -or [int]$mx -lt 1 -or [int]$mx -gt $MAX_PORTS)) { Stop-WithError (T "<Inputs board=`"{0}`">: max must be 1..{1}" $pat $MAX_PORTS) }
+    if (-not $pat -or (-not $use -and $xr -ne "true" -and -not $mx)) { Stop-WithError (T "<Inputs> needs board=... and use=... (or excludeRelayPins=`"true`" or max=...)") }
+    $nums = @()
+    foreach ($tok in @($use -split '\s+' | Where-Object { $_ })) {
+      if ($tok -match '^(\d+)-(\d+)$') { $from = [int]$Matches[1]; $to = [int]$Matches[2] }
+      elseif ($tok -match '^\d+$') { $from = [int]$tok; $to = $from }
+      else { Stop-WithError (T "<Inputs board=`"{0}`">: use `"{1}`" - expected port numbers or ranges like 1 3 5-8" $pat $tok) }
+      if ($from -lt 1 -or $to -gt $MAX_PORTS -or $to -lt $from) { Stop-WithError (T "<Inputs board=`"{0}`">: {1} is not within 1..{2}" $pat $tok $MAX_PORTS) }
+      foreach ($n in ($from..$to)) {
+        if ($nums -contains $n) { Stop-WithError (T "<Inputs board=`"{0}`">: port {1} is listed twice" $pat $n) }
+        $nums += $n
+      }
+    }
+    if ($mx -and @($nums | Where-Object { $_ -gt [int]$mx }).Count -gt 0) { Stop-WithError (T "<Inputs board=`"{0}`">: use lists a port above max {1}" $pat $mx) }
+    $m.InputSets.Add(@{ Board = $pat; Use = @($nums | Sort-Object); All = (-not $use); ExcludeRelayPins = ($xr -eq "true"); Max = $(if ($mx) { [int]$mx } else { 0 }); Hits = 0 })
   }
 }
 
@@ -953,7 +979,7 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
   if ($null -eq $num) { Stop-WithError (T "<Conflicts> needs number=... (first parameter number of the conflict flags in the including module, also the calculation number)") }
   $cf = @{ Output = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($BaseDir, $out)); Number = $num; Params = New-Object System.Collections.Generic.List[object]; Uses = New-Object System.Collections.Generic.List[object] }
   $cf.Value = "$($Node.GetAttribute('value'))"; if (-not $cf.Value) { $cf.Value = "port" }
-  if ($cf.Value -ne "port" -and $cf.Value -ne "gpio") { Stop-WithError (T "<Conflicts>: value must be port or gpio") }
+  if ($cf.Value -notin @("port", "gpio", "input")) { Stop-WithError (T "<Conflicts>: value must be port, gpio or input") }
   $cf.Error = "$($Node.GetAttribute('error'))"
   if (-not $cf.Error) { $cf.Error = "GPIO-Konflikt: {text} nutzt denselben GPIO wie ein anderer Anschluss, ein fest verdrahtetes Relais oder ein manueller GPIO." }
   # reserved="true": a use on a GPIO the selected board uses itself gets flag 2 (reservedError); on a KNX UART pin of a board
@@ -993,7 +1019,7 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
     $u = @{ Name = $uName; Text = ($un.GetAttribute("text") -replace '\s+', ' ').Trim(); Port = $un.GetAttribute("port"); When = $null; Manuals = @(); Index = $cf.Uses.Count }
     if (-not $u.Text) { $u.Text = $uName }
     $u.Value = "$($un.GetAttribute('value'))"; if (-not $u.Value) { $u.Value = $cf.Value }
-    if ($u.Value -ne "port" -and $u.Value -ne "gpio") { Stop-WithError (T "{0}: value must be port or gpio" $uw) }
+    if ($u.Value -notin @("port", "gpio", "input")) { Stop-WithError (T "{0}: value must be port, gpio or input" $uw) }
     # manual / none: the port value encoding of the root (portManualValue / portNoneValue); a GPIO value has none (10 is GPIO 10)
     $u.Manual = $null; $u.None = $null
     if ($u.Value -eq "port") { $u.Manual = $M.PortManual; $u.None = $M.PortNone }
@@ -1046,7 +1072,8 @@ function Read-ConflictsNode($M, $Node, [string]$BaseDir) {
     if (-not $cText) { Stop-WithError (T "{0}: needs text=... (e.g. with {1})" $cw $ct) }
     $names = @($cn.GetAttribute("uses") -split '\s+' | Where-Object { $_ })
     if ($names.Count -lt 1 -or $names.Count -gt $cMax) { Stop-WithError (T "{0}: uses must name 1..{1} <Use> entries (channel 1..{1}, {2} has {3} digit(s))" $cw $cMax $ct $cf.ChannelWidth) }
-    $ch = @{ Name = $cName; Text = $cText; Index = $cf.Channels.Count + 1; Uses = @() }
+    $flagModuleType = Get-ConflictInt $cn "flagModuleType" 0 99 $cw
+    $ch = @{ Name = $cName; Text = $cText; Index = $cf.Channels.Count + 1; Uses = @(); FlagModuleType = $flagModuleType }
     for ($n = 0; $n -lt $names.Count; $n++) {
       $hit = @($cf.Uses | Where-Object { $_.Name -eq $names[$n] })
       if ($hit.Count -eq 0) { Stop-WithError (T "{0}: {1} is no <Use name>" $cw $names[$n]) }

@@ -143,7 +143,7 @@ function New-ConflictsJs($M, $Boards) {
     $man = @($u.Manuals | ForEach-Object { "[{0}, `"{1}`"]" -f (ConvertTo-ConflictJsCondition $_.When $cf), $_.Alias })
     $mv = -1; if ($null -ne $u.Manual) { $mv = $u.Manual }
     $xv = -1; if ($null -ne $u.None) { $xv = $u.None }
-    $gv = 0; if ($u.Value -eq "gpio") { $gv = 1 }
+    $gv = 0; if ($u.Value -eq "gpio") { $gv = 1 }; if ($u.Value -eq "input") { $gv = 2 }
     $rows += ("    {{ n: {0}, w: {1}, g: {2}, m: {3}, x: {4}, man: [{5}], r: {6}, p: {7} }}" -f (ConvertTo-JsString $u.Name), (ConvertTo-ConflictJsCondition $u.When $cf), $gv, $mv, $xv, ($man -join ", "), $u.Wired, $u.Mode)
   }
   [void]$sb.AppendLine(($rows -join ",`n"))
@@ -159,12 +159,17 @@ function New-ConflictsJs($M, $Boards) {
       $pt = @($b.Ports | Where-Object { $_.N -eq $n })
       if ($pt.Count -gt 0) { $ports += [string]$pt[0].Gpio } else { $ports += "null" }
     }
+    $inputs = @()
+    for ($n = 1; $n -le $b.InputCount; $n++) {
+      $ip = @($b.Inputs | Where-Object { $_.N -eq $n })
+      if ($ip.Count -gt 0) { $inputs += [string]$ip[0].Gpio } else { $inputs += "null" }
+    }
     $relays = @($b.Relays | ForEach-Object { [string]$_.Gpio })
     if ($cf.Reserved) {
       $sets = Get-BoardReservedSets $b
-      $rows += ("    {0}: {{ s: {1}, ports: [{2}], relays: [{3}], rsv: [{4}], tp: [{5}] }}" -f $b.HwId, $b.Slot, ($ports -join ", "), ($relays -join ", "), (@($sets.Rsv) -join ", "), (@($sets.Tp) -join ", "))
+      $rows += ("    {0}: {{ s: {1}, ports: [{2}], relays: [{3}], rsv: [{4}], tp: [{5}], inputs: [{6}] }}" -f $b.HwId, $b.Slot, ($ports -join ", "), ($relays -join ", "), (@($sets.Rsv) -join ", "), (@($sets.Tp) -join ", "), ($inputs -join ", "))
     }
-    else { $rows += ("    {0}: {{ s: {1}, ports: [{2}], relays: [{3}] }}" -f $b.HwId, $b.Slot, ($ports -join ", "), ($relays -join ", ")) }
+    else { $rows += ("    {0}: {{ s: {1}, ports: [{2}], relays: [{3}], inputs: [{4}] }}" -f $b.HwId, $b.Slot, ($ports -join ", "), ($relays -join ", "), ($inputs -join ", ")) }
   }
   [void]$sb.AppendLine(($rows -join ",`n"))
   [void]$sb.AppendLine("};")
@@ -228,7 +233,8 @@ function ${p}_conflictGpio(input, u, i, board) {
         return -1;
     }
     if (u.x >= 0 && v == u.x) return -1;
-    if (u.g) return (v >= 0 && v < 255) ? v : -1;
+    if (u.g == 2) return (v >= 0 && v < board.inputs.length && board.inputs[v] !== null) ? board.inputs[v] : -1;
+    if (u.g == 1) return (v >= 0 && v < 255) ? v : -1;
     if (v >= 0 && v < board.ports.length && board.ports[v] !== null) return board.ports[v];
     return -1;
 }
@@ -316,7 +322,9 @@ function New-ConflictsXml($M, $Boards) {
   foreach ($ch in $cf.Channels) {
     # in a channel template: the channel token (channel n, w digits) completes the flag number of the n-th use (number + 10^w k + n)
     $head = ([string][int](($cf.Number + $cf.ChannelStep * $ch.Index) / $cf.ChannelStep)).PadLeft(5 - $cf.ChannelWidth, '0')
-    $ref = "%AID%_P-%TT%{0}{1}_R-%TT%{0}{1}01" -f $head, $cf.ChannelToken
+    $type = "%TT%"
+    if ($null -ne $ch.FlagModuleType) { $type = "{0:D2}" -f $ch.FlagModuleType }
+    $ref = "%AID%_P-{0}{1}{2}_R-{0}{1}{2}01" -f $type, $head, $cf.ChannelToken
     [void]$sb.AppendLine(("  <Block name=`"ConflictChannel_{0}`">" -f $ch.Name))
     [void]$sb.AppendLine(("    <ParameterRefRef RefId=`"{0}`" />" -f $ref))
     [void]$sb.AppendLine(("    <choose ParamRefId=`"{0}`">" -f $ref))

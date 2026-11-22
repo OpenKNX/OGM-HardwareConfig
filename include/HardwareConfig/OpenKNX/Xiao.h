@@ -726,3 +726,134 @@ Main Group 0x3 = Community Devices (0x3000-0x3FFF)
 #endif
 
 #pragma endregion
+
+// Additional accessible module pads, per Seeed's module pin maps. JTAG must be disconnected.
+#if defined(OKNXHW_OPENKNXIAO_RP2350)
+    #define OKNXHW_OPENKNXIAO_D11 21
+    #define OKNXHW_OPENKNXIAO_D12 20
+    #define OKNXHW_OPENKNXIAO_D13 17
+    #define OKNXHW_OPENKNXIAO_D14 16
+    #define OKNXHW_OPENKNXIAO_D15 11
+    #define OKNXHW_OPENKNXIAO_D16 12
+    #define OKNXHW_OPENKNXIAO_D17 10
+    #define OKNXHW_OPENKNXIAO_D18 9
+#elif defined(OKNXHW_OPENKNXIAO_ESP32C5)
+    #define OKNXHW_OPENKNXIAO_MTDO 5
+    #define OKNXHW_OPENKNXIAO_MTDI 3
+    #define OKNXHW_OPENKNXIAO_MTCK 4
+    #define OKNXHW_OPENKNXIAO_MTMS 2
+#elif defined(OKNXHW_OPENKNXIAO_ESP32C6)
+    #define OKNXHW_OPENKNXIAO_MTDO 7
+    #define OKNXHW_OPENKNXIAO_MTDI 5
+    #define OKNXHW_OPENKNXIAO_MTCK 6
+    #define OKNXHW_OPENKNXIAO_MTMS 4
+#elif defined(OKNXHW_OPENKNXIAO_ESP32S3)
+    #define OKNXHW_OPENKNXIAO_MTDO 40
+    #define OKNXHW_OPENKNXIAO_MTCK 39
+#endif
+
+// Prefer input-capable terminals. Only boards without such terminals offer
+// free module solder pads; GPIOs wired to output-only terminals are excluded.
+// Retained connections keep their original numbering; removed values fail closed.
+
+#if defined(OKNXHW_OPENKNXIAO_V1_TERMINAL_MINI)
+    #define HW_INPUT_COUNT 8
+    #define HW_INPUT_1_GPIO OKNXHW_OPENKNXIAO_D1
+    #define HW_INPUT_1_LABEL "D1 (Klemme, 3.3 V)"
+    #define HW_INPUT_2_GPIO OKNXHW_OPENKNXIAO_D2
+    #define HW_INPUT_2_LABEL "D2 (Klemme, 3.3 V)"
+    #define HW_INPUT_3_GPIO OKNXHW_OPENKNXIAO_D3
+    #define HW_INPUT_3_LABEL "D3 (Klemme, 3.3 V)"
+    #define HW_INPUT_4_GPIO OKNXHW_OPENKNXIAO_D4
+    #define HW_INPUT_4_LABEL "D4 (Klemme, 3.3 V)"
+    #define HW_INPUT_5_GPIO OKNXHW_OPENKNXIAO_D5
+    #define HW_INPUT_5_LABEL "D5 (Klemme, 3.3 V)"
+    #define HW_INPUT_6_GPIO OKNXHW_OPENKNXIAO_D8
+    #define HW_INPUT_6_LABEL "D8 (Klemme, 3.3 V)"
+    #define HW_INPUT_7_GPIO OKNXHW_OPENKNXIAO_D9
+    #define HW_INPUT_7_LABEL "D9 (Klemme, 3.3 V)"
+    #define HW_INPUT_8_GPIO OKNXHW_OPENKNXIAO_D10
+    #define HW_INPUT_8_LABEL "D10 (Klemme, 3.3 V)"
+#endif
+
+#if defined(OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX) && HW_LEVELSHIFTER == HW_LEVELSHIFTER_TXS0108E
+    #define HW_INPUT_COUNT 8
+    #define HW_INPUT_1_GPIO OKNXHW_OPENKNXIAO_D1
+    #define HW_INPUT_1_LABEL "D1 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_1_MODE 0
+    #define HW_INPUT_2_GPIO OKNXHW_OPENKNXIAO_D2
+    #define HW_INPUT_2_LABEL "D2 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_2_MODE 0
+    #define HW_INPUT_3_GPIO OKNXHW_OPENKNXIAO_D3
+    #define HW_INPUT_3_LABEL "D3 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_3_MODE 0
+    #define HW_INPUT_4_GPIO OKNXHW_OPENKNXIAO_D4
+    #define HW_INPUT_4_LABEL "D4 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_4_MODE 0
+    #define HW_INPUT_5_GPIO OKNXHW_OPENKNXIAO_D5
+    #define HW_INPUT_5_LABEL "D5 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_5_MODE 0
+    #define HW_INPUT_6_GPIO OKNXHW_OPENKNXIAO_D8
+    #define HW_INPUT_6_LABEL "D8 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_6_MODE 0
+    #define HW_INPUT_7_GPIO OKNXHW_OPENKNXIAO_D9
+    #define HW_INPUT_7_LABEL "D9 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_7_MODE 0
+    #define HW_INPUT_8_GPIO OKNXHW_OPENKNXIAO_D10
+    #define HW_INPUT_8_LABEL "D10 (Klemme, TXS; Kontakt nach GND)"
+    #define HW_INPUT_8_MODE 0
+#endif
+
+#if defined(OKNXHW_OPENKNXIAO_V1_TERMINAL_NEOPIX) && HW_LEVELSHIFTER != HW_LEVELSHIFTER_TXS0108E
+    #if defined(OKNXHW_OPENKNXIAO_ESP32S3)
+        #define HW_INPUT_COUNT 4
+        #define HW_INPUT_1_GPIO OKNXHW_OPENKNXIAO_D12
+        #define HW_INPUT_1_LABEL "D12 (GPIO41, rohes XIAO-Pad)"
+        #define HW_INPUT_2_GPIO OKNXHW_OPENKNXIAO_D11
+        #define HW_INPUT_2_LABEL "D11 (GPIO42, rohes XIAO-Pad)"
+        #define HW_INPUT_3_GPIO OKNXHW_OPENKNXIAO_MTDO
+        #define HW_INPUT_3_LABEL "MTDO (GPIO40, JTAG, rohes XIAO-Pad)"
+        #define HW_INPUT_4_GPIO OKNXHW_OPENKNXIAO_MTCK
+        #define HW_INPUT_4_LABEL "MTCK (GPIO39, JTAG, rohes XIAO-Pad)"
+    #elif defined(OKNXHW_OPENKNXIAO_RP2350)
+        #define HW_INPUT_COUNT 8
+        #define HW_INPUT_1_GPIO OKNXHW_OPENKNXIAO_D11
+        #define HW_INPUT_1_LABEL "D11 (Rueckseiten-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_2_GPIO OKNXHW_OPENKNXIAO_D12
+        #define HW_INPUT_2_LABEL "D12 (Rueckseiten-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_3_GPIO OKNXHW_OPENKNXIAO_D13
+        #define HW_INPUT_3_LABEL "D13 (Rueckseiten-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_4_GPIO OKNXHW_OPENKNXIAO_D14
+        #define HW_INPUT_4_LABEL "D14 (Rueckseiten-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_5_GPIO OKNXHW_OPENKNXIAO_D15
+        #define HW_INPUT_5_LABEL "D15 (Rueckseiten-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_6_GPIO OKNXHW_OPENKNXIAO_D16
+        #define HW_INPUT_6_LABEL "D16 (Rueckseiten-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_7_GPIO OKNXHW_OPENKNXIAO_D17
+        #define HW_INPUT_7_LABEL "D17 (Rueckseiten-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_8_GPIO OKNXHW_OPENKNXIAO_D18
+        #define HW_INPUT_8_LABEL "D18 (Rueckseiten-Pad, rohes XIAO-Pad)"
+    #elif defined(OKNXHW_OPENKNXIAO_ESP32C5)
+        #define HW_INPUT_COUNT 4
+        #define HW_INPUT_1_GPIO OKNXHW_OPENKNXIAO_MTDO
+        #define HW_INPUT_1_LABEL "MTDO (JTAG-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_2_GPIO OKNXHW_OPENKNXIAO_MTDI
+        #define HW_INPUT_2_LABEL "MTDI (JTAG-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_3_GPIO OKNXHW_OPENKNXIAO_MTCK
+        #define HW_INPUT_3_LABEL "MTCK (JTAG-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_4_GPIO OKNXHW_OPENKNXIAO_MTMS
+        #define HW_INPUT_4_LABEL "MTMS (JTAG-Pad, rohes XIAO-Pad)"
+    #elif defined(OKNXHW_OPENKNXIAO_ESP32C6)
+        #define HW_INPUT_COUNT 4
+        #define HW_INPUT_1_GPIO OKNXHW_OPENKNXIAO_MTDO
+        #define HW_INPUT_1_LABEL "MTDO (JTAG-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_2_GPIO OKNXHW_OPENKNXIAO_MTDI
+        #define HW_INPUT_2_LABEL "MTDI (JTAG-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_3_GPIO OKNXHW_OPENKNXIAO_MTCK
+        #define HW_INPUT_3_LABEL "MTCK (JTAG-Pad, rohes XIAO-Pad)"
+        #define HW_INPUT_4_GPIO OKNXHW_OPENKNXIAO_MTMS
+        #define HW_INPUT_4_LABEL "MTMS (JTAG-Pad, rohes XIAO-Pad)"
+    #else
+        #define HW_INPUT_COUNT 0
+    #endif
+#endif

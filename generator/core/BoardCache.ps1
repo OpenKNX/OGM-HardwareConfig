@@ -27,7 +27,7 @@ FILEPATH: OGM-HardwareConfig/generator/core/BoardCache.ps1
     Windows PowerShell 5.1 compatible, pure ASCII.
 #>
 
-$script:BoardCacheVersion = "1"
+$script:BoardCacheVersion = "2"
 
 # @brief Output of "pio project config --json-output" for a project folder, once per run (the board step and the cache key)
 function Get-PioProjectConfigText([string]$ProjectDir, $Pio) {

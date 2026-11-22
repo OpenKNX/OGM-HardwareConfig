@@ -430,6 +430,24 @@ function Resolve-Board($M, $BoardEntry) {
     [void]$sb.AppendLine("#endif")
   }
 
+  # port description of the board header: HW_INPUT_COUNT, HW_INPUT_<n>_GPIO, HW_INPUT_<n>_LABEL
+  [void]$sb.AppendLine("#ifdef HW_INPUT_COUNT")
+  [void]$sb.AppendLine("@@ `"INPUTCOUNT`" HW_INPUT_COUNT")
+  [void]$sb.AppendLine("#endif")
+  for ($n = 1; $n -le $MAX_PORTS; $n++) {
+    [void]$sb.AppendLine(("#if defined(HW_INPUT_{0}_GPIO)" -f $n))
+    [void]$sb.AppendLine(("@@ `"INPUTGPIO{0}`" HW_INPUT_{0}_GPIO" -f $n))
+    [void]$sb.AppendLine(("#ifdef HW_INPUT_{0}_LABEL" -f $n))
+    [void]$sb.AppendLine(("@@ `"INPUTLABEL{0}`" HW_INPUT_{0}_LABEL" -f $n))
+    [void]$sb.AppendLine("#endif")
+    [void]$sb.AppendLine("#endif")
+    foreach ($field in @("MODE", "ONLEVEL")) {
+      [void]$sb.AppendLine(("#ifdef HW_INPUT_{0}_{1}" -f $n, $field))
+      [void]$sb.AppendLine(("@@ `"INPUT{1}{0}`" HW_INPUT_{0}_{1}" -f $n, $field))
+      [void]$sb.AppendLine("#endif")
+    }
+  }
+
   # relay description of the board header: HW_RELAY_COUNT, HW_RELAY_<n>_GPIO, HW_RELAY_<n>_LABEL (hard-wired relays)
   [void]$sb.AppendLine("#ifdef HW_RELAY_COUNT")
   [void]$sb.AppendLine("@@ `"RELAYCOUNT`" HW_RELAY_COUNT")
@@ -673,6 +691,41 @@ function Resolve-Board($M, $BoardEntry) {
   if ($board.Ports.Count -gt 0 -and $board.PortCount -gt $board.Ports.Count) {
     Write-Warn (T "{0}: HW_PORT_COUNT {1}, but only ports 1..{2} are described" $BoardEntry.Define $board.PortCount $board.Ports.Count)
   }
+  # ports: n = 1..HW_INPUT_COUNT, only the ones with HW_INPUT_<n>_GPIO, in header order
+  $board.InputCount = 0
+  $board.Inputs = New-Object System.Collections.Generic.List[object]
+  if ($res.ContainsKey("INPUTCOUNT")) {
+    $pc = ConvertFrom-CInteger $res["INPUTCOUNT"]
+    if ($null -eq $pc) { Stop-WithError ("{0}: HW_INPUT_COUNT is not an integer: {1}" -f $BoardEntry.Define, $res["INPUTCOUNT"]) }
+    if ($pc -gt $MAX_PORTS) { Stop-WithError ("{0}: HW_INPUT_COUNT {1} is above the supported {2} ports (HW_INPUTS_MAX, include/HardwareConfig/Helpers/HardwarePorts.h)" -f $BoardEntry.Define, $pc, $MAX_PORTS) }
+    $board.InputCount = $pc
+  }
+  $gap = 0
+  for ($n = 1; $n -le $MAX_PORTS; $n++) {
+    if (-not $res.ContainsKey("INPUTGPIO$n")) { if ($n -le $board.InputCount -and $gap -eq 0) { $gap = $n }; continue }
+    if ($n -gt $board.InputCount) {
+      Write-Warn ("{0}: HW_INPUT_{1}_GPIO is outside HW_INPUT_COUNT ({2}) - not offered" -f $BoardEntry.Define, $n, $board.InputCount)
+      continue
+    }
+    # a port value is the list position and the firmware maps value k to HW_INPUT_<k+1>: no gaps
+    if ($gap -gt 0) { Stop-WithError ("{0}: HW_INPUT_{1}_GPIO is missing but HW_INPUT_{2}_GPIO is defined - ports must be numbered without gaps" -f $BoardEntry.Define, $gap, $n) }
+    $g = ConvertFrom-CInteger $res["INPUTGPIO$n"]
+    if ($null -eq $g) { Stop-WithError ("{0}: HW_INPUT_{1}_GPIO does not resolve to a GPIO number: {2}" -f $BoardEntry.Define, $n, $res["INPUTGPIO$n"]) }
+    if ($g -lt 0 -or $g -gt 254) { Stop-WithError ("{0}: HW_INPUT_{1}_GPIO is {2}, a GPIO must be 0..254 (255 = none)" -f $BoardEntry.Define, $n, $g) }
+    $label = "Port $n"
+    if ($res.ContainsKey("INPUTLABEL$n")) {
+      $label = ConvertFrom-CString $res["INPUTLABEL$n"]
+      if ($null -eq $label) { Stop-WithError ("{0}: HW_INPUT_{1}_LABEL is not a string: {2}" -f $BoardEntry.Define, $n, $res["INPUTLABEL$n"]) }
+    }
+    $mode = 1; $on = 0
+    if ($res.ContainsKey("INPUTMODE$n")) { $mode = ConvertFrom-CInteger $res["INPUTMODE$n"] }
+    if ($res.ContainsKey("INPUTONLEVEL$n")) { $on = ConvertFrom-CInteger $res["INPUTONLEVEL$n"] }
+    if ($null -eq $mode -or $mode -lt 0 -or $mode -gt 2 -or $null -eq $on -or $on -lt 0 -or $on -gt 1) { Stop-WithError "Invalid HW_INPUT electrical configuration" }
+    $board.Inputs.Add(@{ N = $n; Gpio = $g; Label = $label; Mode = $mode; OnLevel = $on })
+  }
+  if ($board.Inputs.Count -gt 0 -and $board.InputCount -gt $board.Inputs.Count) {
+    Write-Warn ("{0}: HW_INPUT_COUNT {1}, but only ports 1..{2} are described" -f $BoardEntry.Define, $board.InputCount, $board.Inputs.Count)
+  }
   # relays 1..HW_RELAY_COUNT, each with HW_RELAY_<n>_GPIO ($b.Relays: N, Gpio, Label); none without HW_RELAY_COUNT
   $board.Relays = New-Object System.Collections.Generic.List[object]
   $rc = 0
@@ -721,6 +774,30 @@ function Resolve-Board($M, $BoardEntry) {
   }
   # a plain array: PowerShell 7 fails on @() over a generic list of hashtables ("Argument types do not match")
   $board.Ports = $board.Ports.ToArray()
+  $sets = @($M.InputSets | Where-Object { Test-Wildcard $_.Board $BoardEntry.Define })
+  if ($sets.Count -gt 1) { Stop-WithError ("{0}: matched by {1} <Inputs> entries ({2}) - one board, one port list" -f $BoardEntry.Define, $sets.Count, (($sets | ForEach-Object { $_.Board }) -join ", ")) }
+  if ($sets.Count -eq 1) {
+    $sets[0].Hits++
+    if ($sets[0].Max -gt 0 -and $board.Inputs.Count -gt $sets[0].Max) {
+      Stop-WithError ("{0}: describes {1} ports, <Inputs board=`"{2}`" max=`"{3}`"> - the product stores ports 1..{3} only" -f $BoardEntry.Define, $board.Inputs.Count, $sets[0].Board, $sets[0].Max)
+    }
+    $keep = $sets[0].Use
+    if ($sets[0].All) { $keep = @($board.Inputs | ForEach-Object { $_.N }) }
+    foreach ($n in $keep) {
+      if (@($board.Inputs | Where-Object { $_.N -eq $n }).Count -eq 0) { Stop-WithError ("{0}: <Inputs board=`"{1}`"> offers port {2}, the header describes ports 1..{3}" -f $BoardEntry.Define, $sets[0].Board, $n, $board.Inputs.Count) }
+    }
+    $relayGpios = @($board.Relays | ForEach-Object { $_.Gpio })
+    $filtered = New-Object System.Collections.Generic.List[object]
+    foreach ($pt in $board.Inputs) {
+      if (-not ($keep -contains $pt.N)) { continue }
+      # the port stays a hole: the other ports keep their numbers (ETS value N-1)
+      if ($sets[0].ExcludeRelayPins -and ($relayGpios -contains $pt.Gpio)) { continue }
+      $filtered.Add($pt)
+    }
+    $board.Inputs = $filtered
+  }
+  # a plain array: PowerShell 7 fails on @() over a generic list of hashtables ("Argument types do not match")
+  $board.Inputs = $board.Inputs.ToArray()
   # <BoardTable>: Any / All = index -> value; one env here, merged over the envs of the board later
   if ($M.BoardTables.Count -gt 0) {
     $board.Tables = @{}

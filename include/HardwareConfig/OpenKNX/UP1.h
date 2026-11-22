@@ -396,3 +396,12 @@
 #endif
 
 #pragma endregion
+
+// UP1-GW-UART's RX terminal crosses a digital isolator. It is not a passive
+// contact input; configure the isolated-side supply/bias according to uart.kicad_sch.
+#if defined(DEVICE_UP1_GW_UART)
+    #define HW_INPUT_COUNT 1
+    #define HW_INPUT_1_GPIO UART1_RX_PIN
+    #define HW_INPUT_1_LABEL "Rx / GPIO21 (isolierter Logikeingang; ext. Versorgung)"
+    #define HW_INPUT_1_MODE 0
+#endif
