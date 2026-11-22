@@ -54,7 +54,10 @@ function Read-MessageTable([string]$Path) {
         $value -isnot [System.Management.Automation.Language.StringConstantExpressionAst]) {
       throw ("{0}, line {1}: only 'text' = 'text' entries" -f $Path, $kv.Item1.Extent.StartLineNumber)
     }
-    $map[$kv.Item1.Value] = $value.Value
+    # a text over several lines matches the `n of the code also when the file has CRLF line ends (Windows checkout)
+    $key = $kv.Item1.Value -replace "`r`n", "`n"
+    if ($map.ContainsKey($key)) { throw ("{0}, line {1}: text twice in the table" -f $Path, $kv.Item1.Extent.StartLineNumber) }
+    $map[$key] = $value.Value -replace "`r`n", "`n"
   }
   return ,$map
 }
