@@ -23,10 +23,13 @@ jobs:
       - name: Checkout OGM-HardwareConfig
         uses: actions/checkout@v4
 
-      - name: Checkout OGM-Common (platformio ini files of the demo)
+      - name: Checkout OGM-Common (platformio ini files and InfoLed.part.xml of the demo)
         uses: actions/checkout@v4
         with:
           repository: OpenKNX/OGM-Common
+          # branch the demo is generated with: InfoLed.part.xml (28 % LED column) and the ini files (ESP32 platform 55.03.312);
+          # the default branch v1 has older versions of both
+          ref: ec/v1dev-ec
           path: _deps/OGM-Common
 
       - name: Tools (PlatformIO, C++ preprocessor)
