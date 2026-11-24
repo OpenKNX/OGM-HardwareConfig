@@ -19,7 +19,7 @@
 #define MAIN_FirmwareName "OpenKNX Hardware-Profil Demo"
 #define MAIN_OpenKnxId 0xAD
 #define MAIN_ApplicationNumber 240
-#define MAIN_ApplicationVersion 49
+#define MAIN_ApplicationVersion 50
 #define MAIN_ApplicationEncoding iso-8859-15
 #define MAIN_ParameterSize 204
 #define MAIN_MaxKoNumber 106

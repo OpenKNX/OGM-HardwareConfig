@@ -95,6 +95,14 @@
             <Enumeration Text="D8 (GPIO 2)" Value="2" Id="%ENID%" />
             <Enumeration Text="D9 (GPIO 4)" Value="4" Id="%ENID%" />
             <Enumeration Text="D10 (GPIO 3)" Value="3" Id="%ENID%" />
+            <Enumeration Text="D11 (GPIO 21)" Value="21" Id="%ENID%" />
+            <Enumeration Text="D12 (GPIO 20)" Value="20" Id="%ENID%" />
+            <Enumeration Text="D13 (GPIO 17)" Value="17" Id="%ENID%" />
+            <Enumeration Text="D14 (GPIO 16)" Value="16" Id="%ENID%" />
+            <Enumeration Text="D15 (GPIO 11)" Value="11" Id="%ENID%" />
+            <Enumeration Text="D16 (GPIO 12)" Value="12" Id="%ENID%" />
+            <Enumeration Text="D17 (GPIO 10)" Value="10" Id="%ENID%" />
+            <Enumeration Text="D18 (GPIO 9)" Value="9" Id="%ENID%" />
           </TypeRestriction>
         </ParameterType>
         <ParameterType Id="%AID%_PT-HWPPin1B1" Name="HWPPin1B1">
@@ -118,7 +126,7 @@
             <Enumeration Text="Q1 (GPIO 15)" Value="15" Id="%ENID%" />
             <Enumeration Text="Q2 (GPIO 12)" Value="12" Id="%ENID%" />
             <Enumeration Text="Q3 (GPIO 2)" Value="2" Id="%ENID%" />
-            <Enumeration Text="Q4 (GPIO 4)" Value="4" Id="%ENID%" />
+            <Enumeration Text="Q4 (GPIO 32)" Value="32" Id="%ENID%" />
           </TypeRestriction>
         </ParameterType>
         <ParameterType Id="%AID%_PT-HWPPin1B6" Name="HWPPin1B6">

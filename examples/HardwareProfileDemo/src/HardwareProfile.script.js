@@ -141,22 +141,22 @@ var HWP_conflictUses = [
 // DEVICE_HW_ID -> s: board number, ports: GPIO per port value (null: port not offered), relays: GPIO of the hard-wired relays
 // rsv: GPIOs the board reserves (flag 2); tp: KNX UART GPIOs of a board with TP and IP firmware variants (flag 3)
 var HWP_conflictBoards = {
-    4129: { s: 3, ports: [], relays: [], rsv: [2, 4, 32, 33, 34, 35, 36, 38, 39], tp: [5, 37] },
-    4130: { s: 4, ports: [], relays: [], rsv: [2, 4, 5, 32, 33, 34, 35, 36, 38, 39], tp: [] },
-    4402: { s: 2, ports: [], relays: [], rsv: [2, 20, 21], tp: [0, 1] },
-    4611: { s: 5, ports: [], relays: [], rsv: [2, 4, 5, 12, 13], tp: [0, 1] },
-    4880: { s: 0, ports: [27, 28, 5, 6, 7, 2, 4, 3], relays: [], rsv: [0, 1, 25, 26], tp: [] },
-    4896: { s: 1, ports: [2, 3, 4, 5, 6, 7, 8, 9], relays: [], rsv: [1, 21, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 44], tp: [] },
-    8481: { s: 7, ports: [16, 3, 1, 4, 15], relays: [], rsv: [0, 5, 18, 23], tp: [] },
-    9216: { s: 6, ports: [], relays: [], rsv: [4, 5, 9, 10, 11, 20], tp: [16, 17] },
-    16128: { s: 8, ports: [], relays: [], rsv: [], tp: [1] },
-    16129: { s: 9, ports: [], relays: [], rsv: [20, 21], tp: [1] },
-    16130: { s: 10, ports: [], relays: [], rsv: [20, 22], tp: [1] },
-    16144: { s: 11, ports: [], relays: [26], rsv: [], tp: [] },
-    16145: { s: 12, ports: [], relays: [26], rsv: [], tp: [] },
-    16146: { s: 13, ports: [], relays: [12, 13], rsv: [], tp: [] },
-    16147: { s: 14, ports: [], relays: [], rsv: [], tp: [] },
-    16148: { s: 15, ports: [], relays: [4], rsv: [], tp: [] }
+    4129: { s: 3, ports: [], relays: [], rsv: [2, 4, 32, 33, 34, 35, 36, 38, 39], tp: [5, 37], inputs: [] },
+    4130: { s: 4, ports: [], relays: [], rsv: [2, 4, 5, 32, 33, 34, 35, 36, 38, 39], tp: [], inputs: [] },
+    4402: { s: 2, ports: [], relays: [], rsv: [2, 20, 21], tp: [0, 1], inputs: [] },
+    4611: { s: 5, ports: [], relays: [], rsv: [2, 4, 5, 12, 13], tp: [0, 1], inputs: [] },
+    4880: { s: 0, ports: [27, 28, 5, 6, 7, 2, 4, 3], relays: [], rsv: [0, 1, 25, 26], tp: [], inputs: [27, 28, 5, 6, 7, 2, 4, 3] },
+    4896: { s: 1, ports: [2, 3, 4, 5, 6, 7, 8, 9], relays: [], rsv: [1, 21, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 44], tp: [], inputs: [2, 3, 4, 5, 6, 7, 8, 9] },
+    8481: { s: 7, ports: [16, 3, 1, 4, 15], relays: [], rsv: [0, 5, 18, 23], tp: [], inputs: [15, 12, 2, 32] },
+    9216: { s: 6, ports: [], relays: [], rsv: [4, 5, 9, 10, 11, 20], tp: [16, 17], inputs: [] },
+    16128: { s: 8, ports: [], relays: [], rsv: [], tp: [1], inputs: [] },
+    16129: { s: 9, ports: [], relays: [], rsv: [20, 21], tp: [1], inputs: [] },
+    16130: { s: 10, ports: [], relays: [], rsv: [20, 22], tp: [1], inputs: [] },
+    16144: { s: 11, ports: [], relays: [26], rsv: [], tp: [], inputs: [] },
+    16145: { s: 12, ports: [], relays: [26], rsv: [], tp: [], inputs: [] },
+    16146: { s: 13, ports: [], relays: [12, 13], rsv: [], tp: [], inputs: [] },
+    16147: { s: 14, ports: [], relays: [], rsv: [], tp: [], inputs: [] },
+    16148: { s: 15, ports: [], relays: [4], rsv: [], tp: [], inputs: [] }
 };
 
 function HWP_conflictInt(value, fallback) {
@@ -204,7 +204,8 @@ function HWP_conflictGpio(input, u, i, board) {
         return -1;
     }
     if (u.x >= 0 && v == u.x) return -1;
-    if (u.g) return (v >= 0 && v < 255) ? v : -1;
+    if (u.g == 2) return (v >= 0 && v < board.inputs.length && board.inputs[v] !== null) ? board.inputs[v] : -1;
+    if (u.g == 1) return (v >= 0 && v < 255) ? v : -1;
     if (v >= 0 && v < board.ports.length && board.ports[v] !== null) return board.ports[v];
     return -1;
 }
