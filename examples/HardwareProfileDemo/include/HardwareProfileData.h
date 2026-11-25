@@ -265,7 +265,6 @@ constexpr bool ROLE_Pin_ON_OWN_BOARD = contains(ROLE_Pin_HW_IDS, 5, OWN_HW_ID);
 // or no board gives GPIO_NONE
 // (ETS writes the port bytes for the selected board only; an unwritten byte reads 0 = port 1).
 #include "HardwareConfig/Helpers/HardwarePorts.h"
-#include "HardwareConfig/Helpers/HardwareInputs.h"
 namespace HardwareProfile
 {
 constexpr uint8_t PORT_MANUAL = 10;
@@ -288,11 +287,6 @@ constexpr uint8_t signalGpio(uint16_t selected, uint8_t portValue, uint8_t manua
          : hwPortGpio(portValue);
 }
 
-/// @brief GPIO of a board input (port number minus one); 255 or different hardware disables the input
-constexpr uint8_t inputSignalGpio(uint16_t selected, uint8_t inputValue)
-{
-    return !selectionIsOwn(selected) ? GPIO_NONE : hwInputGpio(inputValue);
-}
 /// @brief GPIO of relay relayIndex (0-based): a hard-wired relay (relayIndex < hwRelayCount()) -> hwRelayGpio(), its port byte
 ///        is ignored; every further relay -> signalGpio(). Not this board -> GPIO_NONE, also for a hard-wired relay.
 constexpr uint8_t relaySignalGpio(uint16_t selected, uint8_t relayIndex, uint8_t portValue, uint8_t manualGpio)

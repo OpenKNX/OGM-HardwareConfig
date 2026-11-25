@@ -94,9 +94,6 @@ function Get-ProductBoards($m) {
     foreach ($o in @($g.Group | Select-Object -Skip 1)) {
       # one HW-ID, two different devices: a duplicate DEVICE_HW_ID, not two builds of one board
       if ($o.Name -ne $first.Name) { Stop-WithError (T "Duplicate DEVICE_HW_ID 0x{0:X4}: {1} ({2}) and {3} ({4})" ([int]$first.HwId) $first.Name $first.Env $o.Name $o.Env) }
-      $inputsA = (@($first.Inputs) | ForEach-Object { "{0}={1}/{2}/{3}/{4}" -f $_.N, $_.Gpio, $_.Label, $_.Mode, $_.OnLevel }) -join " "
-      $inputsB = (@($o.Inputs) | ForEach-Object { "{0}={1}/{2}/{3}/{4}" -f $_.N, $_.Gpio, $_.Label, $_.Mode, $_.OnLevel }) -join " "
-      if ($inputsA -cne $inputsB) { Stop-WithError "Same hardware ID has different input descriptions across environments" }
       $portsA = (@($first.Ports) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
       $portsB = (@($o.Ports) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "
       $relA = (@($first.Relays) | ForEach-Object { "{0}={1}/{2}" -f $_.N, $_.Gpio, $_.Label }) -join " "

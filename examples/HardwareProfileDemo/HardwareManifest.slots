@@ -50,4 +50,4 @@ filter TimeSource capability:Lan = 0
 filter TimeSource board:* = 1
 filter TimeSource capability:Wifi = 2
 # ETS content per product XML: ets "<file>" <ApplicationVersion> <fingerprint>; kept until the version changes
-ets "HardwareProfileDemo.xml" 3.2 1CF261DFF0E8FAEF
+ets "HardwareProfileDemo.xml" 3.1 9E5EAC14E2738141

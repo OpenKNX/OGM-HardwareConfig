@@ -341,7 +341,7 @@
     #define QUINLED_Q1_GPIO 15        // Relais
     #define QUINLED_Q2_GPIO 12        // External GPIO (can be pulled low)
     #define QUINLED_Q3_GPIO 2         // External GPIO (can be pulled high)
-    #define QUINLED_Q4_GPIO 32        // Q4 raw GPIO header (not LED4/GPIO4); manufacturer v3 pinout
+    #define QUINLED_Q4_GPIO 4         // External GPIO (can be pulled high)
     #define QUINLED_LED_DATA1_GPIO 16 // LED1 output
     #define QUINLED_LED_DATA2_GPIO 3  // LED2 output
     #define QUINLED_LED_DATA3_GPIO 1  // LED3 output
@@ -816,80 +816,3 @@
 #endif
 
 #pragma endregion
-
-// Qualified raw input headers, NOT the level-shifted LED/Q1R/relay outputs.
-// GPIO12 is a boot strap: no external pullup; dry contact to GND only.
-// GPIO34..39 have no internal bias on classic ESP32: MODE=0 requires board/external pullups.
-#if defined(DEVICE_QUINLED_DIG2GO)
-    #define HW_INPUT_COUNT 4
-    #define HW_INPUT_1_GPIO QUINLED_EXTRA1_GPIO
-    #define HW_INPUT_1_LABEL "Extra 1 (GPIO21, 3.3 V)"
-    #define HW_INPUT_2_GPIO QUINLED_EXTRA2_GPIO
-    #define HW_INPUT_2_LABEL "Extra 2 (GPIO22, 3.3 V)"
-    #define HW_INPUT_3_GPIO QUINLED_EXTRA3_GPIO
-    #define HW_INPUT_3_LABEL "Extra 3 (GPIO23, 3.3 V)"
-    #define HW_INPUT_4_GPIO QUINLED_EXTRA4_GPIO
-    #define HW_INPUT_4_LABEL "Extra 4 (GPIO25, 3.3 V)"
-
-#elif defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI) || defined(DEVICE_QUINLED_DIG_UNO_V3_ETHERNET) || defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI) || defined(DEVICE_QUINLED_DIG_QUAD_V3_ETHERNET)
-    #define HW_INPUT_COUNT 4
-    #define HW_INPUT_1_GPIO QUINLED_Q1_GPIO
-    #define HW_INPUT_1_LABEL "Q1 (GPIO15, 3.3 V)"
-    #define HW_INPUT_2_GPIO QUINLED_Q2_GPIO
-    #define HW_INPUT_2_LABEL "Q2 (GPIO12, 3.3 V; Boot LOW)"
-    #define HW_INPUT_3_GPIO QUINLED_Q3_GPIO
-    #define HW_INPUT_3_LABEL "Q3 (GPIO2, 3.3 V)"
-    #define HW_INPUT_4_GPIO QUINLED_Q4_GPIO
-    #define HW_INPUT_4_LABEL "Q4 (GPIO32, 3.3 V)"
-
-#elif defined(DEVICE_QUINLED_DIG_UNO_V3_WIFI_AE_PLUS) || defined(DEVICE_QUINLED_DIG_QUAD_V3_WIFI_AE_PLUS)
-// Q4/GPIO32 is driven by the onboard microphone; do not offer it.
-    #define HW_INPUT_COUNT 3
-    #define HW_INPUT_1_GPIO QUINLED_Q1_GPIO
-    #define HW_INPUT_1_LABEL "Q1 (GPIO15, 3.3 V)"
-    #define HW_INPUT_2_GPIO QUINLED_Q2_GPIO
-    #define HW_INPUT_2_LABEL "Q2 (GPIO12, 3.3 V; Boot LOW)"
-    #define HW_INPUT_3_GPIO QUINLED_Q3_GPIO
-    #define HW_INPUT_3_LABEL "Q3 (GPIO2, 3.3 V)"
-
-#elif defined(DEVICE_QUINLED_DIG_UNO_V4_WIFI) || defined(DEVICE_QUINLED_DIG_UNO_V4_ETHERNET) || defined(DEVICE_QUINLED_DIG_QUAD_V4_WIFI) || defined(DEVICE_QUINLED_DIG_QUAD_V4_ETHERNET)
-    #define HW_INPUT_COUNT 4
-    #define HW_INPUT_1_GPIO QUINLED_Q1_GPIO
-    #define HW_INPUT_1_LABEL "Q1 (GPIO32, 3.3 V)"
-    #define HW_INPUT_2_GPIO QUINLED_Q2_GPIO
-    #define HW_INPUT_2_LABEL "Q2 (GPIO33, 3.3 V)"
-    #define HW_INPUT_3_GPIO QUINLED_Q3_GPIO
-    #define HW_INPUT_3_LABEL "Q3 (GPIO13, 3.3 V)"
-    #define HW_INPUT_4_GPIO QUINLED_Q4_GPIO
-    #define HW_INPUT_4_LABEL "Q4 (GPIO15, 3.3 V)"
-    // I2C GPIO1/3 share UART0 debug in this firmware; keep them unavailable.
-
-#elif defined(DEVICE_QUINLED_DIG_NEXT_2)
-    #define HW_INPUT_COUNT 7
-    #define HW_INPUT_1_GPIO QUINLED_BUTTON2_GPIO
-    #define HW_INPUT_1_LABEL "Button 2 / GPIO35 (HW Pullup)"
-    #define HW_INPUT_1_MODE 0
-    #define HW_INPUT_2_GPIO QUINLED_Q1_GPIO
-    #define HW_INPUT_2_LABEL "QEXP 1 (GPIO0, 3.3 V)"
-    #define HW_INPUT_3_GPIO QUINLED_Q2_GPIO
-    #define HW_INPUT_3_LABEL "QEXP 2 (GPIO25, 3.3 V)"
-    #define HW_INPUT_4_GPIO QUINLED_Q3_GPIO
-    #define HW_INPUT_4_LABEL "QEXP 3 (GPIO32, 3.3 V)"
-    #define HW_INPUT_5_GPIO QUINLED_Q4_GPIO
-    #define HW_INPUT_5_LABEL "QEXP 4 (GPIO33, 3.3 V)"
-    #define HW_INPUT_6_GPIO QUINLED_I2C_SDA_GPIO
-    #define HW_INPUT_6_LABEL "I2C SDA / GPIO15 (3.3 V)"
-    #define HW_INPUT_7_GPIO QUINLED_I2C_SCL_GPIO
-    #define HW_INPUT_7_LABEL "I2C SCL / GPIO14 (3.3 V)"
-
-#elif defined(DEVICE_QUINLED_DIG_OCTA_32_8L_WIFI) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_ETHERNET) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_WIFI) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V2_ETHERNET) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_WIFI) || defined(DEVICE_QUINLED_DIG_OCTA_32_8L_V4_ETHERNET)
-// Button 1 is PROG_BUTTON_PIN. Do not let BI steal it.
-    #define HW_INPUT_COUNT 3
-    #define HW_INPUT_1_GPIO QUINLED_BUTTON2_GPIO
-    #define HW_INPUT_1_LABEL "Button 2 / GPIO35 (externer Pullup erforderlich)"
-    #define HW_INPUT_1_MODE 0
-    #define HW_INPUT_2_GPIO QUINLED_I2C_SDA_GPIO
-    #define HW_INPUT_2_LABEL "I2C SDA (3.3 V)"
-    #define HW_INPUT_3_GPIO QUINLED_I2C_SCL_GPIO
-    #define HW_INPUT_3_LABEL "I2C SCL (3.3 V; ggf. LED8 geteilt)"
-#endif

@@ -799,33 +799,6 @@ beschriebenen Ports, z. B. `<Ports board="*" excludeRelayPins="true" />`.
 `max="n"`: höchste Portnummer, die die knxprod speichern kann (z. B. weil Wert n eine andere Bedeutung hat). Beschreibt ein
 passendes Board mehr Ports, bricht der Lauf ab, statt einen Port auf einen belegten Wert zu legen.
 
-## Eingangsanschlüsse (`HW_INPUT_*`)
-
-Eingänge folgen derselben Nummerierung wie Ausgänge, mit eigenem Namensraum:
-`HW_INPUT_COUNT`, `HW_INPUT_<n>_GPIO`, `HW_INPUT_<n>_LABEL`.
-Nur tatsächlich als Eingang nutzbare Klemmen oder Header aufnehmen. Lötpads werden
-nur angeboten, wenn das Board keine geeigneten Eingangsanschlüsse besitzt.
-GPIOs, die mit reinen Ausgangsklemmen verbunden sind, bleiben auch als rohe
-Lötpads ausgeschlossen; ein unidirektionaler Ausgangspuffer erlaubt keinen Eingang.
-
-Optional je Anschluss: `HW_INPUT_<n>_MODE` (0 externe Beschaltung, 1 interner
-Pullup/Standard, 2 interner Pulldown) und `HW_INPUT_<n>_ONLEVEL` (0 LOW/Standard,
-1 HIGH). Bei klassischen ESP32-GPIO34..39 muss MODE 0 verwendet werden.
-Die Boardbeschreibung nennt notwendige externe Versorgung, Bias und Boot-Straps.
-
-`<Inputs board="*" max="64"/>` bzw. `use="1 3"` filtert die Eingänge wie `<Ports>`;
-die Nummer bleibt stabil, ETS-Wert ist Anschlussnummer minus eins. `$b.Inputs`
-enthält N, Gpio, Label, Mode, OnLevel. `@hw/InputListTypes.xml` erzeugt die Typen.
-`HardwareConfig/Helpers/HardwareInputs.h` liefert die constexpr-Funktionen
-`hwInputGpio(value)`, `hwInputMode(value)`, `hwInputOnLevel(value)` für das eigene
-Board. Ungültige Anschlusswerte ergeben GPIO 255. `inputSignalGpio(selected,
-value)` prüft zusätzlich die Hardwareauswahl (mit portManualValue/portNoneValue).
-Eingänge haben keinen manuellen GPIO-Ersatz; 255 bedeutet unbenutzt.
-`<Use value="input" port="..."/>` beteiligt sie an der vorhandenen Konfliktprüfung.
-Reservierungen und gleichzeitige GPIO-Nutzer muss die Firmware ebenfalls prüfen.
-Die maximale Anzahl auswählbarer Anschlüsse ist unabhängig von der Kanalanzahl
-im OFM-BinaryInput.
-
 ## Port-Auswahl in der Firmware
 
 Mit `portManualValue` / `portNoneValue` an der Wurzel schreibt der Generator in den Firmware-Header (`<Output header>`,

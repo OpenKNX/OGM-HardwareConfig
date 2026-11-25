@@ -44,7 +44,8 @@
     #define GLEDOPTO_LED_DATA1_GPIO 16 // LED data output 1 (primary)
     #define GLEDOPTO_LED_DATA2_GPIO 2  // LED data output 2 (secondary)
     #define GLEDOPTO_RELAIS1_GPIO 12   // I/O port (no relay on the board)
-    #define GLEDOPTO_EXT_IO33_GPIO 33 // Extended GPIO signal
+                                       // #define GLEDOPTO_GPIO 33         // Note: GPIO33 is input-only on ESP32-WROOM-32
+                                       //  -----------------------------------------------------------------
 
     #define DEVICE_HW_ID 0x2000
     #define HW_INFO_LOGO "HardwareConfig/Others/Gledopto/logo.png" // device card picture (<InfoImage>), found like an #include
@@ -162,8 +163,7 @@
 // Network: LAN8720A Ethernet PHY connected to the ESP32 RMII interface
 //
 // Confirmed IO-Port map:
-//   GPIO13 - DIY switch terminal
-//   GPIO17 - Onboard programming / function button
+//   GPIO13 - Programming / function button
 //   GPIO16 - LED data output 1 (Strip1)
 //   GPIO2  - LED data output 2 (Strip2)
 //   GPIO18 - Relay output
@@ -177,8 +177,7 @@
 //   GPIO27 - LAN8720A CRS_DV
 // ============================================================================
 
-    #define GLEDOPTO_BUTTON_GPIO 17
-    #define GLEDOPTO_DIY_GPIO 13
+    #define GLEDOPTO_BUTTON_GPIO 13
     #define GLEDOPTO_LED_DATA1_GPIO 16
     #define GLEDOPTO_LED_DATA2_GPIO 2
     #define GLEDOPTO_RELAIS1_GPIO 18
@@ -317,23 +316,3 @@
 #endif
 
 #pragma endregion
-
-#if defined(DEVICE_GL_C_309WL)
-    // The manufacturer's connector drawing labels the two extension terminals IO12 and IO33.
-    #define HW_INPUT_COUNT 2
-    #define HW_INPUT_1_GPIO GLEDOPTO_EXT_IO33_GPIO
-    #define HW_INPUT_1_LABEL "IO33 (DIY-Klemme)"
-    // IO12 shares the existing external relay port and must stay LOW during reset.
-    #define HW_INPUT_2_GPIO GLEDOPTO_RELAIS1_GPIO
-    #define HW_INPUT_2_LABEL "IO12 (DIY-Klemme, Boot LOW)"
-#elif defined(DEVICE_GL_C_017WL)
-    // The manufacturer's wiring guide identifies IO13 as an extension terminal.
-    #define HW_INPUT_COUNT 1
-    #define HW_INPUT_1_GPIO GLEDOPTO_RELAIS1_GPIO
-    #define HW_INPUT_1_LABEL "IO13 (DIY-Klemme, 3.3 V)"
-#elif defined(DEVICE_GL_C_620WL)
-    // The manufacturer's DIY IO13 diagram shows a dry contact to the adjacent GND.
-    #define HW_INPUT_COUNT 1
-    #define HW_INPUT_1_GPIO GLEDOPTO_DIY_GPIO
-    #define HW_INPUT_1_LABEL "IO13 (DIY-Klemme, Kontakt nach GND)"
-#endif
